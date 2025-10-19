@@ -1394,9 +1394,17 @@ app.get('/api/usgs/elevation', async (req, res) => {
 // real data from NASA NEX-GDDP-CMIP6 on AWS S3
 const CLIMATE_SERVICE_URL = process.env.CLIMATE_SERVICE_URL || 'http://urban-studio-qgis:5000';
 
-app.get('/api/nasa/temperature-projection', async (req, res) => {
+const forwardTemperatureProjection = async (req, res) => {
   try {
-    const { north, south, east, west, year = 2050, scenario = 'rcp45', resolution, use_real_data, zoom } = req.query;
+    const {
+      north,
+      south,
+      east,
+      west,
+      year = 2050,
+      scenario = 'rcp45',
+      resolution
+    } = req.query;
 
     if (!north || !south || !east || !west) {
       return res.status(400).json({
@@ -1405,61 +1413,13 @@ app.get('/api/nasa/temperature-projection', async (req, res) => {
       });
     }
 
-    // Dynamic resolution based on map zoom level to keep hexagons same visual size
-    // Leaflet zoom levels typically range from 1 (world) to 18 (building)
-    // H3 resolution ranges from 0 (huge hexagons) to 15 (tiny hexagons)
-    //
-    // Mapping: Higher zoom = higher H3 resolution (smaller hexagons)
-    // Increased by 1-2 levels for smaller hexagons
-    // Zoom  1-3:  H3 res 3 (large hexagons, ~350km)
-    // Zoom  4-5:  H3 res 4 (medium hexagons, ~100km)
-    // Zoom  6-7:  H3 res 5 (small hexagons, ~35km)
-    // Zoom  8-9:  H3 res 6 (smaller hexagons, ~10km)
-    // Zoom 10-11: H3 res 7 (tiny hexagons, ~5km)
-    // Zoom 12-13: H3 res 8 (very tiny hexagons, ~1.5km)
-    // Zoom 14+:   H3 res 9 (extremely tiny hexagons, ~500m)
-    let dynamicResolution;
-    if (resolution) {
-      dynamicResolution = parseInt(resolution);
-    } else if (zoom) {
-      const zoomLevel = parseInt(zoom);
-      if (zoomLevel <= 3) {
-        dynamicResolution = 3;
-      } else if (zoomLevel <= 5) {
-        dynamicResolution = 4;
-      } else if (zoomLevel <= 7) {
-        dynamicResolution = 5;
-      } else if (zoomLevel <= 9) {
-        dynamicResolution = 6;
-      } else if (zoomLevel <= 11) {
-        dynamicResolution = 7;
-      } else if (zoomLevel <= 13) {
-        dynamicResolution = 8;
-      } else {
-        dynamicResolution = 9;
-      }
-    } else {
-      // Fallback to area-based if zoom not provided
-      const latSpan = Math.abs(parseFloat(north) - parseFloat(south));
-      const lonSpan = Math.abs(parseFloat(east) - parseFloat(west));
-      const viewportArea = latSpan * lonSpan;
+    const parsedResolution = parseInt(resolution, 10);
+    const targetResolution = Number.isFinite(parsedResolution) ? parsedResolution : 7;
 
-      if (viewportArea < 5) {
-        dynamicResolution = 8;
-      } else if (viewportArea < 50) {
-        dynamicResolution = 7;
-      } else if (viewportArea < 200) {
-        dynamicResolution = 6;
-      } else if (viewportArea < 1000) {
-        dynamicResolution = 5;
-      } else {
-        dynamicResolution = 4;
-      }
-    }
+    console.log(
+      `🌡️ Proxying temperature projection request: year=${year}, scenario=${scenario}, resolution=${targetResolution}`
+    );
 
-    console.log(`🌡️ Proxying temperature projection request: ${year}, scenario ${scenario}, zoom ${zoom || 'N/A'}, resolution ${dynamicResolution}...`);
-
-    // Build query parameters for climate service
     const params = new URLSearchParams({
       north,
       south,
@@ -1467,13 +1427,11 @@ app.get('/api/nasa/temperature-projection', async (req, res) => {
       west,
       year,
       scenario,
-      resolution: dynamicResolution
+      resolution: targetResolution
     });
 
-    // Add optional parameters if provided
-    if (use_real_data) params.append('use_real_data', use_real_data);
+    params.append('use_real_data', 'true');
 
-    // Proxy request to Python climate service
     const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/temperature-projection?${params.toString()}`;
 
     console.log(`📡 Fetching from: ${climateServiceUrl}`);
@@ -1482,13 +1440,89 @@ app.get('/api/nasa/temperature-projection', async (req, res) => {
       timeout: 60000 // 60 second timeout for large areas
     });
 
-    console.log(`✅ Received ${response.data.data?.features?.length || 0} temperature projection hexes from climate service`);
+    console.log(
+      `✅ Received ${response.data.data?.features?.length || 0} temperature projection hexes from climate service`
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('❌ NASA temperature projection error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+};
+
+app.get('/api/nasa/temperature-projection', forwardTemperatureProjection);
+app.get('/api/climate/temperature-projection', forwardTemperatureProjection);
+
+// Urban Heat Island Tiles Endpoint - Proxy to Python Climate Service
+app.get('/api/climate/urban-heat-island/tiles', async (req, res) => {
+  try {
+    const { north, south, east, west, season, color_scheme } = req.query;
+
+    console.log(`🌡️ Proxying urban heat island tiles request: season=${season}, color_scheme=${color_scheme}...`);
+
+    // Build query parameters for climate service
+    const params = new URLSearchParams();
+    if (north) params.append('north', north);
+    if (south) params.append('south', south);
+    if (east) params.append('east', east);
+    if (west) params.append('west', west);
+    if (season) params.append('season', season);
+    if (color_scheme) params.append('color_scheme', color_scheme);
+
+    // Proxy request to Python climate service
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/urban-heat-island/tiles?${params.toString()}`;
+
+    console.log(`📡 Fetching from: ${climateServiceUrl}`);
+
+    const response = await axios.get(climateServiceUrl, {
+      timeout: 60000 // 60 second timeout
+    });
+
+    console.log(`✅ Received urban heat island tiles from climate service`);
 
     // Return the response from climate service
     res.json(response.data);
 
   } catch (error) {
-    console.error('❌ NASA temperature projection error:', error.message);
+    console.error('❌ Urban heat island tiles error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Topographic Relief Tiles Endpoint - Proxy to Python Climate Service
+app.get('/api/climate/topographic-relief/tiles', async (req, res) => {
+  try {
+    const { style } = req.query;
+
+    console.log(`🗻 Proxying topographic relief request: style=${style}...`);
+
+    // Build query parameters for climate service
+    const params = new URLSearchParams();
+    if (style) params.append('style', style);
+
+    // Proxy request to Python climate service
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/topographic-relief/tiles?${params.toString()}`;
+
+    console.log(`📡 Fetching from: ${climateServiceUrl}`);
+
+    const response = await axios.get(climateServiceUrl, {
+      timeout: 60000 // 60 second timeout
+    });
+
+    console.log(`✅ Received topographic relief tiles from climate service`);
+
+    // Return the response from climate service
+    res.json(response.data);
+
+  } catch (error) {
+    console.error('❌ Topographic relief tiles error:', error.message);
     res.status(500).json({
       success: false,
       error: error.message
