@@ -4,7 +4,7 @@ import React, { useCallback, useMemo, useRef, useState } from "react"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { LayerControlsPanel, LayerPanel } from "./layer-panel"
-import { LeafletMap } from "./leaflet-map"
+import { MapboxGlobe } from "./MapboxGlobe"
 import { climateLayers } from "../config/climateLayers"
 import type { ClimateControl } from "../config/climateLayers"
 import { useClimate } from "../contexts/ClimateContext"
@@ -331,7 +331,7 @@ export function GISAnalysisApp() {
             <LayerControlsPanel layerStates={layerStates} />
           </div>
         )}
-        <LeafletMap
+        <MapboxGlobe
           center={viewport.center}
           zoom={viewport.zoom}
           onViewportChange={handleViewportChange}

@@ -5,7 +5,7 @@ export type ClimateLayerId =
   | 'temperature_projection'
   | 'temperature_current'
   | 'urban_heat_island'
-  | 'elevation';
+  | 'topographic_relief';
 
 export type ClimateControl =
   | 'seaLevelFeet'
@@ -15,7 +15,13 @@ export type ClimateControl =
   | 'displayStyle'
   | 'resolution'
   | 'projectionOpacity'
-  | 'seaLevelOpacity';
+  | 'seaLevelOpacity'
+  | 'urbanHeatOpacity'
+  | 'urbanHeatSeason'
+  | 'urbanHeatColorScheme'
+  | 'reliefStyle'
+  | 'reliefOpacity'
+  | 'temperatureMode';
 
 export interface ClimateFetchContext {
   bounds: LatLngBoundsLiteral | null;
@@ -26,6 +32,11 @@ export interface ClimateFetchContext {
   displayStyle: 'depth' | 'confidence';
   resolution: number;
   projectionOpacity: number;
+  urbanHeatSeason: 'summer' | 'winter';
+  urbanHeatColorScheme: 'temperature' | 'heat' | 'urban';
+  reliefStyle: 'classic' | 'dark' | 'depth' | 'dramatic';
+  reliefOpacity: number;
+  temperatureMode: 'anomaly' | 'actual';
   useRealData: boolean;
 }
 
@@ -71,7 +82,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
     controls: ['seaLevelFeet', 'seaLevelOpacity', 'displayStyle'],
     fetch: {
       method: 'GET',
-      route: '/api/noaa/sea-level-rise',
+      route: '/api/climate/sea-level-rise',
       query: ({ bounds, seaLevelFeet, displayStyle }) => {
         const { north, south, east, west } = bounds ?? {
           north: 41,
@@ -91,7 +102,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
     },
     style: {
       color: '#38bdf8',
-      opacity: 0.6,
+      opacity: 0.3,
       layerType: 'polygon',
       blendMode: 'normal',
       valueProperty: 'depth'
@@ -100,17 +111,17 @@ export const climateLayers: ClimateLayerDefinition[] = [
   {
     id: 'temperature_projection',
     title: 'Future Temperature Anomaly',
-    description: 'Projected temperature anomalies from NASA NEX-GDDP (simulated values in development).',
+    description: 'Projected temperature anomalies from NASA NEX-GDDP-CMIP6.',
     category: 'temperature',
     source: {
       name: 'NASA NEX-GDDP-CMIP6',
       url: 'https://www.nccs.nasa.gov/services/data-collections'
     },
     defaultActive: false,
-    controls: ['scenario', 'projectionYear', 'projectionOpacity'],
+    controls: ['scenario', 'projectionYear', 'temperatureMode', 'projectionOpacity'],
     fetch: {
       method: 'GET',
-      route: '/api/nasa/temperature-projection',
+      route: '/api/climate/temperature-projection',
       query: ({ bounds, projectionYear, scenario, useRealData }) => {
         const { north, south, east, west, zoom } = bounds ?? {
           north: 41,
@@ -119,6 +130,12 @@ export const climateLayers: ClimateLayerDefinition[] = [
           west: -74,
           zoom: 10
         };
+
+        // Fixed resolution for consistent ~44px hexagon size
+        // Resolution 7 provides good balance between detail and performance
+        // and keeps hexagons consistently sized across zoom levels
+        const resolution = 7;
+
         return {
           north,
           south,
@@ -126,15 +143,15 @@ export const climateLayers: ClimateLayerDefinition[] = [
           west,
           year: projectionYear,
           scenario,
-          use_real_data: useRealData,
-          zoom
+          resolution,
+          use_real_data: true
         };
       }
     },
     style: {
       color: '#fb923c',
-      opacity: 0.6,
-      layerType: 'point',
+      opacity: 0.3,
+      layerType: 'polygon',
       blendMode: 'screen',
       valueProperty: 'tempAnomaly'
     }
@@ -180,17 +197,18 @@ export const climateLayers: ClimateLayerDefinition[] = [
   {
     id: 'urban_heat_island',
     title: 'Urban Heat Island',
-    description: 'Urban heat island intensity showing temperature differences between urban and rural areas.',
+    description: 'Land surface temperature from Landsat 8/9 showing heat patterns globally. Compare summer vs winter and customize colors.',
     category: 'temperature',
     source: {
-      name: 'NASA MODIS LST',
-      url: 'https://power.larc.nasa.gov/'
+      name: 'Landsat 8/9 LST',
+      url: 'https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2'
     },
-    controls: ['analysisDate'],
+    defaultActive: false,
+    controls: ['urbanHeatSeason', 'urbanHeatColorScheme', 'urbanHeatOpacity'],
     fetch: {
       method: 'GET',
-      route: '/api/modis/lst',
-      query: ({ bounds, analysisDate }) => {
+      route: '/api/climate/urban-heat-island/tiles',
+      query: ({ bounds, urbanHeatSeason, urbanHeatColorScheme }) => {
         const { north, south, east, west } = bounds ?? {
           north: 41,
           south: 40,
@@ -202,32 +220,34 @@ export const climateLayers: ClimateLayerDefinition[] = [
           south,
           east,
           west,
-          date: analysisDate.replace(/-/g, '')
+          season: urbanHeatSeason,
+          color_scheme: urbanHeatColorScheme
         };
       }
     },
     style: {
       color: '#facc15',
-      opacity: 0.7,
-      layerType: 'point',
+      opacity: 0.3,
+      layerType: 'raster',
       blendMode: 'normal',
       valueProperty: 'heatIslandIntensity'
     }
   },
   {
-    id: 'elevation',
-    title: 'Elevation',
-    description: 'USGS 3DEP elevation grid (simulated sample data).',
+    id: 'topographic_relief',
+    title: 'Topographic Relief',
+    description: 'Hillshade terrain visualization from SRTM/Copernicus DEM showing 3D relief with customizable lighting styles.',
     category: 'topography',
     source: {
-      name: 'USGS 3DEP',
-      url: 'https://www.usgs.gov/3dep'
+      name: 'Google Earth Engine (SRTM/Copernicus DEM)',
+      url: 'https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_DEM_GLO30'
     },
-    controls: [],
+    defaultActive: true,
+    controls: ['reliefStyle', 'reliefOpacity'],
     fetch: {
       method: 'GET',
-      route: '/api/usgs/elevation',
-      query: ({ bounds }) => {
+      route: '/api/climate/topographic-relief/tiles',
+      query: ({ bounds, reliefStyle }) => {
         const { north, south, east, west } = bounds ?? {
           north: 41,
           south: 40,
@@ -239,14 +259,14 @@ export const climateLayers: ClimateLayerDefinition[] = [
           south,
           east,
           west,
-          resolution: 20
+          style: reliefStyle
         };
       }
     },
     style: {
-      color: '#22d3ee',
-      opacity: 0.5,
-      layerType: 'point',
+      color: '#64748b',
+      opacity: 0.3,
+      layerType: 'raster',
       blendMode: 'multiply',
       valueProperty: 'elevation'
     }

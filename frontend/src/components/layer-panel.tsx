@@ -29,10 +29,16 @@ const controlOrder: ClimateControl[] = [
   "seaLevelOpacity",
   "scenario",
   "projectionYear",
+  "temperatureMode",
   "analysisDate",
   "displayStyle",
   "resolution",
   "projectionOpacity",
+  "urbanHeatSeason",
+  "urbanHeatColorScheme",
+  "urbanHeatOpacity",
+  "reliefStyle",
+  "reliefOpacity",
 ]
 
 type ControlSetters = Pick<
@@ -44,7 +50,13 @@ type ControlSetters = Pick<
   "setAnalysisDate" |
   "setDisplayStyle" |
   "setResolution" |
-  "setProjectionOpacity"
+  "setProjectionOpacity" |
+  "setUrbanHeatOpacity" |
+  "setUrbanHeatSeason" |
+  "setUrbanHeatColorScheme" |
+  "setReliefStyle" |
+  "setReliefOpacity" |
+  "setTemperatureMode"
 >
 
 const renderControl = (
@@ -197,6 +209,116 @@ const renderControl = (
           />
         </div>
       )
+    case "urbanHeatOpacity":
+      return (
+        <div key="urbanHeatOpacity" className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs text-muted-foreground">Layer Opacity</label>
+            <span className="text-xs font-medium">{Math.round(values.urbanHeatOpacity * 100)}%</span>
+          </div>
+          <Slider
+            value={[Math.round(values.urbanHeatOpacity * 100)]}
+            min={10}
+            max={100}
+            step={5}
+            onValueChange={value => setters.setUrbanHeatOpacity(value[0] / 100)}
+          />
+        </div>
+      )
+    case "urbanHeatSeason":
+      return (
+        <div key="urbanHeatSeason" className="space-y-2">
+          <label className="text-xs font-semibold text-muted-foreground">Season</label>
+          <Select value={values.urbanHeatSeason} onValueChange={value => setters.setUrbanHeatSeason(value as 'summer' | 'winter')}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Choose season" />
+            </SelectTrigger>
+            <SelectContent className="z-[9999]">
+              <SelectItem value="summer">Summer (Jun-Aug)</SelectItem>
+              <SelectItem value="winter">Winter (Dec-Feb)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )
+    case "urbanHeatColorScheme":
+      return (
+        <div key="urbanHeatColorScheme" className="space-y-2">
+          <label className="text-xs font-semibold text-muted-foreground">Color Scheme</label>
+          <Select value={values.urbanHeatColorScheme} onValueChange={value => setters.setUrbanHeatColorScheme(value as 'temperature' | 'heat' | 'urban')}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Choose color scheme" />
+            </SelectTrigger>
+            <SelectContent className="z-[9999]">
+              <SelectItem value="temperature">Temperature (Blue-Red)</SelectItem>
+              <SelectItem value="heat">Heat (Viridis)</SelectItem>
+              <SelectItem value="urban">Urban (Blue-Orange-Red)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )
+    case "reliefStyle":
+      return (
+        <div key="reliefStyle" className="space-y-2">
+          <label className="text-xs font-semibold text-muted-foreground">Hillshade Style</label>
+          <Select value={values.reliefStyle} onValueChange={value => setters.setReliefStyle(value as 'classic' | 'dark' | 'depth' | 'dramatic')}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Choose style" />
+            </SelectTrigger>
+            <SelectContent className="z-[9999]">
+              <SelectItem value="classic">Classic</SelectItem>
+              <SelectItem value="dark">Dark Relief</SelectItem>
+              <SelectItem value="depth">3D Depth</SelectItem>
+              <SelectItem value="dramatic">Dramatic Shadows</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )
+    case "reliefOpacity":
+      return (
+        <div key="reliefOpacity" className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs text-muted-foreground">Layer Opacity</label>
+            <span className="text-xs font-medium">{Math.round(values.reliefOpacity * 100)}%</span>
+          </div>
+          <Slider
+            value={[Math.round(values.reliefOpacity * 100)]}
+            min={10}
+            max={100}
+            step={5}
+            onValueChange={value => setters.setReliefOpacity(value[0] / 100)}
+          />
+        </div>
+      )
+    case "temperatureMode":
+      return (
+        <div key="temperatureMode" className="space-y-2">
+          <label className="text-xs font-semibold text-muted-foreground">Temperature Display</label>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="temperatureMode"
+                value="anomaly"
+                checked={values.temperatureMode === 'anomaly'}
+                onChange={() => setters.setTemperatureMode('anomaly')}
+                className="h-4 w-4 accent-blue-500"
+              />
+              <span className="text-xs">Temperature Anomaly (Change)</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                name="temperatureMode"
+                value="actual"
+                checked={values.temperatureMode === 'actual'}
+                onChange={() => setters.setTemperatureMode('actual')}
+                className="h-4 w-4 accent-blue-500"
+              />
+              <span className="text-xs">Actual Temperature</span>
+            </label>
+          </div>
+        </div>
+      )
     default:
       return null
   }
@@ -216,6 +338,11 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
         <div className="mt-3 space-y-3">
           {climateLayers.map(layer => {
             const active = isLayerActive(layer.id)
+            const layerState = layerStates[layer.id]
+            const isLoading = layerState?.status === 'loading'
+            const hasError = layerState?.status === 'error'
+            const estimatedSeconds = layerState?.estimatedLoadTime ? Math.round(layerState.estimatedLoadTime / 1000) : null
+
             return (
               <label
                 key={layer.id}
@@ -229,9 +356,14 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
                   checked={active}
                   onChange={() => toggleLayer(layer.id)}
                 />
-                <div className="space-y-1">
+                <div className="flex-1 space-y-1">
                   <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-sm font-medium">{layer.title}</h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="text-sm font-medium">{layer.title}</h4>
+                      {isLoading && (
+                        <Loader2 className="h-3 w-3 animate-spin text-blue-400" />
+                      )}
+                    </div>
                     <span className="rounded bg-secondary px-2 py-0.5 text-[10px] uppercase tracking-wide text-secondary-foreground">
                       {layer.category}
                     </span>
@@ -240,6 +372,21 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
                   <p className="text-[11px] text-muted-foreground/80">
                     Source: <span className="font-medium text-foreground">{layer.source.name}</span>
                   </p>
+                  {isLoading && estimatedSeconds && (
+                    <div className="flex items-center gap-1.5 text-[11px] text-blue-400">
+                      <span>Loading data (~{estimatedSeconds}s)...</span>
+                    </div>
+                  )}
+                  {hasError && (
+                    <div className="text-[11px] text-red-400">
+                      Error: {layerState.error}
+                    </div>
+                  )}
+                  {layerState?.status === 'success' && layerState.updatedAt && (
+                    <div className="text-[10px] text-muted-foreground/60">
+                      Cached • Last updated {new Date(layerState.updatedAt).toLocaleTimeString()}
+                    </div>
+                  )}
                 </div>
               </label>
             )
@@ -278,6 +425,13 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
     setDisplayStyle: climate.setDisplayStyle,
     setResolution: climate.setResolution,
     setProjectionOpacity: climate.setProjectionOpacity,
+    setSeaLevelOpacity: climate.setSeaLevelOpacity,
+    setUrbanHeatOpacity: climate.setUrbanHeatOpacity,
+    setUrbanHeatSeason: climate.setUrbanHeatSeason,
+    setUrbanHeatColorScheme: climate.setUrbanHeatColorScheme,
+    setReliefStyle: climate.setReliefStyle,
+    setReliefOpacity: climate.setReliefOpacity,
+    setTemperatureMode: climate.setTemperatureMode,
   }
 
   return (
@@ -318,17 +472,37 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
                     </div>
                   )}
                   <div className="space-y-1">
-                    <p className="text-[11px] font-semibold text-muted-foreground">Temperature Anomaly (°C)</p>
-                    <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#6b2491] via-[#9d559c] via-[#c48b98] via-[#ddb27c] via-[#ebc054] via-[#e08237] to-[#ba3b19]" />
-                    <div className="flex justify-between text-[10px] text-muted-foreground">
-                      <span>0°</span>
-                      <span>1°</span>
-                      <span>2°</span>
-                      <span>3°</span>
-                      <span>4°</span>
-                      <span>6°</span>
-                      <span>8°+</span>
-                    </div>
+                    <p className="text-[11px] font-semibold text-muted-foreground">
+                      {climate.controls.temperatureMode === 'actual' ? 'Actual Temperature (°C)' : 'Temperature Anomaly (°C)'}
+                    </p>
+                    {climate.controls.temperatureMode === 'actual' ? (
+                      <>
+                        <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#1e3a8a] via-[#3b82f6] via-[#fef08a] via-[#fb923c] via-[#ef4444] via-[#7f1d1d] to-[#450a0a]" />
+                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                          <span>10°</span>
+                          <span>15°</span>
+                          <span>20°</span>
+                          <span>25°</span>
+                          <span>30°</span>
+                          <span>35°</span>
+                          <span>40°+</span>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#3b82f6] via-[#60a5fa] via-[#93c5fd] via-[#fef08a] via-[#fbbf24] via-[#fb923c] via-[#ef4444] to-[#7f1d1d]" />
+                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                          <span>0°</span>
+                          <span>1°</span>
+                          <span>2°</span>
+                          <span>3°</span>
+                          <span>4°</span>
+                          <span>5°</span>
+                          <span>6°</span>
+                          <span>8°+</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </>
               )}
