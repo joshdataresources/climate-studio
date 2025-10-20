@@ -56,16 +56,24 @@ export function GISAnalysisApp() {
   type ControlSnapshot = { control: ClimateControl; label: string; value: string }
 
   const formatControlSnapshot = useCallback(
-    (control: ClimateControl) => {
+    (control: ClimateControl, layerId?: string) => {
       switch (control) {
         case "scenario":
           return { label: "Scenario", value: controls.scenario.toUpperCase() }
-        case "projectionYear":
-          return { label: "Projection Year", value: `${controls.projectionYear}` }
+        case "projectionYear": {
+          return {
+            label: "Projection Year",
+            value: `${controls.projectionYear}`
+          }
+        }
+        case "temperatureMode": {
+          return {
+            label: "Temperature Change",
+            value: controls.temperatureMode === 'actual' ? 'Actual Temp' : 'Anomaly'
+          }
+        }
         case "seaLevelFeet":
           return { label: "Sea Level Rise", value: `${controls.seaLevelFeet} ft` }
-        case "seaLevelOpacity":
-          return { label: "Sea Level Opacity", value: `${Math.round(controls.seaLevelOpacity * 100)}%` }
         case "analysisDate": {
           const parsed = new Date(controls.analysisDate)
           const formatted = Number.isNaN(parsed.getTime())
@@ -75,22 +83,83 @@ export function GISAnalysisApp() {
                 day: "numeric",
                 year: "numeric",
               })
-          return { label: "Analysis Date", value: formatted }
+          return { label: "Last captured", value: formatted }
         }
         case "displayStyle": {
           const label = controls.displayStyle === "confidence" ? "Confidence Extent" : "Depth Grid"
           return { label: "Display Style", value: label }
         }
-        case "resolution":
-          return { label: "Sampling Resolution", value: `${controls.resolution}°` }
+        // Hide opacity controls and other settings
+        case "seaLevelOpacity":
         case "projectionOpacity":
-          return { label: "Projection Opacity", value: `${Math.round(controls.projectionOpacity * 100)}%` }
+        case "urbanHeatOpacity":
+        case "reliefOpacity":
+        case "resolution":
+        case "urbanHeatSeason":
+        case "urbanHeatColorScheme":
+        case "reliefStyle":
+          return null
         default:
           return null
       }
     },
     [controls]
   )
+
+  // Calculate suggested sea level rise based on temperature projection
+  const getSuggestedSeaLevelRise = useCallback(() => {
+    const yearsSince2025 = controls.projectionYear - 2025
+    let tempChange = 0
+
+    // Estimate based on scenario
+    if (controls.scenario === 'rcp26' || controls.scenario === 'ssp126') {
+      tempChange = (yearsSince2025 / 75) * 2.0 // ~2°C by 2100
+    } else if (controls.scenario === 'rcp45' || controls.scenario === 'ssp245') {
+      tempChange = (yearsSince2025 / 75) * 3.2 // ~3.2°C by 2100
+    } else if (controls.scenario === 'rcp85' || controls.scenario === 'ssp585') {
+      tempChange = (yearsSince2025 / 75) * 4.8 // ~4.8°C by 2100
+    }
+
+    // Estimate sea level rise (roughly 20cm per 1°C warming)
+    const estimatedSeaLevelFt = Math.round((tempChange * 0.2 * 3.28084) * 10) / 10 // meters to feet
+
+    return {
+      tempChange: tempChange.toFixed(1),
+      seaLevelFt: estimatedSeaLevelFt.toFixed(1)
+    }
+  }, [controls.projectionYear, controls.scenario])
+
+  // Calculate average temperature in current viewport
+  const getViewportAverageTemp = useCallback(() => {
+    // Only calculate if zoomed in to 9.0 or closer
+    if (viewport.zoom < 9.0) {
+      return null
+    }
+
+    const tempData = layerStates.temperature_projection?.data
+    if (!tempData || !tempData.features || tempData.features.length === 0) {
+      return null
+    }
+
+    // Get temperature values from features
+    const temps: number[] = []
+    tempData.features.forEach((feature: any) => {
+      const temp = controls.temperatureMode === 'actual'
+        ? feature.properties?.projected
+        : feature.properties?.tempAnomaly
+
+      if (temp !== undefined && temp !== null) {
+        temps.push(temp)
+      }
+    })
+
+    if (temps.length === 0) {
+      return null
+    }
+
+    const avgTemp = temps.reduce((sum, t) => sum + t, 0) / temps.length
+    return avgTemp.toFixed(1)
+  }, [viewport.zoom, layerStates.temperature_projection?.data, controls.temperatureMode])
 
   const handleBoundsChange = useCallback((bounds: LatLngBoundsLiteral) => {
     setMapBounds(prev => ({ ...bounds, zoom: viewport.zoom }))
@@ -257,13 +326,17 @@ export function GISAnalysisApp() {
 
           <section className="mx-4 rounded-lg border border-border/60 bg-card/95 backdrop-blur-lg p-4">
             <h3 className="text-sm font-semibold">Scenario Snapshot</h3>
-            {activeLayers.length === 0 ? (
+            {activeLayers.filter(layer =>
+              layer.id !== 'urban_heat_island' && layer.id !== 'topographic_relief'
+            ).length === 0 ? (
               <p className="mt-3 text-xs text-muted-foreground">
                 Activate a climate layer to review its current settings.
               </p>
             ) : (
               <div className="mt-3 space-y-4">
-                {activeLayers.map(layer => {
+                {activeLayers
+                  .filter(layer => layer.id !== 'urban_heat_island' && layer.id !== 'topographic_relief')
+                  .map(layer => {
                   const controlEntries = layer.controls.reduce<ControlSnapshot[]>((entries, control) => {
                     const snapshot = formatControlSnapshot(control)
                     if (snapshot) {
@@ -276,6 +349,10 @@ export function GISAnalysisApp() {
                     return entries
                   }, [])
 
+                  // Calculate suggested sea level rise for temperature projection layer
+                  const suggestedSLR = layer.id === 'temperature_projection' ? getSuggestedSeaLevelRise() : null
+                  const viewportAvgTemp = layer.id === 'temperature_projection' ? getViewportAverageTemp() : null
+
                   return (
                     <div key={layer.id} className="rounded-md border border-border/60 bg-card/70 p-3">
                       <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
@@ -283,14 +360,36 @@ export function GISAnalysisApp() {
                         <span>{layer.category}</span>
                       </div>
                       {controlEntries.length > 0 ? (
-                        <dl className="mt-2 grid grid-cols-2 gap-3 text-xs">
-                          {controlEntries.map(entry => (
-                            <div key={`${layer.id}-${entry.control}`}>
-                              <dt className="text-muted-foreground/80">{entry.label}</dt>
-                              <dd className="font-medium text-foreground">{entry.value}</dd>
+                        <>
+                          <dl className="mt-2 grid grid-cols-2 gap-3 text-xs">
+                            {controlEntries.map(entry => (
+                              <div key={`${layer.id}-${entry.control}`}>
+                                <dt className="text-muted-foreground/80">{entry.label}</dt>
+                                <dd className="font-medium text-foreground">{entry.value}</dd>
+                              </div>
+                            ))}
+                            {layer.id === 'temperature_projection' && (
+                              <div>
+                                <dt className="text-muted-foreground/80">Viewport Average</dt>
+                                <dd className="font-medium text-foreground">
+                                  {viewportAvgTemp !== null
+                                    ? `${viewportAvgTemp}°${controls.temperatureMode === 'actual' ? 'C' : 'C anomaly'}`
+                                    : 'N/A (zoom to 9.0+)'}
+                                </dd>
+                              </div>
+                            )}
+                          </dl>
+                          {suggestedSLR && (
+                            <div className="mt-3 pt-3 border-t border-border/40">
+                              <div className="text-xs">
+                                <dt className="text-muted-foreground/80">Suggested Sea Level Rise</dt>
+                                <dd className="font-medium text-foreground mt-1">
+                                  +{suggestedSLR.tempChange}°C = ~{suggestedSLR.seaLevelFt} ft
+                                </dd>
+                              </div>
                             </div>
-                          ))}
-                        </dl>
+                          )}
+                        </>
                       ) : (
                         <p className="mt-2 text-[11px] text-muted-foreground">
                           No adjustable controls for this layer.
@@ -299,26 +398,6 @@ export function GISAnalysisApp() {
                     </div>
                   )
                 })}
-                <div className="rounded-md border border-border/60 bg-card/70 p-3">
-                  <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    <span>Global Settings</span>
-                    <span>{activeLayers.length} Active</span>
-                  </div>
-                  <dl className="mt-2 grid grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <dt className="text-muted-foreground/80">Active Layers</dt>
-                      <dd className="font-medium text-foreground">
-                        {activeLayers.map(layer => layer.title).join(", ")}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-muted-foreground/80">Real Data Mode</dt>
-                      <dd className="font-medium text-foreground">
-                        {controls.useRealData ? "Enabled" : "Simulated"}
-                      </dd>
-                    </div>
-                  </dl>
-                </div>
               </div>
             )}
           </section>
@@ -338,7 +417,7 @@ export function GISAnalysisApp() {
           onMapBoundsChange={handleBoundsChange}
           layerStates={layerStates}
         />
-        <div className="absolute bottom-4 left-4 rounded-lg border border-border/60 bg-card/70 px-4 py-2 text-xs backdrop-blur">
+        <div className="absolute bottom-20 left-4 rounded-lg border border-border/60 bg-card/70 px-4 py-2 text-xs backdrop-blur">
           <div className="font-semibold">Viewport</div>
           <div className="mt-1 space-y-1 text-muted-foreground">
             <div>
