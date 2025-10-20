@@ -416,9 +416,6 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
           <div key={layer.id} className="space-y-3 rounded-lg border border-border/60 bg-card/95 backdrop-blur-lg p-4">
             <div className="flex items-center justify-between">
               <h4 className="text-sm font-semibold">{layer.title}</h4>
-              <span className="rounded bg-secondary px-2 py-0.5 text-[10px] uppercase tracking-wide text-secondary-foreground">
-                {layer.category}
-              </span>
             </div>
             <div className="space-y-3">
               {layer.controls.map(control =>
@@ -459,9 +456,6 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
                     </div>
                   )}
                   <div className="space-y-1">
-                    <p className="text-[11px] font-semibold text-muted-foreground">
-                      {climate.controls.temperatureMode === 'actual' ? 'Actual Temperature (°C)' : 'Temperature Anomaly (°C)'}
-                    </p>
                     {climate.controls.temperatureMode === 'actual' ? (
                       <>
                         <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#1e3a8a] via-[#3b82f6] via-[#fef08a] via-[#fb923c] via-[#ef4444] via-[#7f1d1d] to-[#450a0a]" />

@@ -52,10 +52,14 @@ export function MapboxGlobe({
   // Persist temperature data to prevent disappearing during refetch
   const [stableTempData, setStableTempData] = useState<any>(null)
   useEffect(() => {
+    console.log('Temperature Projection Active:', temperatureProjectionActive)
+    console.log('Temp Projection Data:', tempProjectionData)
+    console.log('Temp Projection Features:', tempProjectionData?.features?.length)
     if (tempProjectionData && tempProjectionData.features?.length > 0) {
+      console.log('Setting stable temp data with', tempProjectionData.features.length, 'features')
       setStableTempData(tempProjectionData)
     }
-  }, [tempProjectionData])
+  }, [tempProjectionData, temperatureProjectionActive])
 
   // Debug: Log when urban heat data changes
   useEffect(() => {
