@@ -9,7 +9,6 @@ Documentation: https://www.nccs.nasa.gov/services/data-collections/land-based-pr
 """
 
 import xarray as xr
-import numpy as np
 import h3
 from shapely.geometry import Polygon
 from datetime import datetime
@@ -50,7 +49,7 @@ class NASAClimateService:
         os.makedirs(cache_dir, exist_ok=True)
 
     def get_temperature_projection(self, bounds, year=2050, scenario='rcp45',
-                                   resolution=7, use_simulated=True):
+                                   resolution=7, use_simulated=False):
         """
         Get temperature projection data for a bounding box
 
@@ -59,15 +58,14 @@ class NASAClimateService:
             year: Projection year (2020-2100)
             scenario: Climate scenario ('rcp26', 'rcp45', 'rcp85')
             resolution: H3 hexagon resolution (0-15, default 7 = ~5km diameter)
-            use_simulated: If True, use simulated data (for development/testing)
+            use_simulated: Deprecated toggle for simulated data (must remain False)
 
         Returns:
             GeoJSON FeatureCollection with hexagonal temperature anomalies
         """
 
         if use_simulated:
-            logger.info(f"Using simulated data for {year}, scenario {scenario}")
-            return self._generate_simulated_data(bounds, year, scenario, resolution)
+            raise ValueError("Simulated temperature projection data has been disabled.")
 
         try:
             logger.info(f"Fetching NASA data: year={year}, scenario={scenario}")
@@ -120,8 +118,7 @@ class NASAClimateService:
 
         except Exception as e:
             logger.error(f"Error fetching NASA data: {str(e)}")
-            logger.info("Falling back to simulated data")
-            return self._generate_simulated_data(bounds, year, scenario, resolution)
+            raise
 
     def _construct_s3_path(self, variable, scenario, model, time_range):
         """Construct S3 path to NetCDF file"""
@@ -244,67 +241,3 @@ class NASAClimateService:
                 'timestamp': datetime.utcnow().isoformat() + 'Z'
             }
         }
-
-    def _generate_simulated_data(self, bounds, year, scenario, resolution):
-        """
-        Generate simulated temperature projection data for development/testing
-        Mimics the structure of real NASA data
-        """
-        logger.info(f"Generating simulated data for bounds: {bounds}")
-
-        # Scenario-based projections (simplified IPCC estimates)
-        scenarios = {
-            'rcp26': {'increase2050': 1.5, 'increase2100': 2.0},
-            'rcp45': {'increase2050': 2.0, 'increase2100': 3.2},
-            'rcp85': {'increase2050': 2.5, 'increase2100': 4.8}
-        }
-
-        config = scenarios.get(scenario, scenarios['rcp45'])
-        year_progress = max(0, min(1, (year - 2025) / (2100 - 2025)))
-        projected_increase = config['increase2050'] + \
-                           (config['increase2100'] - config['increase2050']) * year_progress
-
-        # Get hexagons covering the area
-        hex_ids = self._get_hexagons_in_bounds(bounds, resolution)
-
-        hexagons = []
-        for hex_id in hex_ids:
-            lat, lon = h3.cell_to_latlng(hex_id)
-            boundary = h3.cell_to_boundary(hex_id)
-
-            # More realistic spatial variation based on latitude and geography
-            # Polar amplification: higher latitudes warm more
-            lat_effect = (abs(lat) / 45) * 1.8 if abs(lat) > 45 else (abs(lat) / 45) * 0.8
-
-            # Ocean vs land effect (simplified): areas near coasts have moderated warming
-            coastal_effect = np.sin(lon * 2.5 + lat * 1.7) * 0.3
-
-            # Continental effect: interior regions have higher variability
-            continental_effect = np.cos(lat * 3.2 - lon * 2.1) * 0.4
-
-            # Perlin-like noise for realistic spatial variation
-            noise1 = np.sin(lat * 7.13 + lon * 5.27) * np.cos(lat * 3.97 - lon * 8.41) * 0.5
-            noise2 = np.sin(lat * 13.71 - lon * 11.39) * np.cos(lat * 19.13 + lon * 7.23) * 0.25
-            noise3 = np.sin(lat * 23.45 + lon * 17.83) * 0.15
-
-            # Urban heat island effect (simplified)
-            urban_factor = abs(np.sin(lat * 43.7) * np.cos(lon * 51.3)) * 0.6
-
-            # Combine all factors with the base projection
-            temp_anomaly = (projected_increase +
-                          lat_effect +
-                          coastal_effect +
-                          continental_effect +
-                          noise1 + noise2 + noise3 +
-                          urban_factor)
-
-            hexagons.append({
-                'hex_id': hex_id,
-                'center': [lon, lat],
-                'boundary': boundary,
-                'temp_anomaly': round(temp_anomaly, 2),
-                'temp_anomaly_f': round(temp_anomaly * 1.8, 2)
-            })
-
-        ssp_scenario = self.SCENARIOS.get(scenario, 'ssp245')
-        return self._to_geojson(hexagons, year, scenario, ssp_scenario)
