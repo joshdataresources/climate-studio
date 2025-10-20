@@ -477,7 +477,7 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
                       </>
                     ) : (
                       <>
-                        <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#3b82f6] via-[#60a5fa] via-[#93c5fd] via-[#fef08a] via-[#fbbf24] via-[#fb923c] via-[#ef4444] to-[#7f1d1d]" />
+                        <div className="h-3 w-full rounded-full bg-gradient-to-r from-white via-[#fef9c3] via-[#fde047] via-[#facc15] via-[#f59e0b] via-[#fb923c] via-[#f97316] via-[#ea580c] via-[#dc2626] via-[#ef4444] via-[#b91c1c] to-[#7f1d1d]" />
                         <div className="flex justify-between text-[10px] text-muted-foreground">
                           <span>0°</span>
                           <span>1°</span>
