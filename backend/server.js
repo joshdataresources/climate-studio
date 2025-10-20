@@ -1405,59 +1405,33 @@ app.get('/api/nasa/temperature-projection', async (req, res) => {
       });
     }
 
-    // Dynamic resolution based on map zoom level to keep hexagons same visual size
-    // Leaflet zoom levels typically range from 1 (world) to 18 (building)
-    // H3 resolution ranges from 0 (huge hexagons) to 15 (tiny hexagons)
-    //
-    // Mapping: Higher zoom = higher H3 resolution (smaller hexagons)
-    // Increased by 1-2 levels for smaller hexagons
-    // Zoom  1-3:  H3 res 3 (large hexagons, ~350km)
-    // Zoom  4-5:  H3 res 4 (medium hexagons, ~100km)
-    // Zoom  6-7:  H3 res 5 (small hexagons, ~35km)
-    // Zoom  8-9:  H3 res 6 (smaller hexagons, ~10km)
-    // Zoom 10-11: H3 res 7 (tiny hexagons, ~5km)
-    // Zoom 12-13: H3 res 8 (very tiny hexagons, ~1.5km)
-    // Zoom 14+:   H3 res 9 (extremely tiny hexagons, ~500m)
-    let dynamicResolution;
+    // Use resolution from frontend if provided (for constant hex size)
+    // Otherwise fall back to dynamic resolution based on viewport area
+    let finalResolution;
     if (resolution) {
-      dynamicResolution = parseInt(resolution);
-    } else if (zoom) {
-      const zoomLevel = parseInt(zoom);
-      if (zoomLevel <= 3) {
-        dynamicResolution = 3;
-      } else if (zoomLevel <= 5) {
-        dynamicResolution = 4;
-      } else if (zoomLevel <= 7) {
-        dynamicResolution = 5;
-      } else if (zoomLevel <= 9) {
-        dynamicResolution = 6;
-      } else if (zoomLevel <= 11) {
-        dynamicResolution = 7;
-      } else if (zoomLevel <= 13) {
-        dynamicResolution = 8;
-      } else {
-        dynamicResolution = 9;
-      }
+      finalResolution = parseInt(resolution);
+      console.log(`🌡️ Using frontend-specified resolution: ${finalResolution}`);
     } else {
-      // Fallback to area-based if zoom not provided
+      // Fallback to area-based resolution
       const latSpan = Math.abs(parseFloat(north) - parseFloat(south));
       const lonSpan = Math.abs(parseFloat(east) - parseFloat(west));
       const viewportArea = latSpan * lonSpan;
 
       if (viewportArea < 5) {
-        dynamicResolution = 8;
+        finalResolution = 8;
       } else if (viewportArea < 50) {
-        dynamicResolution = 7;
+        finalResolution = 7;
       } else if (viewportArea < 200) {
-        dynamicResolution = 6;
+        finalResolution = 6;
       } else if (viewportArea < 1000) {
-        dynamicResolution = 5;
+        finalResolution = 5;
       } else {
-        dynamicResolution = 4;
+        finalResolution = 4;
       }
+      console.log(`🌡️ Calculated area-based resolution: ${finalResolution} (viewport area: ${viewportArea.toFixed(2)}°²)`);
     }
 
-    console.log(`🌡️ Proxying temperature projection request: ${year}, scenario ${scenario}, zoom ${zoom || 'N/A'}, resolution ${dynamicResolution}...`);
+    console.log(`🌡️ Proxying temperature projection request: ${year}, scenario ${scenario}, zoom ${zoom || 'N/A'}, resolution ${finalResolution}...`);
 
     // Build query parameters for climate service
     const params = new URLSearchParams({
@@ -1467,7 +1441,7 @@ app.get('/api/nasa/temperature-projection', async (req, res) => {
       west,
       year,
       scenario,
-      resolution: dynamicResolution
+      resolution: finalResolution
     });
 
     // Add optional parameters if provided
@@ -1482,7 +1456,18 @@ app.get('/api/nasa/temperature-projection', async (req, res) => {
       timeout: 60000 // 60 second timeout for large areas
     });
 
-    console.log(`✅ Received ${response.data.data?.features?.length || 0} temperature projection hexes from climate service`);
+    // Check if real or fallback data
+    const isRealData = response.data.data?.metadata?.isRealData === true;
+    const dataSource = response.data.data?.metadata?.source || 'unknown';
+    const featureCount = response.data.data?.features?.length || 0;
+
+    if (isRealData) {
+      console.log(`✅ REAL NASA DATA: ${featureCount} hexes from climate service`);
+      console.log(`✅ Source: ${dataSource}`);
+    } else {
+      console.warn(`⚠️ FALLBACK DATA: ${featureCount} hexes from climate service`);
+      console.warn(`⚠️ Source: ${dataSource}`);
+    }
 
     // Return the response from climate service
     res.json(response.data);

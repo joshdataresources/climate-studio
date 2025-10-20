@@ -131,19 +131,29 @@ export const climateLayers: ClimateLayerDefinition[] = [
           zoom: 10
         };
 
-        // Dynamic resolution based on zoom level for proper tessellation at all scales
-        // Lower zoom (zoomed out) = lower resolution (bigger hexagons)
-        // Higher zoom (zoomed in) = higher resolution (smaller hexagons)
-        const getResolutionForZoom = (z: number) => {
-          if (z <= 4) return 2;  // Continental view
-          if (z <= 6) return 4;  // Multi-state view
-          if (z <= 8) return 5;  // State view
-          if (z <= 10) return 6; // Regional view
-          if (z <= 12) return 7; // City view
-          return 8;              // Neighborhood view
-        };
+        // Dynamic hexagon sizing based on zoom level
+        // Lower zoom = larger hexagons (lower resolution)
+        // Higher zoom = smaller hexagons (higher resolution)
+        const z = zoom || 10;
 
-        const resolution = getResolutionForZoom(zoom || 10);
+        let resolution;
+        if (z <= 3) {
+          resolution = 2;  // Continental - very large hexagons
+        } else if (z <= 5) {
+          resolution = 3;  // Multi-country - large hexagons
+        } else if (z <= 7) {
+          resolution = 4;  // Country/state - medium-large hexagons
+        } else if (z <= 9) {
+          resolution = 5;  // Regional - medium hexagons
+        } else if (z <= 11) {
+          resolution = 6;  // Metropolitan - small hexagons
+        } else if (z <= 13) {
+          resolution = 7;  // City - smaller hexagons
+        } else {
+          resolution = 8;  // Neighborhood - very small hexagons
+        }
+
+        console.log(`🔷 Zoom ${z.toFixed(1)} → H3 resolution ${resolution}`);
 
         return {
           north,
@@ -152,7 +162,8 @@ export const climateLayers: ClimateLayerDefinition[] = [
           west,
           year: projectionYear,
           scenario,
-          resolution
+          resolution,
+          zoom
         };
       }
     },

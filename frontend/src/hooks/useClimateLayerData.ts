@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ClimateFetchContext, ClimateLayerId, getClimateLayer } from '../config/climateLayers';
 import { useClimate } from '../contexts/ClimateContext';
 import { LatLngBoundsLiteral } from '../types/geography';
+import { layerStatusMonitor } from '../agents/LayerStatusMonitor';
 
 type FetchStatus = 'idle' | 'loading' | 'success' | 'error';
 
@@ -96,11 +97,19 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
 
       if (!forceRefresh && cacheRef.current.has(cacheKey)) {
         const cached = cacheRef.current.get(cacheKey)!;
-        setLayerState(layerId, {
-          ...cached,
-          status: 'success'
-        });
-        return;
+        // Validate cached data has features and metadata
+        const isValidCache = cached.data?.features?.length > 0 && cached.data?.metadata;
+        if (isValidCache) {
+          console.log(`✅ Using validated cache for ${layerId}:`, cached.data.metadata?.source);
+          setLayerState(layerId, {
+            ...cached,
+            status: 'success'
+          });
+          return;
+        } else {
+          console.warn(`⚠️ Cache invalid for ${layerId}, refetching...`);
+          cacheRef.current.delete(cacheKey);
+        }
       }
 
       if (abortControllers.current.has(layerId)) {
@@ -109,6 +118,12 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
 
       const controller = new AbortController();
       abortControllers.current.set(layerId, controller);
+
+      // Emit loading status
+      layerStatusMonitor.emit(
+        layerStatusMonitor.createStatusEvent(layerId, 'loading')
+      );
+
       setLayerState(layerId, previous => ({
         status: 'loading',
         data: previous?.data ?? null,
@@ -119,10 +134,21 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       try {
         const queryString = buildQueryString(params);
         const url = `${BACKEND_BASE_URL}${layer.fetch.route}${queryString ? `?${queryString}` : ''}`;
+
+        // Wait minimum 10s for real NASA data before considering fallback
+        const minWaitTime = 10000;
+        const startTime = Date.now();
+
         const response = await fetch(url, {
           method: layer.fetch.method,
           signal: controller.signal
         });
+
+        const elapsedTime = Date.now() - startTime;
+        if (elapsedTime < minWaitTime) {
+          // Response came back too fast, might be immediate fallback
+          console.warn(`⚠️ Fast response for ${layerId} (${elapsedTime}ms), checking data source...`);
+        }
 
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`);
@@ -136,6 +162,29 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
           updatedAt: Date.now()
         };
 
+        // Emit success status and analyze data source
+        const statusEvent = layerStatusMonitor.createStatusEvent(
+          layerId,
+          'success',
+          payload.data ?? payload
+        );
+        layerStatusMonitor.emit(statusEvent);
+
+        // Log definitive message based on data source
+        if (statusEvent.dataSource === 'real') {
+          console.log(`✅ REAL NASA DATA loaded for ${layerId}:`, {
+            source: statusEvent.metadata?.source,
+            features: statusEvent.metadata?.featureCount,
+            model: statusEvent.metadata?.model
+          });
+        } else if (statusEvent.dataSource === 'fallback') {
+          console.warn(`⚠️ FALLBACK DATA loaded for ${layerId}:`, {
+            reason: statusEvent.metadata?.fallbackReason || 'Real data unavailable',
+            source: statusEvent.metadata?.source,
+            features: statusEvent.metadata?.featureCount
+          });
+        }
+
         cacheRef.current.set(cacheKey, result);
         setLayerState(layerId, result);
       } catch (error) {
@@ -143,6 +192,12 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
           return;
         }
         const message = error instanceof Error ? error.message : 'Unknown error';
+
+        // Emit error status
+        layerStatusMonitor.emit(
+          layerStatusMonitor.createStatusEvent(layerId, 'error', undefined, message)
+        );
+
         setLayerState(layerId, {
           status: 'error',
           data: null,

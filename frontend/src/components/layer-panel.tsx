@@ -435,14 +435,26 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
                     </div>
                   )}
                   {layerStates.temperature_projection?.status === 'success' && (
-                    <div className="space-y-2 rounded-md border border-green-500/30 bg-green-500/10 p-3">
+                    <div className={`space-y-2 rounded-md border p-3 ${
+                      layerStates.temperature_projection?.data?.metadata?.isRealData
+                        ? 'border-green-500/30 bg-green-500/10'
+                        : 'border-yellow-500/30 bg-yellow-500/10'
+                    }`}>
                       <div className="flex items-center gap-2">
-                        <div className="h-4 w-4 rounded-full bg-green-500 flex items-center justify-center">
+                        <div className={`h-4 w-4 rounded-full flex items-center justify-center ${
+                          layerStates.temperature_projection?.data?.metadata?.isRealData
+                            ? 'bg-green-500'
+                            : 'bg-yellow-500'
+                        }`}>
                           <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                           </svg>
                         </div>
-                        <p className="text-xs text-foreground">NASA temperature data loaded</p>
+                        <p className="text-xs text-foreground">
+                          {layerStates.temperature_projection?.data?.metadata?.isRealData
+                            ? '✓ Real NASA climate data (Earth Engine)'
+                            : '⚠ Simulated data (Earth Engine unavailable)'}
+                        </p>
                       </div>
                     </div>
                   )}

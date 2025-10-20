@@ -152,27 +152,47 @@ class NASAEEClimateService:
             logger.info(f"Converting {len(features)} hexagons to GeoJSON")
             hexagons = self._convert_hexagon_features_to_geojson(features, year, scenario, ssp_scenario)
 
-            logger.info(f"Successfully created {len(hexagons['features'])} hexagon features")
+            logger.info("=" * 80)
+            logger.info(f"✅ REAL NASA DATA: Successfully loaded {len(hexagons['features'])} hexagon features")
+            logger.info(f"✅ Source: NASA NEX-GDDP-CMIP6 via Earth Engine")
+            logger.info(f"✅ Model: {self.DEFAULT_MODEL}, Scenario: {ssp_scenario}, Year: {year}")
+            logger.info("=" * 80)
             return hexagons
 
         except Exception as e:
             import traceback
-            logger.error(f"Error fetching NASA EE data: {type(e).__name__}: {str(e)}")
-            logger.error(f"Traceback: {traceback.format_exc()}")
-            logger.info("Falling back to simulated data")
+            logger.error("=" * 80)
+            logger.error(f"🚨 NASA EARTH ENGINE FETCH FAILED - FALLING BACK TO SIMULATED DATA")
+            logger.error(f"Error type: {type(e).__name__}")
+            logger.error(f"Error message: {str(e)}")
+            logger.error(f"Request details: year={year}, scenario={scenario}, bounds={bounds}, resolution={resolution}")
+            logger.error(f"Full traceback:\n{traceback.format_exc()}")
+            logger.error("=" * 80)
+            logger.warning("⚠️ RETURNING FALLBACK DATA - This is simulated, not real NASA data!")
             return self._generate_fallback_data(bounds, year, scenario, resolution)
 
     def _convert_hexagon_features_to_geojson(self, features, year, scenario, ssp_scenario):
         """Convert Earth Engine hexagon features with temperature data to GeoJSON"""
         hexagon_data = []
+        hexagons_with_gaps = []
 
+        # First pass: collect all hexagons and identify gaps
         for feature in features:
             # Get hexagon ID from properties
             hex_id = feature['properties']['hexId']
+            lat, lon = h3.cell_to_latlng(hex_id)
+            boundary = h3.cell_to_boundary(hex_id)
 
             # Get temperature from Earth Engine reduction (mean)
             if 'mean' not in feature['properties'] or feature['properties']['mean'] is None:
-                # Skip hexagons with no data (e.g., over ocean)
+                # Mark hexagon as having no data
+                hexagons_with_gaps.append({
+                    'hex_id': hex_id,
+                    'lat': lat,
+                    'lon': lon,
+                    'boundary': boundary,
+                    'temp_anomaly': None
+                })
                 continue
 
             tasmax_k = feature['properties']['mean']
@@ -183,10 +203,6 @@ class NASAEEClimateService:
             # Calculate anomaly relative to baseline
             anomaly = temp_c - self.BASELINE_TEMP_C
 
-            # Get hexagon geometry
-            lat, lon = h3.cell_to_latlng(hex_id)
-            boundary = h3.cell_to_boundary(hex_id)
-
             hexagon_data.append({
                 'hex_id': hex_id,
                 'lat': lat,
@@ -195,6 +211,32 @@ class NASAEEClimateService:
                 'temp_anomaly': round(anomaly, 2),
                 'temp_anomaly_f': round(anomaly * 1.8, 2)
             })
+
+        # Second pass: fill gaps using nearest neighbor interpolation
+        if hexagons_with_gaps:
+            logger.info(f"Filling {len(hexagons_with_gaps)} hexagons with no data using interpolation")
+            for gap_hex in hexagons_with_gaps:
+                # Find nearest hexagons with data
+                neighbors = h3.grid_disk(gap_hex['hex_id'], 2)  # Check neighbors within 2 rings
+                neighbor_temps = []
+
+                for neighbor_id in neighbors:
+                    for hex_with_data in hexagon_data:
+                        if hex_with_data['hex_id'] == neighbor_id:
+                            neighbor_temps.append(hex_with_data['temp_anomaly'])
+                            break
+
+                if neighbor_temps:
+                    # Use mean of neighboring temperatures
+                    interpolated_anomaly = round(np.mean(neighbor_temps), 2)
+                    hexagon_data.append({
+                        'hex_id': gap_hex['hex_id'],
+                        'lat': gap_hex['lat'],
+                        'lon': gap_hex['lon'],
+                        'boundary': gap_hex['boundary'],
+                        'temp_anomaly': interpolated_anomaly,
+                        'temp_anomaly_f': round(interpolated_anomaly * 1.8, 2)
+                    })
 
         return self._to_geojson(hexagon_data, year, scenario, ssp_scenario)
 
@@ -295,13 +337,20 @@ class NASAEEClimateService:
                 'scenario': ssp_scenario,
                 'year': year,
                 'baselineTemp': self.BASELINE_TEMP_C,
-                'count': len(features)
+                'count': len(features),
+                'isRealData': True,
+                'dataType': 'real'
             }
         }
 
     def _generate_fallback_data(self, bounds, year, scenario, resolution):
         """Generate fallback data if Earth Engine fails"""
-        logger.info(f"Generating fallback data for bounds: {bounds}")
+        logger.warning("=" * 80)
+        logger.warning("⚠️ GENERATING FALLBACK (SIMULATED) DATA")
+        logger.warning(f"Bounds: {bounds}")
+        logger.warning(f"Year: {year}, Scenario: {scenario}, Resolution: {resolution}")
+        logger.warning("This is NOT real NASA data - it's a simulation for development/testing")
+        logger.warning("=" * 80)
 
         scenarios = {
             'rcp26': {'increase2050': 1.5, 'increase2100': 2.0},
@@ -339,4 +388,12 @@ class NASAEEClimateService:
             })
 
         ssp_scenario = self.SCENARIOS.get(scenario, 'ssp245')
-        return self._to_geojson(hexagons, year, scenario, ssp_scenario)
+        result = self._to_geojson(hexagons, year, scenario, ssp_scenario)
+
+        # Mark as fallback/simulated data
+        result['metadata']['source'] = 'Simulated Climate Data (Fallback)'
+        result['metadata']['isRealData'] = False
+        result['metadata']['dataType'] = 'fallback'
+
+        logger.warning(f"⚠️ Returning {len(hexagons)} hexagons of SIMULATED data")
+        return result
