@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { ClimateLayerId, climateLayers } from '../config/climateLayers';
 
 type DisplayStyle = 'depth' | 'confidence';
@@ -56,6 +56,22 @@ const defaultActiveLayers = climateLayers
   .filter(layer => layer.defaultActive)
   .map(layer => layer.id);
 
+const STORAGE_KEY = 'climate-active-layers';
+
+const getInitialActiveLayers = (): ClimateLayerId[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      console.log('✅ Restored active layers from localStorage:', parsed);
+      return parsed;
+    }
+  } catch (e) {
+    console.warn('⚠️ Failed to load active layers from localStorage:', e);
+  }
+  return defaultActiveLayers.length > 0 ? defaultActiveLayers : [];
+};
+
 export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [scenario, setScenario] = useState<string>('rcp45');
   const [projectionYear, setProjectionYear] = useState<number>(2050);
@@ -63,18 +79,24 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
   const [analysisDate, setAnalysisDate] = useState<string>(getDefaultAnalysisDate());
   const [displayStyle, setDisplayStyle] = useState<DisplayStyle>('depth');
   const [resolution, setResolution] = useState<number>(1);
-  const [projectionOpacity, setProjectionOpacity] = useState<number>(0.15);
-  const [seaLevelOpacity, setSeaLevelOpacity] = useState<number>(0.6);
-  const [urbanHeatOpacity, setUrbanHeatOpacity] = useState<number>(0.7);
+  const [projectionOpacity, setProjectionOpacity] = useState<number>(0.3);
+  const [seaLevelOpacity, setSeaLevelOpacity] = useState<number>(0.3);
+  const [urbanHeatOpacity, setUrbanHeatOpacity] = useState<number>(0.3);
   const [urbanHeatSeason, setUrbanHeatSeason] = useState<'summer' | 'winter'>('summer');
-  const [urbanHeatColorScheme, setUrbanHeatColorScheme] = useState<'temperature' | 'heat' | 'urban'>('temperature');
-  const [reliefStyle, setReliefStyle] = useState<'classic' | 'dark' | 'depth' | 'dramatic'>('classic');
-  const [reliefOpacity, setReliefOpacity] = useState<number>(0.7);
+  const [urbanHeatColorScheme, setUrbanHeatColorScheme] = useState<'temperature' | 'heat' | 'urban'>('heat');
+  const [reliefStyle, setReliefStyle] = useState<'classic' | 'dark' | 'depth' | 'dramatic'>('dramatic');
+  const [reliefOpacity, setReliefOpacity] = useState<number>(0.3);
   const [temperatureMode, setTemperatureMode] = useState<'anomaly' | 'actual'>('anomaly');
   const [useRealData, setUseRealData] = useState<boolean>(true);
   const [activeLayerIds, setActiveLayerIds] = useState<ClimateLayerId[]>(
-    defaultActiveLayers.length > 0 ? defaultActiveLayers : []
+    getInitialActiveLayers()
   );
+
+  // Persist active layers to localStorage
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(activeLayerIds));
+    console.log('💾 Saved active layers to localStorage:', activeLayerIds);
+  }, [activeLayerIds]);
 
   const toggleLayer = useCallback((layerId: ClimateLayerId) => {
     setActiveLayerIds(prev => {

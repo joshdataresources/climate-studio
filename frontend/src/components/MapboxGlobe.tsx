@@ -49,6 +49,14 @@ export function MapboxGlobe({
   const urbanHeatData = layerStates.urban_heat_island?.data
   const topographicReliefData = layerStates.topographic_relief?.data
 
+  // Persist temperature data to prevent disappearing during refetch
+  const [stableTempData, setStableTempData] = useState<any>(null)
+  useEffect(() => {
+    if (tempProjectionData && tempProjectionData.features?.length > 0) {
+      setStableTempData(tempProjectionData)
+    }
+  }, [tempProjectionData])
+
   // Debug: Log when urban heat data changes
   useEffect(() => {
     if (urbanHeatActive) {
@@ -168,8 +176,8 @@ export function MapboxGlobe({
         }}
       >
         {/* Temperature Projection Layer */}
-        {temperatureProjectionActive && tempProjectionData && (
-          <Source id="temperature-projection" type="geojson" data={tempProjectionData}>
+        {temperatureProjectionActive && stableTempData && (
+          <Source id="temperature-projection" type="geojson" data={stableTempData}>
             <Layer
               id="temperature-projection-layer"
               type="fill"
@@ -189,16 +197,33 @@ export function MapboxGlobe({
                   'interpolate',
                   ['linear'],
                   ['get', 'tempAnomaly'],
-                  0, '#3b82f6',
-                  1, '#60a5fa',
-                  2, '#93c5fd',
-                  3, '#fef08a',
-                  4, '#fbbf24',
-                  5, '#fb923c',
-                  6, '#ef4444',
-                  8, '#7f1d1d'
+                  0, '#ffffff',   // White - no change
+                  0.5, '#fefce8', // Very pale yellow
+                  1, '#fef9c3',   // Pale yellow
+                  1.5, '#fef08a', // Light yellow
+                  2, '#fde047',   // Yellow
+                  2.5, '#facc15', // Golden yellow
+                  3, '#f59e0b',   // Amber
+                  3.5, '#fb923c', // Light orange
+                  4, '#f97316',   // Orange
+                  4.5, '#ea580c', // Deep orange
+                  5, '#dc2626',   // Red-orange
+                  5.5, '#ef4444', // Red
+                  6, '#dc2626',   // Deep red
+                  6.5, '#b91c1c', // Darker red
+                  7, '#991b1b',   // Very dark red
+                  8, '#7f1d1d'    // Darkest red
                 ],
                 'fill-opacity': controls.projectionOpacity || 0.6
+              }}
+            />
+            <Layer
+              id="temperature-projection-borders"
+              type="line"
+              paint={{
+                'line-color': '#ffffff',
+                'line-width': 1,
+                'line-opacity': 0.2
               }}
             />
           </Source>
