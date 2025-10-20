@@ -49,6 +49,11 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       displayStyle: controls.displayStyle,
       resolution: controls.resolution,
       projectionOpacity: controls.projectionOpacity,
+      urbanHeatSeason: controls.urbanHeatSeason,
+      urbanHeatColorScheme: controls.urbanHeatColorScheme,
+      reliefStyle: controls.reliefStyle,
+      reliefOpacity: controls.reliefOpacity,
+      temperatureMode: controls.temperatureMode,
       useRealData: controls.useRealData
     }),
     [bounds, controls, boundsKey]

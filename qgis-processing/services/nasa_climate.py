@@ -84,11 +84,13 @@ class NASAClimateService:
 
             logger.info(f"Opening dataset: {s3_path}")
 
-            # Open dataset with anonymous S3 access using fsspec
+            # Open dataset with anonymous S3 access using s3fs
+            # Remove 's3://' prefix as s3fs expects just the bucket/key path
             import s3fs
             fs = s3fs.S3FileSystem(anon=True)
+            s3_path_clean = s3_path.replace('s3://', '')
 
-            with fs.open(s3_path, 'rb') as f:
+            with fs.open(s3_path_clean, 'rb') as f:
                 ds = xr.open_dataset(f, engine='h5netcdf')
 
                 # Extract bounding box

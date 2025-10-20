@@ -10,13 +10,18 @@ from flask_cors import CORS
 import logging
 import sys
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Add services directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'services'))
 
-from nasa_climate import NASAClimateService
+from nasa_ee_climate import NASAEEClimateService
 from noaa_sea_level import NOAASeaLevelService
 from urban_heat_island import UrbanHeatIslandService
+from topographic_relief import TopographicReliefService
 
 # Configure logging
 logging.basicConfig(
@@ -29,10 +34,14 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)
 
+# Get Earth Engine project from environment
+ee_project = os.getenv('EARTHENGINE_PROJECT', 'josh-geo-the-second')
+
 # Initialize climate services
-climate_service = NASAClimateService()
+climate_service = NASAEEClimateService(ee_project=ee_project)
 sea_level_service = NOAASeaLevelService()
 heat_island_service = UrbanHeatIslandService()
+relief_service = TopographicReliefService()
 
 # Health check endpoint
 @app.route('/health', methods=['GET'])
@@ -72,8 +81,6 @@ def temperature_projection():
         year = request.args.get('year', default=2050, type=int)
         scenario = request.args.get('scenario', default='rcp45', type=str)
         resolution = request.args.get('resolution', default=7, type=int)
-        use_real_data = request.args.get('use_real_data', default='false', type=str).lower() == 'true'
-
         # Validate required parameters
         if None in [north, south, east, west]:
             return jsonify({
@@ -116,8 +123,7 @@ def temperature_projection():
             }), 400
 
         logger.info(f"Temperature projection request: bounds=[{south},{north}]x[{west},{east}], "
-                   f"year={year}, scenario={scenario}, resolution={resolution}, "
-                   f"use_real_data={use_real_data}")
+                   f"year={year}, scenario={scenario}, resolution={resolution}")
 
         # Build bounds dict
         bounds = {
@@ -132,8 +138,7 @@ def temperature_projection():
             bounds=bounds,
             year=year,
             scenario=scenario,
-            resolution=resolution,
-            use_simulated=not use_real_data
+            resolution=resolution
         )
 
         return jsonify({
@@ -144,7 +149,6 @@ def temperature_projection():
                 'year': year,
                 'scenario': scenario,
                 'resolution': resolution,
-                'using_real_data': use_real_data,
                 'feature_count': len(data.get('features', []))
             }
         })
@@ -267,6 +271,68 @@ def sea_level_rise():
         }), 500
 
 
+@app.route('/api/climate/urban-heat-island/tiles', methods=['GET'])
+def urban_heat_island_tiles():
+    """
+    Get urban heat island tile URL for smooth heat map visualization
+
+    Query Parameters:
+        north (float): Northern latitude bound (optional, for API compatibility)
+        south (float): Southern latitude bound (optional)
+        east (float): Eastern longitude bound (optional)
+        west (float): Western longitude bound (optional)
+        season (str): 'summer' or 'winter', default 'summer'
+        color_scheme (str): 'temperature', 'heat', or 'urban', default 'temperature'
+
+    Returns:
+        JSON with Earth Engine tile URL and metadata including actual collection dates
+    """
+    try:
+        # Parse query parameters
+        north = request.args.get('north', type=float)
+        south = request.args.get('south', type=float)
+        east = request.args.get('east', type=float)
+        west = request.args.get('west', type=float)
+        season = request.args.get('season', default='summer', type=str)
+        color_scheme = request.args.get('color_scheme', default='temperature', type=str)
+
+        logger.info(f"Urban heat island tile request: season={season}, color_scheme={color_scheme}")
+
+        # Build bounds dict (optional, not used for global tiles)
+        bounds = {
+            'north': north or 90,
+            'south': south or -90,
+            'east': east or 180,
+            'west': west or -180
+        }
+
+        # Get tile URL
+        result = heat_island_service.get_tile_url(
+            bounds=bounds,
+            season=season,
+            color_scheme=color_scheme
+        )
+
+        if result:
+            return jsonify({
+                'success': True,
+                'tile_url': result['tile_url'],
+                'metadata': result['metadata']
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Could not generate tile URL'
+            }), 500
+
+    except Exception as e:
+        logger.error(f"Error generating tile URL: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @app.route('/api/climate/urban-heat-island', methods=['GET'])
 def urban_heat_island():
     """
@@ -363,6 +429,51 @@ def urban_heat_island():
         }), 500
 
 
+@app.route('/api/climate/topographic-relief/tiles', methods=['GET'])
+def topographic_relief_tiles():
+    """
+    Get topographic relief (hillshade) tile URL with different style presets
+
+    Query parameters:
+        style: Style preset - 'classic', 'dark', 'depth', or 'dramatic' (default: 'classic')
+
+    Returns:
+        JSON with tile_url and metadata
+    """
+    try:
+        # Get style parameter
+        style = request.args.get('style', 'classic')
+
+        # Validate style
+        valid_styles = ['classic', 'dark', 'depth', 'dramatic']
+        if style not in valid_styles:
+            return jsonify({
+                'success': False,
+                'error': f'Invalid style. Must be one of: {", ".join(valid_styles)}'
+            }), 400
+
+        logger.info(f"Topographic relief tile request: style={style}")
+
+        # Get hillshade tiles from service
+        result = relief_service.get_hillshade_tiles(style=style)
+
+        return jsonify(result)
+
+    except ValueError as e:
+        logger.error(f"Validation error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Invalid parameter: {str(e)}'
+        }), 400
+
+    except Exception as e:
+        logger.error(f"Error processing topographic relief: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @app.route('/api/climate/info', methods=['GET'])
 def climate_info():
     """
@@ -423,6 +534,7 @@ if __name__ == '__main__':
     logger.info(f"   GET  /api/climate/temperature-projection")
     logger.info(f"   GET  /api/climate/sea-level-rise")
     logger.info(f"   GET  /api/climate/urban-heat-island")
+    logger.info(f"   GET  /api/climate/topographic-relief/tiles")
     logger.info(f"   GET  /api/climate/info")
 
     app.run(

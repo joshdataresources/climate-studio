@@ -1,13 +1,15 @@
 """
 Urban Heat Island Service
 
-Provides simulated urban heat island intensity data using H3 hexagons.
+Provides urban heat island intensity data from real Landsat LST data
+with simulated fallback using H3 hexagons.
 """
 
 import h3
 import numpy as np
 from datetime import datetime
 import logging
+from landsat_lst import LandsatLSTService
 
 logger = logging.getLogger(__name__)
 
@@ -15,21 +17,58 @@ logger = logging.getLogger(__name__)
 class UrbanHeatIslandService:
     """Service for generating urban heat island data"""
 
-    def get_heat_island_data(self, bounds, date=None, resolution=8):
+    def __init__(self):
+        """Initialize with Landsat LST service"""
+        self.landsat_service = LandsatLSTService()
+        self.use_real_data = self.landsat_service.initialized
+
+    def get_tile_url(self, bounds, season='summer', color_scheme='temperature'):
         """
-        Generate urban heat island H3 hexagon data
+        Get Earth Engine tile URL for smooth heat map visualization
+
+        Args:
+            bounds: Dict with 'north', 'south', 'east', 'west' keys
+            season: 'summer' or 'winter' - which season to show
+            color_scheme: 'temperature', 'heat', or 'urban' - color palette
+
+        Returns:
+            Dict with 'tile_url' and 'metadata', or None if not available
+        """
+        if self.use_real_data:
+            return self.landsat_service.get_tile_url(bounds, season, color_scheme)
+        return None
+
+    def get_heat_island_data(self, bounds, date=None, resolution=8, use_real_data=True):
+        """
+        Generate urban heat island data from real Landsat LST or simulation
 
         Args:
             bounds: Dict with 'north', 'south', 'east', 'west' keys
             date: ISO date string (YYYY-MM-DD), optional
             resolution: H3 resolution level (0-15), default 8
+            use_real_data: Whether to use real Landsat data (True) or simulation (False)
 
         Returns:
-            GeoJSON FeatureCollection with hexagon features
+            GeoJSON FeatureCollection with features
         """
+        # Try to use real Landsat data if requested and available
+        if use_real_data and self.use_real_data:
+            logger.info("Fetching real Landsat LST data for urban heat island")
+            try:
+                lst_data = self.landsat_service.get_lst_data(bounds, date)
+                if lst_data:
+                    geojson = self.landsat_service.format_as_geojson(lst_data)
+                    if geojson:
+                        logger.info("Successfully retrieved real Landsat LST data")
+                        return geojson
+                logger.warning("Could not fetch real data, falling back to simulation")
+            except Exception as e:
+                logger.error(f"Error fetching Landsat data: {e}, falling back to simulation")
+
+        # Fall back to simulated data
+        logger.info(f"Generating simulated urban heat island data: resolution {resolution}")
         # Clamp resolution to valid H3 range
         resolution = max(0, min(15, resolution))
-        logger.info(f"Generating urban heat island data: resolution {resolution}")
 
         # Get hexagons covering the bounds
         hex_ids = self._get_hexagons_in_bounds(bounds, resolution)
@@ -39,6 +78,38 @@ class UrbanHeatIslandService:
         center_lon = (bounds['east'] + bounds['west']) / 2
 
         hexagons = []
+
+        # Create multiple urban centers based on viewport size
+        # Larger viewports = more potential urban centers
+        bbox_width = bounds['east'] - bounds['west']
+        bbox_height = bounds['north'] - bounds['south']
+        bbox_area = bbox_width * bbox_height
+
+        # Create 1-3 urban centers depending on viewport size
+        num_centers = min(3, max(1, int(bbox_area * 20)))
+
+        urban_centers = []
+        for i in range(num_centers):
+            # Use deterministic "random" placement based on bounds
+            seed_x = np.sin((bounds['west'] + bounds['east']) * (i + 1) * 12.9898) * 43758.5453
+            seed_y = np.sin((bounds['north'] + bounds['south']) * (i + 1) * 78.233) * 43758.5453
+            offset_x = (seed_x - np.floor(seed_x)) * bbox_width
+            offset_y = (seed_y - np.floor(seed_y)) * bbox_height
+
+            center_lon = bounds['west'] + offset_x
+            center_lat = bounds['south'] + offset_y
+
+            # Vary the intensity of each urban center
+            intensity_seed = np.sin((center_lat + center_lon) * 45.678) * 23456.789
+            max_temp = 3.0 + (intensity_seed - np.floor(intensity_seed)) * 3.0  # 3-6°C
+
+            urban_centers.append({
+                'lat': center_lat,
+                'lon': center_lon,
+                'max_temp': max_temp,
+                'radius': 0.02 + (intensity_seed - np.floor(intensity_seed)) * 0.03  # varying size
+            })
+
         for hex_id in hex_ids:
             # Get hexagon center
             lat, lon = h3.cell_to_latlng(hex_id)
@@ -46,27 +117,36 @@ class UrbanHeatIslandService:
             # Get hexagon boundary
             boundary = h3.cell_to_boundary(hex_id)
 
-            # Calculate distance from center (urban core)
-            dist_from_center = np.sqrt((lat - center_lat)**2 + (lon - center_lon)**2)
+            # Calculate intensity based on distance from urban centers
+            # Urban heat island effect: hottest at center, gradual cooling with distance
+            intensity = 0.0
 
-            # Urban heat island intensity (hottest at center, cooler at edges)
-            # Maximum intensity ~4.5°C at urban core
-            max_intensity = 4.5
-            urban_core_radius = 0.15  # degrees
+            for center in urban_centers:
+                # Calculate distance from this urban center
+                dist = np.sqrt((lat - center['lat'])**2 + (lon - center['lon'])**2)
 
-            if dist_from_center < urban_core_radius:
-                # Within urban core - high intensity
-                intensity = max_intensity * (1 - (dist_from_center / urban_core_radius) ** 0.7)
-            else:
-                # Outside urban core - exponential decay
-                decay_factor = np.exp(-(dist_from_center - urban_core_radius) / 0.1)
-                intensity = max_intensity * 0.3 * decay_factor
+                # Apply heat island effect with smooth falloff
+                if dist < center['radius']:
+                    # Core urban area - high intensity
+                    # Use inverse square for realistic falloff
+                    center_effect = center['max_temp'] * (1 - (dist / center['radius']) ** 2)
+                else:
+                    # Suburban/rural - exponential decay
+                    decay = np.exp(-(dist - center['radius']) / (center['radius'] * 2))
+                    center_effect = center['max_temp'] * 0.4 * decay
 
-            # Add spatial variation (simulating buildings, parks, water)
-            # Use deterministic noise based on location
-            seed = np.sin((lat * 23.14 + lon * 37.19) * 0.0174533) * 43758.5453
-            noise = (seed - np.floor(seed)) * 2 - 1  # -1 to 1
-            intensity += noise * 0.8
+                intensity += center_effect
+
+            # Add small-scale variation (buildings, parks, streets)
+            # This creates texture without random noise
+            micro_seed = np.sin(lat * 1000.0 + lon * 1000.0) * 43758.5453
+            micro_variation = (micro_seed - np.floor(micro_seed)) * 1.0 - 0.5  # ±0.5°C
+            intensity += micro_variation
+
+            # Add occasional cool spots (parks, water bodies)
+            cool_spot_seed = np.sin(lat * 234.567 + lon * 345.678) * 12345.678
+            if (cool_spot_seed - np.floor(cool_spot_seed)) > 0.88:  # 12% chance
+                intensity -= 2.0  # Significant cooling from vegetation/water
 
             # Clamp to reasonable range (0-6°C)
             intensity = max(0, min(6.0, intensity))
