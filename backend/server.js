@@ -1496,6 +1496,79 @@ app.get('/api/nasa/temperature-projection', async (req, res) => {
   }
 });
 
+// Urban Heat Island Tiles Endpoint - Proxy to Python Climate Service
+app.get('/api/climate/urban-heat-island/tiles', async (req, res) => {
+  try {
+    const { north, south, east, west, season, color_scheme } = req.query;
+
+    console.log(`🌡️ Proxying urban heat island tiles request: season=${season}, color_scheme=${color_scheme}...`);
+
+    // Build query parameters for climate service
+    const params = new URLSearchParams();
+    if (north) params.append('north', north);
+    if (south) params.append('south', south);
+    if (east) params.append('east', east);
+    if (west) params.append('west', west);
+    if (season) params.append('season', season);
+    if (color_scheme) params.append('color_scheme', color_scheme);
+
+    // Proxy request to Python climate service
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/urban-heat-island/tiles?${params.toString()}`;
+
+    console.log(`📡 Fetching from: ${climateServiceUrl}`);
+
+    const response = await axios.get(climateServiceUrl, {
+      timeout: 60000 // 60 second timeout
+    });
+
+    console.log(`✅ Received urban heat island tiles from climate service`);
+
+    // Return the response from climate service
+    res.json(response.data);
+
+  } catch (error) {
+    console.error('❌ Urban heat island tiles error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Topographic Relief Tiles Endpoint - Proxy to Python Climate Service
+app.get('/api/climate/topographic-relief/tiles', async (req, res) => {
+  try {
+    const { style } = req.query;
+
+    console.log(`🗻 Proxying topographic relief request: style=${style}...`);
+
+    // Build query parameters for climate service
+    const params = new URLSearchParams();
+    if (style) params.append('style', style);
+
+    // Proxy request to Python climate service
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/topographic-relief/tiles?${params.toString()}`;
+
+    console.log(`📡 Fetching from: ${climateServiceUrl}`);
+
+    const response = await axios.get(climateServiceUrl, {
+      timeout: 60000 // 60 second timeout
+    });
+
+    console.log(`✅ Received topographic relief tiles from climate service`);
+
+    // Return the response from climate service
+    res.json(response.data);
+
+  } catch (error) {
+    console.error('❌ Topographic relief tiles error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Start server
 const startServer = async () => {
   logEnvWarnings();

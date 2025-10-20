@@ -5,7 +5,7 @@ export type ClimateLayerId =
   | 'temperature_projection'
   | 'temperature_current'
   | 'urban_heat_island'
-  | 'elevation';
+  | 'topographic_relief';
 
 export type ClimateControl =
   | 'seaLevelFeet'
@@ -15,7 +15,13 @@ export type ClimateControl =
   | 'displayStyle'
   | 'resolution'
   | 'projectionOpacity'
-  | 'seaLevelOpacity';
+  | 'seaLevelOpacity'
+  | 'urbanHeatOpacity'
+  | 'urbanHeatSeason'
+  | 'urbanHeatColorScheme'
+  | 'reliefStyle'
+  | 'reliefOpacity'
+  | 'temperatureMode';
 
 export interface ClimateFetchContext {
   bounds: LatLngBoundsLiteral | null;
@@ -26,6 +32,11 @@ export interface ClimateFetchContext {
   displayStyle: 'depth' | 'confidence';
   resolution: number;
   projectionOpacity: number;
+  urbanHeatSeason: 'summer' | 'winter';
+  urbanHeatColorScheme: 'temperature' | 'heat' | 'urban';
+  reliefStyle: 'classic' | 'dark' | 'depth' | 'dramatic';
+  reliefOpacity: number;
+  temperatureMode: 'anomaly' | 'actual';
   useRealData: boolean;
 }
 
@@ -71,7 +82,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
     controls: ['seaLevelFeet', 'seaLevelOpacity', 'displayStyle'],
     fetch: {
       method: 'GET',
-      route: '/api/noaa/sea-level-rise',
+      route: '/api/climate/noaa/slr/data',
       query: ({ bounds, seaLevelFeet, displayStyle }) => {
         const { north, south, east, west } = bounds ?? {
           north: 41,
@@ -107,7 +118,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
       url: 'https://www.nccs.nasa.gov/services/data-collections'
     },
     defaultActive: false,
-    controls: ['scenario', 'projectionYear', 'projectionOpacity'],
+    controls: ['scenario', 'projectionYear', 'temperatureMode', 'projectionOpacity'],
     fetch: {
       method: 'GET',
       route: '/api/nasa/temperature-projection',
@@ -119,6 +130,21 @@ export const climateLayers: ClimateLayerDefinition[] = [
           west: -74,
           zoom: 10
         };
+
+        // Dynamic resolution based on zoom level for proper tessellation at all scales
+        // Lower zoom (zoomed out) = lower resolution (bigger hexagons)
+        // Higher zoom (zoomed in) = higher resolution (smaller hexagons)
+        const getResolutionForZoom = (z: number) => {
+          if (z <= 4) return 2;  // Continental view
+          if (z <= 6) return 4;  // Multi-state view
+          if (z <= 8) return 5;  // State view
+          if (z <= 10) return 6; // Regional view
+          if (z <= 12) return 7; // City view
+          return 8;              // Neighborhood view
+        };
+
+        const resolution = getResolutionForZoom(zoom || 10);
+
         return {
           north,
           south,
@@ -126,15 +152,14 @@ export const climateLayers: ClimateLayerDefinition[] = [
           west,
           year: projectionYear,
           scenario,
-          use_real_data: useRealData,
-          zoom
+          resolution
         };
       }
     },
     style: {
       color: '#fb923c',
       opacity: 0.6,
-      layerType: 'point',
+      layerType: 'polygon',
       blendMode: 'screen',
       valueProperty: 'tempAnomaly'
     }
@@ -180,17 +205,18 @@ export const climateLayers: ClimateLayerDefinition[] = [
   {
     id: 'urban_heat_island',
     title: 'Urban Heat Island',
-    description: 'Urban heat island intensity showing temperature differences between urban and rural areas.',
+    description: 'Land surface temperature from Landsat 8/9 showing heat patterns globally. Compare summer vs winter and customize colors.',
     category: 'temperature',
     source: {
-      name: 'NASA MODIS LST',
-      url: 'https://power.larc.nasa.gov/'
+      name: 'Landsat 8/9 LST',
+      url: 'https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2'
     },
-    controls: ['analysisDate'],
+    defaultActive: true,
+    controls: ['urbanHeatSeason', 'urbanHeatColorScheme', 'urbanHeatOpacity'],
     fetch: {
       method: 'GET',
-      route: '/api/modis/lst',
-      query: ({ bounds, analysisDate }) => {
+      route: '/api/climate/urban-heat-island/tiles',
+      query: ({ bounds, urbanHeatSeason, urbanHeatColorScheme }) => {
         const { north, south, east, west } = bounds ?? {
           north: 41,
           south: 40,
@@ -202,32 +228,34 @@ export const climateLayers: ClimateLayerDefinition[] = [
           south,
           east,
           west,
-          date: analysisDate.replace(/-/g, '')
+          season: urbanHeatSeason,
+          color_scheme: urbanHeatColorScheme
         };
       }
     },
     style: {
       color: '#facc15',
       opacity: 0.7,
-      layerType: 'point',
+      layerType: 'raster',
       blendMode: 'normal',
       valueProperty: 'heatIslandIntensity'
     }
   },
   {
-    id: 'elevation',
-    title: 'Elevation',
-    description: 'USGS 3DEP elevation grid (simulated sample data).',
+    id: 'topographic_relief',
+    title: 'Topographic Relief',
+    description: 'Hillshade terrain visualization from SRTM/Copernicus DEM showing 3D relief with customizable lighting styles.',
     category: 'topography',
     source: {
-      name: 'USGS 3DEP',
-      url: 'https://www.usgs.gov/3dep'
+      name: 'Google Earth Engine (SRTM/Copernicus DEM)',
+      url: 'https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_DEM_GLO30'
     },
-    controls: [],
+    defaultActive: false,
+    controls: ['reliefStyle', 'reliefOpacity'],
     fetch: {
       method: 'GET',
-      route: '/api/usgs/elevation',
-      query: ({ bounds }) => {
+      route: '/api/climate/topographic-relief/tiles',
+      query: ({ bounds, reliefStyle }) => {
         const { north, south, east, west } = bounds ?? {
           north: 41,
           south: 40,
@@ -239,14 +267,14 @@ export const climateLayers: ClimateLayerDefinition[] = [
           south,
           east,
           west,
-          resolution: 20
+          style: reliefStyle
         };
       }
     },
     style: {
-      color: '#22d3ee',
-      opacity: 0.5,
-      layerType: 'point',
+      color: '#64748b',
+      opacity: 0.7,
+      layerType: 'raster',
       blendMode: 'multiply',
       valueProperty: 'elevation'
     }
