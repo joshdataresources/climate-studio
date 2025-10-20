@@ -67,10 +67,7 @@ export function GISAnalysisApp() {
           }
         }
         case "temperatureMode": {
-          return {
-            label: "Temperature Change",
-            value: controls.temperatureMode === 'actual' ? 'Actual Temp' : 'Anomaly'
-          }
+          return null  // Hide temperature mode from scenario snapshot (duplicative)
         }
         case "seaLevelFeet":
           return { label: "Sea Level Rise", value: `${controls.seaLevelFeet} ft` }
@@ -357,7 +354,7 @@ export function GISAnalysisApp() {
                     <div key={layer.id} className="rounded-md border border-border/60 bg-card/70 p-3">
                       <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                         <span>{layer.title}</span>
-                        <span>{layer.category}</span>
+                        {layer.id !== 'temperature_projection' && <span>{layer.category}</span>}
                       </div>
                       {controlEntries.length > 0 ? (
                         <>

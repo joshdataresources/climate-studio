@@ -121,7 +121,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
     controls: ['scenario', 'projectionYear', 'temperatureMode', 'projectionOpacity'],
     fetch: {
       method: 'GET',
-      route: '/api/nasa/temperature-projection',
+      route: '/api/climate/temperature-projection',
       query: ({ bounds, projectionYear, scenario, useRealData }) => {
         const { north, south, east, west, zoom } = bounds ?? {
           north: 41,
