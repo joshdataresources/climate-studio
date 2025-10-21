@@ -72,38 +72,29 @@ export const climateLayers: ClimateLayerDefinition[] = [
   {
     id: 'sea_level_rise',
     title: 'Sea Level Rise',
-    description: 'NOAA sea level rise depth grid with simulated fallback where data is unavailable.',
+    description: 'NOAA sea level rise depth grid showing coastal flooding areas.',
     category: 'coastal',
     source: {
       name: 'NOAA Sea Level Rise Viewer',
       url: 'https://coast.noaa.gov/slr/'
     },
     defaultActive: false,
-    controls: ['seaLevelFeet', 'seaLevelOpacity', 'displayStyle'],
+    controls: ['seaLevelFeet', 'seaLevelOpacity'],
     fetch: {
       method: 'GET',
-      route: '/api/climate/noaa/slr/data',
-      query: ({ bounds, seaLevelFeet, displayStyle }) => {
-        const { north, south, east, west } = bounds ?? {
-          north: 41,
-          south: 40,
-          east: -73,
-          west: -74
-        };
+      route: '/api/tiles/noaa-slr-metadata',
+      query: ({ seaLevelFeet }) => {
+        // Sea level uses direct NOAA tile URLs, no data fetch needed
+        // This endpoint just validates the tiles are available
         return {
-          feet: seaLevelFeet,
-          layer: displayStyle === 'confidence' ? '0' : '1',
-          north,
-          south,
-          east,
-          west
+          feet: seaLevelFeet ?? 3
         };
       }
     },
     style: {
       color: '#38bdf8',
-      opacity: 0.6,
-      layerType: 'polygon',
+      opacity: 0.8,
+      layerType: 'raster',
       blendMode: 'normal',
       valueProperty: 'depth'
     }

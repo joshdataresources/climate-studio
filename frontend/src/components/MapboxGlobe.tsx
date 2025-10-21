@@ -43,9 +43,8 @@ export function MapboxGlobe({
   const urbanHeatActive = isLayerActive("urban_heat_island")
   const topographicReliefActive = isLayerActive("topographic_relief")
 
-  // Get layer data
+  // Get layer data (sea level uses tiles, not data)
   const tempProjectionData = layerStates.temperature_projection?.data
-  const seaLevelData = layerStates.sea_level_rise?.data
   const urbanHeatData = layerStates.urban_heat_island?.data
   const topographicReliefData = layerStates.topographic_relief?.data
 
@@ -60,6 +59,8 @@ export function MapboxGlobe({
       setStableTempData(tempProjectionData)
     }
   }, [tempProjectionData, temperatureProjectionActive])
+
+  // Sea level now uses raster tiles, no need for GeoJSON persistence
 
   // Debug: Log when urban heat data changes
   useEffect(() => {
@@ -233,12 +234,12 @@ export function MapboxGlobe({
           </Source>
         )}
 
-        {/* Sea Level Rise Layer - using raster tiles from backend */}
+        {/* Sea Level Rise Layer - using NOAA raster tiles */}
         {seaLevelActive && (
           <Source
             id="sea-level-rise"
             type="raster"
-            tiles={[`${window.location.origin.replace(':8080', ':3001')}/api/tiles/noaa-slr/${controls.seaLevelFeet}/{z}/{x}/{y}.png`]}
+            tiles={[`http://localhost:3001/api/tiles/noaa-slr/${controls.seaLevelFeet}/{z}/{x}/{y}.png`]}
             tileSize={256}
           >
             <Layer
