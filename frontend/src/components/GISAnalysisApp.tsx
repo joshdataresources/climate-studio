@@ -102,7 +102,7 @@ function SortableViewItem({ view, hasViewChanged, loadSavedView, updateSavedView
 
   if (isEditing) {
     return (
-      <li ref={setNodeRef} className="flex items-center gap-1 p-2 rounded-md border border-border/60 bg-background/50">
+      <li ref={setNodeRef} className="flex items-center gap-2 p-2 rounded-md border border-border/60 bg-background/50">
         <Input
           value={editingViewName}
           onChange={e => setEditingViewName(e.target.value)}
@@ -116,7 +116,7 @@ function SortableViewItem({ view, hasViewChanged, loadSavedView, updateSavedView
         />
         <Button
           size="sm"
-          className="h-8 w-8 p-0 bg-purple-600 hover:bg-purple-700"
+          className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600"
           onClick={saveEditedViewName}
           title="Save name"
         >
@@ -129,7 +129,7 @@ function SortableViewItem({ view, hasViewChanged, loadSavedView, updateSavedView
           onClick={cancelEdit}
           title="Cancel"
         >
-          ×
+          <Trash2 className="h-3.5 w-3.5" />
         </Button>
       </li>
     )
@@ -660,17 +660,18 @@ export function GISAnalysisApp() {
                   You have no saved views. Click "New View" to save your first view.
                 </p>
               ) : (
-                <DndContext
-                  sensors={sensors}
-                  collisionDetection={closestCenter}
-                  onDragStart={handleDragStart}
-                  onDragEnd={handleDragEnd}
-                >
-                  <SortableContext
-                    items={savedViews.map(v => v.id)}
-                    strategy={verticalListSortingStrategy}
+                <div className="rounded-md border border-white/10 bg-black/20 p-2">
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
                   >
-                    <ul className="space-y-1">
+                    <SortableContext
+                      items={savedViews.map(v => v.id)}
+                      strategy={verticalListSortingStrategy}
+                    >
+                      <ul className="space-y-1">
                       {savedViews.map(view => (
                         <SortableViewItem
                           key={view.id}
@@ -689,7 +690,7 @@ export function GISAnalysisApp() {
                       ))}
 
                       {showSaveDialog && (
-                        <li className="flex items-center gap-1 p-2 rounded-md border border-border/60 bg-background/50">
+                        <li className="flex items-center gap-2 p-2 rounded-md border border-border/60 bg-background/50">
                           <Input
                             value={newViewName}
                             onChange={e => setNewViewName(e.target.value)}
@@ -706,7 +707,7 @@ export function GISAnalysisApp() {
                           />
                           <Button
                             size="sm"
-                            className="h-8 w-8 p-0 bg-purple-600 hover:bg-purple-700"
+                            className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600"
                             onClick={saveCurrentView}
                             title="Save this view"
                           >
@@ -722,13 +723,14 @@ export function GISAnalysisApp() {
                             }}
                             title="Cancel"
                           >
-                            ×
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </li>
                       )}
                     </ul>
                   </SortableContext>
                 </DndContext>
+                </div>
               )}
             </div>
           </div>

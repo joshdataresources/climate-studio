@@ -82,8 +82,10 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
 
   const fetchLayer = useCallback(
     async (layerId: ClimateLayerId, forceRefresh = false) => {
+      console.log(`🔍 fetchLayer called for: ${layerId}`);
       const layer = getClimateLayer(layerId);
       if (!layer) {
+        console.error(`❌ Unknown layer: ${layerId}`);
         setLayerState(layerId, {
           status: 'error',
           data: null,
@@ -91,6 +93,7 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
         });
         return;
       }
+      console.log(`✅ Layer config found for: ${layerId}`, layer);
 
       const params = layer.fetch.query(fetchContext);
       const cacheKey = `${layerId}:${JSON.stringify(params)}`;
@@ -135,14 +138,37 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
         const queryString = buildQueryString(params);
         const url = `${BACKEND_BASE_URL}${layer.fetch.route}${queryString ? `?${queryString}` : ''}`;
 
+        console.log(`🌊 Fetching ${layerId}:`, url);
+        console.log(`📦 Query params:`, params);
+        console.log(`🔗 BACKEND_BASE_URL:`, BACKEND_BASE_URL);
+        console.log(`🛣️ Route:`, layer.fetch.route);
+        console.log(`📋 Full URL breakdown:`, {
+          base: BACKEND_BASE_URL,
+          route: layer.fetch.route,
+          queryString,
+          fullUrl: url
+        });
+
         // Wait minimum 10s for real NASA data before considering fallback
         const minWaitTime = 10000;
         const startTime = Date.now();
 
-        const response = await fetch(url, {
-          method: layer.fetch.method,
-          signal: controller.signal
-        });
+        console.log(`⏳ Starting fetch for ${layerId}...`);
+        console.log(`⏰ Fetch started at:`, new Date().toISOString());
+
+        let response;
+        try {
+          response = await fetch(url, {
+            method: layer.fetch.method,
+            signal: controller.signal
+          });
+          console.log(`✅ Fetch complete for ${layerId}, status:`, response.status);
+        } catch (fetchError) {
+          console.error(`❌ Fetch failed for ${layerId}:`, fetchError);
+          console.error(`❌ Fetch error type:`, fetchError instanceof Error ? fetchError.name : typeof fetchError);
+          console.error(`❌ Fetch error message:`, fetchError instanceof Error ? fetchError.message : fetchError);
+          throw fetchError;
+        }
 
         const elapsedTime = Date.now() - startTime;
         if (elapsedTime < minWaitTime) {
@@ -155,6 +181,13 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
         }
 
         const payload = await response.json();
+        console.log(`📥 Full Response for ${layerId}:`, payload);
+        console.log(`📦 payload.data:`, payload.data);
+        console.log(`📦 payload.data?.features:`, payload.data?.features);
+        console.log(`📦 payload.data?.features?.length:`, payload.data?.features?.length);
+        console.log(`📦 payload.features (if not nested):`, payload.features);
+        console.log(`📊 Extracted data:`, payload.data ?? payload);
+
         const result: LayerFetchState = {
           status: 'success',
           data: payload.data ?? payload,
@@ -212,19 +245,12 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
 
   useEffect(() => {
     const uniqueActiveLayers = Array.from(new Set(activeLayerIds));
+    console.log('🎯 Active layers in useClimateLayerData:', uniqueActiveLayers);
     uniqueActiveLayers.forEach(layerId => {
+      console.log(`🔄 Fetching layer: ${layerId}`);
       fetchLayer(layerId);
     });
-
-    return () => {
-      uniqueActiveLayers.forEach(layerId => {
-        if (abortControllers.current.has(layerId)) {
-          abortControllers.current.get(layerId)?.abort();
-          abortControllers.current.delete(layerId);
-        }
-      });
-    };
-  }, [activeLayerIds, fetchLayer]);
+  }, [activeLayerIds, fetchContext]);
 
   const refreshLayer = useCallback(
     (layerId: ClimateLayerId) => {
