@@ -10,7 +10,30 @@ import type { ClimateControl } from "../config/climateLayers"
 import { useClimate } from "../contexts/ClimateContext"
 import { useClimateLayerData } from "../hooks/useClimateLayerData"
 import { LatLngBoundsLiteral } from "../types/geography"
-import { Loader2, MapPin, Search } from "lucide-react"
+import { Loader2, MapPin, Search, Save, Bookmark, GripVertical, MoreHorizontal, Trash2, Pencil } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu"
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 interface GeoSearchResult {
   display_name: string
@@ -24,19 +47,151 @@ interface ViewportState {
   zoom: number
 }
 
+interface SavedView {
+  id: string
+  name: string
+  viewport: ViewportState
+  activeLayerIds: string[]
+  controls: any
+}
+
 const DEFAULT_VIEWPORT: ViewportState = {
   center: { lat: 40.7128, lng: -74.006 },
   zoom: 12,
 }
 
+const DEFAULT_SAVED_VIEW: SavedView = {
+  id: 'nyc-default',
+  name: 'NYC',
+  viewport: DEFAULT_VIEWPORT,
+  activeLayerIds: ['topographic_relief'],
+  controls: {}
+}
+
+interface SortableViewItemProps {
+  view: SavedView
+  hasViewChanged: (view: SavedView) => boolean
+  loadSavedView: (view: SavedView) => void
+  updateSavedView: (id: string) => void
+  deleteSavedView: (id: string) => void
+  editSavedView: (id: string) => void
+  editingViewId: string | null
+  editingViewName: string
+  setEditingViewName: (name: string) => void
+  saveEditedViewName: () => void
+  cancelEdit: () => void
+}
+
+function SortableViewItem({ view, hasViewChanged, loadSavedView, updateSavedView, deleteSavedView, editSavedView, editingViewId, editingViewName, setEditingViewName, saveEditedViewName, cancelEdit }: SortableViewItemProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: view.id })
+
+  const isEditing = editingViewId === view.id
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  if (isEditing) {
+    return (
+      <li ref={setNodeRef} className="flex items-center gap-1 p-2 rounded-md border border-border/60 bg-background/50">
+        <Input
+          value={editingViewName}
+          onChange={e => setEditingViewName(e.target.value)}
+          placeholder="Enter view name..."
+          className="h-8 text-sm flex-1 border-none bg-transparent px-2"
+          onKeyDown={e => {
+            if (e.key === 'Enter') saveEditedViewName()
+            if (e.key === 'Escape') cancelEdit()
+          }}
+          autoFocus
+        />
+        <Button
+          size="sm"
+          className="h-8 w-8 p-0 bg-purple-600 hover:bg-purple-700"
+          onClick={saveEditedViewName}
+          title="Save name"
+        >
+          <Save className="h-3.5 w-3.5 text-white" />
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-8 w-8 p-0"
+          onClick={cancelEdit}
+          title="Cancel"
+        >
+          ×
+        </Button>
+      </li>
+    )
+  }
+
+  return (
+    <li ref={setNodeRef} style={style} className="flex items-center gap-1">
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing p-2 touch-none"
+      >
+        <GripVertical className="h-4 w-4 text-muted-foreground" />
+      </div>
+      <button
+        onClick={() => loadSavedView(view)}
+        className="flex flex-1 items-center gap-2 rounded-md border border-transparent p-2 text-left text-sm hover:border-border hover:bg-background/80"
+      >
+        <Bookmark className="h-4 w-4 text-blue-500 flex-shrink-0" />
+        <span className="flex-1 truncate">{view.name}</span>
+      </button>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 w-8 p-0"
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => editSavedView(view.id)}>
+            <Pencil className="h-4 w-4 mr-2" />
+            Edit Name
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={() => deleteSavedView(view.id)}
+            className="text-destructive focus:text-destructive"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </li>
+  )
+}
+
 export function GISAnalysisApp() {
-  const { activeLayerIds, controls } = useClimate()
+  const { activeLayerIds, controls, setActiveLayerIds, setControls } = useClimate()
   const [viewport, setViewport] = useState<ViewportState>(DEFAULT_VIEWPORT)
   const [mapBounds, setMapBounds] = useState<LatLngBoundsLiteral | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [searchResults, setSearchResults] = useState<GeoSearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const searchControllerRef = useRef<AbortController | null>(null)
+  const [savedViews, setSavedViews] = useState<SavedView[]>([DEFAULT_SAVED_VIEW])
+  const [showSaveDialog, setShowSaveDialog] = useState(false)
+  const [newViewName, setNewViewName] = useState("")
+  const [editingViewId, setEditingViewId] = useState<string | null>(null)
+  const [editingViewName, setEditingViewName] = useState("")
 
   const { layers: layerStates } = useClimateLayerData(mapBounds)
 
@@ -250,6 +405,175 @@ export function GISAnalysisApp() {
     setSearchResults([])
   }, [])
 
+  const loadSavedView = useCallback((view: SavedView) => {
+    setViewport(view.viewport)
+    // Note: We'd need to implement setActiveLayerIds and setControls in ClimateContext
+    // For now, just set viewport
+  }, [])
+
+  const saveCurrentView = useCallback(() => {
+    if (!newViewName.trim()) return
+
+    const newView: SavedView = {
+      id: `view-${Date.now()}`,
+      name: newViewName.trim(),
+      viewport: viewport,
+      activeLayerIds: activeLayerIds,
+      controls: controls
+    }
+
+    setSavedViews(prev => [...prev, newView])
+    setNewViewName("")
+    setShowSaveDialog(false)
+
+    // Save to localStorage
+    localStorage.setItem('climate-saved-views', JSON.stringify([...savedViews, newView]))
+  }, [newViewName, viewport, activeLayerIds, controls, savedViews])
+
+  const deleteSavedView = useCallback((viewId: string) => {
+    setSavedViews(prev => {
+      const updated = prev.filter(v => v.id !== viewId)
+      localStorage.setItem('climate-saved-views', JSON.stringify(updated))
+      return updated
+    })
+  }, [])
+
+  const updateSavedView = useCallback((viewId: string) => {
+    const updated = savedViews.map(v =>
+      v.id === viewId
+        ? { ...v, viewport, activeLayerIds, controls }
+        : v
+    )
+    setSavedViews(updated)
+    localStorage.setItem('climate-saved-views', JSON.stringify(updated))
+  }, [viewport, activeLayerIds, controls, savedViews])
+
+  const hasViewChanged = useCallback((view: SavedView) => {
+    return viewport.center.lat !== view.viewport.center.lat ||
+           viewport.center.lng !== view.viewport.center.lng ||
+           viewport.zoom !== view.viewport.zoom
+  }, [viewport])
+
+  const editSavedView = useCallback((viewId: string) => {
+    const view = savedViews.find(v => v.id === viewId)
+    if (view) {
+      setEditingViewId(viewId)
+      setEditingViewName(view.name)
+    }
+  }, [savedViews])
+
+  const saveEditedViewName = useCallback(() => {
+    if (!editingViewId || !editingViewName.trim()) return
+
+    const updated = savedViews.map(v =>
+      v.id === editingViewId
+        ? { ...v, name: editingViewName.trim() }
+        : v
+    )
+    setSavedViews(updated)
+    localStorage.setItem('climate-saved-views', JSON.stringify(updated))
+    setEditingViewId(null)
+    setEditingViewName("")
+  }, [editingViewId, editingViewName, savedViews])
+
+  const cancelEdit = useCallback(() => {
+    setEditingViewId(null)
+    setEditingViewName("")
+  }, [])
+
+  // Load saved views from localStorage on mount and load first view
+  React.useEffect(() => {
+    const stored = localStorage.getItem('climate-saved-views')
+    let viewsToLoad: SavedView[] = []
+
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored)
+        if (parsed && parsed.length > 0) {
+          viewsToLoad = parsed
+        }
+      } catch (e) {
+        console.error('Failed to parse saved views', e)
+      }
+    }
+
+    // If no saved views, start with NYC as a starter view
+    if (viewsToLoad.length === 0) {
+      viewsToLoad = [DEFAULT_SAVED_VIEW]
+      // Save the starter view to localStorage
+      localStorage.setItem('climate-saved-views', JSON.stringify(viewsToLoad))
+    }
+
+    setSavedViews(viewsToLoad)
+
+    // Load the first view (top of the list) on startup
+    if (viewsToLoad.length > 0) {
+      const firstView = viewsToLoad[0]
+      setViewport(firstView.viewport)
+      // Note: Would need setActiveLayerIds in ClimateContext to fully restore layer state
+    }
+  }, [])
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  const handleDragEnd = useCallback((event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (!over) {
+      console.log('Drag ended without a valid drop target')
+      return
+    }
+
+    if (active.id === over.id) {
+      console.log('Item dropped in same position')
+      return
+    }
+
+    setSavedViews((items) => {
+      console.log('Current items:', items.map(i => i.id))
+      console.log('Moving:', active.id, 'to position of:', over.id)
+
+      const oldIndex = items.findIndex((item) => item.id === active.id)
+      const newIndex = items.findIndex((item) => item.id === over.id)
+
+      if (oldIndex === -1 || newIndex === -1) {
+        console.error('Could not find items for drag operation', {
+          active: active.id,
+          over: over.id,
+          oldIndex,
+          newIndex,
+          itemIds: items.map(i => i.id)
+        })
+        return items
+      }
+
+      const reordered = arrayMove(items, oldIndex, newIndex)
+      console.log('Reordered items:', reordered.map(i => i.id))
+
+      // Save reordered list to localStorage
+      try {
+        localStorage.setItem('climate-saved-views', JSON.stringify(reordered))
+      } catch (e) {
+        console.error('Failed to save to localStorage:', e)
+      }
+
+      return reordered
+    })
+  }, [])
+
+  const handleDragStart = useCallback(() => {
+    // Cancel any editing when drag starts
+    if (editingViewId) {
+      setEditingViewId(null)
+      setEditingViewName("")
+    }
+  }, [editingViewId])
+
   // Get user's location on mount
   React.useEffect(() => {
     if ("geolocation" in navigator) {
@@ -315,6 +639,98 @@ export function GISAnalysisApp() {
                 </ul>
               </div>
             )}
+
+            {/* Saved Views Section */}
+            <div className="mt-3 space-y-2 border-t border-border/60 pt-3">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-semibold uppercase text-muted-foreground">Views</div>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 px-2 text-xs"
+                  onClick={() => setShowSaveDialog(true)}
+                >
+                  <Save className="h-3 w-3 mr-1" />
+                  New View
+                </Button>
+              </div>
+
+{savedViews.length === 0 && !showSaveDialog ? (
+                <p className="text-xs text-muted-foreground py-4">
+                  You have no saved views. Click "New View" to save your first view.
+                </p>
+              ) : (
+                <DndContext
+                  sensors={sensors}
+                  collisionDetection={closestCenter}
+                  onDragStart={handleDragStart}
+                  onDragEnd={handleDragEnd}
+                >
+                  <SortableContext
+                    items={savedViews.map(v => v.id)}
+                    strategy={verticalListSortingStrategy}
+                  >
+                    <ul className="space-y-1">
+                      {savedViews.map(view => (
+                        <SortableViewItem
+                          key={view.id}
+                          view={view}
+                          hasViewChanged={hasViewChanged}
+                          loadSavedView={loadSavedView}
+                          updateSavedView={updateSavedView}
+                          deleteSavedView={deleteSavedView}
+                          editSavedView={editSavedView}
+                          editingViewId={editingViewId}
+                          editingViewName={editingViewName}
+                          setEditingViewName={setEditingViewName}
+                          saveEditedViewName={saveEditedViewName}
+                          cancelEdit={cancelEdit}
+                        />
+                      ))}
+
+                      {showSaveDialog && (
+                        <li className="flex items-center gap-1 p-2 rounded-md border border-border/60 bg-background/50">
+                          <Input
+                            value={newViewName}
+                            onChange={e => setNewViewName(e.target.value)}
+                            placeholder="Enter view name..."
+                            className="h-8 text-sm flex-1 border-none bg-transparent px-2"
+                            onKeyDown={e => {
+                              if (e.key === 'Enter') saveCurrentView()
+                              if (e.key === 'Escape') {
+                                setShowSaveDialog(false)
+                                setNewViewName("")
+                              }
+                            }}
+                            autoFocus
+                          />
+                          <Button
+                            size="sm"
+                            className="h-8 w-8 p-0 bg-purple-600 hover:bg-purple-700"
+                            onClick={saveCurrentView}
+                            title="Save this view"
+                          >
+                            <Save className="h-3.5 w-3.5 text-white" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="h-8 w-8 p-0"
+                            onClick={() => {
+                              setShowSaveDialog(false)
+                              setNewViewName("")
+                            }}
+                            title="Cancel"
+                          >
+                            ×
+                          </Button>
+                        </li>
+                      )}
+                    </ul>
+                  </SortableContext>
+                </DndContext>
+              )}
+            </div>
           </div>
 
           <section className="mx-4 rounded-lg border border-border/60 bg-card/95 backdrop-blur-lg">
