@@ -5,6 +5,10 @@ import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { LayerControlsPanel, LayerPanel } from "./layer-panel"
 import { MapboxGlobe } from "./MapboxGlobe"
+import { LayerErrorOverlay } from "./LayerErrorOverlay"
+import { LayerLoadingNotification } from "./LayerLoadingNotification"
+import { ErrorNotificationManager } from "./ErrorNotification"
+import { LayerDiagnostics } from "./LayerDiagnostics"
 import { climateLayers } from "../config/climateLayers"
 import type { ClimateControl } from "../config/climateLayers"
 import { useClimate } from "../contexts/ClimateContext"
@@ -56,13 +60,13 @@ interface SavedView {
 }
 
 const DEFAULT_VIEWPORT: ViewportState = {
-  center: { lat: 40.7128, lng: -74.006 },
-  zoom: 12,
+  center: { lat: 38.9072, lng: -77.0369 }, // Washington DC
+  zoom: 6.0, // East Coast view
 }
 
 const DEFAULT_SAVED_VIEW: SavedView = {
-  id: 'nyc-default',
-  name: 'NYC',
+  id: 'dc-east-coast',
+  name: 'East Coast',
   viewport: DEFAULT_VIEWPORT,
   activeLayerIds: ['topographic_relief'],
   controls: {}
@@ -180,7 +184,7 @@ function SortableViewItem({ view, hasViewChanged, loadSavedView, updateSavedView
 }
 
 export function GISAnalysisApp() {
-  const { activeLayerIds, controls, setActiveLayerIds, setControls } = useClimate()
+  const { activeLayerIds, controls, setActiveLayerIds, setControls, layerErrors, dismissLayerError } = useClimate()
   const [viewport, setViewport] = useState<ViewportState>(DEFAULT_VIEWPORT)
   const [mapBounds, setMapBounds] = useState<LatLngBoundsLiteral | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
@@ -574,31 +578,10 @@ export function GISAnalysisApp() {
     }
   }, [editingViewId])
 
-  // Get user's location on mount
+  // Removed auto-geolocation to always use default East Coast view
+  // Users can search for their location if needed
   React.useEffect(() => {
-    if ("geolocation" in navigator) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setViewport({
-            center: {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude
-            },
-            zoom: 12
-          })
-        },
-        (error) => {
-          console.log('Geolocation error:', error.message)
-          // If geolocation fails, use default NYC location
-        },
-        {
-          enableHighAccuracy: false,
-          timeout: 5000,
-          maximumAge: 0
-        }
-      )
-    } else {
-    }
+    // No-op: keeping viewport at default East Coast view
   }, [])
 
   return (
@@ -821,10 +804,27 @@ export function GISAnalysisApp() {
 
       <main className="relative h-full w-full">
         {hasLayerControls && (
-          <div className="absolute top-4 right-4 z-[1000] w-80 max-h-[calc(100vh-2rem)] overflow-y-auto pointer-events-auto">
+          <div className="absolute top-4 right-4 z-[1000] w-80 max-h-[calc(100vh-2rem)] overflow-y-auto pointer-events-auto space-y-4">
             <LayerControlsPanel layerStates={layerStates} />
+            <LayerDiagnostics bounds={mapBounds} />
           </div>
         )}
+        <LayerErrorOverlay
+          activeLayerIds={activeLayerIds}
+          onRefresh={(layerId) => refreshLayer(layerId)}
+        />
+        <LayerLoadingNotification
+          activeLayerIds={activeLayerIds}
+          delayThreshold={3000}
+        />
+        <ErrorNotificationManager
+          errors={layerErrors.map(e => ({
+            id: e.id,
+            layerName: e.layerName,
+            error: e.error
+          }))}
+          onDismiss={dismissLayerError}
+        />
         <MapboxGlobe
           center={viewport.center}
           zoom={viewport.zoom}

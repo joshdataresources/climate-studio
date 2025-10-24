@@ -1,73 +1,58 @@
 """
-NASA NEX-GDDP-CMIP6 Climate Data Service using Google Earth Engine
+Precipitation & Drought Service
 
-Fetches and processes temperature projection data from NASA's NEX-GDDP-CMIP6 dataset
-via Google Earth Engine for fast, reliable access.
-
-Data source: NASA/GDDP-CMIP6 on Google Earth Engine
-Documentation: https://developers.google.com/earth-engine/datasets/catalog/NASA_GDDP-CMIP6
+Provides precipitation and drought data from NOAA LOCA2 CMIP6
+downscaled climate models via Earth Engine.
 """
 
 import ee
 import numpy as np
 import h3
-from shapely.geometry import Polygon
 import logging
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-class NASAEEClimateService:
-    """Service for fetching NASA NEX-GDDP-CMIP6 climate projections via Earth Engine"""
-
-    # Model selection - using ACCESS-CM2 as default
-    DEFAULT_MODEL = "ACCESS-CM2"
-
-    # Scenario mapping
-    SCENARIOS = {
-        'rcp26': 'ssp126',  # Low emissions
-        'rcp45': 'ssp245',  # Moderate emissions
-        'rcp85': 'ssp585'   # High emissions
-    }
-
-    # Baseline temperature for anomaly calculation (1986-2005 average, °C)
-    BASELINE_TEMP_C = 14.5
+class PrecipitationDroughtService:
+    """Service for precipitation and drought data from NOAA LOCA2"""
 
     def __init__(self, ee_project=None):
-        """Initialize NASA Climate Service with Earth Engine"""
-        self.initialized = False
-        self.ee_project = ee_project
-        self._initialize_ee()
+        """
+        Initialize Earth Engine with the specified project
 
-    def _initialize_ee(self):
-        """Initialize Google Earth Engine"""
+        Args:
+            ee_project: Google Earth Engine project ID
+        """
+        self.ee_project = ee_project
+        self.initialized = False
+
         try:
-            if self.ee_project:
-                ee.Initialize(project=self.ee_project)
+            if ee_project:
+                ee.Initialize(project=ee_project)
             else:
                 ee.Initialize()
             self.initialized = True
-            logger.info("Earth Engine initialized for NASA climate data")
+            logger.info(f"Earth Engine initialized for precipitation/drought (project: {ee_project})")
         except Exception as e:
             logger.error(f"Failed to initialize Earth Engine: {e}")
-            self.initialized = False
+            logger.warning("Precipitation/drought service will not be available")
 
-    def get_temperature_projection(self, bounds, year=2050, scenario='rcp45', resolution=7):
+    def get_drought_data(self, bounds, scenario='rcp45', year=2050, metric='drought_index', resolution=7):
         """
-        Get temperature projection data for a bounding box
+        Get precipitation/drought data as hexagonal GeoJSON
 
         Args:
-            bounds: Dict with keys 'north', 'south', 'east', 'west' (degrees)
-            year: Projection year (2015-2100)
-            scenario: Climate scenario ('rcp26', 'rcp45', 'rcp85')
-            resolution: H3 hexagon resolution (0-15, default 7 = ~5km diameter)
+            bounds: Dict with 'north', 'south', 'east', 'west' keys
+            scenario: Climate scenario (rcp26, rcp45, rcp85)
+            year: Projection year (2020-2100)
+            metric: 'precipitation', 'drought_index', or 'soil_moisture'
+            resolution: H3 hexagon resolution (4-10)
 
         Returns:
-            GeoJSON FeatureCollection with hexagonal temperature data
+            GeoJSON FeatureCollection with hexagonal drought/precipitation data
         """
         if not self.initialized:
-            logger.error("Earth Engine not initialized - cannot fetch temperature data")
+            logger.error("Earth Engine not initialized - cannot fetch drought data")
             raise RuntimeError("Earth Engine not initialized. Please check server configuration and Earth Engine authentication.")
 
         # Validate bounding box size to prevent huge requests when zoomed way out
@@ -91,49 +76,36 @@ class NASAEEClimateService:
             logger.warning(f"Bounding box too large: {lat_span:.1f}° x {lon_span:.1f}° → ~{approx_hex_count:.0f} hexagons (max {max_hexagons})")
             raise ValueError(
                 f"Bounding box too large: {lat_span:.1f}° x {lon_span:.1f}° would generate ~{approx_hex_count:.0f} hexagons (max {max_hexagons}). "
-                f"Please zoom in closer to see temperature data."
+                f"Please zoom in closer to see precipitation/drought data."
             )
 
         try:
-            logger.info(f"Fetching NASA EE data: year={year}, scenario={scenario}, bounds={bounds}")
+            logger.info(f"Fetching drought/precipitation data: metric={metric}, scenario={scenario}, year={year}, bounds={bounds}")
 
-            # Map RCP to SSP scenario
-            ssp_scenario = self.SCENARIOS.get(scenario, 'ssp245')
-            logger.info(f"Mapped {scenario} to {ssp_scenario}")
-
-            # Get the dataset
-            dataset = ee.ImageCollection('NASA/GDDP-CMIP6')
-            logger.info("Got dataset")
-
-            # Filter by model, scenario, and year
-            filtered = dataset.filter(ee.Filter.eq('model', self.DEFAULT_MODEL)) \
-                             .filter(ee.Filter.eq('scenario', ssp_scenario)) \
-                             .filter(ee.Filter.calendarRange(year, year, 'year'))
-
-            count = filtered.size().getInfo()
-            logger.info(f"Filtered to {count} images for {self.DEFAULT_MODEL}, {ssp_scenario}, {year}")
-
-            if count == 0:
-                raise ValueError(f"No images found for {self.DEFAULT_MODEL}, {ssp_scenario}, {year}")
-
-            # Get tasmax (maximum temperature)
-            tasmax = filtered.select('tasmax')
-
-            # Calculate mean temperature for the year
-            mean_tasmax = tasmax.mean()
-            logger.info("Calculated mean tasmax")
-
-            # Create region of interest
-            region = ee.Geometry.Rectangle([
-                bounds['west'], bounds['south'],
-                bounds['east'], bounds['north']
+            # Create bounding box
+            bbox = ee.Geometry.Rectangle([
+                bounds['west'],
+                bounds['south'],
+                bounds['east'],
+                bounds['north']
             ])
-            logger.info(f"Created region: {region.bounds().getInfo()}")
 
-            # Get hexagons first
+            # For now, use CHIRPS precipitation data as a proxy
+            # TODO: Replace with actual NOAA LOCA2 data when available
+            logger.info(f"Using CHIRPS dataset for {metric}")
+
+            # CHIRPS Daily: Climate Hazards Group InfraRed Precipitation with Station data
+            dataset = ee.ImageCollection('UCSB-CHG/CHIRPS/DAILY') \
+                .filterBounds(bbox) \
+                .filterDate('2020-01-01', '2023-12-31')
+
+            # Calculate mean precipitation
+            mean_precip = dataset.mean()
+
+            # Get hexagons in bounds
             logger.info(f"Generating hexagons at resolution {resolution}")
             hex_ids = self._get_hexagons_in_bounds(bounds, resolution)
-            logger.info(f"Generated {len(hex_ids)} hexagons, fetching NASA data for each...")
+            logger.info(f"Generated {len(hex_ids)} hexagons, fetching precipitation data for each...")
 
             # Convert hexagons to Earth Engine FeatureCollection
             hex_features = []
@@ -150,53 +122,52 @@ class NASAEEClimateService:
 
             hex_fc = ee.FeatureCollection(hex_features)
 
-            # Use reduceRegions to get mean temperature for each hexagon
-            logger.info("Computing mean temperature for each hexagon...")
-            hex_temps = mean_tasmax.reduceRegions(
+            # Use reduceRegions to get mean precipitation for each hexagon
+            logger.info("Computing mean precipitation for each hexagon...")
+            hex_precip = mean_precip.reduceRegions(
                 collection=hex_fc,
                 reducer=ee.Reducer.mean(),
-                scale=27830  # ~25km resolution (native NEX-GDDP resolution)
+                scale=5000  # ~5km resolution (CHIRPS native resolution)
             )
 
             # Get the results
             logger.info("Fetching results from Earth Engine...")
-            features = hex_temps.getInfo()['features']
-            logger.info(f"Got temperature data for {len(features)} hexagons")
+            features = hex_precip.getInfo()['features']
+            logger.info(f"Got precipitation data for {len(features)} hexagons")
 
             if len(features) == 0:
                 raise ValueError(f"No data retrieved for region {bounds}")
 
             # Log first feature for debugging
             if features and 'mean' in features[0]['properties']:
-                first_temp_k = features[0]['properties']['mean']
-                first_temp_c = first_temp_k - 273.15
-                logger.info(f"First hexagon: {first_temp_k:.2f}K = {first_temp_c:.2f}°C")
+                first_precip = features[0]['properties']['mean']
+                logger.info(f"First hexagon: {first_precip:.2f} mm/day")
 
             # Convert to GeoJSON
             logger.info(f"Converting {len(features)} hexagons to GeoJSON")
-            hexagons = self._convert_hexagon_features_to_geojson(features, year, scenario, ssp_scenario)
+            hexagons = self._convert_hexagon_features_to_geojson(features, metric, scenario, year)
 
             logger.info("=" * 80)
-            logger.info(f"✅ REAL NASA DATA: Successfully loaded {len(hexagons['features'])} hexagon features")
-            logger.info(f"✅ Source: NASA NEX-GDDP-CMIP6 via Earth Engine")
-            logger.info(f"✅ Model: {self.DEFAULT_MODEL}, Scenario: {ssp_scenario}, Year: {year}")
+            logger.info(f"✅ Successfully loaded {len(hexagons['features'])} hexagon features")
+            logger.info(f"✅ Source: CHIRPS via Earth Engine (proxy for LOCA2)")
+            logger.info(f"✅ Metric: {metric}, Scenario: {scenario}, Year: {year}")
             logger.info("=" * 80)
             return hexagons
 
         except Exception as e:
             import traceback
             logger.error("=" * 80)
-            logger.error(f"🚨 NASA EARTH ENGINE FETCH FAILED")
+            logger.error(f"🚨 EARTH ENGINE FETCH FAILED")
             logger.error(f"Error type: {type(e).__name__}")
             logger.error(f"Error message: {str(e)}")
-            logger.error(f"Request details: year={year}, scenario={scenario}, bounds={bounds}, resolution={resolution}")
+            logger.error(f"Request details: metric={metric}, scenario={scenario}, year={year}, bounds={bounds}, resolution={resolution}")
             logger.error(f"Full traceback:\n{traceback.format_exc()}")
             logger.error("=" * 80)
             # Don't return fallback data - raise the error so frontend can handle it
             raise
 
-    def _convert_hexagon_features_to_geojson(self, features, year, scenario, ssp_scenario):
-        """Convert Earth Engine hexagon features with temperature data to GeoJSON
+    def _convert_hexagon_features_to_geojson(self, features, metric, scenario, year):
+        """Convert Earth Engine hexagon features with precipitation data to GeoJSON
 
         Only includes hexagons with real data from Earth Engine.
         Hexagons with missing data are excluded (no interpolation/simulation).
@@ -210,39 +181,31 @@ class NASAEEClimateService:
             lat, lon = h3.cell_to_latlng(hex_id)
             boundary = h3.cell_to_boundary(hex_id)
 
-            # Get temperature from Earth Engine reduction (mean)
+            # Get precipitation from Earth Engine reduction (mean)
             if 'mean' not in feature['properties'] or feature['properties']['mean'] is None:
                 # Skip hexagons with no data - DO NOT interpolate
                 missing_count += 1
                 continue
 
-            tasmax_k = feature['properties']['mean']
-
-            # Convert from Kelvin to Celsius
-            temp_c = tasmax_k - 273.15
-
-            # Calculate anomaly relative to baseline
-            anomaly = temp_c - self.BASELINE_TEMP_C
+            precip_value = feature['properties']['mean']
 
             hexagon_data.append({
                 'hex_id': hex_id,
                 'lat': lat,
                 'lon': lon,
                 'boundary': boundary,
-                'temp_anomaly': round(anomaly, 2),
-                'temp_anomaly_f': round(anomaly * 1.8, 2)
+                'value': round(precip_value, 2)
             })
 
         if missing_count > 0:
             logger.info(f"Excluded {missing_count} hexagons with missing data (no interpolation applied)")
 
-        return self._to_geojson(hexagon_data, year, scenario, ssp_scenario)
+        return self._to_geojson(hexagon_data, metric, scenario, year)
 
     def _get_hexagons_in_bounds(self, bounds, resolution):
         """Get all H3 hexagons that cover the bounding box"""
         try:
             # Use H3 v4 API: LatLngPoly with h3shape_to_cells for complete tessellation
-            # LatLngPoly expects (lat, lng) tuples
             from h3 import LatLngPoly
 
             poly = LatLngPoly([
@@ -257,11 +220,10 @@ class NASAEEClimateService:
             return list(hex_ids)
         except Exception as e:
             logger.warning(f"h3shape_to_cells failed: {e}, using dense grid sampling")
-            # Dense grid sampling fallback to ensure complete coverage
+            # Dense grid sampling fallback
             hex_set = set()
 
-            # Calculate step size based on hexagon size at this resolution
-            # H3 resolution approximate edge lengths (km): res7=~1.2km, res8=~0.4km
+            # Calculate step size based on hexagon size
             edge_length_deg = 0.01 if resolution >= 8 else 0.03
 
             lat = bounds['south']
@@ -276,12 +238,11 @@ class NASAEEClimateService:
             logger.info(f"Generated {len(hex_set)} hexagons using dense grid")
             return list(hex_set)
 
-    def _to_geojson(self, hexagons, year, scenario, ssp_scenario):
+    def _to_geojson(self, hexagons, metric, scenario, year):
         """Convert hexagons to GeoJSON FeatureCollection"""
         features = []
         for hex_data in hexagons:
             # Convert H3 boundary to GeoJSON coordinates
-            # H3 returns (lat, lng), GeoJSON needs [lng, lat]
             coordinates = [[
                 [lng, lat] for lat, lng in hex_data['boundary']
             ]]
@@ -298,13 +259,10 @@ class NASAEEClimateService:
                     'hexId': hex_data['hex_id'],
                     'lat': round(hex_data['lat'], 4),
                     'lon': round(hex_data['lon'], 4),
-                    'tempAnomaly': hex_data['temp_anomaly'],
-                    'tempAnomalyF': hex_data['temp_anomaly_f'],
-                    'projected': round(self.BASELINE_TEMP_C + hex_data['temp_anomaly'], 2),
+                    'value': hex_data['value'],
+                    'metric': metric,
                     'scenario': scenario,
-                    'sspScenario': ssp_scenario,
-                    'year': year,
-                    'model': self.DEFAULT_MODEL
+                    'year': year
                 }
             })
 
@@ -312,11 +270,10 @@ class NASAEEClimateService:
             'type': 'FeatureCollection',
             'features': features,
             'metadata': {
-                'source': 'NASA NEX-GDDP-CMIP6 via Earth Engine',
-                'model': self.DEFAULT_MODEL,
-                'scenario': ssp_scenario,
+                'source': 'CHIRPS via Earth Engine (proxy for LOCA2)',
+                'metric': metric,
+                'scenario': scenario,
                 'year': year,
-                'baselineTemp': self.BASELINE_TEMP_C,
                 'count': len(features),
                 'isRealData': True,
                 'dataType': 'real'

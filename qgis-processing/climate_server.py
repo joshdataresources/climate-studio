@@ -22,6 +22,7 @@ from nasa_ee_climate import NASAEEClimateService
 from noaa_sea_level import NOAASeaLevelService
 from urban_heat_island import UrbanHeatIslandService
 from topographic_relief import TopographicReliefService
+from precipitation_drought import PrecipitationDroughtService
 
 # Configure logging
 logging.basicConfig(
@@ -42,6 +43,7 @@ climate_service = NASAEEClimateService(ee_project=ee_project)
 sea_level_service = NOAASeaLevelService()
 heat_island_service = UrbanHeatIslandService()
 relief_service = TopographicReliefService()
+drought_service = PrecipitationDroughtService(ee_project=ee_project)
 
 # Health check endpoint
 @app.route('/health', methods=['GET'])
@@ -474,6 +476,114 @@ def topographic_relief_tiles():
         }), 500
 
 
+@app.route('/api/climate/precipitation-drought', methods=['GET'])
+def precipitation_drought():
+    """
+    Get precipitation and drought data as hexagonal GeoJSON from CHIRPS dataset
+
+    Query parameters:
+        north, south, east, west: Bounding box coordinates
+        scenario: Climate scenario (rcp26, rcp45, rcp85), default rcp45
+        year: Projection year (2020-2100), default 2050
+        metric: Data type - 'precipitation', 'drought_index', or 'soil_moisture', default drought_index
+        resolution: H3 hexagon resolution (4-10), default 7
+
+    Returns:
+        GeoJSON FeatureCollection with hexagonal precipitation/drought data
+    """
+    try:
+        # Get query parameters
+        north = request.args.get('north', type=float)
+        south = request.args.get('south', type=float)
+        east = request.args.get('east', type=float)
+        west = request.args.get('west', type=float)
+        scenario = request.args.get('scenario', default='rcp45', type=str)
+        year = request.args.get('year', default=2050, type=int)
+        metric = request.args.get('metric', default='drought_index', type=str)
+        resolution = request.args.get('resolution', default=7, type=int)
+
+        # Validate required parameters
+        if None in [north, south, east, west]:
+            return jsonify({
+                'success': False,
+                'error': 'Missing required parameters: north, south, east, west'
+            }), 400
+
+        # Validate bounds
+        if not (-90 <= south < north <= 90):
+            return jsonify({
+                'success': False,
+                'error': 'Invalid latitude bounds'
+            }), 400
+
+        if not (-180 <= west < east <= 180):
+            return jsonify({
+                'success': False,
+                'error': 'Invalid longitude bounds'
+            }), 400
+
+        # Validate metric
+        valid_metrics = ['precipitation', 'drought_index', 'soil_moisture']
+        if metric not in valid_metrics:
+            return jsonify({
+                'success': False,
+                'error': f'Invalid metric. Must be one of: {", ".join(valid_metrics)}'
+            }), 400
+
+        # Validate resolution
+        if not (4 <= resolution <= 10):
+            return jsonify({
+                'success': False,
+                'error': 'Resolution must be between 4 and 10'
+            }), 400
+
+        logger.info(f"Precipitation/drought request: scenario={scenario}, year={year}, metric={metric}, resolution={resolution}")
+
+        # Build bounds dict
+        bounds = {
+            'north': north,
+            'south': south,
+            'east': east,
+            'west': west
+        }
+
+        # Get precipitation/drought data from service
+        data = drought_service.get_drought_data(
+            bounds=bounds,
+            scenario=scenario,
+            year=year,
+            metric=metric,
+            resolution=resolution
+        )
+
+        return jsonify({
+            'success': True,
+            'data': data,
+            'metadata': {
+                'bounds': bounds,
+                'scenario': scenario,
+                'year': year,
+                'metric': metric,
+                'resolution': resolution,
+                'feature_count': len(data.get('features', []))
+            }
+        })
+
+    except ValueError as e:
+        logger.error(f"Validation error: {str(e)}")
+        return jsonify({
+            'success': False,
+            'error': f'Invalid parameter: {str(e)}'
+        }), 400
+
+    except Exception as e:
+        logger.error(f"Error processing precipitation/drought: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @app.route('/api/climate/info', methods=['GET'])
 def climate_info():
     """
@@ -533,8 +643,9 @@ if __name__ == '__main__':
     logger.info(f"   GET  /health")
     logger.info(f"   GET  /api/climate/temperature-projection")
     logger.info(f"   GET  /api/climate/sea-level-rise")
-    logger.info(f"   GET  /api/climate/urban-heat-island")
+    logger.info(f"   GET  /api/climate/urban-heat-island/tiles")
     logger.info(f"   GET  /api/climate/topographic-relief/tiles")
+    logger.info(f"   GET  /api/climate/precipitation-drought")
     logger.info(f"   GET  /api/climate/info")
 
     app.run(
