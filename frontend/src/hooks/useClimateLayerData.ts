@@ -33,7 +33,7 @@ const getBoundsKey = (bounds: LatLngBoundsLiteral | null) => {
 };
 
 export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
-  const { controls, activeLayerIds } = useClimate();
+  const { controls, activeLayerIds, addLayerError, clearLayerErrors } = useClimate();
   const [layerStates, setLayerStates] = useState<LayerStateMap>({});
   const cacheRef = useRef<Map<string, LayerFetchState>>(new Map());
   const abortControllers = useRef<Map<ClimateLayerId, AbortController>>(new Map());
@@ -55,6 +55,8 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       reliefStyle: controls.reliefStyle,
       reliefOpacity: controls.reliefOpacity,
       temperatureMode: controls.temperatureMode,
+      droughtOpacity: controls.droughtOpacity,
+      droughtMetric: controls.droughtMetric,
       useRealData: controls.useRealData
     }),
     [bounds, controls, boundsKey]
@@ -86,10 +88,12 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       const layer = getClimateLayer(layerId);
       if (!layer) {
         console.error(`❌ Unknown layer: ${layerId}`);
+        const errorMsg = `Unknown layer: ${layerId}`;
+        addLayerError(layerId, errorMsg);
         setLayerState(layerId, {
           status: 'error',
           data: null,
-          error: `Unknown layer: ${layerId}`
+          error: errorMsg
         });
         return;
       }
@@ -100,17 +104,42 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
 
       if (!forceRefresh && cacheRef.current.has(cacheKey)) {
         const cached = cacheRef.current.get(cacheKey)!;
-        // Validate cached data has features and metadata
-        const isValidCache = cached.data?.features?.length > 0 && cached.data?.metadata;
+        // Validate cached data:
+        // 1. Has features array with at least one feature
+        // 2. Has metadata object
+        // 3. Metadata indicates real data (not fallback)
+        // 4. Cache is not stale (less than 1 hour old)
+        const now = Date.now();
+        const cacheAge = now - (cached.updatedAt || 0);
+        const maxCacheAge = 60 * 60 * 1000; // 1 hour
+
+        const hasValidFeatures = cached.data?.features?.length > 0;
+        const hasMetadata = !!cached.data?.metadata;
+        const isRealData = cached.data?.metadata?.isRealData !== false &&
+                          cached.data?.metadata?.dataType !== 'fallback';
+        const isFresh = cacheAge < maxCacheAge;
+
+        const isValidCache = hasValidFeatures && hasMetadata && isRealData && isFresh;
+
         if (isValidCache) {
-          console.log(`✅ Using validated cache for ${layerId}:`, cached.data.metadata?.source);
+          console.log(`✅ Using validated cache for ${layerId}:`, {
+            source: cached.data.metadata?.source,
+            features: cached.data.features.length,
+            age: Math.round(cacheAge / 1000) + 's'
+          });
           setLayerState(layerId, {
             ...cached,
             status: 'success'
           });
           return;
         } else {
-          console.warn(`⚠️ Cache invalid for ${layerId}, refetching...`);
+          console.warn(`⚠️ Cache invalid for ${layerId}, refetching...`, {
+            hasValidFeatures,
+            hasMetadata,
+            isRealData,
+            isFresh,
+            cacheAge: Math.round(cacheAge / 1000) + 's'
+          });
           cacheRef.current.delete(cacheKey);
         }
       }
@@ -138,16 +167,13 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
         const queryString = buildQueryString(params);
         const url = `${BACKEND_BASE_URL}${layer.fetch.route}${queryString ? `?${queryString}` : ''}`;
 
-        console.log(`🌊 Fetching ${layerId}:`, url);
+        console.log('='.repeat(80));
+        console.log(`🌊 Fetching ${layerId} (${layer.title})`);
+        console.log(`🔗 Full URL: ${url}`);
         console.log(`📦 Query params:`, params);
-        console.log(`🔗 BACKEND_BASE_URL:`, BACKEND_BASE_URL);
-        console.log(`🛣️ Route:`, layer.fetch.route);
-        console.log(`📋 Full URL breakdown:`, {
-          base: BACKEND_BASE_URL,
-          route: layer.fetch.route,
-          queryString,
-          fullUrl: url
-        });
+        console.log(`⚙️ Backend: ${BACKEND_BASE_URL}`);
+        console.log(`🛣️ Route: ${layer.fetch.route}`);
+        console.log('='.repeat(80));
 
         // Wait minimum 10s for real NASA data before considering fallback
         const minWaitTime = 10000;
@@ -181,12 +207,16 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
         }
 
         const payload = await response.json();
-        console.log(`📥 Full Response for ${layerId}:`, payload);
-        console.log(`📦 payload.data:`, payload.data);
-        console.log(`📦 payload.data?.features:`, payload.data?.features);
-        console.log(`📦 payload.data?.features?.length:`, payload.data?.features?.length);
-        console.log(`📦 payload.features (if not nested):`, payload.features);
-        console.log(`📊 Extracted data:`, payload.data ?? payload);
+        console.log('📥'.repeat(40));
+        console.log(`RESPONSE for ${layerId}:`);
+        console.log('Success:', payload.success);
+        console.log('Has data:', !!payload.data);
+        console.log('Features count:', payload.data?.features?.length || payload.features?.length || 0);
+        console.log('Metadata:', payload.data?.metadata || payload.metadata);
+        console.log('IS REAL DATA:', payload.data?.metadata?.isRealData);
+        console.log('DATA TYPE:', payload.data?.metadata?.dataType);
+        console.log('SOURCE:', payload.data?.metadata?.source);
+        console.log('📥'.repeat(40));
 
         const result: LayerFetchState = {
           status: 'success',
@@ -218,6 +248,9 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
           });
         }
 
+        // Clear any previous errors for this layer on successful load
+        clearLayerErrors(layerId);
+
         cacheRef.current.set(cacheKey, result);
         setLayerState(layerId, result);
       } catch (error) {
@@ -231,6 +264,9 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
           layerStatusMonitor.createStatusEvent(layerId, 'error', undefined, message)
         );
 
+        // Report error to context for user notification
+        addLayerError(layerId, message);
+
         setLayerState(layerId, {
           status: 'error',
           data: null,
@@ -240,12 +276,52 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
         abortControllers.current.delete(layerId);
       }
     },
-    [fetchContext, setLayerState]
+    [fetchContext, setLayerState, addLayerError, clearLayerErrors]
   );
+
+  // Track previous zoom to detect significant zoom changes
+  const prevZoomRef = useRef<number | null>(null);
 
   useEffect(() => {
     const uniqueActiveLayers = Array.from(new Set(activeLayerIds));
     console.log('🎯 Active layers in useClimateLayerData:', uniqueActiveLayers);
+
+    const currentZoom = fetchContext.bounds?.zoom ?? 10;
+
+    // Check if zoom changed significantly (crossed resolution threshold)
+    // Resolution thresholds: 3, 5, 7, 9, 11, 13
+    const getResolutionBucket = (zoom: number) => {
+      if (zoom <= 3) return 2;
+      if (zoom <= 5) return 3;
+      if (zoom <= 7) return 4;
+      if (zoom <= 9) return 5;
+      if (zoom <= 11) return 6;
+      if (zoom <= 13) return 7;
+      return 8;
+    };
+
+    const currentResolution = getResolutionBucket(currentZoom);
+    const prevResolution = prevZoomRef.current !== null ? getResolutionBucket(prevZoomRef.current) : currentResolution;
+
+    if (currentResolution !== prevResolution) {
+      console.log(`🔄 Zoom changed: ${prevZoomRef.current} → ${currentZoom} (resolution ${prevResolution} → ${currentResolution})`);
+      console.log('🗑️ Clearing layer states due to resolution change');
+
+      // Clear layer states for layers that use zoom-based resolution
+      const zoomDependentLayers: ClimateLayerId[] = ['temperature_projection', 'precipitation_drought'];
+      zoomDependentLayers.forEach(layerId => {
+        if (uniqueActiveLayers.includes(layerId)) {
+          setLayerState(layerId, {
+            status: 'loading',
+            data: null,
+            error: null
+          });
+        }
+      });
+    }
+
+    prevZoomRef.current = currentZoom;
+
     uniqueActiveLayers.forEach(layerId => {
       console.log(`🔄 Fetching layer: ${layerId}`);
       fetchLayer(layerId);
@@ -254,10 +330,14 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
 
   const refreshLayer = useCallback(
     (layerId: ClimateLayerId) => {
+      // Clear all cache to force fresh fetch
       cacheRef.current.clear();
+      // Clear any error state for this layer
+      clearLayerErrors(layerId);
+      // Force fetch with cache bypass
       fetchLayer(layerId, true);
     },
-    [fetchLayer]
+    [fetchLayer, clearLayerErrors]
   );
 
   const refreshAll = useCallback(() => {

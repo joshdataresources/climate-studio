@@ -18,7 +18,17 @@ interface ClimateControlsState {
   reliefStyle: 'classic' | 'dark' | 'depth' | 'dramatic';
   reliefOpacity: number;
   temperatureMode: 'anomaly' | 'actual';
+  droughtOpacity: number;
+  droughtMetric: 'precipitation' | 'drought_index' | 'soil_moisture';
   useRealData: boolean;
+}
+
+interface LayerError {
+  id: string;
+  layerId: ClimateLayerId;
+  layerName: string;
+  error: string;
+  timestamp: number;
 }
 
 interface ClimateContextValue {
@@ -37,11 +47,17 @@ interface ClimateContextValue {
   setReliefStyle: (style: 'classic' | 'dark' | 'depth' | 'dramatic') => void;
   setReliefOpacity: (value: number) => void;
   setTemperatureMode: (mode: 'anomaly' | 'actual') => void;
+  setDroughtOpacity: (value: number) => void;
+  setDroughtMetric: (metric: 'precipitation' | 'drought_index' | 'soil_moisture') => void;
   setUseRealData: (value: boolean) => void;
   activeLayerIds: ClimateLayerId[];
   setActiveLayerIds: (layerIds: ClimateLayerId[]) => void;
   toggleLayer: (layerId: ClimateLayerId) => void;
   isLayerActive: (layerId: ClimateLayerId) => boolean;
+  layerErrors: LayerError[];
+  addLayerError: (layerId: ClimateLayerId, error: string) => void;
+  dismissLayerError: (errorId: string) => void;
+  clearLayerErrors: (layerId?: ClimateLayerId) => void;
 }
 
 const ClimateContext = createContext<ClimateContextValue | undefined>(undefined);
@@ -87,10 +103,13 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
   const [reliefStyle, setReliefStyle] = useState<'classic' | 'dark' | 'depth' | 'dramatic'>('dramatic');
   const [reliefOpacity, setReliefOpacity] = useState<number>(0.3);
   const [temperatureMode, setTemperatureMode] = useState<'anomaly' | 'actual'>('anomaly');
+  const [droughtOpacity, setDroughtOpacity] = useState<number>(0.3);
+  const [droughtMetric, setDroughtMetric] = useState<'precipitation' | 'drought_index' | 'soil_moisture'>('drought_index');
   const [useRealData, setUseRealData] = useState<boolean>(true);
   const [activeLayerIds, setActiveLayerIds] = useState<ClimateLayerId[]>(
     getInitialActiveLayers()
   );
+  const [layerErrors, setLayerErrors] = useState<LayerError[]>([]);
 
   // Persist active layers to localStorage
   useEffect(() => {
@@ -98,14 +117,45 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
     console.log('💾 Saved active layers to localStorage:', activeLayerIds);
   }, [activeLayerIds]);
 
+  const addLayerError = useCallback((layerId: ClimateLayerId, error: string) => {
+    const layer = climateLayers.find(l => l.id === layerId);
+    const layerName = layer?.title || layerId;
+
+    const newError: LayerError = {
+      id: `${layerId}-${Date.now()}`,
+      layerId,
+      layerName,
+      error,
+      timestamp: Date.now()
+    };
+
+    setLayerErrors(prev => [...prev, newError]);
+    console.error(`❌ Layer error for ${layerName}:`, error);
+  }, []);
+
+  const dismissLayerError = useCallback((errorId: string) => {
+    setLayerErrors(prev => prev.filter(e => e.id !== errorId));
+  }, []);
+
+  const clearLayerErrors = useCallback((layerId?: ClimateLayerId) => {
+    if (layerId) {
+      setLayerErrors(prev => prev.filter(e => e.layerId !== layerId));
+    } else {
+      setLayerErrors([]);
+    }
+  }, []);
+
   const toggleLayer = useCallback((layerId: ClimateLayerId) => {
     setActiveLayerIds(prev => {
       if (prev.includes(layerId)) {
+        // Layer is being turned off
         return prev.filter(id => id !== layerId);
       }
+      // Layer is being turned on - clear any previous errors for this layer
+      clearLayerErrors(layerId);
       return [...prev, layerId];
     });
-  }, []);
+  }, [clearLayerErrors]);
 
   const controls: ClimateControlsState = useMemo(
     () => ({
@@ -123,9 +173,11 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
       reliefStyle,
       reliefOpacity,
       temperatureMode,
+      droughtOpacity,
+      droughtMetric,
       useRealData
     }),
-    [scenario, projectionYear, seaLevelFeet, analysisDate, displayStyle, resolution, projectionOpacity, seaLevelOpacity, urbanHeatOpacity, urbanHeatSeason, urbanHeatColorScheme, reliefStyle, reliefOpacity, temperatureMode, useRealData]
+    [scenario, projectionYear, seaLevelFeet, analysisDate, displayStyle, resolution, projectionOpacity, seaLevelOpacity, urbanHeatOpacity, urbanHeatSeason, urbanHeatColorScheme, reliefStyle, reliefOpacity, temperatureMode, droughtOpacity, droughtMetric, useRealData]
   );
 
   const isLayerActive = useCallback(
@@ -150,17 +202,27 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
       setReliefStyle,
       setReliefOpacity,
       setTemperatureMode,
+      setDroughtOpacity,
+      setDroughtMetric,
       setUseRealData,
       activeLayerIds,
       setActiveLayerIds,
       toggleLayer,
-      isLayerActive
+      isLayerActive,
+      layerErrors,
+      addLayerError,
+      dismissLayerError,
+      clearLayerErrors
     }),
     [
       controls,
       activeLayerIds,
       toggleLayer,
-      isLayerActive
+      isLayerActive,
+      layerErrors,
+      addLayerError,
+      dismissLayerError,
+      clearLayerErrors
     ]
   );
 

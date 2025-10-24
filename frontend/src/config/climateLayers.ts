@@ -5,7 +5,8 @@ export type ClimateLayerId =
   | 'temperature_projection'
   | 'temperature_current'
   | 'urban_heat_island'
-  | 'topographic_relief';
+  | 'topographic_relief'
+  | 'precipitation_drought';
 
 export type ClimateControl =
   | 'seaLevelFeet'
@@ -21,7 +22,9 @@ export type ClimateControl =
   | 'urbanHeatColorScheme'
   | 'reliefStyle'
   | 'reliefOpacity'
-  | 'temperatureMode';
+  | 'temperatureMode'
+  | 'droughtOpacity'
+  | 'droughtMetric';
 
 export interface ClimateFetchContext {
   bounds: LatLngBoundsLiteral | null;
@@ -37,6 +40,8 @@ export interface ClimateFetchContext {
   reliefStyle: 'classic' | 'dark' | 'depth' | 'dramatic';
   reliefOpacity: number;
   temperatureMode: 'anomaly' | 'actual';
+  droughtOpacity: number;
+  droughtMetric: 'precipitation' | 'drought_index' | 'soil_moisture';
   useRealData: boolean;
 }
 
@@ -102,7 +107,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
   {
     id: 'temperature_projection',
     title: 'Future Temperature Anomaly',
-    description: 'Projected temperature anomalies from NASA NEX-GDDP (simulated values in development).',
+    description: 'Projected temperature anomalies from NASA NEX-GDDP-CMIP6 climate models via Earth Engine.',
     category: 'temperature',
     source: {
       name: 'NASA NEX-GDDP-CMIP6',
@@ -241,6 +246,70 @@ export const climateLayers: ClimateLayerDefinition[] = [
       layerType: 'raster',
       blendMode: 'normal',
       valueProperty: 'heatIslandIntensity'
+    }
+  },
+  {
+    id: 'precipitation_drought',
+    title: 'Precipitation & Drought',
+    description: 'Projected precipitation changes and drought conditions from CHIRPS dataset via Earth Engine.',
+    category: 'temperature',
+    source: {
+      name: 'CHIRPS via Earth Engine',
+      url: 'https://www.chc.ucsb.edu/data/chirps'
+    },
+    defaultActive: false,
+    controls: ['scenario', 'projectionYear', 'droughtMetric', 'droughtOpacity'],
+    fetch: {
+      method: 'GET',
+      route: '/api/climate/precipitation-drought',
+      query: ({ bounds, scenario, projectionYear, droughtMetric }) => {
+        const { north, south, east, west, zoom } = bounds ?? {
+          north: 41,
+          south: 40,
+          east: -73,
+          west: -74,
+          zoom: 10
+        };
+
+        // Dynamic hexagon sizing based on zoom level
+        const z = zoom || 10;
+        let resolution;
+        if (z <= 3) {
+          resolution = 2;
+        } else if (z <= 5) {
+          resolution = 3;
+        } else if (z <= 7) {
+          resolution = 4;
+        } else if (z <= 9) {
+          resolution = 5;
+        } else if (z <= 11) {
+          resolution = 6;
+        } else if (z <= 13) {
+          resolution = 7;
+        } else {
+          resolution = 8;
+        }
+
+        console.log(`🌧️ Zoom ${z.toFixed(1)} → H3 resolution ${resolution} for precipitation/drought`);
+
+        return {
+          north,
+          south,
+          east,
+          west,
+          scenario,
+          year: projectionYear,
+          metric: droughtMetric,
+          resolution
+        };
+      }
+    },
+    style: {
+      color: '#3b82f6',
+      opacity: 0.7,
+      layerType: 'polygon',
+      blendMode: 'normal',
+      valueProperty: 'value'
     }
   },
   {

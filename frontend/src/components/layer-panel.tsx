@@ -39,6 +39,8 @@ const controlOrder: ClimateControl[] = [
   "urbanHeatOpacity",
   "reliefStyle",
   "reliefOpacity",
+  "droughtMetric",
+  "droughtOpacity",
 ]
 
 type ControlSetters = Pick<
@@ -56,7 +58,9 @@ type ControlSetters = Pick<
   "setUrbanHeatColorScheme" |
   "setReliefStyle" |
   "setReliefOpacity" |
-  "setTemperatureMode"
+  "setTemperatureMode" |
+  "setDroughtMetric" |
+  "setDroughtOpacity"
 >
 
 const renderControl = (
@@ -319,6 +323,38 @@ const renderControl = (
           </div>
         </div>
       )
+    case "droughtMetric":
+      return (
+        <div key="droughtMetric" className="space-y-2">
+          <label className="text-xs font-semibold text-muted-foreground">Metric Type</label>
+          <Select value={values.droughtMetric} onValueChange={value => setters.setDroughtMetric(value as 'precipitation' | 'drought_index' | 'soil_moisture')}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Choose metric" />
+            </SelectTrigger>
+            <SelectContent className="z-[9999]">
+              <SelectItem value="precipitation">Precipitation</SelectItem>
+              <SelectItem value="drought_index">Drought Index</SelectItem>
+              <SelectItem value="soil_moisture">Soil Moisture</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      )
+    case "droughtOpacity":
+      return (
+        <div key="droughtOpacity" className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs text-muted-foreground">Layer Opacity</label>
+            <span className="text-xs font-medium">{Math.round(values.droughtOpacity * 100)}%</span>
+          </div>
+          <Slider
+            value={[Math.round(values.droughtOpacity * 100)]}
+            min={10}
+            max={100}
+            step={5}
+            onValueChange={value => setters.setDroughtOpacity(value[0] / 100)}
+          />
+        </div>
+      )
     default:
       return null
   }
@@ -407,6 +443,8 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
     setReliefStyle: climate.setReliefStyle,
     setReliefOpacity: climate.setReliefOpacity,
     setTemperatureMode: climate.setTemperatureMode,
+    setDroughtMetric: climate.setDroughtMetric,
+    setDroughtOpacity: climate.setDroughtOpacity,
   }
 
   return (
@@ -481,6 +519,78 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
                           <span>5°</span>
                           <span>6°</span>
                           <span>8°+</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </>
+              )}
+              {layer.id === "precipitation_drought" && (
+                <>
+                  {layerStates.precipitation_drought?.status === 'loading' && (
+                    <div className="space-y-2 rounded-md border border-blue-500/30 bg-blue-500/10 p-3">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                        <p className="text-xs text-foreground">Loading precipitation/drought data...</p>
+                      </div>
+                    </div>
+                  )}
+                  {layerStates.precipitation_drought?.status === 'success' && (
+                    <div className="space-y-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="rounded-full bg-green-500 p-0.5">
+                          <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <p className="text-xs text-foreground">
+                          {layerStates.precipitation_drought?.data?.metadata?.isRealData
+                            ? '✓ Real CHIRPS data (Earth Engine)'
+                            : '⚠ Data unavailable (Earth Engine error)'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  <div className="space-y-1">
+                    {climate.controls.droughtMetric === 'precipitation' && (
+                      <>
+                        <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#ffffff] via-[#e3f2fd] via-[#90caf9] via-[#42a5f5] via-[#1e88e5] via-[#1565c0] to-[#0d47a1]" />
+                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                          <span>0</span>
+                          <span>2</span>
+                          <span>4</span>
+                          <span>6</span>
+                          <span>8</span>
+                          <span>10 mm/day</span>
+                        </div>
+                      </>
+                    )}
+                    {climate.controls.droughtMetric === 'drought_index' && (
+                      <>
+                        <div className="h-3 w-full rounded-full" style={{
+                          background: 'linear-gradient(to right, #dc2626 0%, #f59e0b 16.67%, #fef08a 33.33%, #ffffff 50%, #90caf9 66.67%, #42a5f5 83.33%, #1e88e5 100%)'
+                        }} />
+                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                          <span>0</span>
+                          <span>1</span>
+                          <span>2</span>
+                          <span>3</span>
+                          <span>4</span>
+                          <span>5</span>
+                          <span>6+</span>
+                        </div>
+                      </>
+                    )}
+                    {climate.controls.droughtMetric === 'soil_moisture' && (
+                      <>
+                        <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#8b4513] via-[#daa520] via-[#f0e68c] via-[#adff2f] via-[#7cfc00] to-[#32cd32]" />
+                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                          <span>0</span>
+                          <span>2</span>
+                          <span>4</span>
+                          <span>6</span>
+                          <span>8</span>
+                          <span>10 mm</span>
                         </div>
                       </>
                     )}

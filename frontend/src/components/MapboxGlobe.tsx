@@ -42,11 +42,13 @@ export function MapboxGlobe({
   const seaLevelActive = isLayerActive("sea_level_rise")
   const urbanHeatActive = isLayerActive("urban_heat_island")
   const topographicReliefActive = isLayerActive("topographic_relief")
+  const precipitationDroughtActive = isLayerActive("precipitation_drought")
 
   // Get layer data (sea level uses tiles, not data)
   const tempProjectionData = layerStates.temperature_projection?.data
   const urbanHeatData = layerStates.urban_heat_island?.data
   const topographicReliefData = layerStates.topographic_relief?.data
+  const precipitationDroughtData = layerStates.precipitation_drought?.data
 
   // Persist temperature data to prevent disappearing during refetch
   const [stableTempData, setStableTempData] = useState<any>(null)
@@ -54,11 +56,33 @@ export function MapboxGlobe({
     console.log('Temperature Projection Active:', temperatureProjectionActive)
     console.log('Temp Projection Data:', tempProjectionData)
     console.log('Temp Projection Features:', tempProjectionData?.features?.length)
+
     if (tempProjectionData && tempProjectionData.features?.length > 0) {
       console.log('Setting stable temp data with', tempProjectionData.features.length, 'features')
       setStableTempData(tempProjectionData)
+    } else if (tempProjectionData === null || !temperatureProjectionActive) {
+      // Clear stable data when layer is explicitly cleared or deactivated
+      console.log('Clearing stable temp data (layer cleared or deactivated)')
+      setStableTempData(null)
     }
   }, [tempProjectionData, temperatureProjectionActive])
+
+  // Persist precipitation/drought data to prevent disappearing during refetch
+  const [stableDroughtData, setStableDroughtData] = useState<any>(null)
+  useEffect(() => {
+    console.log('Precipitation/Drought Active:', precipitationDroughtActive)
+    console.log('Drought Data:', precipitationDroughtData)
+    console.log('Drought Features:', precipitationDroughtData?.features?.length)
+
+    if (precipitationDroughtData && precipitationDroughtData.features?.length > 0) {
+      console.log('Setting stable drought data with', precipitationDroughtData.features.length, 'features')
+      setStableDroughtData(precipitationDroughtData)
+    } else if (precipitationDroughtData === null || !precipitationDroughtActive) {
+      // Clear stable data when layer is explicitly cleared or deactivated
+      console.log('Clearing stable drought data (layer cleared or deactivated)')
+      setStableDroughtData(null)
+    }
+  }, [precipitationDroughtData, precipitationDroughtActive])
 
   // Sea level now uses raster tiles, no need for GeoJSON persistence
 
@@ -239,7 +263,7 @@ export function MapboxGlobe({
           <Source
             id="sea-level-rise"
             type="raster"
-            tiles={[`http://localhost:3001/api/tiles/noaa-slr/${controls.seaLevelFeet}/{z}/{x}/{y}.png`]}
+            tiles={[`${import.meta.env.VITE_NODE_BACKEND_URL || 'http://localhost:3001'}/api/tiles/noaa-slr/${controls.seaLevelFeet}/{z}/{x}/{y}.png`]}
             tileSize={256}
           >
             <Layer
@@ -247,6 +271,60 @@ export function MapboxGlobe({
               type="raster"
               paint={{
                 'raster-opacity': controls.seaLevelOpacity || 0.7
+              }}
+            />
+          </Source>
+        )}
+
+        {/* Precipitation & Drought Layer - using GeoJSON hexagons */}
+        {precipitationDroughtActive && stableDroughtData && (
+          <Source id="precipitation-drought" type="geojson" data={stableDroughtData}>
+            <Layer
+              id="precipitation-drought-layer"
+              type="fill"
+              paint={{
+                'fill-color': controls.droughtMetric === 'precipitation' ? [
+                  'interpolate',
+                  ['linear'],
+                  ['get', 'value'],
+                  0, '#ffffff',
+                  2, '#e3f2fd',
+                  4, '#90caf9',
+                  6, '#42a5f5',
+                  8, '#1e88e5',
+                  10, '#1565c0'
+                ] : controls.droughtMetric === 'drought_index' ? [
+                  'interpolate',
+                  ['linear'],
+                  ['get', 'value'],
+                  0, '#dc2626',   // Red - severe drought
+                  1, '#f59e0b',   // Orange
+                  2, '#fef08a',   // Yellow
+                  3, '#ffffff',   // White - normal
+                  4, '#90caf9',   // Light blue
+                  5, '#42a5f5',   // Blue
+                  6, '#1e88e5'    // Dark blue - no drought
+                ] : [  // soil_moisture
+                  'interpolate',
+                  ['linear'],
+                  ['get', 'value'],
+                  0, '#8b4513',   // Brown - dry
+                  2, '#daa520',
+                  4, '#f0e68c',
+                  6, '#adff2f',
+                  8, '#7cfc00',
+                  10, '#32cd32'   // Green - wet
+                ],
+                'fill-opacity': controls.droughtOpacity || 0.6
+              }}
+            />
+            <Layer
+              id="precipitation-drought-borders"
+              type="line"
+              paint={{
+                'line-color': '#ffffff',
+                'line-width': 1,
+                'line-opacity': 0.2
               }}
             />
           </Source>
