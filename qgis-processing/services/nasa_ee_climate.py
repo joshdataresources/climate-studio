@@ -65,10 +65,15 @@ class NASAEEClimateService:
 
         Returns:
             GeoJSON FeatureCollection with hexagonal temperature data
+
+        Raises:
+            RuntimeError: If Earth Engine is not initialized
+            ValueError: If data cannot be retrieved for the specified parameters
         """
         if not self.initialized:
-            logger.error("Earth Engine not initialized")
-            return self._generate_fallback_data(bounds, year, scenario, resolution)
+            error_msg = "Earth Engine is not initialized. Cannot fetch real NASA data."
+            logger.error(error_msg)
+            raise RuntimeError(error_msg)
 
         try:
             logger.info(f"Fetching NASA EE data: year={year}, scenario={scenario}, bounds={bounds}")
@@ -162,14 +167,14 @@ class NASAEEClimateService:
         except Exception as e:
             import traceback
             logger.error("=" * 80)
-            logger.error(f"🚨 NASA EARTH ENGINE FETCH FAILED - FALLING BACK TO SIMULATED DATA")
+            logger.error(f"🚨 NASA EARTH ENGINE FETCH FAILED")
             logger.error(f"Error type: {type(e).__name__}")
             logger.error(f"Error message: {str(e)}")
             logger.error(f"Request details: year={year}, scenario={scenario}, bounds={bounds}, resolution={resolution}")
             logger.error(f"Full traceback:\n{traceback.format_exc()}")
             logger.error("=" * 80)
-            logger.warning("⚠️ RETURNING FALLBACK DATA - This is simulated, not real NASA data!")
-            return self._generate_fallback_data(bounds, year, scenario, resolution)
+            # Re-raise the error instead of falling back to simulated data
+            raise ValueError(f"Failed to fetch NASA temperature projection data: {str(e)}") from e
 
     def _convert_hexagon_features_to_geojson(self, features, year, scenario, ssp_scenario):
         """Convert Earth Engine hexagon features with temperature data to GeoJSON"""

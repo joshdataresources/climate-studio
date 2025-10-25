@@ -155,14 +155,16 @@ export function OpenLayersGlobe({
         style: (feature) => {
           const tempAnomaly = feature.get('tempAnomaly') || 0
           const [r, g, b, a] = getTempColor(tempAnomaly)
+          const opacity = a * (controls.projectionOpacity || 0.6)
 
           return new Style({
             fill: new Fill({
-              color: `rgba(${r}, ${g}, ${b}, ${a * (controls.projectionOpacity || 0.6)})`
+              color: `rgba(${r}, ${g}, ${b}, ${opacity})`
             }),
             stroke: new Stroke({
-              color: 'rgba(0, 0, 0, 0)',
-              width: 0
+              // Use matching color with same opacity to eliminate gaps between hexagons
+              color: `rgba(${r}, ${g}, ${b}, ${opacity})`,
+              width: 0.5
             })
           })
         }
