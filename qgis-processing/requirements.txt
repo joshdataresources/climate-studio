@@ -1,7 +1,7 @@
 flask==3.0.0
 flask-cors==4.0.0
 earthengine-api==0.1.384
-h3==3.7.6
+h3==4.3.1
 numpy==1.26.2
 shapely==2.0.2
 requests==2.31.0
