@@ -120,7 +120,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
       name: 'NASA NEX-GDDP-CMIP6',
       url: 'https://www.nccs.nasa.gov/services/data-collections'
     },
-    defaultActive: true,
+    defaultActive: false,
     controls: ['temperatureMode', 'projectionOpacity'],
     fetch: {
       method: 'GET',
@@ -198,7 +198,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
       name: 'Yale YCEO Summer UHI v4',
       url: 'https://developers.google.com/earth-engine/datasets/catalog/YALE_YCEO_UHI_Summer_UHI_yearly_pixel_v4'
     },
-    defaultActive: true,
+    defaultActive: false,
     controls: ['urbanHeatSeason', 'urbanHeatColorScheme', 'urbanHeatOpacity'],
     fetch: {
       method: 'GET',
@@ -237,7 +237,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
       name: 'CHIRPS via Earth Engine',
       url: 'https://www.chc.ucsb.edu/data/chirps'
     },
-    defaultActive: true,
+    defaultActive: false,
     controls: ['droughtMetric', 'droughtOpacity'],
     fetch: {
       method: 'GET',

@@ -634,7 +634,7 @@ export function GISAnalysisApp() {
             {/* Saved Views Section */}
             <div className="mt-3 space-y-2 border-t border-border/60 pt-3">
               <div className="flex items-center justify-between">
-                <div className="text-xs font-semibold uppercase text-muted-foreground">Views</div>
+                <h3 className="text-sm font-semibold">Views</h3>
                 <Button
                   size="sm"
                   variant="ghost"
