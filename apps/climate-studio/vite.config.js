@@ -7,7 +7,7 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
-  base: '/climate-studio/',
+  base: '/',
   plugins: [
     react(),
     tsconfigPaths()
