@@ -10,6 +10,7 @@ from flask_cors import CORS
 import logging
 import sys
 import os
+import requests
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -41,7 +42,7 @@ ee_project = os.getenv('EARTHENGINE_PROJECT', 'josh-geo-the-second')
 # Initialize climate services
 climate_service = NASAEEClimateService(ee_project=ee_project)
 sea_level_service = NOAASeaLevelService()
-heat_island_service = UrbanHeatIslandService()
+heat_island_service = UrbanHeatIslandService(ee_project=ee_project)
 relief_service = TopographicReliefService()
 drought_service = PrecipitationDroughtService(ee_project=ee_project)
 
@@ -117,11 +118,11 @@ def temperature_projection():
                 'error': 'Scenario must be one of: rcp26, rcp45, rcp85'
             }), 400
 
-        # Validate resolution
-        if not (4 <= resolution <= 10):
+        # Validate resolution (expanded range to support all zoom levels)
+        if not (1 <= resolution <= 10):
             return jsonify({
                 'success': False,
-                'error': 'Resolution must be between 4 and 10'
+                'error': 'Resolution must be between 1 and 10'
             }), 400
 
         logger.info(f"Temperature projection request: bounds=[{south},{north}]x[{west},{east}], "
@@ -168,6 +169,168 @@ def temperature_projection():
             'success': False,
             'error': str(e)
         }), 500
+
+
+@app.route('/api/climate/temperature-projection/tiles', methods=['GET'])
+def temperature_projection_tiles():
+    """
+    Get temperature projection tile URL for smooth heatmap visualization
+
+    Query Parameters:
+        north (float): Northern latitude bound (optional, for API compatibility)
+        south (float): Southern latitude bound (optional)
+        east (float): Eastern longitude bound (optional)
+        west (float): Western longitude bound (optional)
+        year (int): Projection year (2020-2100), default 2050
+        scenario (str): Climate scenario (rcp26, rcp45, rcp85), default rcp45
+        mode (str): Display mode ('anomaly' or 'actual'), default 'anomaly'
+
+    Returns:
+        JSON with Earth Engine tile URL and metadata
+    """
+    try:
+        # Parse query parameters
+        north = request.args.get('north', type=float)
+        south = request.args.get('south', type=float)
+        east = request.args.get('east', type=float)
+        west = request.args.get('west', type=float)
+        year = request.args.get('year', default=2050, type=int)
+        scenario = request.args.get('scenario', default='rcp45', type=str)
+        mode = request.args.get('mode', default='anomaly', type=str)
+
+        # Validate year range
+        if not (2020 <= year <= 2100):
+            return jsonify({
+                'success': False,
+                'error': 'Year must be between 2020 and 2100'
+            }), 400
+
+        # Validate scenario
+        if scenario not in ['rcp26', 'rcp45', 'rcp85']:
+            return jsonify({
+                'success': False,
+                'error': 'Scenario must be one of: rcp26, rcp45, rcp85'
+            }), 400
+
+        # Validate mode
+        if mode not in ['anomaly', 'actual']:
+            return jsonify({
+                'success': False,
+                'error': 'Mode must be one of: anomaly, actual'
+            }), 400
+
+        logger.info(f"Temperature projection tile request: year={year}, scenario={scenario}, mode={mode}")
+
+        # Build bounds dict (optional, not used for global tiles)
+        bounds = {
+            'north': north or 90,
+            'south': south or -90,
+            'east': east or 180,
+            'west': west or -180
+        }
+
+        # Get tile URL
+        result = climate_service.get_tile_url(
+            bounds=bounds,
+            year=year,
+            scenario=scenario,
+            mode=mode
+        )
+
+        if result:
+            return jsonify({
+                'success': True,
+                'tile_url': result['tile_url'],
+                'metadata': result['metadata']
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Could not generate tile URL'
+            }), 500
+
+    except Exception as e:
+        logger.error(f"Error generating temperature tile URL: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/tiles/noaa-slr-metadata', methods=['GET'])
+def noaa_slr_metadata():
+    """
+    Get metadata for NOAA Sea Level Rise tiles
+
+    Query parameters:
+        feet: Sea level rise in feet (0-10), default 3
+
+    Returns:
+        JSON with tile metadata
+    """
+    try:
+        feet = request.args.get('feet', default=3, type=int)
+
+        return jsonify({
+            'success': True,
+            'feet': feet,
+            'tile_url': f'/api/tiles/noaa-slr/{feet}/{{z}}/{{x}}/{{y}}.png',
+            'metadata': {
+                'source': 'NOAA Sea Level Rise Viewer',
+                'feet': feet
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error getting NOAA metadata: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/tiles/noaa-slr/<int:feet>/<int:z>/<int:x>/<int:y>.png', methods=['GET'])
+def noaa_slr_tile(feet, z, x, y):
+    """
+    Proxy NOAA Sea Level Rise tiles
+
+    Args:
+        feet: Sea level rise in feet (0-10)
+        z: Zoom level
+        x: Tile X coordinate
+        y: Tile Y coordinate
+
+    Returns:
+        PNG tile image
+    """
+    try:
+        # NOAA SLR tile URL pattern
+        noaa_url = f"https://coast.noaa.gov/arcgis/rest/services/dc_slr/slr_{feet}ft/MapServer/tile/{z}/{y}/{x}"
+
+        # Fetch tile from NOAA
+        response = requests.get(noaa_url, timeout=10)
+
+        if response.status_code == 200:
+            return response.content, 200, {'Content-Type': 'image/png'}
+        else:
+            # Return empty PNG on error
+            import io
+            from PIL import Image
+            img = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
+            buf = io.BytesIO()
+            img.save(buf, format='PNG')
+            buf.seek(0)
+            return buf.getvalue(), 200, {'Content-Type': 'image/png'}
+
+    except Exception as e:
+        logger.error(f"Error fetching NOAA tile {z}/{x}/{y}: {str(e)}")
+        # Return empty PNG on error
+        import io
+        from PIL import Image
+        img = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
+        buf = io.BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+        return buf.getvalue(), 200, {'Content-Type': 'image/png'}
 
 
 @app.route('/api/climate/sea-level-rise', methods=['GET'])
@@ -380,11 +543,11 @@ def urban_heat_island():
                 'error': 'Invalid longitude bounds'
             }), 400
 
-        # Validate resolution
-        if not (4 <= resolution <= 10):
+        # Validate resolution (expanded range to support all zoom levels)
+        if not (1 <= resolution <= 10):
             return jsonify({
                 'success': False,
-                'error': 'Resolution must be between 4 and 10'
+                'error': 'Resolution must be between 1 and 10'
             }), 400
 
         logger.info(f"Urban heat island request: bounds=[{south},{north}]x[{west},{east}], "
@@ -476,6 +639,79 @@ def topographic_relief_tiles():
         }), 500
 
 
+@app.route('/api/climate/precipitation-drought/tiles', methods=['GET'])
+def precipitation_drought_tiles():
+    """
+    Get precipitation/drought tile URL for smooth heatmap visualization
+
+    Query Parameters:
+        north (float): Northern latitude bound (optional, for API compatibility)
+        south (float): Southern latitude bound (optional)
+        east (float): Eastern longitude bound (optional)
+        west (float): Western longitude bound (optional)
+        scenario (str): Climate scenario (rcp26, rcp45, rcp85), default rcp45
+        year (int): Projection year (2020-2100), default 2050
+        metric (str): Data type - 'precipitation', 'drought_index', or 'soil_moisture', default drought_index
+
+    Returns:
+        JSON with Earth Engine tile URL and metadata
+    """
+    try:
+        # Parse query parameters
+        north = request.args.get('north', type=float)
+        south = request.args.get('south', type=float)
+        east = request.args.get('east', type=float)
+        west = request.args.get('west', type=float)
+        scenario = request.args.get('scenario', default='rcp45', type=str)
+        year = request.args.get('year', default=2050, type=int)
+        metric = request.args.get('metric', default='drought_index', type=str)
+
+        # Validate metric
+        valid_metrics = ['precipitation', 'drought_index', 'soil_moisture']
+        if metric not in valid_metrics:
+            return jsonify({
+                'success': False,
+                'error': f'Invalid metric. Must be one of: {", ".join(valid_metrics)}'
+            }), 400
+
+        logger.info(f"Precipitation/drought tile request: metric={metric}, scenario={scenario}, year={year}")
+
+        # Build bounds dict (optional, not used for global tiles)
+        bounds = {
+            'north': north or 90,
+            'south': south or -90,
+            'east': east or 180,
+            'west': west or -180
+        }
+
+        # Get tile URL
+        result = drought_service.get_tile_url(
+            bounds=bounds,
+            scenario=scenario,
+            year=year,
+            metric=metric
+        )
+
+        if result:
+            return jsonify({
+                'success': True,
+                'tile_url': result['tile_url'],
+                'metadata': result['metadata']
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Could not generate tile URL'
+            }), 500
+
+    except Exception as e:
+        logger.error(f"Error generating precipitation/drought tile URL: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @app.route('/api/climate/precipitation-drought', methods=['GET'])
 def precipitation_drought():
     """
@@ -530,11 +766,11 @@ def precipitation_drought():
                 'error': f'Invalid metric. Must be one of: {", ".join(valid_metrics)}'
             }), 400
 
-        # Validate resolution
-        if not (4 <= resolution <= 10):
+        # Validate resolution (expanded range to support all zoom levels)
+        if not (1 <= resolution <= 10):
             return jsonify({
                 'success': False,
-                'error': 'Resolution must be between 4 and 10'
+                'error': 'Resolution must be between 1 and 10'
             }), 400
 
         logger.info(f"Precipitation/drought request: scenario={scenario}, year={year}, metric={metric}, resolution={resolution}")
@@ -642,10 +878,12 @@ if __name__ == '__main__':
     logger.info(f"📊 Endpoints:")
     logger.info(f"   GET  /health")
     logger.info(f"   GET  /api/climate/temperature-projection")
+    logger.info(f"   GET  /api/climate/temperature-projection/tiles")
     logger.info(f"   GET  /api/climate/sea-level-rise")
     logger.info(f"   GET  /api/climate/urban-heat-island/tiles")
     logger.info(f"   GET  /api/climate/topographic-relief/tiles")
     logger.info(f"   GET  /api/climate/precipitation-drought")
+    logger.info(f"   GET  /api/climate/precipitation-drought/tiles")
     logger.info(f"   GET  /api/climate/info")
 
     app.run(

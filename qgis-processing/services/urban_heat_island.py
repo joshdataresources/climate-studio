@@ -1,168 +1,203 @@
 """
 Urban Heat Island Service
 
-Provides urban heat island intensity data from real Landsat LST data
-with simulated fallback using H3 hexagons.
+Provides urban heat island intensity data from Yale YCEO dataset via Google Earth Engine.
 """
 
+import ee
 import h3
 import numpy as np
 from datetime import datetime
 import logging
-from landsat_lst import LandsatLSTService
 
 logger = logging.getLogger(__name__)
 
 
 class UrbanHeatIslandService:
-    """Service for generating urban heat island data"""
+    """Service for generating urban heat island data from Yale YCEO UHI dataset"""
 
-    def __init__(self):
-        """Initialize with Landsat LST service"""
-        self.landsat_service = LandsatLSTService()
-        self.use_real_data = self.landsat_service.initialized
+    def __init__(self, ee_project=None):
+        """Initialize with Earth Engine"""
+        self.initialized = False
+        self.ee_project = ee_project
+        self._initialize_ee()
+
+    def _initialize_ee(self):
+        """Initialize Google Earth Engine"""
+        try:
+            if self.ee_project:
+                ee.Initialize(project=self.ee_project)
+            else:
+                ee.Initialize()
+            self.initialized = True
+            logger.info("Earth Engine initialized for Yale UHI data")
+        except Exception as e:
+            logger.error(f"Failed to initialize Earth Engine: {e}")
+            self.initialized = False
 
     def get_tile_url(self, bounds, season='summer', color_scheme='temperature'):
         """
-        Get Earth Engine tile URL for smooth heat map visualization
+        Get Earth Engine tile URL for smooth heat map visualization using Yale YCEO UHI data
 
         Args:
             bounds: Dict with 'north', 'south', 'east', 'west' keys
-            season: 'summer' or 'winter' - which season to show
+            season: 'summer' or 'winter' - not used for yearly data, kept for API compatibility
             color_scheme: 'temperature', 'heat', or 'urban' - color palette
 
         Returns:
             Dict with 'tile_url' and 'metadata', or None if not available
         """
-        if self.use_real_data:
-            return self.landsat_service.get_tile_url(bounds, season, color_scheme)
-        return None
+        if not self.initialized:
+            logger.error("Earth Engine not initialized")
+            return None
 
-    def get_heat_island_data(self, bounds, date=None, resolution=8, use_real_data=True):
+        try:
+            # Yale YCEO Summer UHI dataset (2003-2018)
+            dataset = ee.ImageCollection('YALE/YCEO/UHI/Summer_UHI_yearly_pixel/v4')
+
+            # Get the most recent year available (2018)
+            # Use mean to create a composite showing typical UHI patterns
+            uhi_composite = dataset.select('Nighttime').mean()
+
+            # Color palettes based on preference
+            if color_scheme == 'heat':
+                # Yellow to red gradient (heat emphasis)
+                palette = [
+                    '#ffffcc', '#ffeda0', '#fed976', '#feb24c', '#fd8d3c',
+                    '#fc4e2a', '#e31a1c', '#bd0026', '#800026'
+                ]
+            elif color_scheme == 'urban':
+                # Purple to orange gradient (urban emphasis)
+                palette = [
+                    '#f7fcf0', '#e0f3db', '#ccebc5', '#a8ddb5', '#7bccc4',
+                    '#4eb3d3', '#2b8cbe', '#0868ac', '#084081'
+                ]
+            else:  # temperature (default)
+                # Cool to warm gradient
+                palette = [
+                    '#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8',
+                    '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026'
+                ]
+
+            vis_params = {
+                'min': -1.5,
+                'max': 7.5,
+                'palette': palette
+            }
+
+            # Get map ID and tile URL
+            map_id = uhi_composite.getMapId(vis_params)
+            tile_url = map_id['tile_fetcher'].url_format
+
+            # Calculate regional statistics for the viewport
+            region = ee.Geometry.Rectangle([
+                bounds['west'], bounds['south'],
+                bounds['east'], bounds['north']
+            ])
+
+            # Get mean UHI intensity for the region
+            stats = uhi_composite.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=region,
+                scale=300,  # 300m native resolution
+                maxPixels=1e9
+            ).getInfo()
+
+            mean_uhi = stats.get('Nighttime', None)
+
+            return {
+                'tile_url': tile_url,
+                'metadata': {
+                    'source': 'Yale YCEO Urban Heat Island (Summer UHI v4)',
+                    'dataset': 'YALE/YCEO/UHI/Summer_UHI_yearly_pixel/v4',
+                    'temporal_coverage': '2003-2018',
+                    'resolution': '300m',
+                    'band': 'Nighttime',
+                    'color_scheme': color_scheme,
+                    'average_uhi_intensity': round(mean_uhi, 2) if mean_uhi is not None else None,
+                    'description': 'Nighttime surface urban heat island intensity (°C)'
+                }
+            }
+
+        except Exception as e:
+            logger.error(f"Error generating UHI tile URL: {e}")
+            return None
+
+    def get_heat_island_data(self, bounds, date=None, resolution=8):
         """
-        Generate urban heat island data from real Landsat LST or simulation
+        Generate urban heat island data from Yale YCEO dataset via Earth Engine
 
         Args:
             bounds: Dict with 'north', 'south', 'east', 'west' keys
-            date: ISO date string (YYYY-MM-DD), optional
+            date: ISO date string (YYYY-MM-DD), optional (not used, kept for API compatibility)
             resolution: H3 resolution level (0-15), default 8
-            use_real_data: Whether to use real Landsat data (True) or simulation (False)
 
         Returns:
-            GeoJSON FeatureCollection with features
+            GeoJSON FeatureCollection with hexagonal features
         """
-        # Try to use real Landsat data if requested and available
-        if use_real_data and self.use_real_data:
-            logger.info("Fetching real Landsat LST data for urban heat island")
-            try:
-                lst_data = self.landsat_service.get_lst_data(bounds, date)
-                if lst_data:
-                    geojson = self.landsat_service.format_as_geojson(lst_data)
-                    if geojson:
-                        logger.info("Successfully retrieved real Landsat LST data")
-                        return geojson
-                logger.warning("Could not fetch real data, falling back to simulation")
-            except Exception as e:
-                logger.error(f"Error fetching Landsat data: {e}, falling back to simulation")
+        if not self.initialized:
+            logger.error("Earth Engine not initialized, cannot fetch UHI data")
+            return self._empty_geojson()
 
-        # Fall back to simulated data
-        logger.info(f"Generating simulated urban heat island data: resolution {resolution}")
-        # Clamp resolution to valid H3 range
-        resolution = max(0, min(15, resolution))
+        try:
+            logger.info(f"Fetching Yale UHI data: resolution {resolution}")
 
-        # Get hexagons covering the bounds
-        hex_ids = self._get_hexagons_in_bounds(bounds, resolution)
+            # Clamp resolution to valid H3 range
+            resolution = max(0, min(15, resolution))
 
-        # Calculate center point (urban core)
-        center_lat = (bounds['north'] + bounds['south']) / 2
-        center_lon = (bounds['east'] + bounds['west']) / 2
+            # Get Yale YCEO UHI dataset
+            dataset = ee.ImageCollection('YALE/YCEO/UHI/Summer_UHI_yearly_pixel/v4')
+            uhi_image = dataset.select('Nighttime').mean()
 
-        hexagons = []
+            # Define the region
+            region = ee.Geometry.Rectangle([
+                bounds['west'], bounds['south'],
+                bounds['east'], bounds['north']
+            ])
 
-        # Create multiple urban centers based on viewport size
-        # Larger viewports = more potential urban centers
-        bbox_width = bounds['east'] - bounds['west']
-        bbox_height = bounds['north'] - bounds['south']
-        bbox_area = bbox_width * bbox_height
+            # Sample the UHI data at hexagon centers
+            hex_ids = self._get_hexagons_in_bounds(bounds, resolution)
 
-        # Create 1-3 urban centers depending on viewport size
-        num_centers = min(3, max(1, int(bbox_area * 20)))
+            hexagons = []
+            for hex_id in hex_ids:
+                lat, lon = h3.cell_to_latlng(hex_id)
+                boundary = h3.cell_to_boundary(hex_id)
 
-        urban_centers = []
-        for i in range(num_centers):
-            # Use deterministic "random" placement based on bounds
-            seed_x = np.sin((bounds['west'] + bounds['east']) * (i + 1) * 12.9898) * 43758.5453
-            seed_y = np.sin((bounds['north'] + bounds['south']) * (i + 1) * 78.233) * 43758.5453
-            offset_x = (seed_x - np.floor(seed_x)) * bbox_width
-            offset_y = (seed_y - np.floor(seed_y)) * bbox_height
+                # Sample UHI intensity at this location
+                point = ee.Geometry.Point([lon, lat])
+                sample = uhi_image.sample(point, 300).first()
 
-            center_lon = bounds['west'] + offset_x
-            center_lat = bounds['south'] + offset_y
+                if sample:
+                    try:
+                        intensity = sample.get('Nighttime').getInfo()
+                        if intensity is not None and not np.isnan(intensity):
+                            hexagons.append({
+                                'hex_id': hex_id,
+                                'center': [lon, lat],
+                                'boundary': boundary,
+                                'intensity': round(float(intensity), 2),
+                                'level': self._classify_level(float(intensity))
+                            })
+                    except:
+                        pass  # Skip hexagons with no data
 
-            # Vary the intensity of each urban center
-            intensity_seed = np.sin((center_lat + center_lon) * 45.678) * 23456.789
-            max_temp = 3.0 + (intensity_seed - np.floor(intensity_seed)) * 3.0  # 3-6°C
+            logger.info(f"Generated {len(hexagons)} Yale UHI hexagons")
+            return self._to_geojson(hexagons, date, resolution)
 
-            urban_centers.append({
-                'lat': center_lat,
-                'lon': center_lon,
-                'max_temp': max_temp,
-                'radius': 0.02 + (intensity_seed - np.floor(intensity_seed)) * 0.03  # varying size
-            })
+        except Exception as e:
+            logger.error(f"Error fetching Yale UHI data: {e}")
+            return self._empty_geojson()
 
-        for hex_id in hex_ids:
-            # Get hexagon center
-            lat, lon = h3.cell_to_latlng(hex_id)
-
-            # Get hexagon boundary
-            boundary = h3.cell_to_boundary(hex_id)
-
-            # Calculate intensity based on distance from urban centers
-            # Urban heat island effect: hottest at center, gradual cooling with distance
-            intensity = 0.0
-
-            for center in urban_centers:
-                # Calculate distance from this urban center
-                dist = np.sqrt((lat - center['lat'])**2 + (lon - center['lon'])**2)
-
-                # Apply heat island effect with smooth falloff
-                if dist < center['radius']:
-                    # Core urban area - high intensity
-                    # Use inverse square for realistic falloff
-                    center_effect = center['max_temp'] * (1 - (dist / center['radius']) ** 2)
-                else:
-                    # Suburban/rural - exponential decay
-                    decay = np.exp(-(dist - center['radius']) / (center['radius'] * 2))
-                    center_effect = center['max_temp'] * 0.4 * decay
-
-                intensity += center_effect
-
-            # Add small-scale variation (buildings, parks, streets)
-            # This creates texture without random noise
-            micro_seed = np.sin(lat * 1000.0 + lon * 1000.0) * 43758.5453
-            micro_variation = (micro_seed - np.floor(micro_seed)) * 1.0 - 0.5  # ±0.5°C
-            intensity += micro_variation
-
-            # Add occasional cool spots (parks, water bodies)
-            cool_spot_seed = np.sin(lat * 234.567 + lon * 345.678) * 12345.678
-            if (cool_spot_seed - np.floor(cool_spot_seed)) > 0.88:  # 12% chance
-                intensity -= 2.0  # Significant cooling from vegetation/water
-
-            # Clamp to reasonable range (0-6°C)
-            intensity = max(0, min(6.0, intensity))
-
-            hexagons.append({
-                'hex_id': hex_id,
-                'center': [lon, lat],
-                'boundary': boundary,
-                'intensity': round(intensity, 2),
-                'level': self._classify_level(intensity)
-            })
-
-        logger.info(f"Generated {len(hexagons)} urban heat island hexagons")
-
-        # Convert to GeoJSON
-        return self._to_geojson(hexagons, date, resolution)
+    def _empty_geojson(self):
+        """Return empty GeoJSON FeatureCollection"""
+        return {
+            'type': 'FeatureCollection',
+            'features': [],
+            'metadata': {
+                'error': 'Could not fetch UHI data',
+                'count': 0
+            }
+        }
 
     def _get_hexagons_in_bounds(self, bounds, resolution):
         """Get H3 hexagon IDs that cover the bounding box"""
@@ -232,7 +267,8 @@ class UrbanHeatIslandService:
                 'date': date or datetime.now().isoformat().split('T')[0],
                 'resolution': resolution,
                 'count': len(features),
-                'source': 'Simulated Urban Heat Island',
-                'description': 'Urban heat island intensity showing temperature differences between urban and rural areas'
+                'source': 'Yale YCEO Urban Heat Island (Summer UHI v4)',
+                'temporal_coverage': '2003-2018',
+                'description': 'Urban heat island intensity from MODIS LST data (°C)'
             }
         }
