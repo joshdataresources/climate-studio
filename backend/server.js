@@ -1283,6 +1283,38 @@ app.get('/api/modis/gibs-tiles', async (req, res) => {
   }
 });
 
+// NOAA Sea Level Rise Metadata - Validation endpoint
+app.get('/api/tiles/noaa-slr-metadata', async (req, res) => {
+  try {
+    const { feet = 3 } = req.query;
+
+    // Validate feet parameter
+    const validFeet = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    if (!validFeet.includes(parseInt(feet))) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid feet parameter. Must be between 0 and 10.'
+      });
+    }
+
+    // Return success - tiles are available
+    res.json({
+      success: true,
+      data: {
+        available: true,
+        feet: parseInt(feet),
+        source: 'NOAA Sea Level Rise Viewer',
+        tileUrl: `/api/tiles/noaa-slr/${feet}/{z}/{x}/{y}.png`
+      }
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // NOAA Sea Level Rise endpoint
 // NOAA Sea Level Rise Tile Proxy
 app.get('/api/tiles/noaa-slr/:feet/:z/:x/:y.png', async (req, res) => {
@@ -1481,6 +1513,178 @@ app.get('/api/nasa/temperature-projection', async (req, res) => {
   }
 });
 
+// Temperature Projection - Alias endpoint for /api/climate path
+app.get('/api/climate/temperature-projection', async (req, res) => {
+  try {
+    const { north, south, east, west, year = 2050, scenario = 'rcp45', resolution, use_real_data, zoom } = req.query;
+
+    if (!north || !south || !east || !west) {
+      return res.status(400).json({
+        success: false,
+        error: 'Bounding box coordinates required (north, south, east, west)'
+      });
+    }
+
+    // Use resolution from frontend if provided
+    let finalResolution;
+    if (resolution) {
+      finalResolution = parseInt(resolution);
+      console.log(`🌡️ Using frontend-specified resolution: ${finalResolution}`);
+    } else {
+      // Fallback to area-based resolution
+      const latSpan = Math.abs(parseFloat(north) - parseFloat(south));
+      const lonSpan = Math.abs(parseFloat(east) - parseFloat(west));
+      const viewportArea = latSpan * lonSpan;
+
+      if (viewportArea < 5) {
+        finalResolution = 8;
+      } else if (viewportArea < 50) {
+        finalResolution = 7;
+      } else if (viewportArea < 200) {
+        finalResolution = 6;
+      } else if (viewportArea < 1000) {
+        finalResolution = 5;
+      } else {
+        finalResolution = 4;
+      }
+      console.log(`🌡️ Calculated area-based resolution: ${finalResolution} (viewport area: ${viewportArea.toFixed(2)}°²)`);
+    }
+
+    console.log(`🌡️ Proxying temperature projection request: ${year}, scenario ${scenario}, zoom ${zoom || 'N/A'}, resolution ${finalResolution}...`);
+
+    // Build query parameters for climate service
+    const params = new URLSearchParams({
+      north,
+      south,
+      east,
+      west,
+      year,
+      scenario,
+      resolution: finalResolution
+    });
+
+    // Add optional parameters if provided
+    if (use_real_data) params.append('use_real_data', use_real_data);
+
+    // Proxy request to Python climate service
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/temperature-projection?${params.toString()}`;
+
+    console.log(`📡 Fetching from: ${climateServiceUrl}`);
+
+    const response = await axios.get(climateServiceUrl, {
+      timeout: 60000 // 60 second timeout for large areas
+    });
+
+    // Check if real or fallback data
+    const isRealData = response.data.data?.metadata?.isRealData === true;
+    const dataSource = response.data.data?.metadata?.source || 'unknown';
+    const featureCount = response.data.data?.features?.length || 0;
+
+    if (isRealData) {
+      console.log(`✅ REAL NASA DATA: ${featureCount} hexes from climate service`);
+      console.log(`✅ Source: ${dataSource}`);
+    } else {
+      console.warn(`⚠️ FALLBACK DATA: ${featureCount} hexes from climate service`);
+      console.warn(`⚠️ Source: ${dataSource}`);
+    }
+
+    // Return the response from climate service
+    res.json(response.data);
+
+  } catch (error) {
+    console.error('❌ Temperature projection error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Precipitation & Drought - Proxy to Python Climate Service
+app.get('/api/climate/precipitation-drought', async (req, res) => {
+  try {
+    const { north, south, east, west, scenario = 'rcp45', year = 2050, metric = 'drought_index', resolution } = req.query;
+
+    if (!north || !south || !east || !west) {
+      return res.status(400).json({
+        success: false,
+        error: 'Bounding box coordinates required (north, south, east, west)'
+      });
+    }
+
+    // Use resolution from frontend if provided
+    let finalResolution;
+    if (resolution) {
+      finalResolution = parseInt(resolution);
+      console.log(`🌧️ Using frontend-specified resolution: ${finalResolution}`);
+    } else {
+      // Fallback to area-based resolution
+      const latSpan = Math.abs(parseFloat(north) - parseFloat(south));
+      const lonSpan = Math.abs(parseFloat(east) - parseFloat(west));
+      const viewportArea = latSpan * lonSpan;
+
+      if (viewportArea < 5) {
+        finalResolution = 8;
+      } else if (viewportArea < 50) {
+        finalResolution = 7;
+      } else if (viewportArea < 200) {
+        finalResolution = 6;
+      } else if (viewportArea < 1000) {
+        finalResolution = 5;
+      } else {
+        finalResolution = 4;
+      }
+      console.log(`🌧️ Calculated area-based resolution: ${finalResolution} (viewport area: ${viewportArea.toFixed(2)}°²)`);
+    }
+
+    console.log(`🌧️ Proxying precipitation/drought request: ${year}, scenario ${scenario}, metric ${metric}, resolution ${finalResolution}...`);
+
+    // Build query parameters for climate service
+    const params = new URLSearchParams({
+      north,
+      south,
+      east,
+      west,
+      scenario,
+      year,
+      metric,
+      resolution: finalResolution
+    });
+
+    // Proxy request to Python climate service
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/precipitation-drought?${params.toString()}`;
+
+    console.log(`📡 Fetching from: ${climateServiceUrl}`);
+
+    const response = await axios.get(climateServiceUrl, {
+      timeout: 60000 // 60 second timeout for large areas
+    });
+
+    // Check if real or fallback data
+    const isRealData = response.data.data?.metadata?.isRealData === true;
+    const dataSource = response.data.data?.metadata?.source || 'unknown';
+    const featureCount = response.data.data?.features?.length || 0;
+
+    if (isRealData) {
+      console.log(`✅ REAL CHIRPS DATA: ${featureCount} hexes from climate service`);
+      console.log(`✅ Source: ${dataSource}`);
+    } else {
+      console.warn(`⚠️ FALLBACK DATA: ${featureCount} hexes from climate service`);
+      console.warn(`⚠️ Source: ${dataSource}`);
+    }
+
+    // Return the response from climate service
+    res.json(response.data);
+
+  } catch (error) {
+    console.error('❌ Precipitation/drought error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Urban Heat Island Tiles Endpoint - Proxy to Python Climate Service
 app.get('/api/climate/urban-heat-island/tiles', async (req, res) => {
   try {
@@ -1547,6 +1751,58 @@ app.get('/api/climate/topographic-relief/tiles', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Topographic relief tiles error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Precipitation & Drought Endpoint - Proxy to Python Climate Service
+app.get('/api/climate/precipitation-drought', async (req, res) => {
+  try {
+    const { north, south, east, west, scenario, year, metric, resolution } = req.query;
+
+    console.log(`🌧️ Proxying precipitation/drought request: scenario=${scenario}, year=${year}, metric=${metric}, resolution=${resolution}...`);
+
+    // Build query parameters for climate service
+    const params = new URLSearchParams();
+    if (north) params.append('north', north);
+    if (south) params.append('south', south);
+    if (east) params.append('east', east);
+    if (west) params.append('west', west);
+    if (scenario) params.append('scenario', scenario);
+    if (year) params.append('year', year);
+    if (metric) params.append('metric', metric);
+    if (resolution) params.append('resolution', resolution);
+
+    // Proxy request to Python climate service
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/precipitation-drought?${params.toString()}`;
+
+    console.log(`📡 Fetching from: ${climateServiceUrl}`);
+
+    const response = await axios.get(climateServiceUrl, {
+      timeout: 60000 // 60 second timeout for Earth Engine processing
+    });
+
+    // Check if real or fallback data
+    const isRealData = response.data.data?.metadata?.isRealData === true;
+    const dataSource = response.data.data?.metadata?.source || 'unknown';
+    const featureCount = response.data.data?.features?.length || 0;
+
+    if (isRealData) {
+      console.log(`✅ REAL CHIRPS DATA: ${featureCount} hexes from climate service`);
+      console.log(`✅ Source: ${dataSource}`);
+    } else {
+      console.warn(`⚠️ FALLBACK DATA: ${featureCount} hexes from climate service`);
+      console.warn(`⚠️ Source: ${dataSource}`);
+    }
+
+    // Return the response from climate service
+    res.json(response.data);
+
+  } catch (error) {
+    console.error('❌ Precipitation/drought error:', error.message);
     res.status(500).json({
       success: false,
       error: error.message

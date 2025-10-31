@@ -1,0 +1,26 @@
+{
+  "name": "climate-projects",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Monorepo for climate visualization projects",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "dev:studio": "npm run dev --workspace=climate-studio",
+    "build:studio": "npm run build --workspace=climate-studio",
+    "preview:studio": "npm run preview --workspace=climate-studio",
+    "dev:hempstead": "npm run dev --workspace=hempstead-resilience",
+    "build:hempstead": "npm run build --workspace=hempstead-resilience",
+    "preview:hempstead": "npm run preview --workspace=hempstead-resilience",
+    "dev:shared": "npm run dev --workspace=@climate/shared",
+    "build:shared": "npm run build --workspace=@climate/shared",
+    "install:all": "npm install"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  }
+}
