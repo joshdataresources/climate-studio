@@ -411,11 +411,27 @@ interface LayerPanelProps {
 
 export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
   const { activeLayerIds, toggleLayer, isLayerActive } = useClimate()
+  const [showDescriptions, setShowDescriptions] = React.useState(false)
 
   return (
     <div className="space-y-6 p-4">
       <div>
-        <h3 className="text-sm font-semibold">Climate Layers</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold">Climate Layers</h3>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <span className="text-xs text-muted-foreground">Details</span>
+            <div className="relative inline-block w-9 h-5">
+              <input
+                type="checkbox"
+                checked={showDescriptions}
+                onChange={(e) => setShowDescriptions(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-9 h-5 bg-muted rounded-full peer peer-checked:bg-blue-500 transition-colors"></div>
+              <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
+            </div>
+          </label>
+        </div>
         <div className="mt-3 space-y-3">
           {climateLayers.map(layer => {
             const active = isLayerActive(layer.id)
@@ -432,17 +448,20 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
                   checked={active}
                   onChange={() => toggleLayer(layer.id)}
                 />
-                <div className="space-y-1">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-sm font-medium">{layer.title}</h4>
-                    <span className="rounded bg-secondary px-2 py-0.5 text-[10px] uppercase tracking-wide text-secondary-foreground">
-                      {layer.category}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{layer.description}</p>
-                  <p className="text-[11px] text-muted-foreground/80">
-                    Source: <span className="font-medium text-foreground">{layer.source.name}</span>
-                  </p>
+                <div className="space-y-1 flex-1 min-w-0">
+                  <h4 className="text-sm font-medium">{layer.title}</h4>
+                  {showDescriptions ? (
+                    <>
+                      <p className="text-xs text-muted-foreground">{layer.description}</p>
+                      <p className="text-[11px] text-muted-foreground/80">
+                        Source: <span className="font-medium text-foreground">{layer.source.name}</span>
+                      </p>
+                    </>
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground/80 truncate">
+                      Source: <span className="font-medium text-foreground">{layer.source.name}</span>
+                    </p>
+                  )}
                 </div>
               </label>
             )
@@ -512,14 +531,15 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
       {/* Individual Layer Controls - Accordion panels */}
       <div className="space-y-3">
         {activeLayersWithControls.map(layer => {
-          // Auto-close panels that only have opacity controls
+          // Auto-close panels that only have opacity controls or topographic relief
           const hasOnlyOpacity = layer.controls.length === 1 &&
             (layer.controls[0] === 'seaLevelOpacity' ||
              layer.controls[0] === 'reliefOpacity' ||
              layer.controls[0] === 'projectionOpacity' ||
              layer.controls[0] === 'urbanHeatOpacity' ||
              layer.controls[0] === 'droughtOpacity');
-          const defaultOpen = !hasOnlyOpacity;
+          const isReliefLayer = layer.id === 'topographic_relief';
+          const defaultOpen = !hasOnlyOpacity && !isReliefLayer;
 
           return (
           <AccordionItem key={layer.id} title={layer.title} defaultOpen={defaultOpen}>

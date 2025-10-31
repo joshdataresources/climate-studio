@@ -324,55 +324,17 @@ export function MapboxGlobe({
         <ScaleControl position="bottom-left" />
       </Map>
 
-      {/* Climate Data Tooltip */}
+      {/* Coordinates Tooltip */}
       {hoverInfo && (
         <div
-          className="absolute z-10 pointer-events-none bg-card/95 backdrop-blur-lg border border-border/60 rounded-lg shadow-lg p-3 text-xs"
+          className="absolute z-10 pointer-events-none bg-card/95 backdrop-blur-lg border border-border/60 rounded-lg shadow-lg px-2.5 py-1.5 text-xs"
           style={{
             left: hoverInfo.x + 10,
             top: hoverInfo.y + 10
           }}
         >
-          <div className="font-semibold text-sm mb-2 text-foreground">
+          <div className="font-semibold text-foreground">
             {hoverInfo.lat.toFixed(4)}°, {hoverInfo.lng.toFixed(4)}°
-          </div>
-          <div className="grid grid-cols-2 gap-x-3 gap-y-1.5">
-            {seaLevelActive && (
-              <div className="flex flex-col space-y-0.5">
-                <span className="text-muted-foreground">Sea Level Rise</span>
-                <span className="font-semibold text-sky-400">~{seaLevelFeet}ft</span>
-              </div>
-            )}
-            {temperatureProjectionActive && tempAnomalyData !== undefined && (
-              <div className="flex flex-col space-y-0.5">
-                <span className="text-muted-foreground">Temp. Anomaly</span>
-                <span className="font-semibold text-orange-400">+{tempAnomalyData.toFixed(1)}°C</span>
-              </div>
-            )}
-            {temperatureProjectionActive && actualTempData !== undefined && (
-              <div className="flex flex-col space-y-0.5">
-                <span className="text-muted-foreground">Actual Temp.</span>
-                <span className="font-semibold text-red-400">{actualTempData.toFixed(1)}°C</span>
-              </div>
-            )}
-            {precipitationDroughtActive && precipitationData !== undefined && (
-              <div className="flex flex-col space-y-0.5">
-                <span className="text-muted-foreground">Precipitation</span>
-                <span className="font-semibold text-blue-400">{precipitationData.toFixed(1)}mm</span>
-              </div>
-            )}
-            {precipitationDroughtActive && droughtIndexData !== undefined && (
-              <div className="flex flex-col space-y-0.5">
-                <span className="text-muted-foreground">Drought</span>
-                <span className="font-semibold text-yellow-400">{droughtIndexData.toFixed(1)}</span>
-              </div>
-            )}
-            {precipitationDroughtActive && soilMoistureData !== undefined && (
-              <div className="flex flex-col space-y-0.5">
-                <span className="text-muted-foreground">Soil Moisture</span>
-                <span className="font-semibold text-green-400">{soilMoistureData.toFixed(0)}%</span>
-              </div>
-            )}
           </div>
         </div>
       )}
