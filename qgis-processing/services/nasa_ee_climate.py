@@ -53,6 +53,125 @@ class NASAEEClimateService:
             logger.error(f"Failed to initialize Earth Engine: {e}")
             self.initialized = False
 
+    def get_tile_url(self, bounds, year=2050, scenario='rcp45', mode='anomaly'):
+        """
+        Get Earth Engine tile URL for smooth heatmap visualization
+
+        Args:
+            bounds: Dict with 'north', 'south', 'east', 'west' keys
+            year: Projection year (2015-2100)
+            scenario: Climate scenario ('rcp26', 'rcp45', 'rcp85')
+            mode: 'anomaly' or 'actual' temperature display
+
+        Returns:
+            Dict with 'tile_url' and 'metadata'
+        """
+        if not self.initialized:
+            logger.error("Earth Engine not initialized")
+            return None
+
+        try:
+            # Map RCP to SSP scenario
+            ssp_scenario = self.SCENARIOS.get(scenario, 'ssp245')
+
+            # Get the dataset
+            dataset = ee.ImageCollection('NASA/GDDP-CMIP6')
+
+            # Filter by model, scenario, and year
+            filtered = dataset.filter(ee.Filter.eq('model', self.DEFAULT_MODEL)) \
+                             .filter(ee.Filter.eq('scenario', ssp_scenario)) \
+                             .filter(ee.Filter.calendarRange(year, year, 'year'))
+
+            # Get tasmax (maximum temperature) and calculate mean for the year
+            mean_tasmax = filtered.select('tasmax').mean()
+
+            # Convert from Kelvin to Celsius
+            temp_c = mean_tasmax.subtract(273.15)
+
+            # Calculate anomaly or use actual temperature
+            if mode == 'anomaly':
+                temp_display = temp_c.subtract(self.BASELINE_TEMP_C)
+                # White to red gradient for temperature anomaly
+                vis_params = {
+                    'min': 0,
+                    'max': 8,
+                    'palette': [
+                        '#ffffff', '#fefce8', '#fef9c3', '#fef08a', '#fde047', '#facc15',
+                        '#f59e0b', '#fb923c', '#f97316', '#ea580c', '#dc2626', '#ef4444',
+                        '#dc2626', '#b91c1c', '#991b1b', '#7f1d1d'
+                    ]
+                }
+            else:
+                temp_display = temp_c
+                # Blue to red gradient for actual temperature
+                vis_params = {
+                    'min': 10,
+                    'max': 40,
+                    'palette': [
+                        '#1e3a8a', '#3b82f6', '#fef08a', '#fb923c', '#ef4444', '#7f1d1d', '#450a0a'
+                    ]
+                }
+
+            # Resample to higher resolution with bilinear interpolation for smoother appearance at high zoom
+            # Native resolution is ~25km, resample to ~5km for better visual quality
+            temp_display_resampled = temp_display.resample('bilinear').reproject(
+                crs='EPSG:4326',
+                scale=5000  # 5km resolution
+            )
+
+            # Get map ID and tile URL
+            map_id = temp_display_resampled.getMapId(vis_params)
+            tile_url = map_id['tile_fetcher'].url_format
+
+            # Calculate regional statistics for the viewport
+            region = ee.Geometry.Rectangle([
+                bounds['west'], bounds['south'],
+                bounds['east'], bounds['north']
+            ])
+
+            # Get mean temperature for the region
+            stats = temp_display_resampled.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=region,
+                scale=5000,
+                maxPixels=1e9
+            ).getInfo()
+
+            mean_temp = stats.get('tasmax', None)
+
+            # Calculate average temperature and anomaly
+            if mode == 'anomaly':
+                average_anomaly = mean_temp if mean_temp is not None else None
+                average_temperature = (mean_temp + self.BASELINE_TEMP_C) if mean_temp is not None else None
+            else:
+                average_temperature = mean_temp
+                average_anomaly = (mean_temp - self.BASELINE_TEMP_C) if mean_temp is not None else None
+
+            logger.info(f"Generated tile URL for NASA temperature: {year}, {scenario}, mode={mode}")
+            logger.info(f"Regional stats: avg_temp={average_temperature}, avg_anomaly={average_anomaly}")
+
+            return {
+                'tile_url': tile_url,
+                'metadata': {
+                    'source': 'NASA NEX-GDDP-CMIP6 via Earth Engine',
+                    'model': self.DEFAULT_MODEL,
+                    'scenario': scenario,
+                    'ssp_scenario': ssp_scenario,
+                    'year': year,
+                    'mode': mode,
+                    'isRealData': True,
+                    'dataType': 'tiles',
+                    'averageTemperature': round(average_temperature, 2) if average_temperature is not None else None,
+                    'averageAnomaly': round(average_anomaly, 2) if average_anomaly is not None else None
+                }
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to generate tile URL: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return None
+
     def get_temperature_projection(self, bounds, year=2050, scenario='rcp45', resolution=7):
         """
         Get temperature projection data for a bounding box
@@ -76,8 +195,19 @@ class NASAEEClimateService:
         lon_span = bounds['east'] - bounds['west']
 
         # Calculate approximate number of hexagons
-        # H3 resolution area approximations (km²): res2=~86000, res3=~12000, res4=~1700, res5=~240, res6=~34, res7=~4.8
-        resolution_area_km2 = {2: 86000, 3: 12000, 4: 1700, 5: 240, 6: 34, 7: 4.8, 8: 0.7}
+        # H3 resolution area approximations (km²): expanded to support res 1-10
+        resolution_area_km2 = {
+            1: 600000,   # Very large hexagons for global/continental view
+            2: 86000,    # Continental
+            3: 12000,    # Multi-country
+            4: 1700,     # Country/multi-state
+            5: 240,      # State/regional
+            6: 34,       # Metropolitan
+            7: 4.8,      # City
+            8: 0.7,      # Neighborhood
+            9: 0.1,      # Street level
+            10: 0.014    # Building level
+        }
         hex_area = resolution_area_km2.get(resolution, 240)
 
         # Approximate area of bounding box in km²
@@ -239,41 +369,92 @@ class NASAEEClimateService:
         return self._to_geojson(hexagon_data, year, scenario, ssp_scenario)
 
     def _get_hexagons_in_bounds(self, bounds, resolution):
-        """Get all H3 hexagons that cover the bounding box"""
+        """
+        Get all H3 hexagons that cover the bounding box with complete coverage
+
+        Uses minimal buffering to prevent Earth Engine quota errors while still
+        providing seamless coverage during panning.
+        """
+        # Very aggressive buffers to ensure hexagons reach all viewport edges
+        # While staying under Earth Engine's 5000 hexagon limit
+        # Must extend beyond viewport in all directions for complete coverage
+        buffer_factors = {
+            1: 1.0, 2: 1.0, 3: 0.9, 4: 0.85, 5: 0.75,
+            6: 0.65, 7: 0.55, 8: 0.45, 9: 0.35, 10: 0.25
+        }
+        buffer_factor = buffer_factors.get(resolution, 0.50)
+
+        # Calculate buffer in degrees based on viewport size
+        lat_span = bounds['north'] - bounds['south']
+        lon_span = bounds['east'] - bounds['west']
+        lat_buffer = lat_span * buffer_factor
+        lon_buffer = lon_span * buffer_factor
+
+        # Expand bounds with minimal buffer
+        buffered_bounds = {
+            'north': min(90, bounds['north'] + lat_buffer),
+            'south': max(-90, bounds['south'] - lat_buffer),
+            'east': bounds['east'] + lon_buffer,
+            'west': bounds['west'] - lon_buffer
+        }
+
+        logger.info(f"Generating hexagons with {buffer_factor*100:.0f}% buffer")
+        logger.info(f"Original: N={bounds['north']:.3f} S={bounds['south']:.3f} E={bounds['east']:.3f} W={bounds['west']:.3f}")
+        logger.info(f"Buffered: N={buffered_bounds['north']:.3f} S={buffered_bounds['south']:.3f} E={buffered_bounds['east']:.3f} W={buffered_bounds['west']:.3f}")
+
         try:
             # Use H3 v4 API: LatLngPoly with h3shape_to_cells for complete tessellation
-            # LatLngPoly expects (lat, lng) tuples
             from h3 import LatLngPoly
 
             poly = LatLngPoly([
-                (bounds['south'], bounds['west']),
-                (bounds['south'], bounds['east']),
-                (bounds['north'], bounds['east']),
-                (bounds['north'], bounds['west'])
+                (buffered_bounds['south'], buffered_bounds['west']),
+                (buffered_bounds['south'], buffered_bounds['east']),
+                (buffered_bounds['north'], buffered_bounds['east']),
+                (buffered_bounds['north'], buffered_bounds['west'])
             ])
 
             hex_ids = h3.h3shape_to_cells(poly, resolution)
-            logger.info(f"Generated {len(hex_ids)} hexagons using h3shape_to_cells")
+            logger.info(f"✅ Generated {len(hex_ids)} hexagons using h3shape_to_cells (with buffer)")
             return list(hex_ids)
         except Exception as e:
-            logger.warning(f"h3shape_to_cells failed: {e}, using dense grid sampling")
-            # Dense grid sampling fallback to ensure complete coverage
+            logger.warning(f"h3shape_to_cells failed: {e}, using complete grid tessellation")
+
+            # COMPLETE grid tessellation - ensures no gaps in coverage
             hex_set = set()
 
-            # Calculate step size based on hexagon size at this resolution
-            # H3 resolution approximate edge lengths (km): res7=~1.2km, res8=~0.4km
-            edge_length_deg = 0.01 if resolution >= 8 else 0.03
+            # Calculate optimal step size for complete coverage
+            # Step size must be smaller than hexagon diameter to prevent gaps
+            # H3 hexagon edge lengths (approximate, in degrees at equator)
+            edge_length_map = {
+                1: 4.0,    # ~470 km
+                2: 1.5,    # ~170 km
+                3: 0.5,    # ~60 km
+                4: 0.2,    # ~22 km
+                5: 0.075,  # ~8 km
+                6: 0.028,  # ~3 km
+                7: 0.010,  # ~1.2 km
+                8: 0.004,  # ~400 m
+                9: 0.0015, # ~150 m
+                10: 0.0005 # ~50 m
+            }
 
-            lat = bounds['south']
-            while lat < bounds['north']:
-                lon = bounds['west']
-                while lon < bounds['east']:
+            # Use step size that's 40% of edge length to ensure overlapping coverage
+            base_step = edge_length_map.get(resolution, 0.01)
+            step_size = base_step * 0.4
+
+            logger.info(f"Using step size: {step_size:.6f}° for resolution {resolution}")
+
+            # Generate dense grid
+            lat = buffered_bounds['south']
+            while lat <= buffered_bounds['north']:
+                lon = buffered_bounds['west']
+                while lon <= buffered_bounds['east']:
                     hex_id = h3.latlng_to_cell(lat, lon, resolution)
                     hex_set.add(hex_id)
-                    lon += edge_length_deg
-                lat += edge_length_deg
+                    lon += step_size
+                lat += step_size
 
-            logger.info(f"Generated {len(hex_set)} hexagons using dense grid")
+            logger.info(f"✅ Generated {len(hex_set)} hexagons using complete grid tessellation (with buffer)")
             return list(hex_set)
 
     def _to_geojson(self, hexagons, year, scenario, ssp_scenario):

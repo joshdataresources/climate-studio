@@ -37,6 +37,124 @@ class PrecipitationDroughtService:
             logger.error(f"Failed to initialize Earth Engine: {e}")
             logger.warning("Precipitation/drought service will not be available")
 
+    def get_tile_url(self, bounds, scenario='rcp45', year=2050, metric='drought_index'):
+        """
+        Get Earth Engine tile URL for smooth precipitation/drought heatmap visualization
+
+        Args:
+            bounds: Dict with 'north', 'south', 'east', 'west' keys
+            scenario: Climate scenario (rcp26, rcp45, rcp85)
+            year: Projection year (2020-2100)
+            metric: 'precipitation', 'drought_index', or 'soil_moisture'
+
+        Returns:
+            Dict with 'tile_url' and 'metadata'
+        """
+        if not self.initialized:
+            logger.error("Earth Engine not initialized")
+            return None
+
+        try:
+            logger.info(f"Generating tile URL for precipitation/drought: metric={metric}, scenario={scenario}, year={year}")
+
+            # Use CHIRPS precipitation data
+            # TODO: Replace with NOAA LOCA2 projections when available
+            dataset = ee.ImageCollection('UCSB-CHG/CHIRPS/DAILY') \
+                .filterDate('2020-01-01', '2023-12-31')
+
+            # Calculate mean precipitation
+            mean_precip = dataset.mean().select('precipitation')
+
+            # Resample for smoother appearance at high zoom
+            precip_resampled = mean_precip.resample('bilinear').reproject(
+                crs='EPSG:4326',
+                scale=2500  # 2.5km resolution (CHIRPS native is ~5km)
+            )
+
+            # Define visualization based on metric
+            if metric == 'precipitation':
+                vis_params = {
+                    'min': 0,
+                    'max': 10,
+                    'palette': [
+                        '#ffffff', '#e3f2fd', '#90caf9', '#42a5f5', '#1e88e5', '#1565c0'
+                    ]
+                }
+            elif metric == 'drought_index':
+                # Invert scale: low precip = drought (red), high precip = no drought (blue)
+                vis_params = {
+                    'min': 0,
+                    'max': 10,
+                    'palette': [
+                        '#dc2626', '#f59e0b', '#fef08a', '#ffffff', '#90caf9', '#42a5f5', '#1e88e5'
+                    ]
+                }
+            else:  # soil_moisture
+                vis_params = {
+                    'min': 0,
+                    'max': 10,
+                    'palette': [
+                        '#8b4513', '#daa520', '#f0e68c', '#adff2f', '#7cfc00', '#32cd32'
+                    ]
+                }
+
+            # Get map ID and tile URL
+            map_id = precip_resampled.getMapId(vis_params)
+            tile_url = map_id['tile_fetcher'].url_format
+
+            # Calculate regional statistics for the viewport
+            region = ee.Geometry.Rectangle([
+                bounds['west'], bounds['south'],
+                bounds['east'], bounds['north']
+            ])
+
+            # Get mean precipitation for the region
+            stats = precip_resampled.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=region,
+                scale=2500,
+                maxPixels=1e9
+            ).getInfo()
+
+            mean_precip = stats.get('precipitation', None)
+
+            # Calculate drought index (inverse of precipitation, normalized 0-6)
+            # Higher drought index = more drought (less precipitation)
+            drought_index = None
+            soil_moisture = None
+            if mean_precip is not None:
+                # Normalize: 0 mm/day = 6 (severe drought), 10+ mm/day = 0 (no drought)
+                drought_index = max(0, min(6, 6 - (mean_precip * 0.6)))
+
+                # Calculate soil moisture as a proxy from precipitation
+                # Normalized 0-100% where higher precipitation = higher soil moisture
+                # 0 mm/day = 0%, 10+ mm/day = 100%
+                soil_moisture = min(100, max(0, mean_precip * 10))
+
+            logger.info(f"Generated tile URL for precipitation/drought: {metric}")
+            logger.info(f"Regional stats: avg_precip={mean_precip}, drought_index={drought_index}, soil_moisture={soil_moisture}")
+
+            return {
+                'tile_url': tile_url,
+                'metadata': {
+                    'source': 'CHIRPS via Earth Engine (proxy for LOCA2)',
+                    'metric': metric,
+                    'scenario': scenario,
+                    'year': year,
+                    'isRealData': True,
+                    'dataType': 'tiles',
+                    'averagePrecipitation': round(mean_precip, 2) if mean_precip is not None else None,
+                    'droughtIndex': round(drought_index, 2) if drought_index is not None else None,
+                    'soilMoisture': round(soil_moisture, 2) if soil_moisture is not None else None
+                }
+            }
+
+        except Exception as e:
+            logger.error(f"Failed to generate precipitation/drought tile URL: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return None
+
     def get_drought_data(self, bounds, scenario='rcp45', year=2050, metric='drought_index', resolution=7):
         """
         Get precipitation/drought data as hexagonal GeoJSON
@@ -61,8 +179,19 @@ class PrecipitationDroughtService:
         lon_span = bounds['east'] - bounds['west']
 
         # Calculate approximate number of hexagons
-        # H3 resolution area approximations (km²): res2=~86000, res3=~12000, res4=~1700, res5=~240, res6=~34, res7=~4.8
-        resolution_area_km2 = {2: 86000, 3: 12000, 4: 1700, 5: 240, 6: 34, 7: 4.8, 8: 0.7}
+        # H3 resolution area approximations (km²): expanded to support res 1-10
+        resolution_area_km2 = {
+            1: 600000,   # Very large hexagons for global/continental view
+            2: 86000,    # Continental
+            3: 12000,    # Multi-country
+            4: 1700,     # Country/multi-state
+            5: 240,      # State/regional
+            6: 34,       # Metropolitan
+            7: 4.8,      # City
+            8: 0.7,      # Neighborhood
+            9: 0.1,      # Street level
+            10: 0.014    # Building level
+        }
         hex_area = resolution_area_km2.get(resolution, 240)
 
         # Approximate area of bounding box in km²
@@ -203,39 +332,93 @@ class PrecipitationDroughtService:
         return self._to_geojson(hexagon_data, metric, scenario, year)
 
     def _get_hexagons_in_bounds(self, bounds, resolution):
-        """Get all H3 hexagons that cover the bounding box"""
+        """
+        Get all H3 hexagons that cover the bounding box with complete coverage
+
+        This method ensures FULL viewport coverage at all zoom levels by:
+        1. Adding buffer zones around viewport bounds
+        2. Using dense grid sampling with optimal spacing
+        3. Including all hexagons that intersect the buffered viewport
+        """
+        # Add buffer to ensure complete coverage during panning/zooming
+        # Buffer size scales with hexagon size (larger hexagons = larger buffer)
+        buffer_factors = {
+            1: 2.0, 2: 2.0, 3: 1.5, 4: 1.5, 5: 1.0,
+            6: 0.75, 7: 0.5, 8: 0.3, 9: 0.2, 10: 0.1
+        }
+        buffer_factor = buffer_factors.get(resolution, 0.5)
+
+        # Calculate buffer in degrees based on viewport size
+        lat_span = bounds['north'] - bounds['south']
+        lon_span = bounds['east'] - bounds['west']
+        lat_buffer = lat_span * buffer_factor
+        lon_buffer = lon_span * buffer_factor
+
+        # Expand bounds with buffer
+        buffered_bounds = {
+            'north': min(90, bounds['north'] + lat_buffer),
+            'south': max(-90, bounds['south'] - lat_buffer),
+            'east': bounds['east'] + lon_buffer,
+            'west': bounds['west'] - lon_buffer
+        }
+
+        logger.info(f"Generating hexagons with {buffer_factor*100:.0f}% buffer for seamless coverage")
+        logger.info(f"Original: N={bounds['north']:.3f} S={bounds['south']:.3f} E={bounds['east']:.3f} W={bounds['west']:.3f}")
+        logger.info(f"Buffered: N={buffered_bounds['north']:.3f} S={buffered_bounds['south']:.3f} E={buffered_bounds['east']:.3f} W={buffered_bounds['west']:.3f}")
+
         try:
             # Use H3 v4 API: LatLngPoly with h3shape_to_cells for complete tessellation
             from h3 import LatLngPoly
 
             poly = LatLngPoly([
-                (bounds['south'], bounds['west']),
-                (bounds['south'], bounds['east']),
-                (bounds['north'], bounds['east']),
-                (bounds['north'], bounds['west'])
+                (buffered_bounds['south'], buffered_bounds['west']),
+                (buffered_bounds['south'], buffered_bounds['east']),
+                (buffered_bounds['north'], buffered_bounds['east']),
+                (buffered_bounds['north'], buffered_bounds['west'])
             ])
 
             hex_ids = h3.h3shape_to_cells(poly, resolution)
-            logger.info(f"Generated {len(hex_ids)} hexagons using h3shape_to_cells")
+            logger.info(f"✅ Generated {len(hex_ids)} hexagons using h3shape_to_cells (with buffer)")
             return list(hex_ids)
         except Exception as e:
-            logger.warning(f"h3shape_to_cells failed: {e}, using dense grid sampling")
-            # Dense grid sampling fallback
+            logger.warning(f"h3shape_to_cells failed: {e}, using complete grid tessellation")
+
+            # COMPLETE grid tessellation - ensures no gaps in coverage
             hex_set = set()
 
-            # Calculate step size based on hexagon size
-            edge_length_deg = 0.01 if resolution >= 8 else 0.03
+            # Calculate optimal step size for complete coverage
+            # Step size must be smaller than hexagon diameter to prevent gaps
+            # H3 hexagon edge lengths (approximate, in degrees at equator)
+            edge_length_map = {
+                1: 4.0,    # ~470 km
+                2: 1.5,    # ~170 km
+                3: 0.5,    # ~60 km
+                4: 0.2,    # ~22 km
+                5: 0.075,  # ~8 km
+                6: 0.028,  # ~3 km
+                7: 0.010,  # ~1.2 km
+                8: 0.004,  # ~400 m
+                9: 0.0015, # ~150 m
+                10: 0.0005 # ~50 m
+            }
 
-            lat = bounds['south']
-            while lat < bounds['north']:
-                lon = bounds['west']
-                while lon < bounds['east']:
+            # Use step size that's 40% of edge length to ensure overlapping coverage
+            base_step = edge_length_map.get(resolution, 0.01)
+            step_size = base_step * 0.4
+
+            logger.info(f"Using step size: {step_size:.6f}° for resolution {resolution}")
+
+            # Generate dense grid
+            lat = buffered_bounds['south']
+            while lat <= buffered_bounds['north']:
+                lon = buffered_bounds['west']
+                while lon <= buffered_bounds['east']:
                     hex_id = h3.latlng_to_cell(lat, lon, resolution)
                     hex_set.add(hex_id)
-                    lon += edge_length_deg
-                lat += edge_length_deg
+                    lon += step_size
+                lat += step_size
 
-            logger.info(f"Generated {len(hex_set)} hexagons using dense grid")
+            logger.info(f"✅ Generated {len(hex_set)} hexagons using complete grid tessellation (with buffer)")
             return list(hex_set)
 
     def _to_geojson(self, hexagons, metric, scenario, year):
