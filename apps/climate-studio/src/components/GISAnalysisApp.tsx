@@ -735,7 +735,7 @@ export function GISAnalysisApp() {
 
       <main className="relative h-full w-full">
         {hasLayerControls && (
-          <div className="absolute top-4 right-4 z-[1000] w-80 max-h-[calc(100vh-12rem)] overflow-y-auto pointer-events-auto space-y-4">
+          <div className="absolute top-4 right-4 z-[1000] w-80 max-h-[calc(100vh-12rem)] overflow-y-auto pointer-events-auto space-y-4 rounded-lg">
             <LayerControlsPanel layerStates={layerStates} />
           </div>
         )}
