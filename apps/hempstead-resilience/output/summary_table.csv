@@ -1,0 +1,11 @@
+name,lat,lon,need_index,elevation_m,flood_depth_m,year,recommended_action
+"High-Risk Zone 1 (40.6000°N, 73.6000°W)",40.6,-73.59999999999992,0.999,0.13,2.90,2080,"Living shoreline + marsh restoration"
+"High-Risk Zone 2 (40.6000°N, 73.5600°W)",40.6,-73.5599999999999,0.998,0.09,2.89,2080,"Living shoreline + marsh restoration"
+"High-Risk Zone 3 (40.6000°N, 73.5500°W)",40.6,-73.5499999999999,0.994,0.33,2.88,2080,"Living shoreline + marsh restoration"
+"High-Risk Zone 4 (40.6000°N, 73.5700°W)",40.6,-73.56999999999991,0.994,0.53,2.89,2080,"Living shoreline + marsh restoration"
+"High-Risk Zone 5 (40.6000°N, 73.6600°W)",40.6,-73.65999999999995,0.992,0.21,2.86,2080,"Living shoreline + marsh restoration"
+"High-Risk Zone 6 (40.6000°N, 73.6800°W)",40.6,-73.67999999999996,0.989,0.13,2.84,2080,"Living shoreline + marsh restoration"
+"High-Risk Zone 7 (40.6000°N, 73.5100°W)",40.6,-73.50999999999988,0.989,0.25,2.85,2080,"Living shoreline + marsh restoration"
+"High-Risk Zone 8 (40.6000°N, 73.5000°W)",40.6,-73.49999999999987,0.988,0.13,2.83,2080,"Living shoreline + marsh restoration"
+"High-Risk Zone 9 (40.6000°N, 73.5800°W)",40.6,-73.57999999999991,0.987,1.25,2.89,2080,"Living shoreline + marsh restoration"
+"High-Risk Zone 10 (40.6000°N, 73.6400°W)",40.6,-73.63999999999994,0.982,1.50,2.88,2080,"Living shoreline + marsh restoration"
