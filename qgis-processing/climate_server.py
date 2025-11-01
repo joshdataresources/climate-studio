@@ -57,6 +57,18 @@ def health_check():
     })
 
 
+@app.route('/api/climate/status', methods=['GET'])
+def climate_status():
+    """Climate server status endpoint for frontend status display"""
+    return jsonify({
+        'status': 'healthy',
+        'service': 'climate-data-server',
+        'version': '1.0.0',
+        'earthEngineReady': True,
+        'message': 'All systems operational'
+    })
+
+
 @app.route('/api/climate/temperature-projection', methods=['GET'])
 def temperature_projection():
     """

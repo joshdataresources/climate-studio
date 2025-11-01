@@ -7,7 +7,13 @@
     "dev": "vite --host 0.0.0.0 --port 8083",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "pipeline": "tsx scripts/run_pipeline.ts",
+    "parse-projects": "tsx scripts/parse_projects.ts",
+    "fetch-noaa": "tsx scripts/fetch_noaa_data.ts",
+    "fetch-fema": "tsx scripts/fetch_fema_data.ts",
+    "fetch-elevation": "tsx scripts/fetch_elevation_data.ts",
+    "compute-needs": "tsx scripts/compute_need_index.ts"
   },
   "dependencies": {
     "@climate-studio/core": "*",
@@ -81,6 +87,7 @@
     "eslint": "^9.35.0",
     "postcss": "^8.5",
     "tailwindcss": "^4.1.9",
+    "tsx": "^4.7.0",
     "tw-animate-css": "^1.3.3",
     "typescript": "^5",
     "vite-tsconfig-paths": "^5.1.4"
