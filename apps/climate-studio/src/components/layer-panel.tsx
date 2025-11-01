@@ -9,6 +9,7 @@ import { Input } from "./ui/input"
 import { Loader2 } from "lucide-react"
 import { LayerStateMap } from "../hooks/useClimateLayerData"
 import { AccordionItem } from "./ui/accordion"
+import { WaveIcon, HeatIcon, MountainIcon, WeatherIcon, DropIcon } from "./LayerIcons"
 
 const scenarioOptions = [
   { value: "rcp26", label: "RCP 2.6 (Low)" },
@@ -148,36 +149,36 @@ const renderControl = (
               <span className="text-muted-foreground">Sea Level Rise</span>
               <span className="font-semibold text-sky-400">~{seaLevelFeet}ft</span>
             </div>
-            {tempAnomalyData !== undefined && (
-              <div className="flex flex-col space-y-1">
-                <span className="text-muted-foreground">Temp. Anomaly</span>
-                <span className="font-semibold text-orange-400">+{tempAnomalyData.toFixed(1)}°C</span>
-              </div>
-            )}
-            {actualTempData !== undefined && (
-              <div className="flex flex-col space-y-1">
-                <span className="text-muted-foreground">Actual Temp.</span>
-                <span className="font-semibold text-red-400">{actualTempData.toFixed(1)}°C</span>
-              </div>
-            )}
-            {precipitationData !== undefined && (
-              <div className="flex flex-col space-y-1">
-                <span className="text-muted-foreground">Precipitation</span>
-                <span className="font-semibold text-blue-400">{precipitationData.toFixed(1)}mm</span>
-              </div>
-            )}
-            {droughtIndexData !== undefined && (
-              <div className="flex flex-col space-y-1">
-                <span className="text-muted-foreground">Drought</span>
-                <span className="font-semibold text-yellow-400">{droughtIndexData.toFixed(1)}</span>
-              </div>
-            )}
-            {soilMoistureData !== undefined && (
-              <div className="flex flex-col space-y-1">
-                <span className="text-muted-foreground">Soil Moisture</span>
-                <span className="font-semibold text-green-400">{soilMoistureData.toFixed(0)}%</span>
-              </div>
-            )}
+            <div className="flex flex-col space-y-1">
+              <span className="text-muted-foreground">Temp. Anomaly</span>
+              <span className="font-semibold text-orange-400">
+                {tempAnomalyData !== undefined ? `+${tempAnomalyData.toFixed(1)}°C` : '—'}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <span className="text-muted-foreground">Actual Temp.</span>
+              <span className="font-semibold text-red-400">
+                {actualTempData !== undefined ? `${actualTempData.toFixed(1)}°C` : '—'}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <span className="text-muted-foreground">Precipitation</span>
+              <span className="font-semibold text-blue-400">
+                {precipitationData !== undefined ? `${precipitationData.toFixed(1)}mm` : '—'}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <span className="text-muted-foreground">Drought</span>
+              <span className="font-semibold text-yellow-400">
+                {droughtIndexData !== undefined ? droughtIndexData.toFixed(1) : '—'}
+              </span>
+            </div>
+            <div className="flex flex-col space-y-1">
+              <span className="text-muted-foreground">Soil Moisture</span>
+              <span className="font-semibold text-green-400">
+                {soilMoistureData !== undefined ? `${soilMoistureData.toFixed(0)}%` : '—'}
+              </span>
+            </div>
           </div>
         </div>
       )
@@ -409,6 +410,23 @@ interface LayerPanelProps {
   layerStates?: LayerStateMap
 }
 
+const getLayerIcon = (layerId: string) => {
+  switch (layerId) {
+    case 'sea_level_rise':
+      return <WaveIcon />
+    case 'temperature_projection':
+      return <WeatherIcon />
+    case 'urban_heat_island':
+      return <HeatIcon />
+    case 'precipitation_drought':
+      return <DropIcon />
+    case 'topographic_relief':
+      return <MountainIcon />
+    default:
+      return null
+  }
+}
+
 export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
   const { activeLayerIds, toggleLayer, isLayerActive } = useClimate()
   const [showDescriptions, setShowDescriptions] = React.useState(false)
@@ -449,7 +467,12 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
                   onChange={() => toggleLayer(layer.id)}
                 />
                 <div className="space-y-1 flex-1 min-w-0">
-                  <h4 className="text-sm font-medium">{layer.title}</h4>
+                  <div className="flex items-center justify-between gap-2">
+                    <h4 className="text-sm font-medium">{layer.title}</h4>
+                    <span className="text-muted-foreground flex-shrink-0">
+                      {getLayerIcon(layer.id)}
+                    </span>
+                  </div>
                   {showDescriptions ? (
                     <>
                       <p className="text-xs text-muted-foreground">{layer.description}</p>
