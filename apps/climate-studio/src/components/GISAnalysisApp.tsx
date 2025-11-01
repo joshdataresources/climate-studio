@@ -5,6 +5,7 @@ import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { LayerControlsPanel, LayerPanel } from "./layer-panel"
 import { MapboxGlobe } from "./MapboxGlobe"
+import { EarthEngineStatus } from "./EarthEngineStatus"
 import { climateLayers } from "@climate-studio/core/config"
 import type { ClimateControl } from "@climate-studio/core/config"
 import { useClimate } from "@climate-studio/core"
@@ -594,6 +595,9 @@ export function GISAnalysisApp() {
 
   return (
     <div className="relative h-screen text-foreground">
+      {/* Earth Engine Status Indicator */}
+      <EarthEngineStatus />
+
       <aside className="absolute left-0 top-0 z-[1000] flex h-full w-96 flex-col pointer-events-none">
         <div className="flex-1 overflow-y-auto space-y-6 pointer-events-auto">
           <div className="mx-4 mt-4 rounded-lg border border-border/60 bg-card/95 backdrop-blur-lg p-4">

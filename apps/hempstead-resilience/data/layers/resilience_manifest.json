@@ -1,0 +1,317 @@
+{
+  "name": "Coastal Resilience Needs – Town of Hempstead (Rockville Centre → Massapequa)",
+  "version": "1.0.0",
+  "description": "Comprehensive coastal resilience assessment for Town of Hempstead's South Shore communities, including existing projects and high-risk zones requiring intervention",
+  "bbox": [-73.75, 40.60, -73.45, 40.70],
+  "center": [-73.60, 40.65],
+  "zoom": {
+    "min": 9,
+    "max": 16,
+    "default": 11
+  },
+  "layers": [
+    {
+      "id": "resilience-needs",
+      "name": "Resilience Need Index",
+      "type": "circle",
+      "source": {
+        "type": "geojson",
+        "data": "../resilience_needs.geojson"
+      },
+      "paint": {
+        "circle-radius": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          9, 3,
+          12, 6,
+          16, 10
+        ],
+        "circle-color": [
+          "case",
+          ["==", ["get", "risk_category"], "High"],
+          "#dc2626",
+          ["==", ["get", "risk_category"], "Medium"],
+          "#f97316",
+          "#22c55e"
+        ],
+        "circle-opacity": 0.7,
+        "circle-stroke-width": 1,
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-opacity": 0.8
+      },
+      "layout": {
+        "visibility": "visible"
+      },
+      "metadata": {
+        "category": "Risk Assessment",
+        "priority": 1
+      }
+    },
+    {
+      "id": "existing-projects",
+      "name": "Existing Resilience Projects",
+      "type": "circle",
+      "source": {
+        "type": "geojson",
+        "data": "../resilience_projects.geojson"
+      },
+      "paint": {
+        "circle-radius": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          9, 5,
+          12, 8,
+          16, 14
+        ],
+        "circle-color": [
+          "case",
+          ["==", ["get", "type"], "Living Shoreline"],
+          "#10b981",
+          ["==", ["get", "type"], "Marsh Restoration"],
+          "#34d399",
+          ["==", ["get", "type"], "Dune & Beach Nourishment"],
+          "#fbbf24",
+          ["==", ["get", "type"], "Road Elevation & Drainage"],
+          "#3b82f6",
+          ["==", ["get", "type"], "Critical Infrastructure"],
+          "#8b5cf6",
+          "#6366f1"
+        ],
+        "circle-opacity": 0.85,
+        "circle-stroke-width": 2,
+        "circle-stroke-color": "#ffffff",
+        "circle-stroke-opacity": 1
+      },
+      "layout": {
+        "visibility": "visible"
+      },
+      "metadata": {
+        "category": "Existing Projects",
+        "priority": 2
+      }
+    },
+    {
+      "id": "flood-zones-fema",
+      "name": "FEMA Flood Zones",
+      "type": "fill",
+      "source": {
+        "type": "geojson",
+        "data": "../inputs/fema_flood_hazard.geojson"
+      },
+      "paint": {
+        "fill-color": [
+          "case",
+          ["==", ["get", "flood_zone"], "VE"],
+          "#991b1b",
+          ["==", ["get", "flood_zone"], "AE"],
+          "#dc2626",
+          ["==", ["get", "flood_zone"], "AO"],
+          "#f97316",
+          ["==", ["get", "flood_zone"], "X"],
+          "#fbbf24",
+          "#94a3b8"
+        ],
+        "fill-opacity": 0.3
+      },
+      "layout": {
+        "visibility": "none"
+      },
+      "metadata": {
+        "category": "Base Data",
+        "priority": 3
+      }
+    },
+    {
+      "id": "slr-scenarios",
+      "name": "Sea Level Rise Scenarios",
+      "type": "heatmap",
+      "source": {
+        "type": "geojson",
+        "data": "../inputs/noaa_slr_data.geojson"
+      },
+      "paint": {
+        "heatmap-weight": [
+          "interpolate",
+          ["linear"],
+          ["get", "flood_depth_m"],
+          0, 0,
+          5, 1
+        ],
+        "heatmap-intensity": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          9, 0.5,
+          16, 1
+        ],
+        "heatmap-color": [
+          "interpolate",
+          ["linear"],
+          ["heatmap-density"],
+          0, "rgba(255, 255, 255, 0)",
+          0.2, "#bfdbfe",
+          0.4, "#60a5fa",
+          0.6, "#3b82f6",
+          0.8, "#1d4ed8",
+          1, "#1e3a8a"
+        ],
+        "heatmap-radius": [
+          "interpolate",
+          ["linear"],
+          ["zoom"],
+          9, 15,
+          16, 30
+        ],
+        "heatmap-opacity": 0.6
+      },
+      "layout": {
+        "visibility": "none"
+      },
+      "metadata": {
+        "category": "Base Data",
+        "priority": 4
+      }
+    }
+  ],
+  "legend": {
+    "title": "Coastal Resilience Assessment",
+    "items": [
+      {
+        "label": "High Risk (Need Index ≥ 0.7)",
+        "color": "#dc2626",
+        "type": "circle"
+      },
+      {
+        "label": "Medium Risk (0.4 - 0.7)",
+        "color": "#f97316",
+        "type": "circle"
+      },
+      {
+        "label": "Low Risk (< 0.4)",
+        "color": "#22c55e",
+        "type": "circle"
+      },
+      {
+        "label": "Living Shoreline Project",
+        "color": "#10b981",
+        "type": "circle",
+        "border": "#ffffff"
+      },
+      {
+        "label": "Marsh Restoration",
+        "color": "#34d399",
+        "type": "circle",
+        "border": "#ffffff"
+      },
+      {
+        "label": "Dune & Beach Project",
+        "color": "#fbbf24",
+        "type": "circle",
+        "border": "#ffffff"
+      },
+      {
+        "label": "Road Elevation/Drainage",
+        "color": "#3b82f6",
+        "type": "circle",
+        "border": "#ffffff"
+      },
+      {
+        "label": "Critical Infrastructure",
+        "color": "#8b5cf6",
+        "type": "circle",
+        "border": "#ffffff"
+      }
+    ]
+  },
+  "popup": {
+    "needsLayer": {
+      "title": "Resilience Need Assessment",
+      "fields": [
+        { "label": "Risk Category", "property": "risk_category" },
+        { "label": "Need Index", "property": "need_index", "format": "0.000" },
+        { "label": "Elevation", "property": "elevation_m", "format": "0.00", "suffix": "m" },
+        { "label": "Flood Depth", "property": "flood_depth_m", "format": "0.00", "suffix": "m" },
+        { "label": "Year Projected", "property": "year" },
+        { "label": "Has Project", "property": "has_project" },
+        { "label": "Recommended Action", "property": "recommended_action" }
+      ]
+    },
+    "projectsLayer": {
+      "title": "{name}",
+      "fields": [
+        { "label": "Type", "property": "type" },
+        { "label": "Location", "property": "location" },
+        { "label": "Neighborhood", "property": "neighborhood" },
+        { "label": "Status", "property": "status" },
+        { "label": "Description", "property": "description" },
+        { "label": "Funding", "property": "funding" }
+      ]
+    }
+  },
+  "filters": {
+    "riskCategory": {
+      "label": "Risk Category",
+      "type": "select",
+      "options": ["High", "Medium", "Low"]
+    },
+    "year": {
+      "label": "Year Projection",
+      "type": "range",
+      "min": 2030,
+      "max": 2080,
+      "step": 10
+    },
+    "hasProject": {
+      "label": "Has Existing Project",
+      "type": "boolean"
+    },
+    "projectType": {
+      "label": "Project Type",
+      "type": "select",
+      "options": [
+        "Living Shoreline",
+        "Marsh Restoration",
+        "Dune & Beach Nourishment",
+        "Road Elevation & Drainage",
+        "Critical Infrastructure",
+        "Green Infrastructure"
+      ]
+    },
+    "projectStatus": {
+      "label": "Project Status",
+      "type": "select",
+      "options": ["Completed", "In Progress", "Planned", "Active/Ongoing"]
+    }
+  },
+  "neighborhoods": [
+    "Rockville Centre",
+    "Baldwin",
+    "Freeport",
+    "Merrick",
+    "Bellmore",
+    "Wantagh",
+    "Seaford",
+    "Massapequa",
+    "Bay Park",
+    "Point Lookout",
+    "Long Beach",
+    "Oceanside"
+  ],
+  "dataSourceNotes": [
+    "Sea Level Rise data from NOAA Sea Level Rise Viewer (scenarios: +1ft to +6ft)",
+    "Flood hazard zones from FEMA National Flood Hazard Layer (NFHL)",
+    "Elevation data from SRTM/Copernicus Digital Elevation Model",
+    "Project data extracted from Town of Hempstead Coastal Resilience Initiative documentation",
+    "Need Index formula: (0.5 × FloodDepthNorm) + (0.3 × ElevationInverse) + (0.2 × NoProjectFlag)"
+  ],
+  "metadata": {
+    "created": "2025-11-01",
+    "author": "Town of Hempstead GIS & Climate Resilience Analysis",
+    "projection": "EPSG:4326",
+    "coordinateSystem": "WGS84",
+    "updateFrequency": "Quarterly",
+    "lastUpdated": "2025-11-01"
+  }
+}
