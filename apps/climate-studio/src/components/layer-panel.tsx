@@ -518,10 +518,6 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
     [activeLayerIds]
   )
 
-  if (activeLayersWithControls.length === 0 && !hasProjectionLayers) {
-    return null
-  }
-
   const setters: ControlSetters = {
     setSeaLevelFeet: climate.setSeaLevelFeet,
     setScenario: climate.setScenario,
@@ -543,13 +539,11 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
 
   return (
     <div className="space-y-3">
-      {/* Shared Climate Projection Controls */}
-      {hasProjectionLayers && (
-        <AccordionItem title="Climate Projections" defaultOpen={true}>
-          {renderControl('scenario', climate.controls, setters, layerStates)}
-          {renderControl('projectionYear', climate.controls, setters, layerStates)}
-        </AccordionItem>
-      )}
+      {/* Shared Climate Projection Controls - Always Visible */}
+      <AccordionItem title="Climate Projections" defaultOpen={true}>
+        {renderControl('scenario', climate.controls, setters, layerStates)}
+        {renderControl('projectionYear', climate.controls, setters, layerStates)}
+      </AccordionItem>
 
       {/* Individual Layer Controls - Accordion panels */}
       <div className="space-y-3">
