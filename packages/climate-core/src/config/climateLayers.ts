@@ -199,7 +199,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
       url: 'https://developers.google.com/earth-engine/datasets/catalog/YALE_YCEO_UHI_Summer_UHI_yearly_pixel_v4'
     },
     defaultActive: false,
-    controls: ['urbanHeatSeason', 'urbanHeatColorScheme', 'urbanHeatOpacity'],
+    controls: ['urbanHeatOpacity'],
     fetch: {
       method: 'GET',
       route: '/api/climate/urban-heat-island/tiles',
