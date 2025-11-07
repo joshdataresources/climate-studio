@@ -25,14 +25,14 @@ export function EarthEngineStatus() {
   useEffect(() => {
     let mounted = true
     let retryCount = 0
-    const maxRetries = 10 // More retries for Render wake-up
+    const maxRetries = 20 // More retries for Render wake-up (up to ~2 minutes)
     let wakeUpStartTime: number | null = null
 
     const checkStatus = async () => {
       try {
         const startTime = Date.now()
         const response = await fetch('/api/climate/status', {
-          signal: AbortSignal.timeout(5000) // 5 second timeout
+          signal: AbortSignal.timeout(15000) // 15 second timeout for Render
         })
 
         if (!response.ok) {
@@ -75,20 +75,20 @@ export function EarthEngineStatus() {
             const elapsedSeconds = Math.floor((Date.now() - wakeUpStartTime) / 1000)
             setWakingUpTime(elapsedSeconds)
 
-            // Detect if this looks like a Render cold start
-            const isLikelyRender = retryCount > 2 && elapsedSeconds > 10
+            // Detect if this looks like a Render cold start (assume Render if first retry fails)
+            const isLikelyRender = retryCount >= 1
 
             setStatus({
               service: 'climate-data-server',
               status: isLikelyRender ? 'waking' : 'initializing',
               message: isLikelyRender
-                ? `Waking up Render instance... ${elapsedSeconds}s`
+                ? `Waking up Render instance... ${elapsedSeconds}s (this can take up to 60s)`
                 : `Connecting... (attempt ${retryCount}/${maxRetries})`,
               isRender: isLikelyRender
             })
 
-            // Progressive backoff: 2s, 3s, 5s, 5s...
-            const retryDelay = retryCount <= 2 ? 2000 : retryCount === 3 ? 3000 : 5000
+            // Progressive backoff: 3s, 5s, 7s, then 7s...
+            const retryDelay = retryCount === 1 ? 3000 : retryCount === 2 ? 5000 : 7000
             setTimeout(checkStatus, retryDelay)
           } else {
             setStatus({
@@ -138,19 +138,19 @@ export function EarthEngineStatus() {
   }
 
   const getStatusColor = () => {
-    if (!status) return 'bg-gray-100 border-gray-300'
+    if (!status) return 'bg-gray-800/95 border-gray-700'
 
     switch (status.status) {
       case 'healthy':
-        return 'bg-green-50 border-green-300'
+        return 'bg-gray-800/95 border-green-500/50'
       case 'waking':
-        return 'bg-purple-50 border-purple-300'
+        return 'bg-gray-800/95 border-purple-500/50'
       case 'initializing':
-        return 'bg-blue-50 border-blue-300'
+        return 'bg-gray-800/95 border-blue-500/50'
       case 'error':
-        return 'bg-red-50 border-red-300'
+        return 'bg-gray-800/95 border-red-500/50'
       default:
-        return 'bg-gray-100 border-gray-300'
+        return 'bg-gray-800/95 border-gray-700'
     }
   }
 
@@ -189,11 +189,11 @@ export function EarthEngineStatus() {
         </div>
 
         <div className="flex flex-col">
-          <span className="text-sm font-medium text-gray-900">
+          <span className="text-sm font-medium text-white">
             {getStatusText()}
           </span>
           {status?.message && (
-            <span className="text-xs text-gray-600">
+            <span className="text-xs text-gray-400">
               {status.message}
             </span>
           )}
@@ -208,7 +208,7 @@ export function EarthEngineStatus() {
         {status?.status === 'healthy' && (
           <button
             onClick={() => setIsVisible(false)}
-            className="ml-2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="ml-2 text-gray-400 hover:text-gray-200 transition-colors"
             aria-label="Dismiss"
           >
             ×
