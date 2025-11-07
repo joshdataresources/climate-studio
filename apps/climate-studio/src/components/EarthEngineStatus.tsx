@@ -87,10 +87,14 @@ export function EarthEngineStatus() {
               isRender: isLikelyRender
             })
 
+            // Don't set error state during normal retry process
+            setError(null)
+
             // Progressive backoff: 3s, 5s, 7s, then 7s...
             const retryDelay = retryCount === 1 ? 3000 : retryCount === 2 ? 5000 : 7000
             setTimeout(checkStatus, retryDelay)
           } else {
+            // Only show error after all retries exhausted
             setStatus({
               service: 'climate-data-server',
               status: 'error',
