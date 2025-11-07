@@ -31,8 +31,10 @@ export function EarthEngineStatus() {
     const checkStatus = async () => {
       try {
         const startTime = Date.now()
+        // Use longer timeout only for initial wake-up, then reduce once likely awake
+        const timeout = retryCount < 3 ? 20000 : 5000
         const response = await fetch('/api/climate/status', {
-          signal: AbortSignal.timeout(15000) // 15 second timeout for Render
+          signal: AbortSignal.timeout(timeout)
         })
 
         if (!response.ok) {
