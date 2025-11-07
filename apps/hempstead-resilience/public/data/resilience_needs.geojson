@@ -1,0 +1,6845 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.75,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.947,
+        "risk_category": "High",
+        "elevation_m": 2.58,
+        "flood_depth_m": 2.74,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.75,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.9,
+        "risk_category": "High",
+        "elevation_m": 2.56,
+        "flood_depth_m": 2.47,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.75,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.848,
+        "risk_category": "High",
+        "elevation_m": 2.93,
+        "flood_depth_m": 2.19,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.75,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.757,
+        "risk_category": "High",
+        "elevation_m": 7.19,
+        "flood_depth_m": 1.92,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.75,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.686,
+        "risk_category": "Medium",
+        "elevation_m": 9.49,
+        "flood_depth_m": 1.65,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.75,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.569,
+        "risk_category": "Medium",
+        "elevation_m": 16.38,
+        "flood_depth_m": 1.37,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.75,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.547,
+        "risk_category": "Medium",
+        "elevation_m": 13.75,
+        "flood_depth_m": 1.1,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.75,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.451,
+        "risk_category": "Medium",
+        "elevation_m": 18.56,
+        "flood_depth_m": 0.82,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.75,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.29,
+        "risk_category": "Low",
+        "elevation_m": 29.83,
+        "flood_depth_m": 0.55,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.75,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.35,
+        "risk_category": "Low",
+        "elevation_m": 19.1,
+        "flood_depth_m": 0.27,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.74,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.967,
+        "risk_category": "High",
+        "elevation_m": 0.86,
+        "flood_depth_m": 2.76,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.74,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.871,
+        "risk_category": "High",
+        "elevation_m": 5.64,
+        "flood_depth_m": 2.48,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.74,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.839,
+        "risk_category": "High",
+        "elevation_m": 4.05,
+        "flood_depth_m": 2.21,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.74,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.745,
+        "risk_category": "High",
+        "elevation_m": 8.64,
+        "flood_depth_m": 1.94,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.74,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.701,
+        "risk_category": "High",
+        "elevation_m": 8.25,
+        "flood_depth_m": 1.66,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.74,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.6,
+        "risk_category": "Medium",
+        "elevation_m": 13.54,
+        "flood_depth_m": 1.39,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.74,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.569,
+        "risk_category": "Medium",
+        "elevation_m": 11.88,
+        "flood_depth_m": 1.11,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.74,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.46,
+        "risk_category": "Medium",
+        "elevation_m": 17.9,
+        "flood_depth_m": 0.84,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.74,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.409,
+        "risk_category": "Medium",
+        "elevation_m": 18.18,
+        "flood_depth_m": 0.56,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.74,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.249,
+        "risk_category": "Low",
+        "elevation_m": 29.34,
+        "flood_depth_m": 0.29,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.72999999999999,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.964,
+        "risk_category": "High",
+        "elevation_m": 1.47,
+        "flood_depth_m": 2.77,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.72999999999999,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.899,
+        "risk_category": "High",
+        "elevation_m": 3.12,
+        "flood_depth_m": 2.5,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.72999999999999,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.858,
+        "risk_category": "High",
+        "elevation_m": 2.44,
+        "flood_depth_m": 2.22,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.72999999999999,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.78,
+        "risk_category": "High",
+        "elevation_m": 5.45,
+        "flood_depth_m": 1.95,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.72999999999999,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.746,
+        "risk_category": "High",
+        "elevation_m": 4.07,
+        "flood_depth_m": 1.68,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.72999999999999,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.585,
+        "risk_category": "Medium",
+        "elevation_m": 15.32,
+        "flood_depth_m": 1.4,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.72999999999999,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.539,
+        "risk_category": "Medium",
+        "elevation_m": 15.13,
+        "flood_depth_m": 1.13,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.72999999999999,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.564,
+        "risk_category": "Medium",
+        "elevation_m": 7.81,
+        "flood_depth_m": 0.85,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.72999999999999,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.3,
+        "risk_category": "Low",
+        "elevation_m": 29.28,
+        "flood_depth_m": 0.58,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.72999999999999,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.252,
+        "risk_category": "Low",
+        "elevation_m": 29.37,
+        "flood_depth_m": 0.3,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.71999999999998,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.972,
+        "risk_category": "High",
+        "elevation_m": 0.9,
+        "flood_depth_m": 2.79,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.71999999999998,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.892,
+        "risk_category": "High",
+        "elevation_m": 4.09,
+        "flood_depth_m": 2.51,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.71999999999998,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.858,
+        "risk_category": "High",
+        "elevation_m": 2.74,
+        "flood_depth_m": 2.24,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.71999999999998,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.79,
+        "risk_category": "High",
+        "elevation_m": 4.68,
+        "flood_depth_m": 1.97,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.71999999999998,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.705,
+        "risk_category": "High",
+        "elevation_m": 8.4,
+        "flood_depth_m": 1.69,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.71999999999998,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.637,
+        "risk_category": "Medium",
+        "elevation_m": 10.39,
+        "flood_depth_m": 1.42,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.71999999999998,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.578,
+        "risk_category": "Medium",
+        "elevation_m": 11.46,
+        "flood_depth_m": 1.14,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.71999999999998,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.514,
+        "risk_category": "Medium",
+        "elevation_m": 13.1,
+        "flood_depth_m": 0.87,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.71999999999998,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.443,
+        "risk_category": "Medium",
+        "elevation_m": 15.34,
+        "flood_depth_m": 0.59,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.71999999999998,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.372,
+        "risk_category": "Low",
+        "elevation_m": 17.62,
+        "flood_depth_m": 0.32,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.71999999999998,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.501,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.05,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.70999999999998,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.946,
+        "risk_category": "High",
+        "elevation_m": 3.72,
+        "flood_depth_m": 2.8,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.70999999999998,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.898,
+        "risk_category": "High",
+        "elevation_m": 3.72,
+        "flood_depth_m": 2.53,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.70999999999998,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.846,
+        "risk_category": "High",
+        "elevation_m": 4.11,
+        "flood_depth_m": 2.25,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.70999999999998,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.556,
+        "risk_category": "Medium",
+        "elevation_m": 8.3,
+        "flood_depth_m": 1.98,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": true,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.70999999999998,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.73,
+        "risk_category": "High",
+        "elevation_m": 6.18,
+        "flood_depth_m": 1.71,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.70999999999998,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.552,
+        "risk_category": "Medium",
+        "elevation_m": 19.1,
+        "flood_depth_m": 1.43,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.70999999999998,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.523,
+        "risk_category": "Medium",
+        "elevation_m": 17.19,
+        "flood_depth_m": 1.16,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.70999999999998,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.464,
+        "risk_category": "Medium",
+        "elevation_m": 18.24,
+        "flood_depth_m": 0.88,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.70999999999998,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.323,
+        "risk_category": "Low",
+        "elevation_m": 27.58,
+        "flood_depth_m": 0.61,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.70999999999998,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.299,
+        "risk_category": "Low",
+        "elevation_m": 25.12,
+        "flood_depth_m": 0.33,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.70999999999998,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.504,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.06,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.69999999999997,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.978,
+        "risk_category": "High",
+        "elevation_m": 0.84,
+        "flood_depth_m": 2.82,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.69999999999997,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.918,
+        "risk_category": "High",
+        "elevation_m": 1.96,
+        "flood_depth_m": 2.54,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.69999999999997,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.876,
+        "risk_category": "High",
+        "elevation_m": 1.45,
+        "flood_depth_m": 2.27,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.69999999999997,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.756,
+        "risk_category": "High",
+        "elevation_m": 8.62,
+        "flood_depth_m": 1.99,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.69999999999997,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.749,
+        "risk_category": "High",
+        "elevation_m": 4.45,
+        "flood_depth_m": 1.72,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.69999999999997,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.611,
+        "risk_category": "Medium",
+        "elevation_m": 13.44,
+        "flood_depth_m": 1.44,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.69999999999997,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.556,
+        "risk_category": "Medium",
+        "elevation_m": 14.18,
+        "flood_depth_m": 1.17,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.69999999999997,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.504,
+        "risk_category": "Medium",
+        "elevation_m": 14.55,
+        "flood_depth_m": 0.9,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.69999999999997,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.333,
+        "risk_category": "Low",
+        "elevation_m": 26.83,
+        "flood_depth_m": 0.62,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.69999999999997,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.361,
+        "risk_category": "Low",
+        "elevation_m": 19.27,
+        "flood_depth_m": 0.35,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.69999999999997,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.506,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.07,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.68999999999997,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.972,
+        "risk_category": "High",
+        "elevation_m": 1.65,
+        "flood_depth_m": 2.83,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.68999999999997,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.928,
+        "risk_category": "High",
+        "elevation_m": 1.27,
+        "flood_depth_m": 2.55,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.68999999999997,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.868,
+        "risk_category": "High",
+        "elevation_m": 2.42,
+        "flood_depth_m": 2.28,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.68999999999997,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.77,
+        "risk_category": "High",
+        "elevation_m": 7.37,
+        "flood_depth_m": 2.01,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.68999999999997,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.699,
+        "risk_category": "Medium",
+        "elevation_m": 9.74,
+        "flood_depth_m": 1.73,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.68999999999997,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.583,
+        "risk_category": "Medium",
+        "elevation_m": 16.5,
+        "flood_depth_m": 1.46,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.68999999999997,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.368,
+        "risk_category": "Low",
+        "elevation_m": 13.2,
+        "flood_depth_m": 1.18,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": true,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.68999999999997,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.482,
+        "risk_category": "Medium",
+        "elevation_m": 16.95,
+        "flood_depth_m": 0.91,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.68999999999997,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.448,
+        "risk_category": "Medium",
+        "elevation_m": 15.58,
+        "flood_depth_m": 0.63,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.68999999999997,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.336,
+        "risk_category": "Low",
+        "elevation_m": 21.95,
+        "flood_depth_m": 0.36,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.68999999999997,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.509,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.09,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.67999999999996,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.989,
+        "risk_category": "High",
+        "elevation_m": 0.13,
+        "flood_depth_m": 2.84,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.67999999999996,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.89,
+        "risk_category": "High",
+        "elevation_m": 5.22,
+        "flood_depth_m": 2.57,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.67999999999996,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.852,
+        "risk_category": "High",
+        "elevation_m": 4.19,
+        "flood_depth_m": 2.29,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.67999999999996,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.819,
+        "risk_category": "High",
+        "elevation_m": 2.75,
+        "flood_depth_m": 2.02,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.67999999999996,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.751,
+        "risk_category": "High",
+        "elevation_m": 4.78,
+        "flood_depth_m": 1.74,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.67999999999996,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.593,
+        "risk_category": "Medium",
+        "elevation_m": 15.7,
+        "flood_depth_m": 1.47,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.67999999999996,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.596,
+        "risk_category": "Medium",
+        "elevation_m": 10.63,
+        "flood_depth_m": 1.2,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.67999999999996,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.535,
+        "risk_category": "Medium",
+        "elevation_m": 11.91,
+        "flood_depth_m": 0.92,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.67999999999996,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.422,
+        "risk_category": "Medium",
+        "elevation_m": 18.33,
+        "flood_depth_m": 0.65,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.67999999999996,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.312,
+        "risk_category": "Low",
+        "elevation_m": 24.49,
+        "flood_depth_m": 0.37,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.67999999999996,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.511,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.1,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.66999999999996,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.982,
+        "risk_category": "High",
+        "elevation_m": 1.07,
+        "flood_depth_m": 2.85,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.66999999999996,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.932,
+        "risk_category": "High",
+        "elevation_m": 1.25,
+        "flood_depth_m": 2.58,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.66999999999996,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.87,
+        "risk_category": "High",
+        "elevation_m": 2.64,
+        "flood_depth_m": 2.3,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.66999999999996,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.751,
+        "risk_category": "High",
+        "elevation_m": 9.66,
+        "flood_depth_m": 2.03,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.66999999999996,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.714,
+        "risk_category": "High",
+        "elevation_m": 8.62,
+        "flood_depth_m": 1.76,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.66999999999996,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.567,
+        "risk_category": "Medium",
+        "elevation_m": 18.42,
+        "flood_depth_m": 1.48,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.66999999999996,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.576,
+        "risk_category": "Medium",
+        "elevation_m": 12.8,
+        "flood_depth_m": 1.21,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.66999999999996,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.5,
+        "risk_category": "Medium",
+        "elevation_m": 15.6,
+        "flood_depth_m": 0.93,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.66999999999996,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.389,
+        "risk_category": "Low",
+        "elevation_m": 21.87,
+        "flood_depth_m": 0.66,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.66999999999996,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.288,
+        "risk_category": "Low",
+        "elevation_m": 27.12,
+        "flood_depth_m": 0.38,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.66999999999996,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.513,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.11,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.65999999999995,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.992,
+        "risk_category": "High",
+        "elevation_m": 0.21,
+        "flood_depth_m": 2.86,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.65999999999995,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.923,
+        "risk_category": "High",
+        "elevation_m": 2.31,
+        "flood_depth_m": 2.59,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.65999999999995,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.867,
+        "risk_category": "High",
+        "elevation_m": 3.08,
+        "flood_depth_m": 2.31,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.65999999999995,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.807,
+        "risk_category": "High",
+        "elevation_m": 4.28,
+        "flood_depth_m": 2.04,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.65999999999995,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.708,
+        "risk_category": "High",
+        "elevation_m": 9.34,
+        "flood_depth_m": 1.77,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.65999999999995,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.565,
+        "risk_category": "Medium",
+        "elevation_m": 18.79,
+        "flood_depth_m": 1.49,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.65999999999995,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.592,
+        "risk_category": "Medium",
+        "elevation_m": 11.41,
+        "flood_depth_m": 1.22,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.65999999999995,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.455,
+        "risk_category": "Medium",
+        "elevation_m": 20.24,
+        "flood_depth_m": 0.94,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.65999999999995,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.345,
+        "risk_category": "Low",
+        "elevation_m": 26.36,
+        "flood_depth_m": 0.67,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.65999999999995,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.34,
+        "risk_category": "Low",
+        "elevation_m": 22.16,
+        "flood_depth_m": 0.39,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.65999999999995,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.515,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.12,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.64999999999995,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.777,
+        "risk_category": "High",
+        "elevation_m": 1.85,
+        "flood_depth_m": 2.87,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": true,
+        "recommended_action": "Monitor existing project performance",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.64999999999995,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.924,
+        "risk_category": "High",
+        "elevation_m": 2.38,
+        "flood_depth_m": 2.6,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.64999999999995,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.862,
+        "risk_category": "High",
+        "elevation_m": 3.77,
+        "flood_depth_m": 2.32,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.64999999999995,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.748,
+        "risk_category": "High",
+        "elevation_m": 10.36,
+        "flood_depth_m": 2.05,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.64999999999995,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.759,
+        "risk_category": "High",
+        "elevation_m": 4.47,
+        "flood_depth_m": 1.77,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.64999999999995,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.668,
+        "risk_category": "Medium",
+        "elevation_m": 8.77,
+        "flood_depth_m": 1.5,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.64999999999995,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.52,
+        "risk_category": "Medium",
+        "elevation_m": 18.67,
+        "flood_depth_m": 1.23,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.64999999999995,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.464,
+        "risk_category": "Medium",
+        "elevation_m": 19.49,
+        "flood_depth_m": 0.95,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.64999999999995,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.331,
+        "risk_category": "Low",
+        "elevation_m": 27.9,
+        "flood_depth_m": 0.68,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.64999999999995,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.303,
+        "risk_category": "Low",
+        "elevation_m": 25.96,
+        "flood_depth_m": 0.4,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.64999999999995,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.516,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.13,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.63999999999994,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.982,
+        "risk_category": "High",
+        "elevation_m": 1.5,
+        "flood_depth_m": 2.88,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.63999999999994,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.909,
+        "risk_category": "High",
+        "elevation_m": 4.04,
+        "flood_depth_m": 2.6,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.63999999999994,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.875,
+        "risk_category": "High",
+        "elevation_m": 2.63,
+        "flood_depth_m": 2.33,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.63999999999994,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.795,
+        "risk_category": "High",
+        "elevation_m": 5.8,
+        "flood_depth_m": 2.06,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.63999999999994,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.543,
+        "risk_category": "Medium",
+        "elevation_m": 6.17,
+        "flood_depth_m": 1.78,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": true,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.63999999999994,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.602,
+        "risk_category": "Medium",
+        "elevation_m": 15.4,
+        "flood_depth_m": 1.51,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.63999999999994,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.575,
+        "risk_category": "Medium",
+        "elevation_m": 13.36,
+        "flood_depth_m": 1.23,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.63999999999994,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.574,
+        "risk_category": "Medium",
+        "elevation_m": 8.7,
+        "flood_depth_m": 0.96,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.63999999999994,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.452,
+        "risk_category": "Medium",
+        "elevation_m": 16.01,
+        "flood_depth_m": 0.68,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.63999999999994,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.334,
+        "risk_category": "Low",
+        "elevation_m": 22.96,
+        "flood_depth_m": 0.41,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.63999999999994,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.517,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.14,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.62999999999994,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.972,
+        "risk_category": "High",
+        "elevation_m": 2.64,
+        "flood_depth_m": 2.89,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.62999999999994,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.909,
+        "risk_category": "High",
+        "elevation_m": 4.13,
+        "flood_depth_m": 2.61,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.62999999999994,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.893,
+        "risk_category": "High",
+        "elevation_m": 0.96,
+        "flood_depth_m": 2.34,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.62999999999994,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.822,
+        "risk_category": "High",
+        "elevation_m": 3.16,
+        "flood_depth_m": 2.06,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.62999999999994,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.718,
+        "risk_category": "High",
+        "elevation_m": 8.74,
+        "flood_depth_m": 1.79,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.62999999999994,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.609,
+        "risk_category": "Medium",
+        "elevation_m": 14.85,
+        "flood_depth_m": 1.51,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.62999999999994,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.619,
+        "risk_category": "Medium",
+        "elevation_m": 9.12,
+        "flood_depth_m": 1.24,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.62999999999994,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.507,
+        "risk_category": "Medium",
+        "elevation_m": 15.42,
+        "flood_depth_m": 0.97,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.62999999999994,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.364,
+        "risk_category": "Low",
+        "elevation_m": 24.89,
+        "flood_depth_m": 0.69,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.62999999999994,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.402,
+        "risk_category": "Medium",
+        "elevation_m": 16.33,
+        "flood_depth_m": 0.42,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.62999999999994,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.518,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.14,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.61999999999993,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.967,
+        "risk_category": "High",
+        "elevation_m": 3.15,
+        "flood_depth_m": 2.89,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.61999999999993,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.937,
+        "risk_category": "High",
+        "elevation_m": 1.36,
+        "flood_depth_m": 2.62,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.61999999999993,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.867,
+        "risk_category": "High",
+        "elevation_m": 3.56,
+        "flood_depth_m": 2.34,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.61999999999993,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.775,
+        "risk_category": "High",
+        "elevation_m": 7.96,
+        "flood_depth_m": 2.07,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.61999999999993,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.742,
+        "risk_category": "High",
+        "elevation_m": 6.49,
+        "flood_depth_m": 1.79,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.61999999999993,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.575,
+        "risk_category": "Medium",
+        "elevation_m": 18.27,
+        "flood_depth_m": 1.52,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.61999999999993,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.554,
+        "risk_category": "Medium",
+        "elevation_m": 15.62,
+        "flood_depth_m": 1.24,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.61999999999993,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.55,
+        "risk_category": "Medium",
+        "elevation_m": 11.22,
+        "flood_depth_m": 0.97,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.61999999999993,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.421,
+        "risk_category": "Medium",
+        "elevation_m": 19.33,
+        "flood_depth_m": 0.7,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.61999999999993,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.296,
+        "risk_category": "Low",
+        "elevation_m": 26.99,
+        "flood_depth_m": 0.42,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.61999999999993,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.519,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.15,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.60999999999993,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.981,
+        "risk_category": "High",
+        "elevation_m": 1.83,
+        "flood_depth_m": 2.89,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.60999999999993,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.918,
+        "risk_category": "High",
+        "elevation_m": 3.35,
+        "flood_depth_m": 2.62,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.60999999999993,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.888,
+        "risk_category": "High",
+        "elevation_m": 1.54,
+        "flood_depth_m": 2.34,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.60999999999993,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.769,
+        "risk_category": "High",
+        "elevation_m": 8.59,
+        "flood_depth_m": 2.07,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.60999999999993,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.761,
+        "risk_category": "High",
+        "elevation_m": 4.68,
+        "flood_depth_m": 1.8,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.60999999999993,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.632,
+        "risk_category": "Medium",
+        "elevation_m": 12.71,
+        "flood_depth_m": 1.52,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.60999999999993,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.415,
+        "risk_category": "Medium",
+        "elevation_m": 9.64,
+        "flood_depth_m": 1.25,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": true,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.60999999999993,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.512,
+        "risk_category": "Medium",
+        "elevation_m": 15.13,
+        "flood_depth_m": 0.97,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.60999999999993,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.347,
+        "risk_category": "Low",
+        "elevation_m": 26.69,
+        "flood_depth_m": 0.7,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.60999999999993,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.313,
+        "risk_category": "Low",
+        "elevation_m": 25.3,
+        "flood_depth_m": 0.42,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.60999999999993,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.52,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.15,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.59999999999992,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.999,
+        "risk_category": "High",
+        "elevation_m": 0.13,
+        "flood_depth_m": 2.9,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.59999999999992,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.93,
+        "risk_category": "High",
+        "elevation_m": 2.22,
+        "flood_depth_m": 2.62,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.59999999999992,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.882,
+        "risk_category": "High",
+        "elevation_m": 2.16,
+        "flood_depth_m": 2.35,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.59999999999992,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.779,
+        "risk_category": "High",
+        "elevation_m": 7.68,
+        "flood_depth_m": 2.07,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.59999999999992,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.748,
+        "risk_category": "High",
+        "elevation_m": 5.95,
+        "flood_depth_m": 1.8,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.59999999999992,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.642,
+        "risk_category": "Medium",
+        "elevation_m": 11.72,
+        "flood_depth_m": 1.52,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.59999999999992,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.542,
+        "risk_category": "Medium",
+        "elevation_m": 16.92,
+        "flood_depth_m": 1.25,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.59999999999992,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.515,
+        "risk_category": "Medium",
+        "elevation_m": 14.81,
+        "flood_depth_m": 0.97,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.59999999999992,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.428,
+        "risk_category": "Medium",
+        "elevation_m": 18.72,
+        "flood_depth_m": 0.7,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.59999999999992,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.359,
+        "risk_category": "Low",
+        "elevation_m": 20.79,
+        "flood_depth_m": 0.43,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.59999999999992,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.52,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.15,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.58999999999992,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.979,
+        "risk_category": "High",
+        "elevation_m": 2.04,
+        "flood_depth_m": 2.9,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.58999999999992,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.935,
+        "risk_category": "High",
+        "elevation_m": 1.74,
+        "flood_depth_m": 2.62,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.58999999999992,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.872,
+        "risk_category": "High",
+        "elevation_m": 3.22,
+        "flood_depth_m": 2.35,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.58999999999992,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.81,
+        "risk_category": "High",
+        "elevation_m": 4.6,
+        "flood_depth_m": 2.07,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.58999999999992,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.784,
+        "risk_category": "High",
+        "elevation_m": 2.43,
+        "flood_depth_m": 1.8,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.58999999999992,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.673,
+        "risk_category": "Medium",
+        "elevation_m": 8.69,
+        "flood_depth_m": 1.52,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.58999999999992,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.626,
+        "risk_category": "Medium",
+        "elevation_m": 8.57,
+        "flood_depth_m": 1.25,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.58999999999992,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.555,
+        "risk_category": "Medium",
+        "elevation_m": 10.89,
+        "flood_depth_m": 0.98,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.58999999999992,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.354,
+        "risk_category": "Low",
+        "elevation_m": 26.07,
+        "flood_depth_m": 0.7,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.58999999999992,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.354,
+        "risk_category": "Low",
+        "elevation_m": 21.34,
+        "flood_depth_m": 0.43,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.58999999999992,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.52,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.15,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.57999999999991,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.987,
+        "risk_category": "High",
+        "elevation_m": 1.25,
+        "flood_depth_m": 2.89,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.57999999999991,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.908,
+        "risk_category": "High",
+        "elevation_m": 4.4,
+        "flood_depth_m": 2.62,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.57999999999991,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.878,
+        "risk_category": "High",
+        "elevation_m": 2.61,
+        "flood_depth_m": 2.35,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.57999999999991,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.778,
+        "risk_category": "High",
+        "elevation_m": 7.7,
+        "flood_depth_m": 2.07,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.57999999999991,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.703,
+        "risk_category": "High",
+        "elevation_m": 10.43,
+        "flood_depth_m": 1.8,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.57999999999991,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.634,
+        "risk_category": "Medium",
+        "elevation_m": 12.54,
+        "flood_depth_m": 1.52,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.57999999999991,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.615,
+        "risk_category": "Medium",
+        "elevation_m": 9.66,
+        "flood_depth_m": 1.25,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.57999999999991,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.571,
+        "risk_category": "Medium",
+        "elevation_m": 9.28,
+        "flood_depth_m": 0.97,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.57999999999991,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.338,
+        "risk_category": "Low",
+        "elevation_m": 27.6,
+        "flood_depth_m": 0.7,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.57999999999991,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.406,
+        "risk_category": "Medium",
+        "elevation_m": 16.09,
+        "flood_depth_m": 0.43,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.57999999999991,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.52,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.15,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.56999999999991,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.994,
+        "risk_category": "High",
+        "elevation_m": 0.53,
+        "flood_depth_m": 2.89,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.56999999999991,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.922,
+        "risk_category": "High",
+        "elevation_m": 2.93,
+        "flood_depth_m": 2.62,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.56999999999991,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.862,
+        "risk_category": "High",
+        "elevation_m": 4.09,
+        "flood_depth_m": 2.34,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.56999999999991,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.76,
+        "risk_category": "High",
+        "elevation_m": 9.45,
+        "flood_depth_m": 2.07,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.56999999999991,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.765,
+        "risk_category": "High",
+        "elevation_m": 4.2,
+        "flood_depth_m": 1.79,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.56999999999991,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.624,
+        "risk_category": "Medium",
+        "elevation_m": 13.5,
+        "flood_depth_m": 1.52,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.56999999999991,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.57,
+        "risk_category": "Medium",
+        "elevation_m": 14.11,
+        "flood_depth_m": 1.25,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.56999999999991,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.58,
+        "risk_category": "Medium",
+        "elevation_m": 8.31,
+        "flood_depth_m": 0.97,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.56999999999991,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.334,
+        "risk_category": "Low",
+        "elevation_m": 27.99,
+        "flood_depth_m": 0.7,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.56999999999991,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.315,
+        "risk_category": "Low",
+        "elevation_m": 25.16,
+        "flood_depth_m": 0.42,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.56999999999991,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.52,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.15,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5599999999999,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.998,
+        "risk_category": "High",
+        "elevation_m": 0.09,
+        "flood_depth_m": 2.89,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5599999999999,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.908,
+        "risk_category": "High",
+        "elevation_m": 4.22,
+        "flood_depth_m": 2.61,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5599999999999,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.858,
+        "risk_category": "High",
+        "elevation_m": 4.41,
+        "flood_depth_m": 2.34,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5599999999999,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.763,
+        "risk_category": "High",
+        "elevation_m": 9.08,
+        "flood_depth_m": 2.06,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5599999999999,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.737,
+        "risk_category": "High",
+        "elevation_m": 6.96,
+        "flood_depth_m": 1.79,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5599999999999,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.618,
+        "risk_category": "Medium",
+        "elevation_m": 14.01,
+        "flood_depth_m": 1.52,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5599999999999,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.524,
+        "risk_category": "Medium",
+        "elevation_m": 18.6,
+        "flood_depth_m": 1.24,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5599999999999,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.544,
+        "risk_category": "Medium",
+        "elevation_m": 11.77,
+        "flood_depth_m": 0.97,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5599999999999,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.41,
+        "risk_category": "Medium",
+        "elevation_m": 20.37,
+        "flood_depth_m": 0.69,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5599999999999,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.392,
+        "risk_category": "Low",
+        "elevation_m": 17.4,
+        "flood_depth_m": 0.42,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5599999999999,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.519,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.14,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5499999999999,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.994,
+        "risk_category": "High",
+        "elevation_m": 0.33,
+        "flood_depth_m": 2.88,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5499999999999,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.94,
+        "risk_category": "High",
+        "elevation_m": 0.99,
+        "flood_depth_m": 2.61,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5499999999999,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.857,
+        "risk_category": "High",
+        "elevation_m": 4.42,
+        "flood_depth_m": 2.33,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5499999999999,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.816,
+        "risk_category": "High",
+        "elevation_m": 3.78,
+        "flood_depth_m": 2.06,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5499999999999,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.758,
+        "risk_category": "High",
+        "elevation_m": 4.7,
+        "flood_depth_m": 1.78,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5499999999999,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.591,
+        "risk_category": "Medium",
+        "elevation_m": 16.55,
+        "flood_depth_m": 1.51,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5499999999999,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.307,
+        "risk_category": "Low",
+        "elevation_m": 20.15,
+        "flood_depth_m": 1.24,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": true,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5499999999999,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.567,
+        "risk_category": "Medium",
+        "elevation_m": 9.39,
+        "flood_depth_m": 0.96,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5499999999999,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.409,
+        "risk_category": "Medium",
+        "elevation_m": 20.36,
+        "flood_depth_m": 0.69,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5499999999999,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.314,
+        "risk_category": "Low",
+        "elevation_m": 25.07,
+        "flood_depth_m": 0.41,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5499999999999,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.518,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.14,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.53999999999989,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.968,
+        "risk_category": "High",
+        "elevation_m": 2.86,
+        "flood_depth_m": 2.87,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.53999999999989,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.921,
+        "risk_category": "High",
+        "elevation_m": 2.72,
+        "flood_depth_m": 2.6,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.53999999999989,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.852,
+        "risk_category": "High",
+        "elevation_m": 4.83,
+        "flood_depth_m": 2.33,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.53999999999989,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.801,
+        "risk_category": "High",
+        "elevation_m": 5.13,
+        "flood_depth_m": 2.05,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.53999999999989,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.746,
+        "risk_category": "High",
+        "elevation_m": 5.81,
+        "flood_depth_m": 1.78,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.53999999999989,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.626,
+        "risk_category": "Medium",
+        "elevation_m": 12.93,
+        "flood_depth_m": 1.5,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.53999999999989,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.506,
+        "risk_category": "Medium",
+        "elevation_m": 20.09,
+        "flood_depth_m": 1.23,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.53999999999989,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.476,
+        "risk_category": "Medium",
+        "elevation_m": 18.4,
+        "flood_depth_m": 0.95,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.53999999999989,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.454,
+        "risk_category": "Medium",
+        "elevation_m": 15.74,
+        "flood_depth_m": 0.68,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.53999999999989,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.314,
+        "risk_category": "Low",
+        "elevation_m": 24.93,
+        "flood_depth_m": 0.41,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.53999999999989,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.517,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.13,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.52999999999989,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.979,
+        "risk_category": "High",
+        "elevation_m": 1.6,
+        "flood_depth_m": 2.87,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.52999999999989,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.903,
+        "risk_category": "High",
+        "elevation_m": 4.33,
+        "flood_depth_m": 2.59,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.52999999999989,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.856,
+        "risk_category": "High",
+        "elevation_m": 4.28,
+        "flood_depth_m": 2.32,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.52999999999989,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.817,
+        "risk_category": "High",
+        "elevation_m": 3.41,
+        "flood_depth_m": 2.04,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.52999999999989,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.734,
+        "risk_category": "High",
+        "elevation_m": 6.89,
+        "flood_depth_m": 1.77,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.52999999999989,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.58,
+        "risk_category": "Medium",
+        "elevation_m": 17.36,
+        "flood_depth_m": 1.49,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.52999999999989,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.549,
+        "risk_category": "Medium",
+        "elevation_m": 15.75,
+        "flood_depth_m": 1.22,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.52999999999989,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.312,
+        "risk_category": "Low",
+        "elevation_m": 14.65,
+        "flood_depth_m": 0.95,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": true,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.52999999999989,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.398,
+        "risk_category": "Low",
+        "elevation_m": 21.21,
+        "flood_depth_m": 0.67,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.52999999999989,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.283,
+        "risk_category": "Low",
+        "elevation_m": 27.88,
+        "flood_depth_m": 0.4,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.52999999999989,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.515,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.12,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.51999999999988,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.979,
+        "risk_category": "High",
+        "elevation_m": 1.46,
+        "flood_depth_m": 2.86,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.51999999999988,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.908,
+        "risk_category": "High",
+        "elevation_m": 3.71,
+        "flood_depth_m": 2.58,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.51999999999988,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.885,
+        "risk_category": "High",
+        "elevation_m": 1.19,
+        "flood_depth_m": 2.31,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.51999999999988,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.764,
+        "risk_category": "High",
+        "elevation_m": 8.45,
+        "flood_depth_m": 2.03,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.51999999999988,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.727,
+        "risk_category": "High",
+        "elevation_m": 7.36,
+        "flood_depth_m": 1.76,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.51999999999988,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.626,
+        "risk_category": "Medium",
+        "elevation_m": 12.7,
+        "flood_depth_m": 1.49,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.51999999999988,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.525,
+        "risk_category": "Medium",
+        "elevation_m": 17.98,
+        "flood_depth_m": 1.21,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.51999999999988,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.516,
+        "risk_category": "Medium",
+        "elevation_m": 14.09,
+        "flood_depth_m": 0.94,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.51999999999988,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.354,
+        "risk_category": "Low",
+        "elevation_m": 25.43,
+        "flood_depth_m": 0.66,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.51999999999988,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.41,
+        "risk_category": "Medium",
+        "elevation_m": 15.07,
+        "flood_depth_m": 0.39,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.51999999999988,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.513,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.11,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.50999999999988,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.989,
+        "risk_category": "High",
+        "elevation_m": 0.25,
+        "flood_depth_m": 2.85,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.50999999999988,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.929,
+        "risk_category": "High",
+        "elevation_m": 1.39,
+        "flood_depth_m": 2.57,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.50999999999988,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.887,
+        "risk_category": "High",
+        "elevation_m": 0.79,
+        "flood_depth_m": 2.3,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.50999999999988,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.749,
+        "risk_category": "High",
+        "elevation_m": 9.75,
+        "flood_depth_m": 2.02,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.50999999999988,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.765,
+        "risk_category": "High",
+        "elevation_m": 3.45,
+        "flood_depth_m": 1.75,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.50999999999988,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.655,
+        "risk_category": "Medium",
+        "elevation_m": 9.63,
+        "flood_depth_m": 1.47,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.50999999999988,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.562,
+        "risk_category": "Medium",
+        "elevation_m": 14.07,
+        "flood_depth_m": 1.2,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.50999999999988,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.498,
+        "risk_category": "Medium",
+        "elevation_m": 15.66,
+        "flood_depth_m": 0.93,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.50999999999988,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.323,
+        "risk_category": "Low",
+        "elevation_m": 28.26,
+        "flood_depth_m": 0.65,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.50999999999988,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.264,
+        "risk_category": "Low",
+        "elevation_m": 29.38,
+        "flood_depth_m": 0.38,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.50999999999988,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.512,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.1,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.49999999999987,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.988,
+        "risk_category": "High",
+        "elevation_m": 0.13,
+        "flood_depth_m": 2.83,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.49999999999987,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.899,
+        "risk_category": "High",
+        "elevation_m": 4.23,
+        "flood_depth_m": 2.56,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.49999999999987,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.873,
+        "risk_category": "High",
+        "elevation_m": 2.07,
+        "flood_depth_m": 2.29,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.49999999999987,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.795,
+        "risk_category": "High",
+        "elevation_m": 5.06,
+        "flood_depth_m": 2.01,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.49999999999987,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.733,
+        "risk_category": "High",
+        "elevation_m": 6.41,
+        "flood_depth_m": 1.74,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.49999999999987,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.574,
+        "risk_category": "Medium",
+        "elevation_m": 17.43,
+        "flood_depth_m": 1.46,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.49999999999987,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.548,
+        "risk_category": "Medium",
+        "elevation_m": 15.28,
+        "flood_depth_m": 1.19,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.49999999999987,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.468,
+        "risk_category": "Medium",
+        "elevation_m": 18.49,
+        "flood_depth_m": 0.91,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.49999999999987,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.343,
+        "risk_category": "Low",
+        "elevation_m": 26.07,
+        "flood_depth_m": 0.64,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.49999999999987,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.33,
+        "risk_category": "Low",
+        "elevation_m": 22.64,
+        "flood_depth_m": 0.37,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.49999999999987,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.51,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.09,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.48999999999987,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.962,
+        "risk_category": "High",
+        "elevation_m": 2.5,
+        "flood_depth_m": 2.82,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.48999999999987,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.897,
+        "risk_category": "High",
+        "elevation_m": 4.23,
+        "flood_depth_m": 2.55,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.48999999999987,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.871,
+        "risk_category": "High",
+        "elevation_m": 1.97,
+        "flood_depth_m": 2.27,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.48999999999987,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.76,
+        "risk_category": "High",
+        "elevation_m": 8.28,
+        "flood_depth_m": 2,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.48999999999987,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.705,
+        "risk_category": "High",
+        "elevation_m": 8.98,
+        "flood_depth_m": 1.72,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.48999999999987,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.594,
+        "risk_category": "Medium",
+        "elevation_m": 15.25,
+        "flood_depth_m": 1.45,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.48999999999987,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.613,
+        "risk_category": "Medium",
+        "elevation_m": 8.59,
+        "flood_depth_m": 1.18,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.48999999999987,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.462,
+        "risk_category": "Medium",
+        "elevation_m": 18.83,
+        "flood_depth_m": 0.9,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.48999999999987,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.392,
+        "risk_category": "Low",
+        "elevation_m": 21.01,
+        "flood_depth_m": 0.63,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.48999999999987,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.361,
+        "risk_category": "Low",
+        "elevation_m": 19.33,
+        "flood_depth_m": 0.35,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.48999999999987,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.507,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.08,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.47999999999986,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.977,
+        "risk_category": "High",
+        "elevation_m": 0.74,
+        "flood_depth_m": 2.81,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.47999999999986,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.92,
+        "risk_category": "High",
+        "elevation_m": 1.7,
+        "flood_depth_m": 2.53,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.47999999999986,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.873,
+        "risk_category": "High",
+        "elevation_m": 1.54,
+        "flood_depth_m": 2.26,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.47999999999986,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.764,
+        "risk_category": "High",
+        "elevation_m": 7.63,
+        "flood_depth_m": 1.99,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.47999999999986,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.719,
+        "risk_category": "High",
+        "elevation_m": 7.38,
+        "flood_depth_m": 1.71,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.47999999999986,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.573,
+        "risk_category": "Medium",
+        "elevation_m": 17.06,
+        "flood_depth_m": 1.44,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.47999999999986,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.566,
+        "risk_category": "Medium",
+        "elevation_m": 13,
+        "flood_depth_m": 1.16,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.47999999999986,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.526,
+        "risk_category": "Medium",
+        "elevation_m": 12.27,
+        "flood_depth_m": 0.89,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.47999999999986,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.375,
+        "risk_category": "Low",
+        "elevation_m": 22.48,
+        "flood_depth_m": 0.61,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.47999999999986,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.361,
+        "risk_category": "Low",
+        "elevation_m": 19.07,
+        "flood_depth_m": 0.34,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.47999999999986,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.505,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.07,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.46999999999986,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.969,
+        "risk_category": "High",
+        "elevation_m": 1.35,
+        "flood_depth_m": 2.79,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.46999999999986,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.913,
+        "risk_category": "High",
+        "elevation_m": 2.16,
+        "flood_depth_m": 2.52,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.46999999999986,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.849,
+        "risk_category": "High",
+        "elevation_m": 3.76,
+        "flood_depth_m": 2.25,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.46999999999986,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.733,
+        "risk_category": "High",
+        "elevation_m": 10.48,
+        "flood_depth_m": 1.97,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.46999999999986,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.758,
+        "risk_category": "High",
+        "elevation_m": 3.27,
+        "flood_depth_m": 1.7,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.46999999999986,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.651,
+        "risk_category": "Medium",
+        "elevation_m": 9.1,
+        "flood_depth_m": 1.42,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.46999999999986,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.518,
+        "risk_category": "Medium",
+        "elevation_m": 17.55,
+        "flood_depth_m": 1.15,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.46999999999986,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.512,
+        "risk_category": "Medium",
+        "elevation_m": 13.34,
+        "flood_depth_m": 0.87,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.46999999999986,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.429,
+        "risk_category": "Medium",
+        "elevation_m": 16.87,
+        "flood_depth_m": 0.6,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.46999999999986,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.299,
+        "risk_category": "Low",
+        "elevation_m": 25,
+        "flood_depth_m": 0.33,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.46999999999986,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.503,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.05,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.45999999999985,
+          40.6
+        ]
+      },
+      "properties": {
+        "need_index": 0.963,
+        "risk_category": "High",
+        "elevation_m": 1.64,
+        "flood_depth_m": 2.78,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Living shoreline + marsh restoration",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.45999999999985,
+          40.61
+        ]
+      },
+      "properties": {
+        "need_index": 0.894,
+        "risk_category": "High",
+        "elevation_m": 3.8,
+        "flood_depth_m": 2.51,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "VE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.45999999999985,
+          40.62
+        ]
+      },
+      "properties": {
+        "need_index": 0.855,
+        "risk_category": "High",
+        "elevation_m": 2.89,
+        "flood_depth_m": 2.23,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.45999999999985,
+          40.629999999999995
+        ]
+      },
+      "properties": {
+        "need_index": 0.767,
+        "risk_category": "High",
+        "elevation_m": 6.81,
+        "flood_depth_m": 1.96,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AE"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.45999999999985,
+          40.63999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.706,
+        "risk_category": "High",
+        "elevation_m": 8.18,
+        "flood_depth_m": 1.68,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Drainage improvements + green infrastructure",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.45999999999985,
+          40.64999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.573,
+        "risk_category": "Medium",
+        "elevation_m": 16.56,
+        "flood_depth_m": 1.41,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "AO"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.45999999999985,
+          40.65999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.615,
+        "risk_category": "Medium",
+        "elevation_m": 7.62,
+        "flood_depth_m": 1.13,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.45999999999985,
+          40.66999999999999
+        ]
+      },
+      "properties": {
+        "need_index": 0.536,
+        "risk_category": "Medium",
+        "elevation_m": 10.75,
+        "flood_depth_m": 0.86,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales",
+        "flood_zone": "X"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.45999999999985,
+          40.679999999999986
+        ]
+      },
+      "properties": {
+        "need_index": 0.328,
+        "risk_category": "Low",
+        "elevation_m": 26.69,
+        "flood_depth_m": 0.59,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.45999999999985,
+          40.68999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.259,
+        "risk_category": "Low",
+        "elevation_m": 28.74,
+        "flood_depth_m": 0.31,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Continue monitoring",
+        "flood_zone": "X_UNSHADED"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.45999999999985,
+          40.69999999999998
+        ]
+      },
+      "properties": {
+        "need_index": 0.5,
+        "risk_category": "Medium",
+        "elevation_m": 0,
+        "flood_depth_m": 0.04,
+        "year": 2080,
+        "slr_ft": 6,
+        "has_project": false,
+        "recommended_action": "Stormwater management + bioswales"
+      }
+    }
+  ]
+}

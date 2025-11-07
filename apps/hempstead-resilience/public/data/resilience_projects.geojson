@@ -1,0 +1,366 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6555,
+          40.6165
+        ]
+      },
+      "properties": {
+        "name": "Bay Park Road Elevation (East, West, North Boulevards)",
+        "type": "Road Elevation & Drainage",
+        "location": "Bay Park",
+        "neighborhood": "Bay Park",
+        "description": "Raised and improved roads to mitigate chronic flooding, installed 17 tidal check valves, bioswales, and rain gardens",
+        "status": "Completed",
+        "funding": "HUD CDBG-DR ($125M Living with the Bay program)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6093,
+          40.6565
+        ]
+      },
+      "properties": {
+        "name": "Baldwin Drainage Upgrades",
+        "type": "Road Elevation & Drainage",
+        "location": "Baldwin",
+        "neighborhood": "Baldwin",
+        "description": "Storm drain improvements and tidal check valves to reduce flooding",
+        "status": "Completed",
+        "funding": "NY Rising Community Reconstruction"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5271,
+          40.6687
+        ]
+      },
+      "properties": {
+        "name": "Bellmore-Wantagh Street Elevation",
+        "type": "Road Elevation & Drainage",
+        "location": "Bellmore-Wantagh",
+        "neighborhood": "Bellmore",
+        "description": "Low-lying streets elevated with new storm drains to reduce tidal flooding",
+        "status": "Completed",
+        "funding": "NY Rising Community Reconstruction"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5513,
+          40.6629
+        ]
+      },
+      "properties": {
+        "name": "Merrick Drainage Improvements",
+        "type": "Road Elevation & Drainage",
+        "location": "Merrick",
+        "neighborhood": "Merrick",
+        "description": "Storm sewer upgrades and tidal check valves",
+        "status": "Completed",
+        "funding": "NY Rising Community Reconstruction"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.4882,
+          40.6657
+        ]
+      },
+      "properties": {
+        "name": "Seaford Street Elevation & Shoreline Protection",
+        "type": "Road Elevation & Drainage",
+        "location": "Seaford",
+        "neighborhood": "Seaford",
+        "description": "Road raising, new storm drains, and timber/vinyl bulkhead at Anchor Place",
+        "status": "Completed",
+        "funding": "NY Rising Community Reconstruction"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.7124,
+          40.6321
+        ]
+      },
+      "properties": {
+        "name": "Woodmere Drainage & Street Elevation",
+        "type": "Road Elevation & Drainage",
+        "location": "Woodmere",
+        "neighborhood": "Woodmere",
+        "description": "Street elevation and storm drain improvements in Five Towns area",
+        "status": "Completed",
+        "funding": "NY Rising Community Reconstruction"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6401,
+          40.6387
+        ]
+      },
+      "properties": {
+        "name": "Oceanside Stormwater Improvements",
+        "type": "Road Elevation & Drainage",
+        "location": "Oceanside",
+        "neighborhood": "Oceanside",
+        "description": "Larger storm drain pipes, additional catch basins, and pump stations",
+        "status": "Completed",
+        "funding": "NY Rising Community Reconstruction"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6093,
+          40.6565
+        ]
+      },
+      "properties": {
+        "name": "Baldwin Park Living Shoreline",
+        "type": "Living Shoreline",
+        "location": "Baldwin Park (Middle Bay)",
+        "neighborhood": "Baldwin",
+        "description": "Replacing failing timber bulkhead with natural living shoreline, tidal wetlands, marsh grasses, shrubs, and upland trees",
+        "status": "Completed",
+        "funding": "NY Rising Community Reconstruction"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.65,
+          40.6
+        ]
+      },
+      "properties": {
+        "name": "Middle Hempstead Bay Living Barrier Reef",
+        "type": "Living Shoreline",
+        "location": "Middle Hempstead Bay",
+        "neighborhood": "Hempstead Bay",
+        "description": "Artificial oyster reef using recycled shells from restaurants to dampen waves, reduce erosion, and improve water quality",
+        "status": "Active/Ongoing",
+        "funding": "Town funds + NGO partnerships (CCE, Operation SPLASH)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6912,
+          40.6587
+        ]
+      },
+      "properties": {
+        "name": "Hempstead Bay Marsh Restoration (Mill River)",
+        "type": "Marsh Restoration",
+        "location": "Hempstead Bay / Mill River",
+        "neighborhood": "Mill River",
+        "description": "Create 200 linear feet of living shoreline and restore 9 acres of tidal marsh using thin-layer sediment deposition",
+        "status": "In Progress",
+        "funding": "NOAA National Coastal Resilience Fund ($10M + $5.76M match)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.64,
+          40.595
+        ]
+      },
+      "properties": {
+        "name": "Pearsalls Hassock Marsh Restoration",
+        "type": "Marsh Restoration",
+        "location": "Pearsalls Hassock",
+        "neighborhood": "Hempstead Bay",
+        "description": "Re-establish historic elevations, fill ditches, construct living shoreline edges",
+        "status": "Planned",
+        "funding": "Nassau County + NYS funds"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.635,
+          40.59
+        ]
+      },
+      "properties": {
+        "name": "South Black Banks Hassock Restoration",
+        "type": "Marsh Restoration",
+        "location": "South Black Banks Hassock",
+        "neighborhood": "Hempstead Bay",
+        "description": "Stabilize eroding marsh and improve habitat through elevation restoration",
+        "status": "Planned",
+        "funding": "Nassau County + NYS funds"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5812,
+          40.593
+        ]
+      },
+      "properties": {
+        "name": "Long Beach Barrier Island Dune System",
+        "type": "Dune & Beach Nourishment",
+        "location": "Long Beach Island (Point Lookout to East Rockaway Inlet)",
+        "neighborhood": "Point Lookout",
+        "description": "7-mile continuous dune (~16 ft elevation), raised beach berm (~5 ft), 4M cubic yards of sand, new groins",
+        "status": "Completed",
+        "funding": "U.S. Army Corps + Federal Sandy Relief (~$150M)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.5812,
+          40.593
+        ]
+      },
+      "properties": {
+        "name": "Point Lookout Stone Revetment",
+        "type": "Shoreline Stabilization",
+        "location": "Point Lookout (Jones Inlet)",
+        "neighborhood": "Point Lookout",
+        "description": "2,000 linear feet of stone revetment and shoreline stabilization",
+        "status": "Completed",
+        "funding": "NY Rising Community Reconstruction"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6555,
+          40.6165
+        ]
+      },
+      "properties": {
+        "name": "South Shore Water Reclamation Facility (Bay Park Plant) Hardening",
+        "type": "Critical Infrastructure",
+        "location": "Bay Park",
+        "neighborhood": "Bay Park",
+        "description": "Earthen berm and floodwall (500-year flood level), tidal flood gates, elevated pumps and electrical systems",
+        "status": "Completed",
+        "funding": "FEMA (~$830M)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6555,
+          40.6165
+        ]
+      },
+      "properties": {
+        "name": "Bay Park Conveyance Project",
+        "type": "Critical Infrastructure",
+        "location": "Bay Park to Cedar Creek",
+        "neighborhood": "Bay Park",
+        "description": "Divert 50M gallons/day of treated wastewater from Hempstead Bay to improve water quality and marsh health",
+        "status": "In Progress",
+        "funding": "NYS + Nassau County (~$439M, $300M state)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6579,
+          40.5887
+        ]
+      },
+      "properties": {
+        "name": "Long Beach Wastewater Plant Consolidation",
+        "type": "Critical Infrastructure",
+        "location": "Long Beach",
+        "neighborhood": "Long Beach",
+        "description": "Convert to hardened pump station with backup power and flood barriers, elevate sewer pump stations above 500-year surge",
+        "status": "In Progress",
+        "funding": "Nassau County + NYS"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.6912,
+          40.6587
+        ]
+      },
+      "properties": {
+        "name": "Mill River Greenway",
+        "type": "Green Infrastructure",
+        "location": "Mill River Watershed",
+        "neighborhood": "Mill River",
+        "description": "Greenway route with stormwater management features and bioretention",
+        "status": "Completed",
+        "funding": "Living with the Bay ($125M CDBG-DR)"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -73.62,
+          40.685
+        ]
+      },
+      "properties": {
+        "name": "Smith Pond & Hempstead Lake Upgrades",
+        "type": "Green Infrastructure",
+        "location": "Hempstead Lake State Park",
+        "neighborhood": "Hempstead",
+        "description": "Stormwater park and habitat improvements at headwaters of Mill River",
+        "status": "Completed",
+        "funding": "Living with the Bay ($125M CDBG-DR)"
+      }
+    }
+  ]
+}
