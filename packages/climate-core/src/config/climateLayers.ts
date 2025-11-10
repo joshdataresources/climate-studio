@@ -5,6 +5,7 @@ export type ClimateLayerId =
   | 'temperature_projection'
   | 'temperature_current'
   | 'urban_heat_island'
+  | 'urban_expansion'
   | 'topographic_relief'
   | 'precipitation_drought';
 
@@ -20,6 +21,7 @@ export type ClimateControl =
   | 'urbanHeatOpacity'
   | 'urbanHeatSeason'
   | 'urbanHeatColorScheme'
+  | 'urbanExpansionOpacity'
   | 'reliefStyle'
   | 'reliefOpacity'
   | 'temperatureMode'
@@ -37,6 +39,7 @@ export interface ClimateFetchContext {
   projectionOpacity: number;
   urbanHeatSeason: 'summer' | 'winter';
   urbanHeatColorScheme: 'temperature' | 'heat' | 'urban';
+  urbanExpansionOpacity: number;
   reliefStyle: 'classic' | 'dark' | 'depth' | 'dramatic';
   reliefOpacity: number;
   temperatureMode: 'anomaly' | 'actual';
@@ -226,6 +229,45 @@ export const climateLayers: ClimateLayerDefinition[] = [
       layerType: 'raster',
       blendMode: 'normal',
       valueProperty: 'heatIslandIntensity'
+    }
+  },
+  {
+    id: 'urban_expansion',
+    title: 'Conceptual Urban Growth',
+    description: '⚠️ CONCEPTUAL VISUALIZATION: Shows simplified urban expansion as translucent orange circles growing outward from current cities. Circle size increases as you move the year slider (2025→2100), representing potential metropolitan growth. Larger cities grow faster. For educational purposes only.',
+    category: 'temperature',
+    source: {
+      name: 'GHSL 2023 Circular Buffers',
+      url: 'https://ghsl.jrc.ec.europa.eu/'
+    },
+    defaultActive: false,
+    controls: ['urbanExpansionOpacity'],
+    fetch: {
+      method: 'GET',
+      route: '/api/climate/urban-expansion/tiles',
+      query: ({ bounds, projectionYear, scenario }) => {
+        const { north, south, east, west } = bounds ?? {
+          north: 41,
+          south: 40,
+          east: -73,
+          west: -74
+        };
+        return {
+          north,
+          south,
+          east,
+          west,
+          year: projectionYear,
+          scenario
+        };
+      }
+    },
+    style: {
+      color: '#ff8c00',
+      opacity: 0.2,  // 20% opacity
+      layerType: 'polygon',  // GeoJSON polygons (circles)
+      blendMode: 'normal',
+      valueProperty: 'tier'
     }
   },
   {
