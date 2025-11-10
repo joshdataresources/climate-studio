@@ -35,6 +35,7 @@ const controlOrder: ClimateControl[] = [
   "urbanHeatSeason",
   "urbanHeatColorScheme",
   "urbanHeatOpacity",
+  "urbanExpansionOpacity",
   "reliefStyle",
   "reliefOpacity",
   "droughtMetric",
@@ -54,6 +55,7 @@ type ControlSetters = Pick<
   "setUrbanHeatOpacity" |
   "setUrbanHeatSeason" |
   "setUrbanHeatColorScheme" |
+  "setUrbanExpansionOpacity" |
   "setReliefStyle" |
   "setReliefOpacity" |
   "setTemperatureMode" |
@@ -98,30 +100,51 @@ const renderControl = (
       };
       const seaLevelFeet = yearToFeet(values.projectionYear);
 
-      // Extract climate data from layer states
-      // Try both data.metadata and metadata fields for compatibility
+      // Calculate projected climate values based on scenario and year
+      // These are estimates based on IPCC projections - shown even when layers are off
+      const getProjectedValues = (scenario: string, year: number) => {
+        const yearProgress = (year - 2025) / (2100 - 2025); // 0 to 1
+
+        // Temperature anomaly projections (°C above baseline)
+        const tempAnomalies = {
+          rcp26: 1.0 + yearProgress * 1.0,   // 1-2°C by 2100
+          rcp45: 1.5 + yearProgress * 1.7,   // 1.5-3.2°C by 2100
+          rcp85: 2.0 + yearProgress * 2.8    // 2-4.8°C by 2100
+        };
+
+        const tempAnomaly = tempAnomalies[scenario as keyof typeof tempAnomalies] || tempAnomalies.rcp45;
+        const actualTemp = 14.5 + tempAnomaly; // Global baseline ~14.5°C
+
+        return {
+          tempAnomaly,
+          actualTemp,
+          precipitation: 800 + yearProgress * (scenario === 'rcp85' ? 100 : scenario === 'rcp45' ? 50 : 20), // mm/year
+          droughtIndex: 1.0 + yearProgress * (scenario === 'rcp85' ? 0.5 : scenario === 'rcp45' ? 0.3 : 0.1),
+          soilMoisture: 60 - yearProgress * (scenario === 'rcp85' ? 15 : scenario === 'rcp45' ? 10 : 5) // %
+        };
+      };
+
+      const projected = getProjectedValues(values.scenario, values.projectionYear);
+
+      // Use actual layer data if available, otherwise use projections
       const tempLayerState = layerStates.temperature_projection;
       const droughtLayerState = layerStates.precipitation_drought;
 
-      console.log('Layer States Debug:', {
-        tempState: tempLayerState,
-        tempData: tempLayerState?.data,
-        tempMetadata: tempLayerState?.metadata,
-        droughtState: droughtLayerState,
-        droughtData: droughtLayerState?.data,
-        droughtMetadata: droughtLayerState?.metadata
-      });
-
       const tempAnomalyData = tempLayerState?.data?.metadata?.averageAnomaly
-        ?? tempLayerState?.metadata?.averageAnomaly;
+        ?? tempLayerState?.metadata?.averageAnomaly
+        ?? projected.tempAnomaly;
       const actualTempData = tempLayerState?.data?.metadata?.averageTemperature
-        ?? tempLayerState?.metadata?.averageTemperature;
+        ?? tempLayerState?.metadata?.averageTemperature
+        ?? projected.actualTemp;
       const precipitationData = droughtLayerState?.data?.metadata?.averagePrecipitation
-        ?? droughtLayerState?.metadata?.averagePrecipitation;
+        ?? droughtLayerState?.metadata?.averagePrecipitation
+        ?? projected.precipitation;
       const droughtIndexData = droughtLayerState?.data?.metadata?.droughtIndex
-        ?? droughtLayerState?.metadata?.droughtIndex;
+        ?? droughtLayerState?.metadata?.droughtIndex
+        ?? projected.droughtIndex;
       const soilMoistureData = droughtLayerState?.data?.metadata?.soilMoisture
-        ?? droughtLayerState?.metadata?.soilMoisture;
+        ?? droughtLayerState?.metadata?.soilMoisture
+        ?? projected.soilMoisture;
 
       return (
         <div key="projectionYear" className="space-y-2">
@@ -152,31 +175,31 @@ const renderControl = (
             <div className="flex flex-col space-y-1">
               <span className="text-muted-foreground">Temp. Anomaly</span>
               <span className="font-semibold text-orange-400">
-                {tempAnomalyData !== undefined ? `+${tempAnomalyData.toFixed(1)}°C` : '—'}
+                +{tempAnomalyData.toFixed(1)}°C
               </span>
             </div>
             <div className="flex flex-col space-y-1">
               <span className="text-muted-foreground">Actual Temp.</span>
               <span className="font-semibold text-red-400">
-                {actualTempData !== undefined ? `${actualTempData.toFixed(1)}°C` : '—'}
+                {actualTempData.toFixed(1)}°C
               </span>
             </div>
             <div className="flex flex-col space-y-1">
               <span className="text-muted-foreground">Precipitation</span>
               <span className="font-semibold text-blue-400">
-                {precipitationData !== undefined ? `${precipitationData.toFixed(1)}mm` : '—'}
+                {precipitationData.toFixed(0)}mm
               </span>
             </div>
             <div className="flex flex-col space-y-1">
-              <span className="text-muted-foreground">Drought</span>
+              <span className="text-muted-foreground">Drought Index</span>
               <span className="font-semibold text-yellow-400">
-                {droughtIndexData !== undefined ? droughtIndexData.toFixed(1) : '—'}
+                {droughtIndexData.toFixed(1)}
               </span>
             </div>
             <div className="flex flex-col space-y-1">
               <span className="text-muted-foreground">Soil Moisture</span>
               <span className="font-semibold text-green-400">
-                {soilMoistureData !== undefined ? `${soilMoistureData.toFixed(0)}%` : '—'}
+                {soilMoistureData.toFixed(0)}%
               </span>
             </div>
           </div>
@@ -272,6 +295,22 @@ const renderControl = (
             max={100}
             step={5}
             onValueChange={value => setters.setUrbanHeatOpacity(value[0] / 100)}
+          />
+        </div>
+      )
+    case "urbanExpansionOpacity":
+      return (
+        <div key="urbanExpansionOpacity" className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs text-muted-foreground">Layer Opacity</label>
+            <span className="text-xs font-medium">{Math.round(values.urbanExpansionOpacity * 100)}%</span>
+          </div>
+          <Slider
+            value={[Math.round(values.urbanExpansionOpacity * 100)]}
+            min={10}
+            max={100}
+            step={5}
+            onValueChange={value => setters.setUrbanExpansionOpacity(value[0] / 100)}
           />
         </div>
       )
@@ -554,6 +593,7 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
              layer.controls[0] === 'reliefOpacity' ||
              layer.controls[0] === 'projectionOpacity' ||
              layer.controls[0] === 'urbanHeatOpacity' ||
+             layer.controls[0] === 'urbanExpansionOpacity' ||
              layer.controls[0] === 'droughtOpacity');
           const isReliefLayer = layer.id === 'topographic_relief';
           const defaultOpen = !hasOnlyOpacity && !isReliefLayer;

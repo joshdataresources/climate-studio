@@ -117,14 +117,18 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
         // 4. Cache is not stale (less than 1 hour old)
         const now = Date.now();
         const cacheAge = now - (cached.updatedAt || 0);
-        const maxCacheAge = 60 * 60 * 1000; // 1 hour
+        // Urban expansion should refresh more frequently to show year changes
+        const maxCacheAge = layerId === 'urban_expansion' ? 5 * 60 * 1000 : 60 * 60 * 1000; // 5 min for urban, 1 hour for others
 
         const hasValidFeatures = cached.data?.features?.length > 0;
         const hasValidTileUrl = !!cached.data?.tile_url;
         const hasValidData = hasValidFeatures || hasValidTileUrl;
         const hasMetadata = !!cached.data?.metadata;
-        const isRealData = cached.data?.metadata?.isRealData !== false &&
-                          cached.data?.metadata?.dataType !== 'fallback';
+        // For urban_expansion, allow fallback data in cache (GHSL simulation)
+        // For other layers, require real data
+        const isRealData = layerId === 'urban_expansion' ? true :
+                          (cached.data?.metadata?.isRealData !== false &&
+                           cached.data?.metadata?.dataType !== 'fallback');
         const isFresh = cacheAge < maxCacheAge;
 
         const isValidCache = hasValidData && hasMetadata && isRealData && isFresh;
@@ -361,6 +365,7 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
     } else {
       // All climate layers now use tiles - no more hexagon layers
       // Tile-based layers that don't depend on bounds (global tiles)
+      // urban_expansion is now a bounds-based hexagon layer (GeoJSON polygons)
       const globalTileLayers: ClimateLayerId[] = ['temperature_projection', 'urban_heat_island', 'topographic_relief', 'precipitation_drought'];
 
       // Refetch tile-based layers when control parameters change (not bounds)

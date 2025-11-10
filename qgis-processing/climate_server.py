@@ -24,6 +24,7 @@ from noaa_sea_level import NOAASeaLevelService
 from urban_heat_island import UrbanHeatIslandService
 from topographic_relief import TopographicReliefService
 from precipitation_drought import PrecipitationDroughtService
+from urban_expansion import UrbanExpansionService
 
 # Configure logging
 logging.basicConfig(
@@ -45,6 +46,7 @@ sea_level_service = NOAASeaLevelService()
 heat_island_service = UrbanHeatIslandService(ee_project=ee_project)
 relief_service = TopographicReliefService()
 drought_service = PrecipitationDroughtService(ee_project=ee_project)
+urban_expansion_service = UrbanExpansionService(ee_project=ee_project)
 
 # Health check endpoint
 @app.route('/health', methods=['GET'])
@@ -832,6 +834,168 @@ def precipitation_drought():
         }), 500
 
 
+@app.route('/api/climate/urban-expansion/tiles', methods=['GET'])
+def urban_expansion_tiles():
+    """
+    Get urban expansion as H3 hexagon grid (true hexacomb pattern)
+
+    Query Parameters:
+        north (float): Northern latitude bound
+        south (float): Southern latitude bound
+        east (float): Eastern longitude bound
+        west (float): Western longitude bound
+        year (int): Projection year (2020-2100), default 2050
+        scenario (str): Climate scenario (rcp26, rcp45, rcp85), default rcp45
+        resolution (int): H3 hexagon resolution (2-6), default 4
+
+    Returns:
+        GeoJSON FeatureCollection with hexagonal growth patterns
+    """
+    try:
+        # Parse query parameters
+        north = request.args.get('north', type=float)
+        south = request.args.get('south', type=float)
+        east = request.args.get('east', type=float)
+        west = request.args.get('west', type=float)
+        year = request.args.get('year', default=2050, type=int)
+        scenario = request.args.get('scenario', default='rcp45', type=str)
+        resolution = request.args.get('resolution', default=4, type=int)
+
+        # Validate bounds
+        if north is None or south is None or east is None or west is None:
+            return jsonify({
+                'success': False,
+                'error': 'Bounds (north, south, east, west) are required'
+            }), 400
+
+        # Validate year range
+        if not (2020 <= year <= 2100):
+            return jsonify({
+                'success': False,
+                'error': 'Year must be between 2020 and 2100'
+            }), 400
+
+        # Validate scenario
+        if scenario not in ['rcp26', 'rcp45', 'rcp85']:
+            return jsonify({
+                'success': False,
+                'error': 'Scenario must be one of: rcp26, rcp45, rcp85'
+            }), 400
+
+        logger.info(f"Urban expansion circular buffers request: year={year}, scenario={scenario}")
+
+        # Build bounds dict
+        bounds = {
+            'north': north,
+            'south': south,
+            'east': east,
+            'west': west
+        }
+
+        # Get circular buffer GeoJSON
+        result = urban_expansion_service.get_urban_expansion_circles(
+            bounds=bounds,
+            year=year,
+            scenario=scenario,
+            min_density=0.3  # Only show significant urban areas
+        )
+
+        if result and result.get('features'):
+            return jsonify({
+                'success': True,
+                'data': result
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Could not generate circular buffer data'
+            }), 500
+
+    except Exception as e:
+        logger.error(f"Error generating urban expansion circles: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/climate/population', methods=['GET'])
+def population_at_point():
+    """
+    Get population projection at a specific point (for tooltips)
+
+    Query Parameters:
+        lat (float): Latitude
+        lng (float): Longitude
+        year (int): Projection year (2020-2100), default 2050
+        scenario (str): Climate scenario (rcp26, rcp45, rcp85), default rcp45
+
+    Returns:
+        JSON with population value and metadata
+    """
+    try:
+        # Parse query parameters
+        lat = request.args.get('lat', type=float)
+        lng = request.args.get('lng', type=float)
+        year = request.args.get('year', default=2050, type=int)
+        scenario = request.args.get('scenario', default='rcp45', type=str)
+
+        # Validate required parameters
+        if lat is None or lng is None:
+            return jsonify({
+                'success': False,
+                'error': 'Missing required parameters: lat, lng'
+            }), 400
+
+        # Validate coordinates
+        if not (-90 <= lat <= 90):
+            return jsonify({
+                'success': False,
+                'error': 'Invalid latitude'
+            }), 400
+
+        if not (-180 <= lng <= 180):
+            return jsonify({
+                'success': False,
+                'error': 'Invalid longitude'
+            }), 400
+
+        # Validate year range
+        if not (2020 <= year <= 2100):
+            return jsonify({
+                'success': False,
+                'error': 'Year must be between 2020 and 2100'
+            }), 400
+
+        logger.info(f"Population query: lat={lat}, lng={lng}, year={year}, scenario={scenario}")
+
+        # Get population data
+        data = urban_expansion_service.get_population_at_point(
+            lat=lat,
+            lng=lng,
+            year=year,
+            scenario=scenario
+        )
+
+        if data and 'error' not in data:
+            return jsonify({
+                'success': True,
+                'data': data
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': data.get('error', 'Could not retrieve population data')
+            }), 500
+
+    except Exception as e:
+        logger.error(f"Error querying population: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @app.route('/api/climate/info', methods=['GET'])
 def climate_info():
     """
@@ -896,6 +1060,8 @@ if __name__ == '__main__':
     logger.info(f"   GET  /api/climate/topographic-relief/tiles")
     logger.info(f"   GET  /api/climate/precipitation-drought")
     logger.info(f"   GET  /api/climate/precipitation-drought/tiles")
+    logger.info(f"   GET  /api/climate/urban-expansion/tiles")
+    logger.info(f"   GET  /api/climate/population")
     logger.info(f"   GET  /api/climate/info")
 
     app.run(

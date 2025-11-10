@@ -42,17 +42,24 @@ export function MapboxGlobe({
     lng: number
     lat: number
   } | null>(null)
+  const [populationData, setPopulationData] = useState<{
+    population: number | null
+    year: number
+    scenario: string
+  } | null>(null)
 
   // Get active layers
   const temperatureProjectionActive = isLayerActive("temperature_projection")
   const seaLevelActive = isLayerActive("sea_level_rise")
   const urbanHeatActive = isLayerActive("urban_heat_island")
+  const urbanExpansionActive = isLayerActive("urban_expansion")
   const topographicReliefActive = isLayerActive("topographic_relief")
   const precipitationDroughtActive = isLayerActive("precipitation_drought")
 
   // Get layer data (sea level uses tiles, not data)
   const tempProjectionData = layerStates.temperature_projection?.data
   const urbanHeatData = layerStates.urban_heat_island?.data
+  const urbanExpansionData = layerStates.urban_expansion?.data
   const topographicReliefData = layerStates.topographic_relief?.data
   const precipitationDroughtData = layerStates.precipitation_drought?.data
 
@@ -116,7 +123,49 @@ export function MapboxGlobe({
 
   const handleMouseLeave = useCallback(() => {
     setHoverInfo(null)
+    setPopulationData(null)
   }, [])
+
+  // Query population when hovering and urban expansion layer is active
+  useEffect(() => {
+    if (!urbanExpansionActive || !hoverInfo) {
+      setPopulationData(null)
+      return
+    }
+
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => {
+      // Debounce population query by 300ms
+      const { lat, lng } = hoverInfo
+      const year = controls.projectionYear
+      const scenario = controls.scenario
+
+      const apiUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001'
+      fetch(`${apiUrl}/api/climate/population?lat=${lat}&lng=${lng}&year=${year}&scenario=${scenario}`, {
+        signal: controller.signal
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.data) {
+            setPopulationData({
+              population: data.data.population,
+              year: data.data.year,
+              scenario: data.data.scenario
+            })
+          }
+        })
+        .catch(err => {
+          if (err.name !== 'AbortError') {
+            console.warn('Failed to fetch population:', err)
+          }
+        })
+    }, 300)
+
+    return () => {
+      clearTimeout(timeoutId)
+      controller.abort()
+    }
+  }, [urbanExpansionActive, hoverInfo?.lat, hoverInfo?.lng, controls.projectionYear, controls.scenario])
 
   const handleLoad = useCallback(() => {
     if (mapRef.current) {
@@ -215,7 +264,8 @@ export function MapboxGlobe({
           'sea-level-rise-layer',
           'precipitation-drought-layer',
           'topographic-relief-layer',
-          'urban-heat-island-layer'
+          'urban-heat-island-layer',
+          'urban-expansion-layer'
         ]}
       >
         {/* Temperature Projection Layer - using Earth Engine raster tiles */}
@@ -319,12 +369,30 @@ export function MapboxGlobe({
           </Source>
         )}
 
+        {/* Urban Expansion Layer - circular buffers around urban cores */}
+        {urbanExpansionActive && urbanExpansionData && typeof urbanExpansionData === 'object' && 'type' in urbanExpansionData && urbanExpansionData.type === 'FeatureCollection' && (
+          <Source
+            id="urban-expansion"
+            type="geojson"
+            data={urbanExpansionData}
+          >
+            <Layer
+              id="urban-expansion-layer"
+              type="fill"
+              paint={{
+                'fill-color': '#ff8c00',
+                'fill-opacity': controls.urbanExpansionOpacity || 0.2
+              }}
+            />
+          </Source>
+        )}
+
         <NavigationControl position="bottom-right" />
         <GeolocateControl position="bottom-right" />
         <ScaleControl position="bottom-left" />
       </Map>
 
-      {/* Coordinates Tooltip */}
+      {/* Coordinates & Population Tooltip */}
       {hoverInfo && (
         <div
           className="absolute z-10 pointer-events-none bg-card/95 backdrop-blur-lg border border-border/60 rounded-lg shadow-lg px-2.5 py-1.5 text-xs"
@@ -336,6 +404,19 @@ export function MapboxGlobe({
           <div className="font-semibold text-foreground">
             {hoverInfo.lat.toFixed(4)}°, {hoverInfo.lng.toFixed(4)}°
           </div>
+          {urbanExpansionActive && populationData && populationData.population !== null && populationData.population > 0 && (
+            <div className="text-muted-foreground mt-1 pt-1 border-t border-border/40">
+              <div className="flex items-center gap-1.5">
+                <span className="text-orange-500">👥</span>
+                <span className="font-medium">
+                  {populationData.population.toLocaleString()} people
+                </span>
+              </div>
+              <div className="text-[10px] opacity-70 mt-0.5">
+                {populationData.year} projection ({populationData.scenario})
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
