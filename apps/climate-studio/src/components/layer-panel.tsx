@@ -780,7 +780,7 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
               {layer.id === "megaregion_timeseries" && (
                 <div className="space-y-1">
                   <div className="h-3 w-full rounded-full" style={{
-                    background: 'linear-gradient(to right, #3b82f6 0%, #0ea5e9 16.67%, #06b6d4 33.33%, #10b981 50%, #84cc16 58.33%, #eab308 66.67%, #f59e0b 75%, #f97316 83.33%, #ef4444 91.67%, #dc2626 100%)'
+                    background: 'linear-gradient(to right, #dc2626 0%, #f97316 15%, #eab308 30%, #84cc16 45%, #3b82f6 75%, #8b5cf6 100%)'
                   }} />
                   <div className="flex justify-between text-[10px] text-muted-foreground">
                     <span>-5%</span>
