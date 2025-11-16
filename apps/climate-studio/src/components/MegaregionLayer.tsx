@@ -35,29 +35,30 @@ function populationToRadius(population: number): number {
 }
 
 // Helper: Determine circle color based on population size and growth
+// INVERTED: Decline = RED (alarming), Growth = BLUE
 function getGrowthColor(currentPop: number, previousPop: number): string {
   if (!previousPop || previousPop === 0) return '#888888' // Gray for no data
 
   const growthRate = (currentPop - previousPop) / previousPop
 
   // Color based on growth rate with more granular steps
-  // Declining metros (cool colors: blue → cyan)
-  if (growthRate < -0.05) return '#3b82f6' // Strong decline - blue
-  if (growthRate < -0.02) return '#0ea5e9' // Moderate decline - sky blue
-  if (growthRate < 0) return '#06b6d4' // Slight decline - cyan
+  // Declining metros (warm colors: dark red → orange) - ALARMING
+  if (growthRate < -0.05) return '#dc2626' // Strong decline - dark red
+  if (growthRate < -0.02) return '#ef4444' // Moderate decline - red
+  if (growthRate < 0) return '#f97316' // Slight decline - orange
 
-  // Slow growth (green → yellow)
-  if (growthRate < 0.03) return '#10b981' // Very slow growth - emerald
-  if (growthRate < 0.06) return '#84cc16' // Slow growth - lime
-  if (growthRate < 0.09) return '#eab308' // Moderate-slow growth - yellow
+  // Slow growth (yellow → green)
+  if (growthRate < 0.03) return '#f59e0b' // Very slow growth - amber
+  if (growthRate < 0.06) return '#eab308' // Slow growth - yellow
+  if (growthRate < 0.09) return '#84cc16' // Moderate-slow growth - lime
 
-  // Faster growth (orange → red)
-  if (growthRate < 0.12) return '#f59e0b' // Moderate growth - amber
-  if (growthRate < 0.15) return '#f97316' // Moderate-fast growth - orange
-  if (growthRate < 0.18) return '#ef4444' // Fast growth - red
+  // Faster growth (cool colors: green → blue) - POSITIVE
+  if (growthRate < 0.12) return '#10b981' // Moderate growth - emerald
+  if (growthRate < 0.15) return '#06b6d4' // Moderate-fast growth - cyan
+  if (growthRate < 0.18) return '#0ea5e9' // Fast growth - sky blue
 
   // Very fast growth
-  return '#dc2626' // Very fast growth - dark red
+  return '#3b82f6' // Very fast growth - blue
 }
 
 // Helper: Create circle polygon from center point
