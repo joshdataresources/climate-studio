@@ -21,18 +21,29 @@ const LEGEND_CONFIGS: Record<string, LegendItem> = {
     label: 'Soil Moisture',
     gradient: 'linear-gradient(to right, #8b4513, #daa520, #f0e68c, #adff2f, #7cfc00, #32cd32)',
     range: '0 - 10 mm'
+  },
+  megaregion_growth: {
+    label: 'Population Growth Rate',
+    gradient: 'linear-gradient(to right, #3b82f6, #0ea5e9, #06b6d4, #10b981, #84cc16, #eab308, #f59e0b, #f97316, #ef4444, #dc2626)',
+    range: '-50% (decline) to +150% (boom)'
   }
 }
 
 export function ClimateLayerLegend() {
   const { controls, isLayerActive } = useClimate()
 
-  // Only show legend when precipitation/drought layer is active
-  if (!isLayerActive('precipitation_drought')) {
+  const precipitationActive = isLayerActive('precipitation_drought')
+  const megaregionActive = isLayerActive('megaregion_timeseries')
+
+  // Show legend when either precipitation/drought or megaregion layer is active
+  if (!precipitationActive && !megaregionActive) {
     return null
   }
 
-  const legendConfig = LEGEND_CONFIGS[controls.droughtMetric]
+  // Determine which legend to show
+  const legendConfig = megaregionActive
+    ? LEGEND_CONFIGS['megaregion_growth']
+    : LEGEND_CONFIGS[controls.droughtMetric]
 
   return (
     <div className="absolute bottom-8 left-4 bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-3 z-10">

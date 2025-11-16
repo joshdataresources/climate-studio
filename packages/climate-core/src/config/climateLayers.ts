@@ -7,7 +7,8 @@ export type ClimateLayerId =
   | 'urban_heat_island'
   | 'urban_expansion'
   | 'topographic_relief'
-  | 'precipitation_drought';
+  | 'precipitation_drought'
+  | 'megaregion_timeseries';
 
 export type ClimateControl =
   | 'seaLevelFeet'
@@ -26,7 +27,9 @@ export type ClimateControl =
   | 'reliefOpacity'
   | 'temperatureMode'
   | 'droughtOpacity'
-  | 'droughtMetric';
+  | 'droughtMetric'
+  | 'megaregionOpacity'
+  | 'megaregionAnimating';
 
 export interface ClimateFetchContext {
   bounds: LatLngBoundsLiteral | null;
@@ -45,6 +48,8 @@ export interface ClimateFetchContext {
   temperatureMode: 'anomaly' | 'actual';
   droughtOpacity: number;
   droughtMetric: 'precipitation' | 'drought_index' | 'soil_moisture';
+  megaregionOpacity: number;
+  megaregionAnimating: boolean;
   useRealData: boolean;
 }
 
@@ -77,6 +82,7 @@ export interface ClimateLayerDefinition {
 }
 
 export const climateLayers: ClimateLayerDefinition[] = [
+  // 1. Sea Level Rise
   {
     id: 'sea_level_rise',
     title: 'Sea Level Rise',
@@ -114,21 +120,52 @@ export const climateLayers: ClimateLayerDefinition[] = [
       valueProperty: 'depth'
     }
   },
+  // 2. Population Migration
   {
-    id: 'temperature_projection',
-    title: 'Future Temperature Anomaly',
-    description: 'Projected temperature anomalies from NASA NEX-GDDP-CMIP6 climate models via Earth Engine.',
+    id: 'megaregion_timeseries',
+    title: 'Population Migration',
+    description: 'Time-series visualization of US metropolitan population growth and megaregion convergence (2025-2095) based on climate migration scenarios. Shows how climate change drives population shifts toward climate havens and away from high-risk areas.',
     category: 'temperature',
     source: {
-      name: 'NASA NEX-GDDP-CMIP6',
-      url: 'https://www.nccs.nasa.gov/services/data-collections'
+      name: 'Climate Migration Model',
+      url: undefined
     },
     defaultActive: false,
-    controls: ['temperatureMode', 'projectionOpacity'],
+    controls: ['megaregionOpacity', 'megaregionAnimating'],
     fetch: {
       method: 'GET',
-      route: '/api/climate/temperature-projection/tiles',
-      query: ({ bounds, projectionYear, scenario, temperatureMode }) => {
+      route: '/megaregion-data',
+      query: ({ projectionYear, scenario }) => {
+        return {
+          year: projectionYear,
+          scenario
+        };
+      }
+    },
+    style: {
+      color: '#ff8c00',
+      opacity: 0.4,
+      layerType: 'polygon',
+      blendMode: 'normal',
+      valueProperty: 'population'
+    }
+  },
+  // 3. Conceptual Urban Growth
+  {
+    id: 'urban_expansion',
+    title: 'Conceptual Urban Growth',
+    description: '⚠️ CONCEPTUAL VISUALIZATION: Shows simplified urban expansion as translucent orange circles growing outward from current cities. Circle size increases as you move the year slider (2025→2100), representing potential metropolitan growth. Larger cities grow faster. For educational purposes only.',
+    category: 'temperature',
+    source: {
+      name: 'GHSL 2023 Circular Buffers',
+      url: 'https://ghsl.jrc.ec.europa.eu/'
+    },
+    defaultActive: false,
+    controls: ['urbanExpansionOpacity'],
+    fetch: {
+      method: 'GET',
+      route: '/api/climate/urban-expansion/tiles',
+      query: ({ bounds, projectionYear, scenario }) => {
         const { north, south, east, west } = bounds ?? {
           north: 41,
           south: 40,
@@ -141,17 +178,16 @@ export const climateLayers: ClimateLayerDefinition[] = [
           east,
           west,
           year: projectionYear,
-          scenario,
-          mode: temperatureMode
+          scenario
         };
       }
     },
     style: {
-      color: '#fb923c',
-      opacity: 0.6,
-      layerType: 'raster',
-      blendMode: 'screen',
-      valueProperty: 'tempAnomaly'
+      color: '#ff8c00',
+      opacity: 0.3,  // 30% opacity
+      layerType: 'polygon',  // GeoJSON polygons (circles)
+      blendMode: 'normal',
+      valueProperty: 'tier'
     }
   },
   // Hidden layer - Current Surface Temperature
@@ -192,6 +228,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
   //     valueProperty: 'temperature'
   //   }
   // },
+  // 4. Urban Heat Island
   {
     id: 'urban_heat_island',
     title: 'Urban Heat Island',
@@ -231,21 +268,22 @@ export const climateLayers: ClimateLayerDefinition[] = [
       valueProperty: 'heatIslandIntensity'
     }
   },
+  // 5. Future Temperature Anomaly
   {
-    id: 'urban_expansion',
-    title: 'Conceptual Urban Growth',
-    description: '⚠️ CONCEPTUAL VISUALIZATION: Shows simplified urban expansion as translucent orange circles growing outward from current cities. Circle size increases as you move the year slider (2025→2100), representing potential metropolitan growth. Larger cities grow faster. For educational purposes only.',
+    id: 'temperature_projection',
+    title: 'Future Temperature Anomaly',
+    description: 'Projected temperature anomalies from NASA NEX-GDDP-CMIP6 climate models via Earth Engine.',
     category: 'temperature',
     source: {
-      name: 'GHSL 2023 Circular Buffers',
-      url: 'https://ghsl.jrc.ec.europa.eu/'
+      name: 'NASA NEX-GDDP-CMIP6',
+      url: 'https://www.nccs.nasa.gov/services/data-collections'
     },
     defaultActive: false,
-    controls: ['urbanExpansionOpacity'],
+    controls: ['temperatureMode', 'projectionOpacity'],
     fetch: {
       method: 'GET',
-      route: '/api/climate/urban-expansion/tiles',
-      query: ({ bounds, projectionYear, scenario }) => {
+      route: '/api/climate/temperature-projection/tiles',
+      query: ({ bounds, projectionYear, scenario, temperatureMode }) => {
         const { north, south, east, west } = bounds ?? {
           north: 41,
           south: 40,
@@ -258,18 +296,20 @@ export const climateLayers: ClimateLayerDefinition[] = [
           east,
           west,
           year: projectionYear,
-          scenario
+          scenario,
+          mode: temperatureMode
         };
       }
     },
     style: {
-      color: '#ff8c00',
-      opacity: 0.2,  // 20% opacity
-      layerType: 'polygon',  // GeoJSON polygons (circles)
-      blendMode: 'normal',
-      valueProperty: 'tier'
+      color: '#fb923c',
+      opacity: 0.6,
+      layerType: 'raster',
+      blendMode: 'screen',
+      valueProperty: 'tempAnomaly'
     }
   },
+  // 6. Precipitation & Drought
   {
     id: 'precipitation_drought',
     title: 'Precipitation & Drought',
@@ -310,6 +350,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
       valueProperty: 'value'
     }
   },
+  // 7. Topographic Relief
   {
     id: 'topographic_relief',
     title: 'Topographic Relief',
