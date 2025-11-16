@@ -40,6 +40,8 @@ const controlOrder: ClimateControl[] = [
   "reliefOpacity",
   "droughtMetric",
   "droughtOpacity",
+  "megaregionOpacity",
+  "megaregionAnimating",
 ]
 
 type ControlSetters = Pick<
@@ -60,7 +62,9 @@ type ControlSetters = Pick<
   "setReliefOpacity" |
   "setTemperatureMode" |
   "setDroughtMetric" |
-  "setDroughtOpacity"
+  "setDroughtOpacity" |
+  "setMegaregionOpacity" |
+  "setMegaregionAnimating"
 >
 
 const renderControl = (
@@ -440,6 +444,36 @@ const renderControl = (
           />
         </div>
       )
+    case "megaregionOpacity":
+      return (
+        <div key="megaregionOpacity" className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs text-muted-foreground">Layer Opacity</label>
+            <span className="text-xs font-medium">{Math.round(values.megaregionOpacity * 100)}%</span>
+          </div>
+          <Slider
+            value={[Math.round(values.megaregionOpacity * 100)]}
+            min={10}
+            max={100}
+            step={5}
+            onValueChange={value => setters.setMegaregionOpacity(value[0] / 100)}
+          />
+        </div>
+      )
+    case "megaregionAnimating":
+      return (
+        <div key="megaregionAnimating" className="space-y-2">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={values.megaregionAnimating}
+              onChange={(e) => setters.setMegaregionAnimating(e.target.checked)}
+              className="h-4 w-4 accent-blue-500"
+            />
+            <span className="text-xs">Auto-animate through years</span>
+          </label>
+        </div>
+      )
     default:
       return null
   }
@@ -574,6 +608,8 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
     setTemperatureMode: climate.setTemperatureMode,
     setDroughtMetric: climate.setDroughtMetric,
     setDroughtOpacity: climate.setDroughtOpacity,
+    setMegaregionOpacity: climate.setMegaregionOpacity,
+    setMegaregionAnimating: climate.setMegaregionAnimating,
   }
 
   return (
@@ -740,6 +776,23 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
                     )}
                   </div>
                 </>
+              )}
+              {layer.id === "megaregion_timeseries" && (
+                <div className="space-y-1">
+                  <div className="h-3 w-full rounded-full" style={{
+                    background: 'linear-gradient(to right, #3b82f6 0%, #0ea5e9 16.67%, #06b6d4 33.33%, #10b981 50%, #84cc16 58.33%, #eab308 66.67%, #f59e0b 75%, #f97316 83.33%, #ef4444 91.67%, #dc2626 100%)'
+                  }} />
+                  <div className="flex justify-between text-[10px] text-muted-foreground">
+                    <span>-5%</span>
+                    <span>0%</span>
+                    <span>+3%</span>
+                    <span>+6%</span>
+                    <span>+9%</span>
+                    <span>+12%</span>
+                    <span>+15%</span>
+                    <span>+18%+</span>
+                  </div>
+                </div>
               )}
           </AccordionItem>
           );

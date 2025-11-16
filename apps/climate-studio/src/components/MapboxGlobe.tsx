@@ -7,6 +7,7 @@ import type { LayerStateMap } from "../hooks/useClimateLayerData"
 import { LatLngBoundsLiteral } from "../types/geography"
 import type { MapRef } from "react-map-gl"
 import { useClimate } from "@climate-studio/core"
+import { MegaregionLayer } from "./MegaregionLayer"
 
 interface MapboxGlobeProps {
   className?: string
@@ -41,6 +42,9 @@ export function MapboxGlobe({
     y: number
     lng: number
     lat: number
+    metroName?: string
+    metroPopulation?: number
+    metroYear?: number
   } | null>(null)
   const [populationData, setPopulationData] = useState<{
     population: number | null
@@ -55,6 +59,7 @@ export function MapboxGlobe({
   const urbanExpansionActive = isLayerActive("urban_expansion")
   const topographicReliefActive = isLayerActive("topographic_relief")
   const precipitationDroughtActive = isLayerActive("precipitation_drought")
+  const megaregionActive = isLayerActive("megaregion_timeseries")
 
   // Get layer data (sea level uses tiles, not data)
   const tempProjectionData = layerStates.temperature_projection?.data
@@ -112,14 +117,24 @@ export function MapboxGlobe({
 
   const handleMouseMove = useCallback((evt: any) => {
     if (evt.lngLat) {
+      // Check if hovering over a megaregion feature
+      const features = evt.target.queryRenderedFeatures(evt.point, {
+        layers: ['megaregion-circles-fill']
+      })
+
+      const metroFeature = features && features.length > 0 ? features[0] : null
+
       setHoverInfo({
         x: evt.point.x,
         y: evt.point.y,
         lng: evt.lngLat.lng,
-        lat: evt.lngLat.lat
+        lat: evt.lngLat.lat,
+        metroName: metroFeature?.properties?.name,
+        metroPopulation: metroFeature?.properties?.population,
+        metroYear: metroFeature?.properties?.year
       })
     }
-  }, [])
+  }, [megaregionActive])
 
   const handleMouseLeave = useCallback(() => {
     setHoverInfo(null)
@@ -387,12 +402,19 @@ export function MapboxGlobe({
           </Source>
         )}
 
+        {/* Megaregion Formation Layer - time-series population migration */}
+        <MegaregionLayer
+          year={controls.projectionYear}
+          opacity={controls.megaregionOpacity || 0.7}
+          visible={megaregionActive}
+        />
+
         <NavigationControl position="bottom-right" />
         <GeolocateControl position="bottom-right" />
         <ScaleControl position="bottom-left" />
       </Map>
 
-      {/* Coordinates & Population Tooltip */}
+      {/* Megaregion & Population Tooltip */}
       {hoverInfo && (
         <div
           className="absolute z-10 pointer-events-none bg-card/95 backdrop-blur-lg border border-border/60 rounded-lg shadow-lg px-2.5 py-1.5 text-xs"
@@ -401,21 +423,43 @@ export function MapboxGlobe({
             top: hoverInfo.y + 10
           }}
         >
-          <div className="font-semibold text-foreground">
-            {hoverInfo.lat.toFixed(4)}°, {hoverInfo.lng.toFixed(4)}°
-          </div>
-          {urbanExpansionActive && populationData && populationData.population !== null && populationData.population > 0 && (
-            <div className="text-muted-foreground mt-1 pt-1 border-t border-border/40">
+          {/* Megaregion metro info */}
+          {megaregionActive && hoverInfo.metroName && hoverInfo.metroPopulation ? (
+            <div>
+              <div className="font-semibold text-foreground mb-1">
+                {hoverInfo.metroName}
+              </div>
               <div className="flex items-center gap-1.5">
-                <span className="text-orange-500">👥</span>
+                <span className="text-blue-500">🏙️</span>
                 <span className="font-medium">
-                  {populationData.population.toLocaleString()} people
+                  {hoverInfo.metroPopulation.toLocaleString()} people
                 </span>
               </div>
               <div className="text-[10px] opacity-70 mt-0.5">
-                {populationData.year} projection ({populationData.scenario})
+                {hoverInfo.metroYear} projection
               </div>
             </div>
+          ) : (
+            <>
+              <div className="font-semibold text-foreground">
+                {hoverInfo.lat.toFixed(4)}°, {hoverInfo.lng.toFixed(4)}°
+              </div>
+
+              {/* Urban expansion population data */}
+              {urbanExpansionActive && populationData && populationData.population !== null && populationData.population > 0 && (
+                <div className="text-muted-foreground mt-1 pt-1 border-t border-border/40">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-orange-500">👥</span>
+                    <span className="font-medium">
+                      {populationData.population.toLocaleString()} people
+                    </span>
+                  </div>
+                  <div className="text-[10px] opacity-70 mt-0.5">
+                    {populationData.year} projection ({populationData.scenario})
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       )}

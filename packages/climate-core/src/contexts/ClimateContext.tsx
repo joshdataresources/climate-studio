@@ -21,6 +21,8 @@ interface ClimateControlsState {
   temperatureMode: 'anomaly' | 'actual';
   droughtOpacity: number;
   droughtMetric: 'precipitation' | 'drought_index' | 'soil_moisture';
+  megaregionOpacity: number;
+  megaregionAnimating: boolean;
   useRealData: boolean;
 }
 
@@ -51,6 +53,8 @@ interface ClimateContextValue {
   setTemperatureMode: (mode: 'anomaly' | 'actual') => void;
   setDroughtOpacity: (value: number) => void;
   setDroughtMetric: (metric: 'precipitation' | 'drought_index' | 'soil_moisture') => void;
+  setMegaregionOpacity: (value: number) => void;
+  setMegaregionAnimating: (value: boolean) => void;
   setUseRealData: (value: boolean) => void;
   activeLayerIds: ClimateLayerId[];
   setActiveLayerIds: (layerIds: ClimateLayerId[]) => void;
@@ -111,12 +115,14 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
   const [urbanHeatOpacity, setUrbanHeatOpacity] = useState<number>(0.3);
   const [urbanHeatSeason, setUrbanHeatSeason] = useState<'summer' | 'winter'>('summer');
   const [urbanHeatColorScheme, setUrbanHeatColorScheme] = useState<'temperature' | 'heat' | 'urban'>('heat');
-  const [urbanExpansionOpacity, setUrbanExpansionOpacity] = useState<number>(0.6);
+  const [urbanExpansionOpacity, setUrbanExpansionOpacity] = useState<number>(0.3);
   const [reliefStyle, setReliefStyle] = useState<'classic' | 'dark' | 'depth' | 'dramatic'>('dramatic');
   const [reliefOpacity, setReliefOpacity] = useState<number>(0.3);
   const [temperatureMode, setTemperatureMode] = useState<'anomaly' | 'actual'>('anomaly');
   const [droughtOpacity, setDroughtOpacity] = useState<number>(0.3);
   const [droughtMetric, setDroughtMetric] = useState<'precipitation' | 'drought_index' | 'soil_moisture'>('drought_index');
+  const [megaregionOpacity, setMegaregionOpacity] = useState<number>(0.7);
+  const [megaregionAnimating, setMegaregionAnimating] = useState<boolean>(false);
   const [useRealData, setUseRealData] = useState<boolean>(true);
   const [activeLayerIds, setActiveLayerIds] = useState<ClimateLayerId[]>(
     getInitialActiveLayers()
@@ -188,9 +194,11 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
       temperatureMode,
       droughtOpacity,
       droughtMetric,
+      megaregionOpacity,
+      megaregionAnimating,
       useRealData
     }),
-    [scenario, projectionYear, seaLevelFeet, analysisDate, displayStyle, resolution, projectionOpacity, seaLevelOpacity, urbanHeatOpacity, urbanHeatSeason, urbanHeatColorScheme, urbanExpansionOpacity, reliefStyle, reliefOpacity, temperatureMode, droughtOpacity, droughtMetric, useRealData]
+    [scenario, projectionYear, seaLevelFeet, analysisDate, displayStyle, resolution, projectionOpacity, seaLevelOpacity, urbanHeatOpacity, urbanHeatSeason, urbanHeatColorScheme, urbanExpansionOpacity, reliefStyle, reliefOpacity, temperatureMode, droughtOpacity, droughtMetric, megaregionOpacity, megaregionAnimating, useRealData]
   );
 
   const isLayerActive = useCallback(
@@ -218,6 +226,8 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
       setTemperatureMode,
       setDroughtOpacity,
       setDroughtMetric,
+      setMegaregionOpacity,
+      setMegaregionAnimating,
       setUseRealData,
       activeLayerIds,
       setActiveLayerIds,
