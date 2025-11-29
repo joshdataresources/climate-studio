@@ -24,8 +24,8 @@ const LEGEND_CONFIGS: Record<string, LegendItem> = {
   },
   megaregion_growth: {
     label: 'Population Growth Rate',
-    gradient: 'linear-gradient(to right, #3b82f6, #0ea5e9, #06b6d4, #10b981, #84cc16, #eab308, #f59e0b, #f97316, #ef4444, #dc2626)',
-    range: '-50% (decline) to +150% (boom)'
+    gradient: 'linear-gradient(to right, #dc2626, #ef4444, #f97316, #eab308, #a855f7, #8b5cf6, #3b82f6, #0ea5e9, #06b6d4, #10b981)',
+    range: '-5% (decline) to +10% (growth)'
   }
 }
 

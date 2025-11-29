@@ -41,6 +41,9 @@ function getGrowthColor(currentPop: number, previousPop: number): string {
 
   const growthRate = (currentPop - previousPop) / previousPop
 
+  // Show color even for very small changes (> 0.1% change)
+  if (Math.abs(growthRate) < 0.001) return '#888888' // Gray only if essentially no change
+
   // Color based on growth rate with more granular steps
   // Declining metros (warm colors: dark red → orange) - ALARMING
   if (growthRate < -0.05) return '#dc2626' // Strong decline - dark red
@@ -127,7 +130,9 @@ export function MegaregionLayer({ year, opacity, visible }: MegaregionLayerProps
           climate_risk: metro.climate_risk,
           megaregion: metro.megaregion,
           color,
-          radius: radiusKm
+          radius: radiusKm,
+          growthRate: parseFloat(growthRate),
+          previousPop: previousPop
         },
         geometry: {
           type: 'Polygon' as const,
@@ -144,6 +149,45 @@ export function MegaregionLayer({ year, opacity, visible }: MegaregionLayerProps
     }
   }, [data.metros, year, closestYear, previousYear, visible])
 
+  // Generate label features for center labels
+  const labelFeatures = useMemo(() => {
+    if (!visible || !geojson) return null
+
+    const labels = data.metros.map(metro => {
+      const population = metro.populations[closestYear.toString()] || 0
+      const previousPop = previousYear ? (metro.populations[previousYear.toString()] || 0) : population
+      const growthRate = previousPop ? ((population - previousPop) / previousPop * 100) : 0
+
+      // Format population with commas
+      const formattedPop = population.toLocaleString('en-US')
+
+      // Create triangle indicator
+      const triangle = growthRate > 0 ? '▲' : growthRate < 0 ? '▼' : '='
+      const growthText = `${growthRate >= 0 ? '+' : ''}${Math.abs(growthRate).toFixed(0)}%${triangle}`
+
+      return {
+        type: 'Feature' as const,
+        properties: {
+          name: metro.name,
+          population: formattedPop,
+          growthRate: growthRate.toFixed(1),
+          growthText: growthText,
+          isGrowing: growthRate > 0,
+          isDecline: growthRate < 0
+        },
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [metro.lon, metro.lat]
+        }
+      }
+    })
+
+    return {
+      type: 'FeatureCollection' as const,
+      features: labels
+    }
+  }, [data.metros, closestYear, previousYear, visible, geojson])
+
   if (!visible || !geojson) return null
 
   return (
@@ -159,7 +203,7 @@ export function MegaregionLayer({ year, opacity, visible }: MegaregionLayerProps
           type="fill"
           paint={{
             'fill-color': ['get', 'color'],
-            'fill-opacity': opacity * 0.4 // Base opacity multiplied by control
+            'fill-opacity': opacity * 0.8 // Base opacity multiplied by control
           }}
         />
       </Source>
@@ -176,42 +220,63 @@ export function MegaregionLayer({ year, opacity, visible }: MegaregionLayerProps
           paint={{
             'line-color': ['get', 'color'],
             'line-width': 2,
-            'line-opacity': opacity * 0.8
+            'line-opacity': opacity
           }}
         />
       </Source>
 
-      {/* Metro center points (optional labels) */}
-      <Source
-        id="megaregion-centers"
-        type="geojson"
-        data={{
-          type: 'FeatureCollection',
-          features: data.metros.map(metro => ({
-            type: 'Feature' as const,
-            properties: {
-              name: metro.name,
-              population: metro.populations[closestYear.toString()] || 0
-            },
-            geometry: {
-              type: 'Point' as const,
-              coordinates: [metro.lon, metro.lat]
-            }
-          }))
-        }}
-      >
-        <Layer
-          id="megaregion-center-dots"
-          type="circle"
-          paint={{
-            'circle-radius': 3,
-            'circle-color': '#ffffff',
-            'circle-stroke-width': 1,
-            'circle-stroke-color': '#000000',
-            'circle-opacity': opacity
-          }}
-        />
-      </Source>
+      {/* Metro center labels with population */}
+      {labelFeatures && (
+        <Source
+          id="megaregion-labels"
+          type="geojson"
+          data={labelFeatures}
+        >
+          <Layer
+            id="megaregion-population-text"
+            type="symbol"
+            layout={{
+              'text-field': ['get', 'population'],
+              'text-size': 16,
+              'text-anchor': 'center',
+              'text-offset': [0, -0.5],
+              'text-allow-overlap': false,
+              'text-ignore-placement': false
+            }}
+            paint={{
+              'text-color': '#ffffff',
+              'text-halo-color': '#000000',
+              'text-halo-width': 2,
+              'text-opacity': opacity
+            }}
+          />
+          <Layer
+            id="megaregion-growth-text"
+            type="symbol"
+            layout={{
+              'text-field': ['get', 'growthText'],
+              'text-size': 14,
+              'text-anchor': 'center',
+              'text-offset': [0, 0.5],
+              'text-allow-overlap': false,
+              'text-ignore-placement': false
+            }}
+            paint={{
+              'text-color': [
+                'case',
+                ['get', 'isGrowing'],
+                '#10b981', // Green for growth
+                ['get', 'isDecline'],
+                '#ef4444', // Red for decline
+                '#888888'  // Gray for no change
+              ],
+              'text-halo-color': '#000000',
+              'text-halo-width': 2,
+              'text-opacity': opacity
+            }}
+          />
+        </Source>
+      )}
     </>
   )
 }

@@ -100,10 +100,8 @@ class TopographicReliefService:
         Returns:
             dict with tile_url and metadata
         """
-        # Check cache first
-        if style in self.cached_tiles:
-            logger.info(f"Returning cached hillshade tile for {style} style")
-            return self.cached_tiles[style]
+        # DON'T use cache - Earth Engine tile URLs expire after ~1 day
+        # Always generate fresh tile URLs
 
         if not self.initialized:
             return self._generate_simulated_hillshade(style)
@@ -144,9 +142,7 @@ class TopographicReliefService:
                 'elevation_angle': params['elevation']
             }
 
-            # Cache the result
-            self.cached_tiles[style] = result
-
+            # DON'T cache - Earth Engine URLs expire
             logger.info(f"Generated hillshade tile URL for {style} style")
             return result
 

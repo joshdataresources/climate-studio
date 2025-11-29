@@ -38,6 +38,23 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
   const cacheRef = useRef<Map<string, LayerFetchState>>(new Map());
   const abortControllers = useRef<Map<ClimateLayerId, AbortController>>(new Map());
 
+  // Clear tile layer cache on mount to ensure fresh tile URLs
+  useEffect(() => {
+    console.log('🔄 useClimateLayerData mounted - clearing tile layer cache');
+    const tileLayers: ClimateLayerId[] = ['temperature_projection', 'urban_heat_island', 'topographic_relief', 'precipitation_drought'];
+    const keysToDelete: string[] = [];
+    cacheRef.current.forEach((value, key) => {
+      const layerId = key.split(':')[0] as ClimateLayerId;
+      if (tileLayers.includes(layerId)) {
+        keysToDelete.push(key);
+      }
+    });
+    keysToDelete.forEach(key => cacheRef.current.delete(key));
+    if (keysToDelete.length > 0) {
+      console.log(`🗑️  Cleared ${keysToDelete.length} cached tile layer entries`);
+    }
+  }, []); // Run once on mount
+
   const boundsKey = useMemo(() => getBoundsKey(bounds), [bounds]);
 
   const fetchContext: ClimateFetchContext = useMemo(
@@ -105,6 +122,18 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       }
       console.log(`✅ Layer config found for: ${layerId}`, layer);
 
+      // Skip fetch if route is empty (layer uses local data only, like megaregion)
+      if (!layer.fetch.route || layer.fetch.route === '') {
+        console.log(`⏭️ Skipping fetch for ${layerId} - uses local data`);
+        setLayerState(layerId, {
+          status: 'success',
+          data: { features: [] }, // Empty data, actual rendering handled by DeckGLMap
+          metadata: { source: 'local', isRealData: true },
+          updatedAt: Date.now()
+        });
+        return;
+      }
+
       const params = layer.fetch.query(fetchContext);
       const cacheKey = `${layerId}:${JSON.stringify(params)}`;
 
@@ -117,8 +146,13 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
         // 4. Cache is not stale (less than 1 hour old)
         const now = Date.now();
         const cacheAge = now - (cached.updatedAt || 0);
+        // Tile-based layers should refresh frequently since tile URLs can expire
         // Urban expansion should refresh more frequently to show year changes
-        const maxCacheAge = layerId === 'urban_expansion' ? 5 * 60 * 1000 : 60 * 60 * 1000; // 5 min for urban, 1 hour for others
+        const tileLayers: ClimateLayerId[] = ['temperature_projection', 'urban_heat_island', 'topographic_relief', 'precipitation_drought'];
+        const isTileLayer = tileLayers.includes(layerId);
+        const maxCacheAge = layerId === 'urban_expansion' ? 5 * 60 * 1000 :
+                           isTileLayer ? 10 * 60 * 1000 : // 10 minutes for tile layers
+                           60 * 60 * 1000; // 1 hour for others
 
         const hasValidFeatures = cached.data?.features?.length > 0;
         const hasValidTileUrl = !!cached.data?.tile_url;
@@ -127,8 +161,8 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
         // For urban_expansion, allow fallback data in cache (GHSL simulation)
         // For other layers, require real data
         const isRealData = layerId === 'urban_expansion' ? true :
-                          (cached.data?.metadata?.isRealData !== false &&
-                           cached.data?.metadata?.dataType !== 'fallback');
+          (cached.data?.metadata?.isRealData !== false &&
+            cached.data?.metadata?.dataType !== 'fallback');
         const isFresh = cacheAge < maxCacheAge;
 
         const isValidCache = hasValidData && hasMetadata && isRealData && isFresh;
@@ -300,6 +334,19 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
   const prevControlsRef = useRef<string | null>(null);
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Cleanup abort controllers for inactive layers
+  useEffect(() => {
+    // Cancel any pending requests for layers that are no longer active
+    const activeSet = new Set(activeLayerIds);
+    abortControllers.current.forEach((controller, layerId) => {
+      if (!activeSet.has(layerId)) {
+        console.log(`🚫 Aborting fetch for inactive layer: ${layerId}`);
+        controller.abort();
+        abortControllers.current.delete(layerId);
+      }
+    });
+  }, [activeLayerIds]);
+
   useEffect(() => {
     const uniqueActiveLayers = Array.from(new Set(activeLayerIds));
     console.log('🎯 Active layers in useClimateLayerData:', uniqueActiveLayers);
@@ -403,6 +450,18 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       }
     };
   }, [activeLayerIds, fetchContext]);
+
+  // Cleanup all abort controllers on unmount
+  useEffect(() => {
+    return () => {
+      console.log('🧹 Cleaning up all abort controllers on unmount');
+      abortControllers.current.forEach((controller, layerId) => {
+        console.log(`  → Aborting ${layerId}`);
+        controller.abort();
+      });
+      abortControllers.current.clear();
+    };
+  }, []);
 
   const refreshLayer = useCallback(
     (layerId: ClimateLayerId) => {

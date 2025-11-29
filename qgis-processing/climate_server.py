@@ -66,8 +66,8 @@ def climate_status():
         'status': 'healthy',
         'service': 'climate-data-server',
         'version': '1.0.0',
-        'earthEngineReady': True,
-        'message': 'All systems operational'
+        'earthEngineReady': climate_service.initialized,
+        'message': 'All systems operational' if climate_service.initialized else 'Earth Engine not initialized'
     })
 
 
