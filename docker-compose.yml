@@ -41,15 +41,15 @@ services:
   # Frontend service
   urban-studio-frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile.dev
+      context: .
+      dockerfile: apps/climate-studio/Dockerfile.dev
     container_name: urban-studio-frontend
     environment:
       - REACT_APP_API_URL=http://localhost:3001
     ports:
       - "8080:8080"
     volumes:
-      - ./frontend:/app
+      - .:/app
       - /app/node_modules
     depends_on:
       - urban-studio-backend
@@ -74,6 +74,7 @@ services:
     volumes:
       - ./qgis-data:/data
       - ./qgis-projects:/projects
+      - ./qgis-processing:/app
     depends_on:
       - urban-studio-db
     networks:

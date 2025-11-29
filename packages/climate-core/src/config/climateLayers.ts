@@ -120,7 +120,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
       valueProperty: 'depth'
     }
   },
-  // 2. Population Migration
+  // 2. Population Migration (uses local data, no fetch needed)
   {
     id: 'megaregion_timeseries',
     title: 'Population Migration',
@@ -130,17 +130,12 @@ export const climateLayers: ClimateLayerDefinition[] = [
       name: 'Climate Migration Model',
       url: undefined
     },
-    defaultActive: false,
-    controls: ['megaregionOpacity', 'megaregionAnimating'],
+    defaultActive: true,
+    controls: ['megaregionOpacity'],
     fetch: {
       method: 'GET',
-      route: '/megaregion-data',
-      query: ({ projectionYear, scenario }) => {
-        return {
-          year: projectionYear,
-          scenario
-        };
-      }
+      route: '', // Empty route - uses local data in DeckGLMap.tsx
+      query: () => ({}) // No query params needed for local data
     },
     style: {
       color: '#ff8c00',
@@ -148,46 +143,6 @@ export const climateLayers: ClimateLayerDefinition[] = [
       layerType: 'polygon',
       blendMode: 'normal',
       valueProperty: 'population'
-    }
-  },
-  // 3. Conceptual Urban Growth
-  {
-    id: 'urban_expansion',
-    title: 'Conceptual Urban Growth',
-    description: '⚠️ CONCEPTUAL VISUALIZATION: Shows simplified urban expansion as translucent orange circles growing outward from current cities. Circle size increases as you move the year slider (2025→2100), representing potential metropolitan growth. Larger cities grow faster. For educational purposes only.',
-    category: 'temperature',
-    source: {
-      name: 'GHSL 2023 Circular Buffers',
-      url: 'https://ghsl.jrc.ec.europa.eu/'
-    },
-    defaultActive: false,
-    controls: ['urbanExpansionOpacity'],
-    fetch: {
-      method: 'GET',
-      route: '/api/climate/urban-expansion/tiles',
-      query: ({ bounds, projectionYear, scenario }) => {
-        const { north, south, east, west } = bounds ?? {
-          north: 41,
-          south: 40,
-          east: -73,
-          west: -74
-        };
-        return {
-          north,
-          south,
-          east,
-          west,
-          year: projectionYear,
-          scenario
-        };
-      }
-    },
-    style: {
-      color: '#ff8c00',
-      opacity: 0.3,  // 30% opacity
-      layerType: 'polygon',  // GeoJSON polygons (circles)
-      blendMode: 'normal',
-      valueProperty: 'tier'
     }
   },
   // Hidden layer - Current Surface Temperature
@@ -360,7 +315,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
       name: 'Google Earth Engine (SRTM/Copernicus DEM)',
       url: 'https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_DEM_GLO30'
     },
-    defaultActive: true,
+    defaultActive: false,
     controls: ['reliefStyle', 'reliefOpacity'],
     fetch: {
       method: 'GET',

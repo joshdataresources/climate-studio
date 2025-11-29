@@ -2,17 +2,18 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Copy package files first
+# Copy root package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install
+# Copy packages and apps directories
+COPY packages ./packages
+COPY apps ./apps
 
-# Copy source code
-COPY . .
+# Install dependencies from root
+RUN npm install
 
 # Expose port
 EXPOSE 8080
 
-# Start Vite dev server (without config)
-CMD ["npx", "vite", "--host", "0.0.0.0", "--port", "8080", "--config", "/dev/null"]
+# Start Vite dev server using root script
+CMD ["npm", "run", "dev:studio"]

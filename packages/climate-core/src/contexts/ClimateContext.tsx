@@ -105,12 +105,12 @@ const getInitialActiveLayers = (): ClimateLayerId[] => {
 
 export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [scenario, setScenario] = useState<string>('rcp45');
-  const [projectionYear, setProjectionYear] = useState<number>(2025);
+  const [projectionYear, setProjectionYear] = useState<number>(2030);
   const [seaLevelFeet, setSeaLevelFeet] = useState<number>(3);
   const [analysisDate, setAnalysisDate] = useState<string>(getDefaultAnalysisDate());
   const [displayStyle, setDisplayStyle] = useState<DisplayStyle>('depth');
   const [resolution, setResolution] = useState<number>(1);
-  const [projectionOpacity, setProjectionOpacity] = useState<number>(0.3);
+  const [projectionOpacity, setProjectionOpacity] = useState<number>(0.2);
   const [seaLevelOpacity, setSeaLevelOpacity] = useState<number>(0.3);
   const [urbanHeatOpacity, setUrbanHeatOpacity] = useState<number>(0.3);
   const [urbanHeatSeason, setUrbanHeatSeason] = useState<'summer' | 'winter'>('summer');
@@ -119,9 +119,9 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
   const [reliefStyle, setReliefStyle] = useState<'classic' | 'dark' | 'depth' | 'dramatic'>('dramatic');
   const [reliefOpacity, setReliefOpacity] = useState<number>(0.3);
   const [temperatureMode, setTemperatureMode] = useState<'anomaly' | 'actual'>('anomaly');
-  const [droughtOpacity, setDroughtOpacity] = useState<number>(0.3);
+  const [droughtOpacity, setDroughtOpacity] = useState<number>(0.2);
   const [droughtMetric, setDroughtMetric] = useState<'precipitation' | 'drought_index' | 'soil_moisture'>('drought_index');
-  const [megaregionOpacity, setMegaregionOpacity] = useState<number>(0.7);
+  const [megaregionOpacity, setMegaregionOpacity] = useState<number>(0.5);
   const [megaregionAnimating, setMegaregionAnimating] = useState<boolean>(false);
   const [useRealData, setUseRealData] = useState<boolean>(true);
   const [activeLayerIds, setActiveLayerIds] = useState<ClimateLayerId[]>(
@@ -131,9 +131,59 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
 
   // Persist active layers to localStorage
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(activeLayerIds));
-    console.log('💾 Saved active layers to localStorage:', activeLayerIds);
+    try {
+      // Only store the layer IDs (strings), not the entire layer objects
+      const idsOnly = activeLayerIds.filter(id => typeof id === 'string');
+
+      // Skip saving if it would exceed quota (prevents crash loops)
+      const jsonString = JSON.stringify(idsOnly);
+      if (jsonString.length > 5000000) { // 5MB limit
+        console.warn('⚠️ Active layers data too large, skipping localStorage save');
+        return;
+      }
+
+      localStorage.setItem(STORAGE_KEY, jsonString);
+      console.log('💾 Saved active layers to localStorage:', idsOnly);
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'QuotaExceededError') {
+        console.warn('⚠️ localStorage quota exceeded, clearing ALL localStorage');
+        // Clear ALL localStorage to free up space
+        try {
+          localStorage.clear();
+          console.log('✅ localStorage cleared');
+        } catch (clearError) {
+          console.error('❌ Failed to clear localStorage:', clearError);
+        }
+      } else {
+        console.error('❌ Failed to save active layers to localStorage:', error);
+      }
+    }
   }, [activeLayerIds]);
+
+  // Animation loop for megaregion time series
+  useEffect(() => {
+    let intervalId: NodeJS.Timeout;
+
+    if (megaregionAnimating) {
+      console.log('▶️ Starting animation loop');
+      intervalId = setInterval(() => {
+        setProjectionYear(prevYear => {
+          const nextYear = prevYear + 5;
+          if (nextYear > 2100) {
+            return 2025;
+          }
+          return nextYear;
+        });
+      }, 1000); // Update every 1 second
+    }
+
+    return () => {
+      if (intervalId) {
+        console.log('ww Stopping animation loop');
+        clearInterval(intervalId);
+      }
+    };
+  }, [megaregionAnimating]);
 
   const addLayerError = useCallback((layerId: ClimateLayerId, error: string) => {
     const layer = climateLayers.find(l => l.id === layerId);

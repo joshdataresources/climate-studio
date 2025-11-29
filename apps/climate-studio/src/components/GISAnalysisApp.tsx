@@ -5,6 +5,7 @@ import { Button } from "./ui/button"
 import { Input } from "./ui/input"
 import { LayerControlsPanel, LayerPanel } from "./layer-panel"
 import { MapboxGlobe } from "./MapboxGlobe"
+import { DeckGLMap } from "./DeckGLMap"
 import { EarthEngineStatus } from "./EarthEngineStatus"
 import { climateLayers } from "@climate-studio/core/config"
 import type { ClimateControl } from "@climate-studio/core/config"
@@ -598,6 +599,30 @@ export function GISAnalysisApp() {
       {/* Earth Engine Status Indicator */}
       <EarthEngineStatus />
 
+      <main className="relative h-full w-full">
+        {hasLayerControls && (
+          <div className="absolute top-4 right-4 z-[1000] w-80 max-h-[calc(100vh-12rem)] overflow-y-auto pointer-events-auto space-y-4 rounded-lg">
+            <LayerControlsPanel layerStates={layerStates} />
+          </div>
+        )}
+        <DeckGLMap
+          center={viewport.center}
+          zoom={viewport.zoom}
+          onViewportChange={handleViewportChange}
+          onMapBoundsChange={handleBoundsChange}
+          layerStates={layerStates}
+        />
+        <div className="absolute bottom-20 left-4 rounded-lg border border-border/60 bg-card/70 px-4 py-2 text-xs backdrop-blur">
+          <div className="font-semibold">Viewport</div>
+          <div className="mt-1 space-y-1 text-muted-foreground">
+            <div>
+              Lat/Lng: {viewport.center.lat.toFixed(3)}, {viewport.center.lng.toFixed(3)}
+            </div>
+            <div>Zoom: {viewport.zoom.toFixed(1)}</div>
+          </div>
+        </div>
+      </main>
+
       <aside className="absolute left-0 top-0 z-[1000] flex h-full w-96 flex-col pointer-events-none">
         <div className="flex-1 overflow-y-auto space-y-6 pointer-events-auto">
           <div className="mx-4 mt-4 rounded-lg border border-border/60 bg-card/95 backdrop-blur-lg p-4">
@@ -736,30 +761,6 @@ export function GISAnalysisApp() {
 
         </div>
       </aside>
-
-      <main className="relative h-full w-full">
-        {hasLayerControls && (
-          <div className="absolute top-4 right-4 z-[1000] w-80 max-h-[calc(100vh-12rem)] overflow-y-auto pointer-events-auto space-y-4 rounded-lg">
-            <LayerControlsPanel layerStates={layerStates} />
-          </div>
-        )}
-        <MapboxGlobe
-          center={viewport.center}
-          zoom={viewport.zoom}
-          onViewportChange={handleViewportChange}
-          onMapBoundsChange={handleBoundsChange}
-          layerStates={layerStates}
-        />
-        <div className="absolute bottom-20 left-4 rounded-lg border border-border/60 bg-card/70 px-4 py-2 text-xs backdrop-blur">
-          <div className="font-semibold">Viewport</div>
-          <div className="mt-1 space-y-1 text-muted-foreground">
-            <div>
-              Lat/Lng: {viewport.center.lat.toFixed(3)}, {viewport.center.lng.toFixed(3)}
-            </div>
-            <div>Zoom: {viewport.zoom.toFixed(1)}</div>
-          </div>
-        </div>
-      </main>
     </div>
   )
 }
