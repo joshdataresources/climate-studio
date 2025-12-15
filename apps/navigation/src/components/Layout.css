@@ -1,0 +1,27 @@
+.layout {
+  height: 100vh;
+  display: flex;
+  overflow: hidden;
+}
+
+.main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* Allow content to shrink */
+  margin-left: 72px; /* Match narrow sidebar width */
+  transition: margin-left 0.3s ease-in-out;
+  height: 100vh;
+}
+
+.main-wrapper.sidebar-collapsed {
+  margin-left: 0;
+}
+
+.main-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Sidebar is always 72px, no responsive changes needed */
