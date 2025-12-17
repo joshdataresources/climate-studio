@@ -595,7 +595,7 @@ export function GISAnalysisApp() {
   }, [])
 
   return (
-    <div className="relative h-screen text-foreground">
+    <div className="relative h-full w-full text-foreground">
       {/* Earth Engine Status Indicator */}
       <EarthEngineStatus />
 
