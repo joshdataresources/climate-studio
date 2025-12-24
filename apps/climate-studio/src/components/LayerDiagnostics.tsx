@@ -36,7 +36,7 @@ export function LayerDiagnostics({ bounds }: { bounds: any }) {
   }
 
   return (
-    <div className="w-80 rounded-lg border border-border/60 bg-card/95 backdrop-blur-lg p-4 text-xs space-y-3">
+    <div className="w-80 rounded-lg border border-[#3f3f3f] bg-card/40 backdrop-blur-lg p-4 text-xs space-y-3">
       <h3 className="font-semibold text-sm">🔍 Temperature Layer Diagnostics</h3>
 
       <div className="space-y-2">

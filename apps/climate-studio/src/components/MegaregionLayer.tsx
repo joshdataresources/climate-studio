@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo } from "react"
 import { Source, Layer } from "react-map-gl"
+import { useTheme } from "../contexts/ThemeContext"
 import megaregionData from "../data/megaregion-data.json"
 
 interface Metro {
@@ -87,6 +88,7 @@ function createCircle(lng: number, lat: number, radiusKm: number, points: number
 
 export function MegaregionLayer({ year, opacity, visible }: MegaregionLayerProps) {
   const data = megaregionData as MegaregionData
+  const { theme } = useTheme()
 
   console.log(`🔵 MegaregionLayer render: year=${year}, visible=${visible}, opacity=${opacity}`)
 
@@ -244,9 +246,9 @@ export function MegaregionLayer({ year, opacity, visible }: MegaregionLayerProps
               'text-ignore-placement': false
             }}
             paint={{
-              'text-color': '#ffffff',
-              'text-halo-color': '#000000',
-              'text-halo-width': 2,
+              'text-color': theme === 'light' ? '#1e293b' : '#ffffff', // slate-800 for light, white for dark
+              'text-halo-color': theme === 'light' ? 'rgba(255, 255, 255, 0)' : '#000000', // No border in light mode
+              'text-halo-width': theme === 'light' ? 0 : 2, // No border width in light mode
               'text-opacity': opacity
             }}
           />
@@ -268,10 +270,10 @@ export function MegaregionLayer({ year, opacity, visible }: MegaregionLayerProps
                 '#10b981', // Green for growth
                 ['get', 'isDecline'],
                 '#ef4444', // Red for decline
-                '#888888'  // Gray for no change
+                '#64748b'  // slate-500 for no change (darker neutral in light mode)
               ],
-              'text-halo-color': '#000000',
-              'text-halo-width': 2,
+              'text-halo-color': theme === 'light' ? 'rgba(255, 255, 255, 0)' : '#000000', // No border in light mode
+              'text-halo-width': theme === 'light' ? 0 : 2, // No border width in light mode
               'text-opacity': opacity
             }}
           />

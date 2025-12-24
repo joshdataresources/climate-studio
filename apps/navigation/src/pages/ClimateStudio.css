@@ -34,11 +34,9 @@
   height: 20px;
 }
 
-.climate-studio-iframe {
+.climate-studio-container {
   width: 100%;
   height: 100%;
-  border: none;
-  display: block;
   position: absolute;
   top: 0;
   left: 0;

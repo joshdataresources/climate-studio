@@ -13,10 +13,20 @@ export function AppLayout({ children }: AppLayoutProps) {
   return (
     <div className="app-layout">
       <AppSidebar />
-      <main className={`app-main ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <div className={`app-main ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
         {children}
-      </main>
+      </div>
     </div>
   )
 }
+
+
+
+
+
+
+
+
+
+
 

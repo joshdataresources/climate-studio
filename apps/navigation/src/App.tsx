@@ -3,6 +3,7 @@ import { SidebarProvider } from './context/SidebarContext'
 import Layout from './components/Layout'
 import ClimateStudio from './pages/ClimateStudio'
 import WaterAccess from './pages/WaterAccess'
+import AquiferProjection from './pages/AquiferProjection'
 import './App.css'
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
             <Route path="/" element={<ClimateStudio />} />
             <Route path="/climate-studio" element={<ClimateStudio />} />
             <Route path="/water-access" element={<WaterAccess />} />
+            <Route path="/aquifer-projection" element={<AquiferProjection />} />
           </Routes>
         </Layout>
       </SidebarProvider>

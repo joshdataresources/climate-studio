@@ -35,12 +35,12 @@ const getBoundsKey = (bounds: LatLngBoundsLiteral | null) => {
 export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
   const { controls, activeLayerIds, addLayerError, clearLayerErrors } = useClimate();
   const [layerStates, setLayerStates] = useState<LayerStateMap>({});
+  
   const cacheRef = useRef<Map<string, LayerFetchState>>(new Map());
   const abortControllers = useRef<Map<ClimateLayerId, AbortController>>(new Map());
 
   // Clear tile layer cache on mount to ensure fresh tile URLs
   useEffect(() => {
-    console.log('🔄 useClimateLayerData mounted - clearing tile layer cache');
     const tileLayers: ClimateLayerId[] = ['temperature_projection', 'urban_heat_island', 'topographic_relief', 'precipitation_drought'];
     const keysToDelete: string[] = [];
     cacheRef.current.forEach((value, key) => {
@@ -50,38 +50,32 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       }
     });
     keysToDelete.forEach(key => cacheRef.current.delete(key));
-    if (keysToDelete.length > 0) {
-      console.log(`🗑️  Cleared ${keysToDelete.length} cached tile layer entries`);
-    }
-  }, []); // Run once on mount
+  }, []);
 
   const boundsKey = useMemo(() => getBoundsKey(bounds), [bounds]);
 
   const fetchContext: ClimateFetchContext = useMemo(
-    () => {
-      console.log('🔄 useClimateLayerData: Creating fetch context with bounds:', bounds)
-      if (bounds) {
-        console.log(`  Bounds: N=${bounds.north.toFixed(3)} S=${bounds.south.toFixed(3)} E=${bounds.east.toFixed(3)} W=${bounds.west.toFixed(3)} Z=${bounds.zoom}`)
-      }
-      return {
-        bounds,
-        scenario: controls.scenario,
-        projectionYear: controls.projectionYear,
-        seaLevelFeet: controls.seaLevelFeet,
-        analysisDate: controls.analysisDate,
-        displayStyle: controls.displayStyle,
-        resolution: controls.resolution,
-        projectionOpacity: controls.projectionOpacity,
-        urbanHeatSeason: controls.urbanHeatSeason,
-        urbanHeatColorScheme: controls.urbanHeatColorScheme,
-        reliefStyle: controls.reliefStyle,
-        reliefOpacity: controls.reliefOpacity,
-        temperatureMode: controls.temperatureMode,
-        droughtOpacity: controls.droughtOpacity,
-        droughtMetric: controls.droughtMetric,
-        useRealData: controls.useRealData
-      }
-    },
+    () => ({
+      bounds,
+      scenario: controls.scenario,
+      projectionYear: controls.projectionYear,
+      seaLevelFeet: controls.seaLevelFeet,
+      analysisDate: controls.analysisDate,
+      displayStyle: controls.displayStyle,
+      resolution: controls.resolution,
+      projectionOpacity: controls.projectionOpacity,
+      urbanHeatSeason: controls.urbanHeatSeason,
+      urbanHeatColorScheme: controls.urbanHeatColorScheme,
+      urbanExpansionOpacity: controls.urbanExpansionOpacity,
+      reliefStyle: controls.reliefStyle,
+      reliefOpacity: controls.reliefOpacity,
+      temperatureMode: controls.temperatureMode,
+      droughtOpacity: controls.droughtOpacity,
+      droughtMetric: controls.droughtMetric,
+      megaregionOpacity: controls.megaregionOpacity,
+      megaregionAnimating: controls.megaregionAnimating,
+      useRealData: controls.useRealData
+    }),
     [bounds, controls, boundsKey]
   );
 
@@ -107,10 +101,8 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
 
   const fetchLayer = useCallback(
     async (layerId: ClimateLayerId, forceRefresh = false) => {
-      console.log(`🔍 fetchLayer called for: ${layerId}`);
       const layer = getClimateLayer(layerId);
       if (!layer) {
-        console.error(`❌ Unknown layer: ${layerId}`);
         const errorMsg = `Unknown layer: ${layerId}`;
         addLayerError(layerId, errorMsg);
         setLayerState(layerId, {
@@ -120,14 +112,12 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
         });
         return;
       }
-      console.log(`✅ Layer config found for: ${layerId}`, layer);
 
       // Skip fetch if route is empty (layer uses local data only, like megaregion)
       if (!layer.fetch.route || layer.fetch.route === '') {
-        console.log(`⏭️ Skipping fetch for ${layerId} - uses local data`);
         setLayerState(layerId, {
           status: 'success',
-          data: { features: [] }, // Empty data, actual rendering handled by DeckGLMap
+          data: { features: [] },
           metadata: { source: 'local', isRealData: true },
           updatedAt: Date.now()
         });
@@ -139,27 +129,18 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
 
       if (!forceRefresh && cacheRef.current.has(cacheKey)) {
         const cached = cacheRef.current.get(cacheKey)!;
-        // Validate cached data:
-        // 1. Has features array with at least one feature OR has tile_url (for raster layers)
-        // 2. Has metadata object
-        // 3. Metadata indicates real data (not fallback)
-        // 4. Cache is not stale (less than 1 hour old)
         const now = Date.now();
         const cacheAge = now - (cached.updatedAt || 0);
-        // Tile-based layers should refresh frequently since tile URLs can expire
-        // Urban expansion should refresh more frequently to show year changes
         const tileLayers: ClimateLayerId[] = ['temperature_projection', 'urban_heat_island', 'topographic_relief', 'precipitation_drought'];
         const isTileLayer = tileLayers.includes(layerId);
         const maxCacheAge = layerId === 'urban_expansion' ? 5 * 60 * 1000 :
-                           isTileLayer ? 10 * 60 * 1000 : // 10 minutes for tile layers
-                           60 * 60 * 1000; // 1 hour for others
+                           isTileLayer ? 10 * 60 * 1000 :
+                           60 * 60 * 1000;
 
         const hasValidFeatures = cached.data?.features?.length > 0;
         const hasValidTileUrl = !!cached.data?.tile_url;
         const hasValidData = hasValidFeatures || hasValidTileUrl;
         const hasMetadata = !!cached.data?.metadata;
-        // For urban_expansion, allow fallback data in cache (GHSL simulation)
-        // For other layers, require real data
         const isRealData = layerId === 'urban_expansion' ? true :
           (cached.data?.metadata?.isRealData !== false &&
             cached.data?.metadata?.dataType !== 'fallback');
@@ -168,27 +149,12 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
         const isValidCache = hasValidData && hasMetadata && isRealData && isFresh;
 
         if (isValidCache) {
-          console.log(`✅ Using validated cache for ${layerId}:`, {
-            source: cached.data.metadata?.source,
-            features: cached.data.features?.length,
-            tileUrl: cached.data.tile_url ? 'present' : undefined,
-            age: Math.round(cacheAge / 1000) + 's'
-          });
           setLayerState(layerId, {
             ...cached,
             status: 'success'
           });
           return;
         } else {
-          console.warn(`⚠️ Cache invalid for ${layerId}, refetching...`, {
-            hasValidFeatures,
-            hasValidTileUrl,
-            hasValidData,
-            hasMetadata,
-            isRealData,
-            isFresh,
-            cacheAge: Math.round(cacheAge / 1000) + 's'
-          });
           cacheRef.current.delete(cacheKey);
         }
       }
@@ -214,88 +180,43 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
 
       try {
         const queryString = buildQueryString(params);
-        const url = `${BACKEND_BASE_URL}${layer.fetch.route}${queryString ? `?${queryString}` : ''}`;
+        const hasExplicitBackendUrl = !!import.meta.env.VITE_BACKEND_URL;
+        const url = hasExplicitBackendUrl
+          ? `${BACKEND_BASE_URL}${layer.fetch.route}${queryString ? `?${queryString}` : ''}`
+          : `${layer.fetch.route}${queryString ? `?${queryString}` : ''}`;
 
-        console.log('='.repeat(80));
-        console.log(`🌊 Fetching ${layerId} (${layer.title})`);
-        console.log(`🔗 Full URL: ${url}`);
-        console.log(`📦 Query params:`, params);
-        console.log(`⚙️ Backend: ${BACKEND_BASE_URL}`);
-        console.log(`🛣️ Route: ${layer.fetch.route}`);
-        console.log('='.repeat(80));
-
-        // Wait minimum 10s for real NASA data before considering fallback
-        const minWaitTime = 10000;
-        const startTime = Date.now();
-
-        console.log(`⏳ Starting fetch for ${layerId}...`);
-        console.log(`⏰ Fetch started at:`, new Date().toISOString());
-
-        let response;
-        try {
-          response = await fetch(url, {
-            method: layer.fetch.method,
-            signal: controller.signal
-          });
-          console.log(`✅ Fetch complete for ${layerId}, status:`, response.status);
-        } catch (fetchError) {
-          console.error(`❌ Fetch failed for ${layerId}:`, fetchError);
-          console.error(`❌ Fetch error type:`, fetchError instanceof Error ? fetchError.name : typeof fetchError);
-          console.error(`❌ Fetch error message:`, fetchError instanceof Error ? fetchError.message : fetchError);
-          throw fetchError;
-        }
-
-        const elapsedTime = Date.now() - startTime;
-        if (elapsedTime < minWaitTime) {
-          // Response came back too fast, might be immediate fallback
-          console.warn(`⚠️ Fast response for ${layerId} (${elapsedTime}ms), checking data source...`);
-        }
+        const response = await fetch(url, {
+          method: layer.fetch.method,
+          signal: controller.signal
+        });
 
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`);
         }
 
         const payload = await response.json();
-        console.log('📥'.repeat(40));
-        console.log(`RESPONSE for ${layerId}:`);
-        console.log('Success:', payload.success);
-        console.log('Has data:', !!payload.data);
-        console.log('Features count:', payload.data?.features?.length || payload.features?.length || 0);
-        console.log('Metadata:', payload.data?.metadata || payload.metadata);
-        console.log('IS REAL DATA:', payload.data?.metadata?.isRealData);
-        console.log('DATA TYPE:', payload.data?.metadata?.dataType);
-        console.log('SOURCE:', payload.data?.metadata?.source);
-        console.log('📥'.repeat(40));
+
+        // For tile-based APIs, the response has tile_url at top level
+        // Wrap it so data.tile_url works consistently
+        const layerData = payload.data ?? (payload.tile_url ? payload : { features: payload.features || [] });
+        
+        console.log(`📦 ${layerId} FULL response:`, JSON.stringify(payload, null, 2).substring(0, 500));
+        console.log(`📦 ${layerId} layerData:`, JSON.stringify(layerData, null, 2).substring(0, 500));
 
         const result: LayerFetchState = {
           status: 'success',
-          data: payload.data ?? payload,
+          data: layerData,
           metadata: payload.metadata,
           updatedAt: Date.now()
         };
 
-        // Emit success status and analyze data source
+        // Emit success status
         const statusEvent = layerStatusMonitor.createStatusEvent(
           layerId,
           'success',
           payload.data ?? payload
         );
         layerStatusMonitor.emit(statusEvent);
-
-        // Log definitive message based on data source
-        if (statusEvent.dataSource === 'real') {
-          console.log(`✅ REAL NASA DATA loaded for ${layerId}:`, {
-            source: statusEvent.metadata?.source,
-            features: statusEvent.metadata?.featureCount,
-            model: statusEvent.metadata?.model
-          });
-        } else if (statusEvent.dataSource === 'fallback') {
-          console.warn(`⚠️ FALLBACK DATA loaded for ${layerId}:`, {
-            reason: statusEvent.metadata?.fallbackReason || 'Real data unavailable',
-            source: statusEvent.metadata?.source,
-            features: statusEvent.metadata?.featureCount
-          });
-        }
 
         // Clear any previous errors for this layer on successful load
         clearLayerErrors(layerId);
@@ -332,15 +253,14 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
   const prevZoomRef = useRef<number | null>(null);
   const prevBoundsRef = useRef<string | null>(null);
   const prevControlsRef = useRef<string | null>(null);
+  const prevActiveLayersRef = useRef<Set<ClimateLayerId>>(new Set());
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup abort controllers for inactive layers
   useEffect(() => {
-    // Cancel any pending requests for layers that are no longer active
     const activeSet = new Set(activeLayerIds);
     abortControllers.current.forEach((controller, layerId) => {
       if (!activeSet.has(layerId)) {
-        console.log(`🚫 Aborting fetch for inactive layer: ${layerId}`);
         controller.abort();
         abortControllers.current.delete(layerId);
       }
@@ -349,12 +269,11 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
 
   useEffect(() => {
     const uniqueActiveLayers = Array.from(new Set(activeLayerIds));
-    console.log('🎯 Active layers in useClimateLayerData:', uniqueActiveLayers);
+    const currentActiveSet = new Set(uniqueActiveLayers);
 
     const currentZoom = fetchContext.bounds?.zoom ?? 10;
     const currentBoundsKey = boundsKey;
 
-    // Track control parameters separately from bounds for tile layers
     const controlsKey = JSON.stringify({
       scenario: fetchContext.scenario,
       year: fetchContext.projectionYear,
@@ -366,12 +285,10 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
     });
     const controlsChanged = prevControlsRef.current !== null && prevControlsRef.current !== controlsKey;
 
-    // Smaller hexagons with lazy loading
-    // More aggressive resolution increase at higher zoom for detail
     const getResolutionBucket = (zoom: number) => {
       if (zoom < 7) return 2;
       if (zoom < 9) return 3;
-      if (zoom < 11) return 5;  // Skip resolution 4, jump to 5 for smaller hexagons
+      if (zoom < 11) return 5;
       if (zoom < 13) return 6;
       if (zoom < 15) return 7;
       if (zoom < 17) return 8;
@@ -381,19 +298,13 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
     const currentResolution = getResolutionBucket(currentZoom);
     const prevResolution = prevZoomRef.current !== null ? getResolutionBucket(prevZoomRef.current) : currentResolution;
 
-    // Check if bounds changed significantly (pan detected)
     const boundsChanged = prevBoundsRef.current !== null && prevBoundsRef.current !== currentBoundsKey;
-
-    // Only trigger refetch if resolution actually changed
-    const resolutionChanged = currentResolution !== prevResolution;
     const isFirstLoad = prevZoomRef.current === null;
 
-    console.log('═══════════════════════════════════════════════════════════');
-    console.log(`📏 Zoom: ${prevZoomRef.current?.toFixed(2) ?? 'initial'} → ${currentZoom.toFixed(2)}`);
-    console.log(`🔷 Resolution: ${prevResolution} → ${currentResolution}`);
-    console.log(`🗺️  Bounds changed: ${boundsChanged ? 'YES' : 'NO'}`);
-    console.log(`🔀 Resolution changed: ${resolutionChanged ? 'YES - WILL REFETCH' : 'NO'}`);
-    console.log('═══════════════════════════════════════════════════════════');
+    // Find newly activated layers (layers that weren't active before)
+    const newlyActivatedLayers = uniqueActiveLayers.filter(
+      layerId => !prevActiveLayersRef.current.has(layerId)
+    );
 
     // Clear any pending debounced fetch
     if (debounceTimerRef.current) {
@@ -402,37 +313,41 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
 
     // For first load, fetch immediately without debounce
     if (isFirstLoad) {
-      console.log('🎬 First load - fetching all active layers immediately');
       uniqueActiveLayers.forEach(layerId => {
-        console.log(`  → Fetching ${layerId}`);
         fetchLayer(layerId);
       });
       prevZoomRef.current = currentZoom;
       prevBoundsRef.current = currentBoundsKey;
+      prevActiveLayersRef.current = currentActiveSet;
     } else {
-      // All climate layers now use tiles - no more hexagon layers
       // Tile-based layers that don't depend on bounds (global tiles)
-      // urban_expansion is now a bounds-based hexagon layer (GeoJSON polygons)
       const globalTileLayers: ClimateLayerId[] = ['temperature_projection', 'urban_heat_island', 'topographic_relief', 'precipitation_drought'];
+
+      // ALWAYS fetch newly activated layers immediately
+      if (newlyActivatedLayers.length > 0) {
+        console.log('🆕 Fetching newly activated layers:', newlyActivatedLayers);
+        newlyActivatedLayers.forEach(layerId => {
+          fetchLayer(layerId);
+        });
+      }
 
       // Refetch tile-based layers when control parameters change (not bounds)
       if (controlsChanged) {
-        const activeTileLayers = uniqueActiveLayers.filter(id => globalTileLayers.includes(id));
+        const activeTileLayers = uniqueActiveLayers.filter(
+          id => globalTileLayers.includes(id) && !newlyActivatedLayers.includes(id)
+        );
         if (activeTileLayers.length > 0) {
-          console.log(`🎛️  Controls changed - refetching tile layers:`, activeTileLayers);
           activeTileLayers.forEach(layerId => {
             fetchLayer(layerId);
           });
         }
       }
 
-      // Always fetch bounds-based layers immediately on bounds change (no debounce)
-      // All climate layers now use tiles, so only sea_level_rise is bounds-based
+      // Always fetch bounds-based layers immediately on bounds change
       const boundsBasedLayers = uniqueActiveLayers.filter(
-        id => !globalTileLayers.includes(id)
+        id => !globalTileLayers.includes(id) && !newlyActivatedLayers.includes(id)
       );
       if (boundsBasedLayers.length > 0 && boundsChanged) {
-        console.log(`🗺️  Fetching bounds-based layers immediately:`, boundsBasedLayers);
         boundsBasedLayers.forEach(layerId => {
           fetchLayer(layerId);
         });
@@ -441,9 +356,9 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       prevZoomRef.current = currentZoom;
       prevBoundsRef.current = currentBoundsKey;
       prevControlsRef.current = controlsKey;
+      prevActiveLayersRef.current = currentActiveSet;
     }
 
-    // Cleanup debounce timer on unmount
     return () => {
       if (debounceTimerRef.current) {
         clearTimeout(debounceTimerRef.current);
@@ -454,9 +369,7 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
   // Cleanup all abort controllers on unmount
   useEffect(() => {
     return () => {
-      console.log('🧹 Cleaning up all abort controllers on unmount');
-      abortControllers.current.forEach((controller, layerId) => {
-        console.log(`  → Aborting ${layerId}`);
+      abortControllers.current.forEach((controller) => {
         controller.abort();
       });
       abortControllers.current.clear();
@@ -465,11 +378,8 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
 
   const refreshLayer = useCallback(
     (layerId: ClimateLayerId) => {
-      // Clear all cache to force fresh fetch
       cacheRef.current.clear();
-      // Clear any error state for this layer
       clearLayerErrors(layerId);
-      // Force fetch with cache bypass
       fetchLayer(layerId, true);
     },
     [fetchLayer, clearLayerErrors]

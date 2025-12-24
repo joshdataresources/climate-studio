@@ -22,6 +22,7 @@
   flex: 1;
   overflow: hidden;
   position: relative;
+  height: 100%;
 }
 
 /* Sidebar is always 72px, no responsive changes needed */

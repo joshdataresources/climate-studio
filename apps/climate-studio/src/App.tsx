@@ -1,24 +1,39 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { ClimateProvider } from '@climate-studio/core'
 import { SidebarProvider } from './contexts/SidebarContext'
+import { ThemeProvider } from './contexts/ThemeContext'
+import { MapProvider } from './contexts/MapContext'
 import { AppLayout } from './components/layout/AppLayout'
 import { GISAnalysisApp } from './components/GISAnalysisApp'
 import WaterAccessView from './components/WaterAccessView'
+import DesignSystemPage from './design-system/DesignSystemPage'
 
 export default function App() {
   return (
     <BrowserRouter>
-      <ClimateProvider>
+      <ThemeProvider>
         <SidebarProvider>
-          <AppLayout>
-            <Routes>
-              <Route path="/" element={<GISAnalysisApp />} />
-              <Route path="/climate-studio" element={<GISAnalysisApp />} />
-              <Route path="/water-access" element={<WaterAccessView />} />
-            </Routes>
-          </AppLayout>
+          <ClimateProvider>
+            <MapProvider>
+              <Routes>
+                {/* Hidden design system page - no layout wrapper */}
+                <Route path="/design-system" element={<DesignSystemPage />} />
+                
+                {/* Main app routes with layout */}
+                <Route path="*" element={
+                  <AppLayout>
+                    <Routes>
+                      <Route path="/" element={<Navigate to="/climate-studio" replace />} />
+                      <Route path="/climate-studio" element={<GISAnalysisApp />} />
+                      <Route path="/water-access" element={<WaterAccessView />} />
+                    </Routes>
+                  </AppLayout>
+                } />
+              </Routes>
+            </MapProvider>
+          </ClimateProvider>
         </SidebarProvider>
-      </ClimateProvider>
+      </ThemeProvider>
     </BrowserRouter>
   )
 }

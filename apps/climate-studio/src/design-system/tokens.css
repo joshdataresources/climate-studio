@@ -1,0 +1,478 @@
+/**
+ * Climate Studio Design System Tokens
+ * ====================================
+ * A comprehensive set of design tokens for consistent UI across the application.
+ * 
+ * This file defines all primitive tokens used throughout the app.
+ * Import this in globals.css for application-wide availability.
+ */
+
+:root {
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * COLOR SYSTEM
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* === Neutral Scale === */
+  --cs-neutral-0: #000000;
+  --cs-neutral-50: #0a0a0a;
+  --cs-neutral-100: #141414;
+  --cs-neutral-150: #1e1e1e;
+  --cs-neutral-200: #282828;
+  --cs-neutral-300: #3f3f3f;
+  --cs-neutral-400: #525252;
+  --cs-neutral-500: #737373;
+  --cs-neutral-600: #a3a3a3;
+  --cs-neutral-700: #d4d4d4;
+  --cs-neutral-800: #e5e5e5;
+  --cs-neutral-900: #f5f5f5;
+  --cs-neutral-950: #fafafa;
+  --cs-neutral-1000: #ffffff;
+  
+  /* === Brand Colors === */
+  --cs-brand-primary: #437efc;
+  --cs-brand-primary-light: #6b9bff;
+  --cs-brand-primary-dark: #2a5fd4;
+  --cs-brand-primary-muted: rgba(67, 126, 252, 0.25);
+  
+  /* === Semantic Colors === */
+  /* Success - Emerald */
+  --cs-success-50: #064e3b;
+  --cs-success-100: #065f46;
+  --cs-success-200: #047857;
+  --cs-success-300: #059669;
+  --cs-success-400: #10b981;
+  --cs-success-500: #34d399;
+  --cs-success-600: #6ee7b7;
+  --cs-success-text: #10b981;
+  --cs-success-bg: rgba(16, 185, 129, 0.15);
+  --cs-success-border: rgba(16, 185, 129, 0.3);
+  
+  /* Warning - Amber */
+  --cs-warning-50: #78350f;
+  --cs-warning-100: #92400e;
+  --cs-warning-200: #b45309;
+  --cs-warning-300: #d97706;
+  --cs-warning-400: #f59e0b;
+  --cs-warning-500: #fbbf24;
+  --cs-warning-600: #fcd34d;
+  --cs-warning-text: #fbbf24;
+  --cs-warning-bg: rgba(251, 191, 36, 0.15);
+  --cs-warning-border: rgba(251, 191, 36, 0.3);
+  
+  /* Error - Red */
+  --cs-error-50: #7f1d1d;
+  --cs-error-100: #991b1b;
+  --cs-error-200: #b91c1c;
+  --cs-error-300: #dc2626;
+  --cs-error-400: #ef4444;
+  --cs-error-500: #f87171;
+  --cs-error-600: #fca5a5;
+  --cs-error-text: #ef4444;
+  --cs-error-bg: rgba(239, 68, 68, 0.15);
+  --cs-error-border: rgba(239, 68, 68, 0.3);
+  
+  /* Info - Blue */
+  --cs-info-50: #1e3a8a;
+  --cs-info-100: #1e40af;
+  --cs-info-200: #1d4ed8;
+  --cs-info-300: #2563eb;
+  --cs-info-400: #3b82f6;
+  --cs-info-500: #60a5fa;
+  --cs-info-600: #93c5fd;
+  --cs-info-text: #3b82f6;
+  --cs-info-bg: rgba(59, 130, 246, 0.15);
+  --cs-info-border: rgba(59, 130, 246, 0.3);
+  
+  /* === Data Visualization Colors === */
+  /* Climate-themed palette */
+  --cs-data-sea: #0ea5e9;        /* Sky blue - sea level */
+  --cs-data-heat: #f97316;       /* Orange - heat/temperature */
+  --cs-data-cold: #3b82f6;       /* Blue - cold/cooling */
+  --cs-data-drought: #eab308;    /* Yellow - drought */
+  --cs-data-rain: #06b6d4;       /* Cyan - precipitation */
+  --cs-data-growth: #10b981;     /* Emerald - positive growth */
+  --cs-data-decline: #ef4444;    /* Red - negative/decline */
+  --cs-data-urban: #8b5cf6;      /* Violet - urban */
+  --cs-data-forest: #22c55e;     /* Green - vegetation */
+  --cs-data-terrain: #78716c;    /* Stone - topographic */
+  
+  /* Chart colors (ordered for accessibility) */
+  --cs-chart-1: #437efc;  /* Primary blue */
+  --cs-chart-2: #10b981;  /* Emerald */
+  --cs-chart-3: #f59e0b;  /* Amber */
+  --cs-chart-4: #8b5cf6;  /* Violet */
+  --cs-chart-5: #ef4444;  /* Red */
+  --cs-chart-6: #06b6d4;  /* Cyan */
+  --cs-chart-7: #f97316;  /* Orange */
+  --cs-chart-8: #84cc16;  /* Lime */
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * TYPOGRAPHY
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Font Families */
+  --cs-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --cs-font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+  
+  /* Font Sizes */
+  --cs-text-2xs: 0.625rem;    /* 10px */
+  --cs-text-xs: 0.6875rem;    /* 11px */
+  --cs-text-sm: 0.75rem;      /* 12px */
+  --cs-text-base: 0.875rem;   /* 14px */
+  --cs-text-md: 1rem;         /* 16px */
+  --cs-text-lg: 1.125rem;     /* 18px */
+  --cs-text-xl: 1.25rem;      /* 20px */
+  --cs-text-2xl: 1.5rem;      /* 24px */
+  --cs-text-3xl: 1.875rem;    /* 30px */
+  --cs-text-4xl: 2.25rem;     /* 36px */
+  
+  /* Font Weights */
+  --cs-font-normal: 400;
+  --cs-font-medium: 500;
+  --cs-font-semibold: 600;
+  --cs-font-bold: 700;
+  
+  /* Line Heights */
+  --cs-leading-none: 1;
+  --cs-leading-tight: 1.25;
+  --cs-leading-snug: 1.375;
+  --cs-leading-normal: 1.5;
+  --cs-leading-relaxed: 1.625;
+  
+  /* Letter Spacing */
+  --cs-tracking-tighter: -0.05em;
+  --cs-tracking-tight: -0.025em;
+  --cs-tracking-normal: 0;
+  --cs-tracking-wide: 0.025em;
+  --cs-tracking-wider: 0.05em;
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * SPACING
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --cs-space-0: 0;
+  --cs-space-px: 1px;
+  --cs-space-0-5: 0.125rem;   /* 2px */
+  --cs-space-1: 0.25rem;      /* 4px */
+  --cs-space-1-5: 0.375rem;   /* 6px */
+  --cs-space-2: 0.5rem;       /* 8px */
+  --cs-space-2-5: 0.625rem;   /* 10px */
+  --cs-space-3: 0.75rem;      /* 12px */
+  --cs-space-3-5: 0.875rem;   /* 14px */
+  --cs-space-4: 1rem;         /* 16px */
+  --cs-space-5: 1.25rem;      /* 20px */
+  --cs-space-6: 1.5rem;       /* 24px */
+  --cs-space-7: 1.75rem;      /* 28px */
+  --cs-space-8: 2rem;         /* 32px */
+  --cs-space-9: 2.25rem;      /* 36px */
+  --cs-space-10: 2.5rem;      /* 40px */
+  --cs-space-12: 3rem;        /* 48px */
+  --cs-space-14: 3.5rem;      /* 56px */
+  --cs-space-16: 4rem;        /* 64px */
+  --cs-space-20: 5rem;        /* 80px */
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * BORDERS & RADIUS
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Border Widths */
+  --cs-border-0: 0;
+  --cs-border-1: 1px;
+  --cs-border-2: 2px;
+  --cs-border-4: 4px;
+  
+  /* Border Radius */
+  --cs-radius-none: 0;
+  --cs-radius-sm: 0.25rem;    /* 4px */
+  --cs-radius-md: 0.375rem;   /* 6px */
+  --cs-radius-DEFAULT: 0.5rem; /* 8px */
+  --cs-radius-lg: 0.75rem;    /* 12px */
+  --cs-radius-xl: 1rem;       /* 16px */
+  --cs-radius-2xl: 1.5rem;    /* 24px */
+  --cs-radius-full: 9999px;
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * SHADOWS
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --cs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --cs-shadow-DEFAULT: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --cs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --cs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --cs-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --cs-shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  
+  /* Glow effects */
+  --cs-glow-sm: 0 0 10px rgba(67, 126, 252, 0.3);
+  --cs-glow-md: 0 0 20px rgba(67, 126, 252, 0.4);
+  --cs-glow-lg: 0 0 40px rgba(67, 126, 252, 0.5);
+  
+  /* Panel shadows (for floating elements) */
+  --cs-shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --cs-shadow-panel-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * EFFECTS
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Blur */
+  --cs-blur-sm: 4px;
+  --cs-blur-DEFAULT: 8px;
+  --cs-blur-md: 12px;
+  --cs-blur-lg: 16px;
+  --cs-blur-xl: 24px;
+  --cs-blur-2xl: 40px;
+  
+  /* Opacity */
+  --cs-opacity-0: 0;
+  --cs-opacity-5: 0.05;
+  --cs-opacity-10: 0.1;
+  --cs-opacity-20: 0.2;
+  --cs-opacity-25: 0.25;
+  --cs-opacity-30: 0.3;
+  --cs-opacity-40: 0.4;
+  --cs-opacity-50: 0.5;
+  --cs-opacity-60: 0.6;
+  --cs-opacity-70: 0.7;
+  --cs-opacity-75: 0.75;
+  --cs-opacity-80: 0.8;
+  --cs-opacity-90: 0.9;
+  --cs-opacity-95: 0.95;
+  --cs-opacity-100: 1;
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * TRANSITIONS
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Duration */
+  --cs-duration-75: 75ms;
+  --cs-duration-100: 100ms;
+  --cs-duration-150: 150ms;
+  --cs-duration-200: 200ms;
+  --cs-duration-300: 300ms;
+  --cs-duration-500: 500ms;
+  --cs-duration-700: 700ms;
+  --cs-duration-1000: 1000ms;
+  
+  /* Easing */
+  --cs-ease-linear: linear;
+  --cs-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --cs-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --cs-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --cs-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * Z-INDEX
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  
+  --cs-z-base: 0;
+  --cs-z-dropdown: 1000;
+  --cs-z-sticky: 1100;
+  --cs-z-overlay: 1200;
+  --cs-z-modal: 1300;
+  --cs-z-popover: 1400;
+  --cs-z-tooltip: 1500;
+  --cs-z-toast: 1600;
+  --cs-z-max: 9999;
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * COMPONENT TOKENS (Semantic Aliases) - DARK THEME (Default)
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* === Surface Colors === */
+  --cs-surface-base: var(--cs-neutral-100);
+  --cs-surface-elevated: var(--cs-neutral-150);
+  --cs-surface-overlay: rgba(30, 30, 30, 0.85);
+  --cs-surface-sunken: var(--cs-neutral-50);
+  
+  /* === Text Colors === */
+  --cs-text-primary: var(--cs-neutral-900);
+  --cs-text-secondary: var(--cs-neutral-600);
+  --cs-text-tertiary: var(--cs-neutral-500);
+  --cs-text-disabled: var(--cs-neutral-400);
+  --cs-text-inverse: var(--cs-neutral-100);
+  
+  /* === Border Colors === */
+  --cs-border-default: var(--cs-neutral-300);
+  --cs-border-muted: var(--cs-neutral-200);
+  --cs-border-strong: var(--cs-neutral-400);
+  --cs-border-focus: var(--cs-brand-primary);
+  
+  /* === Interactive States === */
+  --cs-interactive-hover: rgba(255, 255, 255, 0.1);
+  --cs-interactive-active: rgba(255, 255, 255, 0.15);
+  --cs-interactive-selected: var(--cs-brand-primary-muted);
+  --cs-interactive-disabled: var(--cs-opacity-50);
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+   * COMPONENT-SPECIFIC TOKENS
+   * ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Widget/Panel */
+  --cs-widget-bg: var(--cs-surface-overlay);
+  --cs-widget-border: var(--cs-border-default);
+  --cs-widget-radius: var(--cs-radius-xl);
+  --cs-widget-padding: var(--cs-space-4);
+  --cs-widget-shadow: var(--cs-shadow-panel);
+  --cs-widget-blur: var(--cs-blur-md);
+  
+  /* Button */
+  --cs-btn-height-sm: 2rem;    /* 32px */
+  --cs-btn-height-md: 2.25rem; /* 36px */
+  --cs-btn-height-lg: 2.75rem; /* 44px */
+  --cs-btn-radius: var(--cs-radius-md);
+  --cs-btn-padding-x: var(--cs-space-4);
+  --cs-btn-font-size: var(--cs-text-sm);
+  --cs-btn-font-weight: var(--cs-font-medium);
+  
+  /* Input */
+  --cs-input-height: 2.25rem; /* 36px */
+  --cs-input-radius: var(--cs-radius-md);
+  --cs-input-padding-x: var(--cs-space-3);
+  --cs-input-bg: var(--cs-neutral-200);
+  --cs-input-border: var(--cs-border-default);
+  
+  /* Sidebar */
+  --cs-sidebar-width: 72px;
+  --cs-sidebar-width-expanded: 240px;
+  --cs-sidebar-bg: var(--cs-neutral-150);
+  
+  /* Map Controls */
+  --cs-map-control-size: 29px;
+  --cs-map-control-radius: var(--cs-radius-md);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * LIGHT THEME
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+[data-theme="light"],
+.light {
+  /* === Surface Colors (Light) === */
+  --cs-surface-base: #f8fafc;
+  --cs-surface-elevated: #ffffff;
+  --cs-surface-overlay: rgba(255, 255, 255, 0.92);
+  --cs-surface-sunken: #f1f5f9;
+  
+  /* === Text Colors (Light) === */
+  --cs-text-primary: #0f172a;
+  --cs-text-secondary: #475569;
+  --cs-text-tertiary: #64748b;
+  --cs-text-disabled: #94a3b8;
+  --cs-text-inverse: #f8fafc;
+  
+  /* === Border Colors (Light) === */
+  --cs-border-default: #e2e8f0;
+  --cs-border-muted: #f1f5f9;
+  --cs-border-strong: #cbd5e1;
+  --cs-border-focus: var(--cs-brand-primary);
+  
+  /* === Interactive States (Light) === */
+  --cs-interactive-hover: rgba(0, 0, 0, 0.04);
+  --cs-interactive-active: rgba(0, 0, 0, 0.08);
+  --cs-interactive-selected: rgba(67, 126, 252, 0.12);
+  
+  /* === Widget/Panel (Light) === */
+  --cs-widget-bg: var(--cs-surface-overlay);
+  --cs-widget-border: var(--cs-border-default);
+  --cs-widget-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  
+  /* === Input (Light) === */
+  --cs-input-bg: #ffffff;
+  --cs-input-border: var(--cs-border-default);
+  
+  /* === Sidebar (Light) === */
+  --cs-sidebar-bg: #f8fafc;
+  
+  /* === Semantic Colors (Light - adjusted for readability) === */
+  --cs-success-text: #059669;
+  --cs-success-bg: rgba(16, 185, 129, 0.1);
+  --cs-success-border: rgba(16, 185, 129, 0.25);
+  
+  --cs-warning-text: #d97706;
+  --cs-warning-bg: rgba(245, 158, 11, 0.1);
+  --cs-warning-border: rgba(245, 158, 11, 0.25);
+  
+  --cs-error-text: #dc2626;
+  --cs-error-bg: rgba(239, 68, 68, 0.1);
+  --cs-error-border: rgba(239, 68, 68, 0.25);
+  
+  --cs-info-text: #2563eb;
+  --cs-info-bg: rgba(59, 130, 246, 0.1);
+  --cs-info-border: rgba(59, 130, 246, 0.25);
+  
+  /* === Shadows (Light - softer) === */
+  --cs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --cs-shadow-DEFAULT: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  --cs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+  --cs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.06);
+  --cs-shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.08);
+  
+  /* === Glow effects (Light - subtle) === */
+  --cs-glow-sm: 0 0 10px rgba(67, 126, 252, 0.15);
+  --cs-glow-md: 0 0 20px rgba(67, 126, 252, 0.2);
+  --cs-glow-lg: 0 0 40px rgba(67, 126, 252, 0.25);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * UTILITY CLASSES
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Glass morphism effect */
+.cs-glass {
+  background: var(--cs-widget-bg);
+  backdrop-filter: blur(var(--cs-widget-blur));
+  -webkit-backdrop-filter: blur(var(--cs-widget-blur));
+  border: 1px solid var(--cs-widget-border);
+  box-shadow: var(--cs-widget-shadow);
+}
+
+/* Glow effects */
+.cs-glow-primary {
+  box-shadow: var(--cs-glow-sm);
+}
+
+.cs-glow-primary-md {
+  box-shadow: var(--cs-glow-md);
+}
+
+/* Status indicators */
+.cs-status-success {
+  background: var(--cs-success-bg);
+  border-color: var(--cs-success-border);
+  color: var(--cs-success-text);
+}
+
+.cs-status-warning {
+  background: var(--cs-warning-bg);
+  border-color: var(--cs-warning-border);
+  color: var(--cs-warning-text);
+}
+
+.cs-status-error {
+  background: var(--cs-error-bg);
+  border-color: var(--cs-error-border);
+  color: var(--cs-error-text);
+}
+
+.cs-status-info {
+  background: var(--cs-info-bg);
+  border-color: var(--cs-info-border);
+  color: var(--cs-info-text);
+}
+
+/* Smooth transitions */
+.cs-transition {
+  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
+  transition-timing-function: var(--cs-ease-out);
+  transition-duration: var(--cs-duration-200);
+}
+
+.cs-transition-fast {
+  transition-duration: var(--cs-duration-150);
+}
+
+.cs-transition-slow {
+  transition-duration: var(--cs-duration-300);
+}
+

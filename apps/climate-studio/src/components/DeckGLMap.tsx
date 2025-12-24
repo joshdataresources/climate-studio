@@ -1,7 +1,7 @@
 "use client"
 
-import { useEffect, useMemo, useRef, useState, useCallback } from "react"
-import { Map, useControl, Source, Layer } from 'react-map-gl'
+import React, { useEffect, useMemo, useRef, useState, useCallback, memo } from "react"
+import { Map, useControl, Source, Layer, NavigationControl, Marker } from 'react-map-gl'
 import { MapboxOverlay } from '@deck.gl/mapbox'
 import { GeoJsonLayer, BitmapLayer, TextLayer } from '@deck.gl/layers'
 import { HeatmapLayer } from '@deck.gl/aggregation-layers'
@@ -11,12 +11,42 @@ import { useClimate } from "@climate-studio/core"
 import type { LayerStateMap } from "../hooks/useClimateLayerData"
 import { getClimateLayer } from "@climate-studio/core/config"
 import megaregionData from "../data/megaregion-data.json"
+import { useTheme } from "../contexts/ThemeContext"
 import 'mapbox-gl/dist/mapbox-gl.css'
 
-function DeckGLOverlay(props: { layers: any[] }) {
-  const overlay = useControl<MapboxOverlay>(() => new MapboxOverlay(props))
+// Memoized DeckGL overlay for better performance
+const DeckGLOverlay = memo(function DeckGLOverlay(props: { layers: any[] }) {
+  const overlay = useControl<MapboxOverlay>(() => new MapboxOverlay({
+    ...props,
+    // Performance optimizations
+    interleaved: false, // Render DeckGL in separate canvas below Mapbox layers
+    _pickable: false, // Disable picking for better perf when not needed
+  }), {
+    position: 'top-left' // Position doesn't matter, but required for useControl
+  })
   overlay.setProps(props)
   return null
+})
+
+// Throttle function for viewport updates
+function throttle<T extends (...args: any[]) => void>(func: T, limit: number): T {
+  let inThrottle: boolean
+  return function(this: any, ...args: any[]) {
+    if (!inThrottle) {
+      func.apply(this, args)
+      inThrottle = true
+      setTimeout(() => inThrottle = false, limit)
+    }
+  } as T
+}
+
+// Debounce for bounds changes (less critical updates)
+function debounce<T extends (...args: any[]) => void>(func: T, wait: number): T {
+  let timeout: NodeJS.Timeout
+  return function(this: any, ...args: any[]) {
+    clearTimeout(timeout)
+    timeout = setTimeout(() => func.apply(this, args), wait)
+  } as T
 }
 
 interface DeckGLMapProps {
@@ -29,7 +59,8 @@ interface DeckGLMapProps {
 }
 
 const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1Ijoiam9zaHVhYmJ1dGxlciIsImEiOiJjbWcwNXpyNXUwYTdrMmtva2tiZ2NjcGxhIn0.Fc3d_CloJGiw9-BE4nI_Kw'
-const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
+// Use empty string for relative URLs (goes through Vite proxy to port 5001), or explicit URL if set
+const backendUrl = import.meta.env.VITE_BACKEND_URL || ''
 
 export function DeckGLMap({
   className,
@@ -40,6 +71,12 @@ export function DeckGLMap({
   layerStates,
 }: DeckGLMapProps) {
   const { controls, isLayerActive } = useClimate()
+  const { theme } = useTheme()
+  
+  // Determine map style based on theme
+  const mapStyle = theme === 'light' 
+    ? "mapbox://styles/mapbox/light-v11" 
+    : "mapbox://styles/mapbox/dark-v11"
 
   const [viewState, setViewState] = useState<MapViewState>({
     longitude: center.lng,
@@ -52,49 +89,233 @@ export function DeckGLMap({
   // Track container dimensions for proper canvas sizing
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<any>(null)
-  const [dimensions, setDimensions] = useState<{ width: number; height: number }>({
-    width: 0,
-    height: 0
-  })
+  const [isContainerReady, setIsContainerReady] = useState(false)
 
-  // Measure container size and update on resize
+  // Check if container is ready and trigger map resize on window resize
   useEffect(() => {
     if (!containerRef.current) {
-      console.log('🔍 DeckGLMap: containerRef not ready')
       return
     }
 
-    const updateDimensions = () => {
+    // Mark container as ready once it has dimensions
+    const checkReady = () => {
       if (containerRef.current) {
         const rect = containerRef.current.getBoundingClientRect()
-        console.log('🔍 Container dimensions measured:', rect.width, 'x', rect.height)
-        setDimensions({ width: rect.width, height: rect.height })
+        if (rect.width > 0 && rect.height > 0) {
+          setIsContainerReady(true)
+        }
       }
     }
 
-    // Initial measurement
-    console.log('🔍 Starting initial dimension measurement')
-    updateDimensions()
+    // Initial check
+    checkReady()
 
-    // Watch for resize
-    const resizeObserver = new ResizeObserver(updateDimensions)
+    // Watch for resize and trigger map resize
+    const resizeObserver = new ResizeObserver(() => {
+      checkReady()
+      // Trigger map resize when container changes
+      if (mapRef.current?.resize) {
+        mapRef.current.resize()
+      }
+    })
     resizeObserver.observe(containerRef.current)
-    console.log('🔍 ResizeObserver attached')
+
+    // Also listen for window resize as a fallback
+    const handleWindowResize = () => {
+      if (mapRef.current?.resize) {
+        mapRef.current.resize()
+      }
+    }
+    window.addEventListener('resize', handleWindowResize)
 
     return () => {
-      console.log('🔍 ResizeObserver disconnecting')
       resizeObserver.disconnect()
+      window.removeEventListener('resize', handleWindowResize)
     }
   }, [])
 
-  // Update viewState when props change
+  // Cleanup on unmount
   useEffect(() => {
+    return () => {
+      // Clean up map reference
+      if (mapRef.current) {
+        try {
+          // DeckGL/Mapbox cleanup is handled by React components
+          mapRef.current = null
+        } catch (error) {
+          console.warn('Error during DeckGLMap cleanup:', error)
+        }
+      }
+    }
+  }, [])
+
+  // Track if viewport change is from user interaction or programmatic
+  const isUserInteractionRef = useRef(false)
+  const lastViewportRef = useRef({ center, zoom })
+
+  // Track style change for DeckGL layer refresh
+  const [layerRefreshKey, setLayerRefreshKey] = useState(0)
+  const prevMapStyleRef = useRef(mapStyle)
+
+  // Force Mapbox layers to render above DeckGL canvas by directly manipulating DOM
+  useEffect(() => {
+    if (!mapRef.current) return
+    
+    const map = mapRef.current.getMap()
+    
+    const fixZIndex = () => {
+      const container = map.getContainer()
+      
+      // Find all DeckGL canvas elements and force them below
+      const deckCanvases = container.querySelectorAll('canvas[class*="deck"], canvas[data-deck]')
+      deckCanvases.forEach((canvas) => {
+        const el = canvas as HTMLElement
+        el.style.zIndex = '0'
+        el.style.position = 'absolute'
+      })
+      
+      // Find DeckGL container divs
+      const deckContainers = container.querySelectorAll('[class*="deck"], [data-deck]')
+      deckContainers.forEach((div) => {
+        const el = div as HTMLElement
+        if (el.tagName !== 'CANVAS') {
+          el.style.zIndex = '0'
+          el.style.position = 'relative'
+        }
+      })
+      
+      // Force Mapbox canvas container above
+      const mapboxContainer = container.querySelector('.mapboxgl-canvas-container')
+      if (mapboxContainer) {
+        const el = mapboxContainer as HTMLElement
+        el.style.zIndex = '10'
+        el.style.position = 'relative'
+      }
+      
+      // Force all Mapbox canvas elements above
+      const mapboxCanvases = container.querySelectorAll('.mapboxgl-canvas-container canvas')
+      mapboxCanvases.forEach((canvas) => {
+        const el = canvas as HTMLElement
+        el.style.zIndex = '10'
+      })
+    }
+    
+    // Fix z-index after map loads and on style changes
+    map.once('load', fixZIndex)
+    map.once('style.load', fixZIndex)
+    
+    // Use MutationObserver to catch when DeckGL canvas is added
+    const observer = new MutationObserver(() => {
+      fixZIndex()
+    })
+    
+    observer.observe(map.getContainer(), {
+      childList: true,
+      subtree: true
+    })
+    
+    // Also fix periodically to catch any late additions
+    const intervalId = setInterval(fixZIndex, 100)
+    const timeoutId = setTimeout(() => clearInterval(intervalId), 5000)
+    
+    return () => {
+      map.off('load', fixZIndex)
+      map.off('style.load', fixZIndex)
+      observer.disconnect()
+      clearInterval(intervalId)
+      clearTimeout(timeoutId)
+    }
+  }, [mapStyle, layerRefreshKey, isContainerReady])
+
+  // Update map style when theme changes
+  useEffect(() => {
+    if (!mapRef.current) return
+    
+    // Skip if style hasn't actually changed
+    if (prevMapStyleRef.current === mapStyle) return
+    prevMapStyleRef.current = mapStyle
+    
+    const map = mapRef.current.getMap()
+    
+    // Store current viewport
+    const center = map.getCenter()
+    const zoom = map.getZoom()
+    const pitch = map.getPitch()
+    const bearing = map.getBearing()
+    
+    console.log('🎨 DeckGLMap: Changing map style to:', mapStyle)
+    
+    // Change the style
+    map.setStyle(mapStyle)
+    
+    // After style loads, restore viewport and trigger DeckGL layer refresh
+    const onStyleLoad = () => {
+      console.log('✅ DeckGLMap: New style loaded, restoring viewport')
+      
+      // Restore viewport
+      map.setCenter(center)
+      map.setZoom(zoom)
+      map.setPitch(pitch)
+      map.setBearing(bearing)
+      
+      // Force DeckGL layers to refresh by changing a key
+      // Wait a moment for the style to fully settle
+      setTimeout(() => {
+        setLayerRefreshKey(prev => prev + 1)
+        console.log('🔄 DeckGLMap: Triggered layer refresh')
+      }, 100)
+    }
+    
+    map.once('style.load', onStyleLoad)
+    
+    return () => {
+      map.off('style.load', onStyleLoad)
+    }
+  }, [mapStyle])
+
+  // Update viewState when props change (with animation for programmatic changes)
+  useEffect(() => {
+    // Skip if this is from user interaction
+    if (isUserInteractionRef.current) {
+      isUserInteractionRef.current = false
+      lastViewportRef.current = { center, zoom }
+      return
+    }
+
+    // Check if viewport actually changed
+    const hasChanged = 
+      Math.abs(lastViewportRef.current.center.lat - center.lat) > 0.001 ||
+      Math.abs(lastViewportRef.current.center.lng - center.lng) > 0.001 ||
+      Math.abs(lastViewportRef.current.zoom - zoom) > 0.1
+
+    if (!hasChanged) return
+
+    // If map is ready, use flyTo for smooth animation
+    if (mapRef.current) {
+      try {
+        const map = mapRef.current.getMap()
+        if (map && typeof map.flyTo === 'function') {
+          map.flyTo({
+            center: [center.lng, center.lat],
+            zoom: zoom,
+            duration: 1000
+          })
+          lastViewportRef.current = { center, zoom }
+          return
+        }
+      } catch (error) {
+        console.warn('Error animating map:', error)
+      }
+    }
+
+    // Fallback to direct update if flyTo not available
     setViewState(prev => ({
       ...prev,
       longitude: center.lng,
       latitude: center.lat,
       zoom: zoom,
     }))
+    lastViewportRef.current = { center, zoom }
   }, [center.lng, center.lat, zoom])
 
   // Helper function to calculate and report bounds
@@ -125,22 +346,47 @@ export function DeckGLMap({
 
   // Update bounds when map loads
   useEffect(() => {
-    if (!mapRef.current) return
+    if (!mapRef.current || !isContainerReady) return
 
     const timer = setTimeout(() => {
       updateBounds()
     }, 100) // Small delay to ensure map is fully initialized
 
     return () => clearTimeout(timer)
-  }, [updateBounds, dimensions])
+  }, [updateBounds, isContainerReady])
 
-  const onViewStateChange = ({ viewState: newViewState }: { viewState: MapViewState }) => {
+  // Throttled viewport change handler for smoother interaction
+  const throttledViewportChange = useMemo(
+    () => throttle((viewport: { center: { lat: number; lng: number }; zoom: number }) => {
+      onViewportChange?.(viewport)
+    }, 100), // Update external state at most every 100ms
+    [onViewportChange]
+  )
+
+  // Debounced bounds update for data fetching
+  const debouncedBoundsUpdate = useMemo(
+    () => debounce(() => {
+      updateBounds()
+    }, 300), // Wait 300ms after movement stops to update bounds
+    [updateBounds]
+  )
+
+  const onViewStateChange = useCallback(({ viewState: newViewState }: { viewState: MapViewState }) => {
+    // Mark as user interaction
+    isUserInteractionRef.current = true
+    
+    // Update local state immediately for smooth rendering
     setViewState(newViewState)
-    onViewportChange?.({
+    
+    // Throttle updates to parent components
+    throttledViewportChange({
       center: { lat: newViewState.latitude, lng: newViewState.longitude },
       zoom: newViewState.zoom,
     })
-  }
+    
+    // Debounce bounds updates for data fetching
+    debouncedBoundsUpdate()
+  }, [throttledViewportChange, debouncedBoundsUpdate])
 
 
   // Temperature Current Layer - GPU-accelerated heatmap
@@ -183,39 +429,64 @@ export function DeckGLMap({
     layerStates.temperature_current
   ])
 
+  // Shared tile loading configuration for optimal performance
+  const tileLoadConfig = useMemo(() => ({
+    refinementStrategy: 'best-available' as const,
+  }), [])
+
+  // Simple tile image loader
+  const loadTileImage = useCallback((tileUrl: string, tile: any): Promise<HTMLImageElement> => {
+    const { x, y, z } = tile.index
+    const url = tileUrl.replace('{z}', String(z)).replace('{x}', String(x)).replace('{y}', String(y))
+    
+    console.log(`🗺️ Loading tile: z=${z}, x=${x}, y=${y}`)
+    console.log(`📍 Tile URL: ${url.substring(0, 100)}...`)
+    
+    return new Promise((resolve, reject) => {
+      const image = new Image()
+      image.crossOrigin = 'anonymous'
+      image.decoding = 'async'
+      image.onload = () => {
+        console.log(`✅ Tile loaded: z=${z}, x=${x}, y=${y}, size=${image.width}x${image.height}`)
+        resolve(image)
+      }
+      image.onerror = (err) => {
+        console.error(`❌ Tile failed: z=${z}, x=${x}, y=${y}`, err)
+        reject(err)
+      }
+      image.src = url
+    })
+  }, [])
+
   // Temperature Projection Tile Layer - raster tiles from Earth Engine
   const temperatureProjectionTileLayer = useMemo(() => {
     if (!isLayerActive("temperature_projection")) return null
     const data = layerStates.temperature_projection?.data as any
     if (!data || !data.tile_url) return null
 
+    const tileUrl = data.tile_url
     return new TileLayer({
       id: 'temperature-projection-tiles',
-      data: data.tile_url,
+      data: tileUrl,
       minZoom: 0,
       maxZoom: 19,
       tileSize: 256,
-      opacity: controls.projectionOpacity ?? 0.1,
-      getTileData: (tile: any) => {
-        const { x, y, z } = tile.index
-        const url = data.tile_url.replace('{z}', z).replace('{x}', x).replace('{y}', y)
-        return new Promise((resolve, reject) => {
-          const image = new Image()
-          image.crossOrigin = 'anonymous'
-          image.onload = () => resolve(image)
-          image.onerror = reject
-          image.src = url
-        })
-      },
+      opacity: controls.projectionOpacity ?? 0.2,
+      ...tileLoadConfig,
+      getTileData: (tile: any) => loadTileImage(tileUrl, tile),
       renderSubLayers: (props: any) => {
-        const { boundingBox } = props.tile
-        return new BitmapLayer(props, {
-          data: null,
-          image: props.data,
-          bounds: [boundingBox[0][0], boundingBox[0][1], boundingBox[1][0], boundingBox[1][1]],
-          visible: true,
-          desaturate: 0,
-          tintColor: [255, 255, 255]
+        const { tile, data } = props
+        if (!data) return null
+        const { boundingBox } = tile
+        const bounds: [number, number, number, number] = [
+          boundingBox[0][0], boundingBox[0][1], 
+          boundingBox[1][0], boundingBox[1][1]
+        ]
+        return new BitmapLayer({
+          id: `${props.id}-bitmap`,
+          image: data,
+          bounds,
+          opacity: props.opacity ?? 1,
         })
       },
       pickable: false,
@@ -226,7 +497,9 @@ export function DeckGLMap({
   }, [
     isLayerActive("temperature_projection"),
     layerStates.temperature_projection,
-    controls.projectionOpacity
+    controls.projectionOpacity,
+    tileLoadConfig,
+    loadTileImage
   ])
 
   // Precipitation & Drought Tile Layer - raster tiles from Earth Engine
@@ -241,7 +514,7 @@ export function DeckGLMap({
       minZoom: 0,
       maxZoom: 19,
       tileSize: 256,
-      opacity: controls.droughtOpacity ?? 0.7,
+      opacity: controls.droughtOpacity ?? 0.2,
       getTileData: (tile: any) => {
         const { x, y, z } = tile.index
         const url = data.tile_url.replace('{z}', z).replace('{x}', x).replace('{y}', y)
@@ -254,14 +527,18 @@ export function DeckGLMap({
         })
       },
       renderSubLayers: (props: any) => {
-        const { boundingBox } = props.tile
-        return new BitmapLayer(props, {
-          data: null,
-          image: props.data,
-          bounds: [boundingBox[0][0], boundingBox[0][1], boundingBox[1][0], boundingBox[1][1]],
-          visible: true,
-          desaturate: 0,
-          tintColor: [255, 255, 255]
+        const { tile, data } = props
+        if (!data) return null
+        const { boundingBox } = tile
+        const bounds: [number, number, number, number] = [
+          boundingBox[0][0], boundingBox[0][1],
+          boundingBox[1][0], boundingBox[1][1]
+        ]
+        return new BitmapLayer({
+          id: `${props.id}-bitmap`,
+          image: data,
+          bounds,
+          opacity: props.opacity ?? 1,
         })
       },
       pickable: false,
@@ -300,14 +577,18 @@ export function DeckGLMap({
         })
       },
       renderSubLayers: (props: any) => {
-        const { boundingBox } = props.tile
-        return new BitmapLayer(props, {
-          data: null,
-          image: props.data,
-          bounds: [boundingBox[0][0], boundingBox[0][1], boundingBox[1][0], boundingBox[1][1]],
-          visible: true,
-          desaturate: 0,
-          tintColor: [255, 255, 255]
+        const { tile, data } = props
+        if (!data) return null
+        const { boundingBox } = tile
+        const bounds: [number, number, number, number] = [
+          boundingBox[0][0], boundingBox[0][1],
+          boundingBox[1][0], boundingBox[1][1]
+        ]
+        return new BitmapLayer({
+          id: `${props.id}-bitmap`,
+          image: data,
+          bounds,
+          opacity: props.opacity ?? 1,
         })
       },
       pickable: false
@@ -323,7 +604,7 @@ export function DeckGLMap({
     if (!isLayerActive("topographic_relief")) return null
     const data = layerStates.topographic_relief?.data as any
 
-    const opacityValue = controls.reliefOpacity ?? 0.5
+    const opacityValue = controls.reliefOpacity ?? 0.3
     console.log('🏔️ Topographic Relief Layer State:', {
       isActive: isLayerActive("topographic_relief"),
       hasData: !!data,
@@ -360,38 +641,19 @@ export function DeckGLMap({
         console.error('🏔️ Topographic tile error:', tile.index, error)
       },
       renderSubLayers: (props: any) => {
-        const { boundingBox } = props.tile
-        const bounds = [boundingBox[0][0], boundingBox[0][1], boundingBox[1][0], boundingBox[1][1]]
-        console.log('🏔️ Rendering topographic sublayer:', {
-          index: props.tile.index,
-          hasData: !!props.data,
-          dataType: typeof props.data,
-          isImage: props.data instanceof HTMLImageElement,
-          imageWidth: props.data?.width,
-          imageHeight: props.data?.height,
-          bounds: bounds,
-          boundingBox: boundingBox,
-          tileOpacity: props.opacity,
-          layerOpacity: opacityValue
-        })
-
-        const bitmapLayer = new BitmapLayer(props, {
-          data: null,
-          image: props.data,
-          bounds: bounds,
+        const { tile, data } = props
+        if (!data) return null
+        const { boundingBox } = tile
+        const bounds: [number, number, number, number] = [
+          boundingBox[0][0], boundingBox[0][1], 
+          boundingBox[1][0], boundingBox[1][1]
+        ]
+        return new BitmapLayer({
+          id: `${props.id}-bitmap`,
+          image: data,
+          bounds,
           opacity: opacityValue,
-          visible: true,
-          desaturate: 0,
-          tintColor: [255, 255, 255]
         })
-
-        console.log('🏔️ BitmapLayer created:', {
-          id: bitmapLayer.id,
-          visible: bitmapLayer.props.visible,
-          opacity: bitmapLayer.props.opacity
-        })
-
-        return bitmapLayer
       },
       pickable: false,
       updateTriggers: {
@@ -427,125 +689,6 @@ export function DeckGLMap({
     controls.urbanExpansionOpacity
   ])
 
-  // Megaregion Timeseries Layer - GeoJSON polygons from local data
-  const megaregionLayer = useMemo(() => {
-    console.log('🌐 Megaregion Layer Check:', {
-      isActive: isLayerActive("megaregion_timeseries"),
-      projectionYear: controls.projectionYear,
-      opacity: controls.megaregionOpacity
-    })
-    if (!isLayerActive("megaregion_timeseries")) return null
-
-    // Helper functions from MegaregionLayer.tsx
-    const populationToRadius = (population: number): number => {
-      const scaleFactor = 0.015
-      const baseRadius = Math.sqrt(population) * scaleFactor
-      return Math.max(baseRadius, 30)
-    }
-
-    const getGrowthColor = (currentPop: number, previousPop: number): [number, number, number, number] => {
-      if (!previousPop || previousPop === 0) return [136, 136, 136, 255]
-
-      const growthRate = (currentPop - previousPop) / previousPop
-
-      // Warm colors (red → yellow) for DECLINE (negative growth)
-      if (growthRate < -0.05) return [220, 38, 38, 255]   // Dark red - strong decline
-      if (growthRate < -0.03) return [239, 68, 68, 255]   // Red - moderate decline
-      if (growthRate < -0.01) return [249, 115, 22, 255]  // Orange - slight decline
-      if (growthRate < 0) return [234, 179, 8, 255]       // Yellow - minor decline
-
-      // Cool colors (purple → blue → green) for GROWTH (positive)
-      if (growthRate < 0.02) return [168, 85, 247, 255]   // Purple - minimal growth
-      if (growthRate < 0.04) return [139, 92, 246, 255]   // Violet - low growth
-      if (growthRate < 0.06) return [59, 130, 246, 255]   // Blue - moderate growth
-      if (growthRate < 0.08) return [14, 165, 233, 255]   // Sky blue - good growth
-      if (growthRate < 0.10) return [6, 182, 212, 255]    // Cyan - strong growth
-      return [16, 185, 129, 255] // Green - 10%+ excellent growth
-    }
-
-    const createCircle = (lng: number, lat: number, radiusKm: number, points: number = 64): number[][] => {
-      const coords: number[][] = []
-      const earthRadiusKm = 6371
-
-      for (let i = 0; i <= points; i++) {
-        const angle = (i / points) * 2 * Math.PI
-        const latOffset = (radiusKm / earthRadiusKm) * (180 / Math.PI)
-        const lngOffset = (radiusKm / earthRadiusKm) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180)
-        const newLat = lat + latOffset * Math.cos(angle)
-        const newLng = lng + lngOffset * Math.sin(angle)
-        coords.push([newLng, newLat])
-      }
-
-      return coords
-    }
-
-    // Get year from controls
-    const year = controls.projectionYear ?? 2050
-    const availableYears = [2025, 2035, 2045, 2055, 2065, 2075, 2085, 2095]
-    const closestYear = availableYears.reduce((prev, curr) =>
-      Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
-    )
-    const yearIndex = availableYears.indexOf(closestYear)
-    const previousYear = yearIndex > 0 ? availableYears[yearIndex - 1] : null
-
-    // Convert megaregion data to GeoJSON
-    const data = megaregionData as any
-    const features = data.metros.map((metro: any) => {
-      const currentPop = metro.populations[String(closestYear)]
-      const previousPop = previousYear ? metro.populations[String(previousYear)] : null
-      const radius = populationToRadius(currentPop)
-      const color = getGrowthColor(currentPop, previousPop || 0)
-      const growthRate = previousPop ? ((currentPop - previousPop) / previousPop * 100) : 0
-
-      return {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [createCircle(metro.lon, metro.lat, radius)]
-        },
-        properties: {
-          name: metro.name,
-          population: currentPop,
-          previousPopulation: previousPop,
-          growthRate: growthRate,
-          climate_risk: metro.climate_risk,
-          region: metro.region,
-          megaregion: metro.megaregion,
-          color: color,
-          // Label data
-          coordinates: [metro.lon, metro.lat]
-        }
-      }
-    })
-
-    const geojson = {
-      type: 'FeatureCollection',
-      features: features
-    }
-
-    console.log('✅ Creating Megaregion GeoJSON Layer:', {
-      featureCount: features.length,
-      year: closestYear,
-      opacity: controls.megaregionOpacity,
-      firstFeature: features[0]
-    })
-
-    return new GeoJsonLayer({
-      id: 'megaregion-layer',
-      data: geojson,
-      pickable: true,
-      stroked: true,
-      filled: true,
-      getFillColor: (d: any) => d.properties.color,
-      getLineColor: [100, 100, 100, 255],
-      getLineWidth: 1,
-      opacity: controls.megaregionOpacity ?? 0.6
-    })
-  }, [
-    isLayerActive("megaregion_timeseries"),
-    controls.projectionYear,
-    controls.megaregionOpacity
-  ])
 
   // Helper functions for megaregion circles
   const populationToRadius = (population: number): number => {
@@ -631,49 +774,61 @@ export function DeckGLMap({
     const previousYear = displayYearIndex > 0 ? availableYears[displayYearIndex - 1] : null
 
     const data = megaregionData as any
-    const features = data.metros.map((metro: any) => {
-      const currentPop = metro.populations[String(displayYear)]
-      // For 2025, previousPop is 0 (no comparison). For all other years, compare to previous decade.
-      const previousPop = previousYear ? (metro.populations[String(previousYear)] || 0) : 0
-      const radius = populationToRadius(currentPop)
-      const colorRGBA = getGrowthColorRGBA(currentPop, previousPop)
-
-      return {
-        type: 'Feature',
-        geometry: {
-          type: 'Polygon',
-          coordinates: [createCircle(metro.lon, metro.lat, radius)]
-        },
-        properties: {
-          name: metro.name,
-          population: currentPop,
-          radius: radius,
-          fillColor: colorRGBA,
-          lineColor: colorRGBA,
-          center: [metro.lon, metro.lat]
+    const features = data.metros
+      .map((metro: any) => {
+        const currentPop = metro.populations?.[String(displayYear)]
+        // Skip if population data is missing
+        if (currentPop == null || typeof currentPop !== 'number') {
+          return null
         }
-      }
-    })
+        // For 2025, previousPop is 0 (no comparison). For all other years, compare to previous decade.
+        const previousPop = previousYear ? (metro.populations?.[String(previousYear)] || 0) : 0
+        const radius = populationToRadius(currentPop)
+        const colorRGBA = getGrowthColorRGBA(currentPop, previousPop)
 
-    const geojson = {
+        // Validate coordinates
+        if (typeof metro.lon !== 'number' || typeof metro.lat !== 'number' || 
+            isNaN(metro.lon) || isNaN(metro.lat)) {
+          return null
+        }
+
+        return {
+          type: 'Feature',
+          geometry: {
+            type: 'Polygon',
+            coordinates: [createCircle(metro.lon, metro.lat, radius)]
+          },
+          properties: {
+            name: metro.name,
+            population: currentPop,
+            radius: radius,
+            fillColor: colorRGBA,
+            lineColor: colorRGBA,
+            center: [metro.lon, metro.lat]
+          }
+        }
+      })
+      .filter((f: any) => f !== null)
+
+    const geojson: GeoJSON.FeatureCollection = {
       type: 'FeatureCollection',
       features
     }
 
     return new GeoJsonLayer({
       id: 'megaregion-circles',
-      data: geojson,
+      data: geojson as any,
       filled: true,
       stroked: true,
       getFillColor: (d: any) => d.properties.fillColor,
       getLineColor: (d: any) => d.properties.lineColor,
       getLineWidth: 2,
       lineWidthUnits: 'pixels',
-      opacity: controls.megaregionOpacity * 0.8,
+      opacity: controls.megaregionOpacity ?? 0.5,
       pickable: true,
       updateTriggers: {
-        getFillColor: [closestYear],
-        getLineColor: [closestYear],
+        getFillColor: [displayYear],
+        getLineColor: [displayYear],
         opacity: controls.megaregionOpacity
       }
     })
@@ -699,43 +854,55 @@ export function DeckGLMap({
     const previousYear = displayYearIndex > 0 ? availableYears[displayYearIndex - 1] : null
 
     const data = megaregionData as any
-    const features = data.metros.map((metro: any) => {
-      const currentPop = metro.populations[String(displayYear)]
-      const previousPop = previousYear ? metro.populations[String(previousYear)] : null
-      const growthRate = previousPop ? ((currentPop - previousPop) / previousPop * 100) : 0
-      const absoluteChange = previousPop ? (currentPop - previousPop) : 0
-
-      // Format population with commas
-      const formattedPop = currentPop.toLocaleString('en-US')
-
-      // Show growth if we have previous data to compare with
-      const showGrowth = previousPop !== null && previousPop !== currentPop
-      const triangle = growthRate > 0 ? '▲' : growthRate < 0 ? '▼' : '='
-
-      // Format: "+50,000 (+5%▲)" or "-30,000 (-3%▼)"
-      const formattedChange = Math.abs(absoluteChange).toLocaleString('en-US')
-      const changeText = showGrowth
-        ? `${growthRate >= 0 ? '+' : '-'}${formattedChange} (${growthRate >= 0 ? '+' : ''}${Math.abs(growthRate).toFixed(0)}%${triangle})`
-        : ''
-
-      const isGrowing = growthRate > 0
-      const isDecline = growthRate < 0
-
-      return {
-        type: 'Feature',
-        geometry: {
-          type: 'Point',
-          coordinates: [metro.lon, metro.lat]
-        },
-        properties: {
-          population: formattedPop,
-          change: changeText,
-          isGrowing,
-          isDecline,
-          showGrowth
+    const features = data.metros
+      .map((metro: any) => {
+        const currentPop = metro.populations?.[String(displayYear)]
+        // Skip if population data is missing
+        if (currentPop == null || typeof currentPop !== 'number') {
+          return null
         }
-      }
-    })
+        const previousPop = previousYear ? (metro.populations?.[String(previousYear)] ?? null) : null
+        const growthRate = previousPop != null && previousPop > 0 ? ((currentPop - previousPop) / previousPop * 100) : 0
+        const absoluteChange = previousPop != null ? (currentPop - previousPop) : 0
+
+        // Format population with commas
+        const formattedPop = currentPop.toLocaleString('en-US')
+
+        // Show growth if we have previous data to compare with
+        const showGrowth = previousPop !== null && previousPop !== currentPop && previousPop > 0
+        const triangle = growthRate > 0 ? '▲' : growthRate < 0 ? '▼' : '='
+
+        // Format: "+50,000 (+5%▲)" or "-30,000 (-3%▼)"
+        const formattedChange = Math.abs(absoluteChange).toLocaleString('en-US')
+        const changeText = showGrowth
+          ? `${growthRate >= 0 ? '+' : '-'}${formattedChange} (${growthRate >= 0 ? '+' : ''}${Math.abs(growthRate).toFixed(0)}%${triangle})`
+          : ''
+
+        const isGrowing = growthRate > 0
+        const isDecline = growthRate < 0
+
+        // Validate coordinates
+        if (typeof metro.lon !== 'number' || typeof metro.lat !== 'number' || 
+            isNaN(metro.lon) || isNaN(metro.lat)) {
+          return null
+        }
+
+        return {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [metro.lon, metro.lat]
+          },
+          properties: {
+            population: formattedPop,
+            change: changeText,
+            isGrowing,
+            isDecline,
+            showGrowth
+          }
+        }
+      })
+      .filter((f: any) => f !== null)
 
     const geojson = {
       type: 'FeatureCollection',
@@ -769,22 +936,39 @@ export function DeckGLMap({
         return Math.round(1 + ((year - 2025) / (2100 - 2025)) * 9)
       }
       const feet = yearToFeet(controls.projectionYear)
+      const tileUrl = `${backendUrl}/api/tiles/noaa-slr/${feet}/{z}/{x}/{y}.png`
+      
       return new TileLayer({
         id: 'sea-level-rise-tiles',
-        data: `${backendUrl}/api/tiles/noaa-slr/${feet}/{z}/{x}/{y}.png`,
+        data: tileUrl,
         minZoom: 0,
         maxZoom: 16,
         tileSize: 256,
-        opacity: controls.seaLevelOpacity ?? 0.3,
+        opacity: controls.seaLevelOpacity ?? 0.7,
+        getTileData: (tile: any) => {
+          const { x, y, z } = tile.index
+          const url = tileUrl.replace('{z}', String(z)).replace('{x}', String(x)).replace('{y}', String(y))
+          return new Promise((resolve, reject) => {
+            const image = new Image()
+            image.crossOrigin = 'anonymous'
+            image.onload = () => resolve(image)
+            image.onerror = reject
+            image.src = url
+          })
+        },
         renderSubLayers: (props: any) => {
-          const { boundingBox } = props.tile
-          return new BitmapLayer(props, {
-            data: null,
-            image: props.data,
-            bounds: [boundingBox[0][0], boundingBox[0][1], boundingBox[1][0], boundingBox[1][1]],
-            visible: true,
-            desaturate: 0,
-            tintColor: [255, 255, 255]
+          const { tile, data } = props
+          if (!data) return null
+          const { boundingBox } = tile
+          const bounds: [number, number, number, number] = [
+            boundingBox[0][0], boundingBox[0][1],
+            boundingBox[1][0], boundingBox[1][1]
+          ]
+          return new BitmapLayer({
+            id: `${props.id}-bitmap`,
+            image: data,
+            bounds,
+            opacity: props.opacity ?? 1,
           })
         },
         pickable: false,
@@ -808,7 +992,48 @@ export function DeckGLMap({
 
   // Layer order: first in array renders first (bottom), last renders last (top)
   // Desired order (bottom to top): Relief → Sea Level → Precipitation → Future Temp → Heat Map → Population circles
-  // Population labels render via Mapbox (after DeckGL) to ensure they appear on top
+  // Population labels render via Mapbox symbol layers (after DeckGL) to ensure they appear on top
+  
+  // Debug layer creation
+  const layerStatus = {
+    topographicRelief: {
+      active: isLayerActive("topographic_relief"),
+      hasState: !!layerStates.topographic_relief,
+      status: layerStates.topographic_relief?.status,
+      hasTileUrl: !!layerStates.topographic_relief?.data?.tile_url,
+      layerCreated: !!topographicReliefTileLayer
+    },
+    seaLevel: {
+      active: isLayerActive("sea_level_rise"),
+      hasState: !!layerStates.sea_level_rise,
+      status: layerStates.sea_level_rise?.status,
+      hasTileUrl: !!layerStates.sea_level_rise?.data?.tile_url,
+      layerCreated: !!seaLevelTileLayer
+    },
+    precipitation: {
+      active: isLayerActive("precipitation_drought"),
+      hasState: !!layerStates.precipitation_drought,
+      status: layerStates.precipitation_drought?.status,
+      hasTileUrl: !!layerStates.precipitation_drought?.data?.tile_url,
+      layerCreated: !!precipitationDroughtTileLayer
+    },
+    temperature: {
+      active: isLayerActive("temperature_projection"),
+      hasState: !!layerStates.temperature_projection,
+      status: layerStates.temperature_projection?.status,
+      hasTileUrl: !!layerStates.temperature_projection?.data?.tile_url,
+      layerCreated: !!temperatureProjectionTileLayer
+    },
+    urbanHeat: {
+      active: isLayerActive("urban_heat_island"),
+      hasState: !!layerStates.urban_heat_island,
+      status: layerStates.urban_heat_island?.status,
+      hasTileUrl: !!layerStates.urban_heat_island?.data?.tile_url,
+      layerCreated: !!urbanHeatTileLayer
+    }
+  }
+  console.log('🔧 Layer Creation Status:', JSON.stringify(layerStatus, null, 2))
+  
   const layers = [
     topographicReliefTileLayer,    // 1. Bottom - Topographic Relief
     seaLevelTileLayer,             // 2. Sea Level Rise
@@ -865,95 +1090,103 @@ export function DeckGLMap({
   }
 
   return (
-    <div ref={containerRef} className={`h-full w-full ${className ?? ""} relative`}>
-      {dimensions.width > 0 && dimensions.height > 0 ? (
+    <div ref={containerRef} className={`absolute inset-0 h-full w-full ${className ?? ""}`}>
+      {isContainerReady ? (
         <>
-          {console.log('🎨 Rendering Map with DeckGL Overlay, dimensions:', dimensions.width, 'x', dimensions.height)}
           <Map
             ref={mapRef}
             {...viewState}
-            onMove={(evt) => {
-              setViewState(evt.viewState)
-              onViewportChange?.({
-                center: { lat: evt.viewState.latitude, lng: evt.viewState.longitude },
-                zoom: evt.viewState.zoom
-              })
-              updateBounds()
-            }}
+            onMove={(evt) => onViewStateChange({ viewState: evt.viewState })}
             mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
-            mapStyle="mapbox://styles/mapbox/dark-v11"
-            style={{ width: dimensions.width, height: dimensions.height }}
+            mapStyle={mapStyle}
+            style={{ width: '100%', height: '100%' }}
+            // Performance optimizations
+            maxTileCacheSize={100}
+            attributionControl={false}
+            reuseMaps={true}
           >
-            <DeckGLOverlay layers={layers} />
+            {/* Add style to ensure Marker container is above DeckGL canvas */}
+            <style>{`
+              /* Force DeckGL canvas below everything */
+              .mapboxgl-map canvas[class*="deck"] {
+                z-index: 0 !important;
+              }
+              /* Force Marker container above all canvases */
+              .mapboxgl-marker-container {
+                z-index: 1000 !important;
+                position: relative !important;
+              }
+              .mapboxgl-marker {
+                z-index: 1000 !important;
+              }
+              /* Hide compass button */
+              .mapboxgl-ctrl-compass {
+                display: none !important;
+              }
+            `}</style>
+            <NavigationControl position="bottom-right" />
+            
+            {/* DeckGL overlay - renders in separate canvas */}
+            <DeckGLOverlay key={`deck-overlay-${layerRefreshKey}`} layers={layers} />
+            
+            {/* Population labels - HTML Markers render on top of all canvas elements */}
+            {megaregionLabelsGeoJSON && megaregionLabelsGeoJSON.features.map((feature: any, index: number) => {
+              const [lng, lat] = feature.geometry.coordinates
+              const { population, change, showGrowth } = feature.properties
+              
+              // Theme-based styling
+              const isLightMode = theme === 'light'
+              const backgroundColor = isLightMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'
+              const textColor = isLightMode ? 'var(--cs-neutral-0)' : '#ffffff'
+              
+              return (
+                <Marker key={`label-${index}`} longitude={lng} latitude={lat} anchor="center" offset={[0, -20]}>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    pointerEvents: 'none',
+                    position: 'relative',
+                    zIndex: 1000,
+                    padding: '4px 8px',
+                    background: backgroundColor,
+                    borderRadius: '6px',
+                    backdropFilter: 'blur(4px)'
+                  }}>
+                    {/* Population number */}
+                    <div style={{
+                      color: textColor,
+                      fontSize: '13.5px',
+                      fontWeight: 'bold',
+                      whiteSpace: 'nowrap',
+                      lineHeight: '1.3'
+                    }}>
+                      {population}
+                    </div>
+                    
+                    {/* Change label */}
+                    {showGrowth && change && (
+                      <div style={{
+                        color: feature.properties.isGrowing ? '#10b981' : feature.properties.isDecline ? '#ef4444' : '#888888',
+                        fontSize: '9.75px',
+                        fontWeight: '600',
+                        whiteSpace: 'nowrap',
+                        lineHeight: '1.3',
+                        marginTop: '3px'
+                      }}>
+                        {change}
+                      </div>
+                    )}
+                  </div>
+                </Marker>
+              )
+            })}
           </Map>
-
-          {/* Population labels in separate overlay on top - pointer-events-none to allow map interaction */}
-          {megaregionLabelsGeoJSON && (
-            <div className="absolute inset-0 pointer-events-none" style={{ zIndex: 1000 }}>
-              <Map
-                {...viewState}
-                mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
-                mapStyle="mapbox://styles/mapbox/empty-v9"
-                style={{ width: dimensions.width, height: dimensions.height }}
-                interactive={false}
-              >
-                <Source id="megaregion-labels" type="geojson" data={megaregionLabelsGeoJSON}>
-                  <Layer
-                    id="megaregion-population-labels"
-                    type="symbol"
-                    layout={{
-                      'text-field': ['get', 'population'],
-                      'text-size': 16,
-                      'text-anchor': 'center',
-                      'text-offset': [0, -0.3],
-                      'text-allow-overlap': true,
-                      'text-ignore-placement': true
-                    }}
-                    paint={{
-                      'text-color': '#ffffff',
-                      'text-halo-color': '#000000',
-                      'text-halo-width': 1.5,
-                      'text-opacity': 1.0
-                    }}
-                  />
-                  <Layer
-                    id="megaregion-change-labels"
-                    type="symbol"
-                    filter={['==', ['get', 'showGrowth'], true]}
-                    layout={{
-                      'text-field': ['get', 'change'],
-                      'text-size': 12,
-                      'text-anchor': 'center',
-                      'text-offset': [0, 0.6],
-                      'text-allow-overlap': true,
-                      'text-ignore-placement': true
-                    }}
-                    paint={{
-                      'text-color': [
-                        'case',
-                        ['==', ['get', 'isGrowing'], true],
-                        '#10b981',
-                        ['==', ['get', 'isDecline'], true],
-                        '#ef4444',
-                        '#888888'
-                      ],
-                      'text-halo-color': '#000000',
-                      'text-halo-width': 1.5,
-                      'text-opacity': 1.0
-                    }}
-                  />
-                </Source>
-              </Map>
-            </div>
-          )}
         </>
       ) : (
-        <>
-          {console.log('⚠️ Not rendering DeckGL - dimensions:', dimensions.width, 'x', dimensions.height)}
-          <div className="h-full w-full flex items-center justify-center text-white bg-gray-900">
-            Waiting for container dimensions...
-          </div>
-        </>
+        <div className="h-full w-full flex items-center justify-center text-white bg-gray-900">
+          Loading map...
+        </div>
       )}
     </div>
   )

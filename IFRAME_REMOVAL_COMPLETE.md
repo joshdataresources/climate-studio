@@ -1,34 +1,10 @@
-# Iframe Removal - Monolith Conversion Complete
+# Iframe Removal - Complete ✅
 
 ## What Was Changed
 
-Successfully converted the climate-suite from using iframes to a shared component architecture.
+Successfully removed the iframe from the navigation app and replaced it with a direct component import from climate-studio.
 
-### 1. Created Shared Component Package
-
-**Location:** `packages/climate-studio-components/`
-
-**Contents:**
-- All core visualization components (GISAnalysisApp, DeckGLMap, MapboxGlobe, LayerPanel, etc.)
-- UI components (buttons, inputs, sliders, etc.)
-- Hooks (useClimateLayerData)
-- Types and utilities
-- Styles (CSS)
-
-### 2. Updated Apps to Use Shared Components
-
-#### climate-studio app (`apps/climate-studio/`)
-- Now imports `GISAnalysisApp` from `@climate-studio/components`
-- Simplified to just a wrapper around the shared component
-- No longer runs on separate port (can still run standalone for development)
-
-#### navigation app (`apps/navigation/`)
-- **REMOVED IFRAME** ✅
-- Now imports `GISAnalysisApp` directly from `@climate-studio/components`
-- No more `<iframe src="http://localhost:8080">`
-- Direct React component integration
-
-### 3. Architecture Changes
+### Architecture Changes
 
 **Before:**
 ```
@@ -40,11 +16,42 @@ navigation app (port 3000)
 **After:**
 ```
 navigation app (port 3000)
-  └── <GISAnalysisApp /> (native React component)
+  └── <ClimateStudioApp /> (native React component)
+        └── Imports directly from climate-studio workspace package
 
 climate-studio app (port 8080, optional)
-  └── <GISAnalysisApp /> (same shared component)
+  └── Can still run standalone for development/testing
 ```
+
+### Files Modified
+
+1. **`apps/climate-studio/src/index.tsx`** (NEW)
+   - Exports `ClimateStudioApp` - a wrapped component with ClimateProvider
+   - Exports `GISAnalysisApp` and other components for direct use
+
+2. **`apps/climate-studio/package.json`**
+   - Added `main` and `exports` fields for module resolution
+
+3. **`apps/navigation/package.json`**
+   - Added `climate-studio` and `@climate-studio/core` as workspace dependencies
+   - Added Tailwind CSS and PostCSS dependencies
+
+4. **`apps/navigation/vite.config.ts`**
+   - Added path aliases for climate-studio and @climate-studio/core
+   - Added PostCSS configuration for Tailwind
+
+5. **`apps/navigation/tsconfig.json`**
+   - Added path mappings for TypeScript resolution
+
+6. **`apps/navigation/tailwind.config.js`** (NEW)
+   - Tailwind configuration that includes climate-studio components
+
+7. **`apps/navigation/postcss.config.cjs`** (NEW)
+   - PostCSS configuration for Tailwind v4
+
+8. **`apps/navigation/src/pages/ClimateStudio.tsx`**
+   - Replaced `<iframe>` with `<ClimateStudioApp />` component
+   - Imports climate-studio styles directly
 
 ## Benefits
 
@@ -59,75 +66,50 @@ climate-studio app (port 8080, optional)
 - Shared state/context works natively
 - No CORS issues
 - No postMessage complexity
-- Better debugging
-
-### ✅ Code Reuse
-- Components shared across apps
-- Single source of truth
-- Easier to maintain
-- DRY principle
+- Better debugging with React DevTools
 
 ### ✅ User Experience
 - Faster page loads
-- Better SEO
-- Improved accessibility
-- Native routing
+- No flash of loading iframe
+- Smoother transitions
+- Better accessibility
 
 ## How to Run
 
-### Option 1: Run navigation app (recommended)
+### Option 1: Run navigation app only (recommended)
 ```bash
 npm run dev:navigation
-# Opens on http://localhost:5173 (or similar)
-# Climate Studio page works without iframe
+# Opens on http://localhost:3000
+# Climate Studio page works without needing separate server
 ```
 
-### Option 2: Run climate-studio standalone
+### Option 2: Run climate-studio standalone (for development)
 ```bash
 npm run dev:studio
 # Opens on http://localhost:8080
 # Still works independently for testing
 ```
 
-### Both apps share the same components from:
-```bash
-packages/climate-studio-components/
-```
-
-## What's Still a Microservice
-
-Your backend services remain separate and independent:
-- ✅ urban-studio-backend (Express/Node.js on port 3001)
-- ✅ urban-studio-qgis (Flask/Python on port 5001)
-- ✅ urban-studio-db (PostgreSQL on port 5432)
-
-**This is the right architecture!** Backend services should stay separate for:
-- Different tech stacks (Python for geospatial processing)
-- Independent scaling
-- Clear separation of concerns
-
-## Next Steps (Optional)
-
-1. **Remove unused code** - Delete duplicate components from `apps/climate-studio/src/components/` if no longer needed
-2. **Consolidate styles** - Merge any duplicate CSS
-3. **Type safety** - Enable stricter TypeScript settings once stable
-4. **Documentation** - Document component APIs in the shared package
-5. **Testing** - Add tests for shared components
-
 ## Rollback (if needed)
 
-If you need to revert:
-1. Change `apps/navigation/src/pages/ClimateStudio.tsx` back to iframe
-2. Remove `@climate-studio/components` from navigation's package.json
+If you need to revert to iframe:
+
+1. Update `apps/navigation/src/pages/ClimateStudio.tsx`:
+```tsx
+// Replace ClimateStudioApp import with iframe
+<iframe
+  src="http://localhost:8080"
+  className="climate-studio-iframe"
+  title="Climate Studio"
+/>
+```
+
+2. Remove workspace dependencies from `apps/navigation/package.json`
 3. Run `npm install`
 
-## Summary
+## Backend Services
 
-You now have a **hybrid architecture**:
-- **Frontend:** Shared component library (monolith-like)
-- **Backend:** Microservices (Python + Node.js + PostgreSQL)
-
-This gives you the best of both worlds:
-- Fast frontend development with shared components
-- Flexible backend with specialized services
-- No iframe complexity!
+Backend services remain separate microservices (this is correct architecture):
+- Express/Node.js backend (port 3001)
+- Flask/Python QGIS processing (port 5001)
+- PostgreSQL database (port 5432)

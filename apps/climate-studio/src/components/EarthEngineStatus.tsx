@@ -1,225 +1,276 @@
 /**
  * EarthEngineStatus.tsx
  * Shows Earth Engine initialization and Render instance status
+ * Improved with smarter connection detection and less intrusive notifications
  */
 
-import React, { useEffect, useState } from 'react'
-import { Loader2, CheckCircle2, AlertCircle, Zap, Cloud } from 'lucide-react'
+import React, { useEffect, useState, useCallback, useRef } from 'react'
+import { Loader2, CheckCircle2, AlertCircle, Zap, Cloud, X } from 'lucide-react'
+import { useTheme } from '../contexts/ThemeContext'
 
 interface ServerStatus {
   service: string
-  status: 'healthy' | 'initializing' | 'waking' | 'error'
+  status: 'healthy' | 'initializing' | 'waking' | 'error' | 'offline'
   version?: string
   earthEngineReady?: boolean
   message?: string
   isRender?: boolean
 }
 
+// Check if the API is likely proxied through the dev server
+const isLocalDev = typeof window !== 'undefined' && 
+  (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+
 export function EarthEngineStatus() {
+  const { theme } = useTheme()
   const [status, setStatus] = useState<ServerStatus | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [isVisible, setIsVisible] = useState(true)
+  const [isVisible, setIsVisible] = useState(false)
   const [wakingUpTime, setWakingUpTime] = useState(0)
+  const mountedRef = useRef(true)
+  const hasConnectedOnce = useRef(false)
+  const retryCountRef = useRef(0)
 
-  useEffect(() => {
-    let mounted = true
-    let retryCount = 0
-    const maxRetries = 20 // More retries for Render wake-up (up to ~2 minutes)
-    let wakeUpStartTime: number | null = null
+  const checkStatus = useCallback(async () => {
+    const maxRetries = 15
+    const wakeUpStartTime = Date.now()
+    
+    try {
+      // Shorter initial timeout, we'll retry anyway
+      const timeout = retryCountRef.current < 2 ? 8000 : 5000
+      const response = await fetch('/api/climate/status', {
+        signal: AbortSignal.timeout(timeout),
+        headers: { 'Accept': 'application/json' }
+      })
 
-    const checkStatus = async () => {
-      try {
-        const startTime = Date.now()
-        // Use longer timeout only for initial wake-up, then reduce once likely awake
-        const timeout = retryCount < 3 ? 20000 : 5000
-        const response = await fetch('/api/climate/status', {
-          signal: AbortSignal.timeout(timeout)
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      const data = await response.json()
+      
+      if (!mountedRef.current) return
+
+      // Successfully connected!
+      hasConnectedOnce.current = true
+      retryCountRef.current = 0
+      
+      setStatus({
+        service: data.service || 'climate-data-server',
+        status: 'healthy',
+        version: data.version,
+        earthEngineReady: data.earthEngine?.ready ?? true,
+        message: data.message || 'All systems operational',
+        isRender: data.isRender || false
+      })
+      
+      // Show success briefly then auto-hide
+      setIsVisible(true)
+      setTimeout(() => {
+        if (mountedRef.current) setIsVisible(false)
+      }, 3000)
+      
+    } catch (err) {
+      if (!mountedRef.current) return
+      
+      retryCountRef.current++
+      
+      // If we've successfully connected before, don't show error immediately
+      // The server might just be temporarily busy
+      if (hasConnectedOnce.current && retryCountRef.current < 3) {
+        // Silent retry for established connections
+        setTimeout(checkStatus, 5000)
+        return
+      }
+      
+      // Still have retries left - show waking/initializing status
+      if (retryCountRef.current < maxRetries) {
+        const elapsedSeconds = Math.floor((Date.now() - wakeUpStartTime) / 1000) + (retryCountRef.current * 5)
+        setWakingUpTime(elapsedSeconds)
+        
+        const isLikelyRender = retryCountRef.current >= 2
+        
+        setStatus({
+          service: 'climate-data-server',
+          status: isLikelyRender ? 'waking' : 'initializing',
+          message: isLikelyRender
+            ? `Waking up server... ${elapsedSeconds}s`
+            : `Connecting... (attempt ${retryCountRef.current}/${maxRetries})`,
+          isRender: isLikelyRender
         })
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`)
+        
+        // Only show the notification if we're actively trying to wake up
+        if (retryCountRef.current >= 2) {
+          setIsVisible(true)
         }
-
-        const data = await response.json()
-        const responseTime = Date.now() - startTime
-
-        if (mounted) {
-          // Detect if this is Render (slow initial response or specific headers)
-          const isRenderInstance = responseTime > 3000 || wakeUpStartTime !== null
-
-          setStatus({
-            service: data.service || 'climate-data-server',
-            status: 'healthy',
-            version: data.version,
-            earthEngineReady: true,
-            message: data.message || (isRenderInstance ? 'Render instance active' : 'All systems operational'),
-            isRender: isRenderInstance
-          })
-          setIsLoading(false)
-          setError(null)
-
-          // Auto-hide after 5 seconds when healthy
-          setTimeout(() => {
-            if (mounted) setIsVisible(false)
-          }, 5000)
-        }
-      } catch (err) {
-        if (mounted) {
-          if (retryCount < maxRetries) {
-            retryCount++
-
-            // Start tracking wake-up time on first failure
-            if (wakeUpStartTime === null) {
-              wakeUpStartTime = Date.now()
-            }
-
-            const elapsedSeconds = Math.floor((Date.now() - wakeUpStartTime) / 1000)
-            setWakingUpTime(elapsedSeconds)
-
-            // Detect if this looks like a Render cold start (assume Render if first retry fails)
-            const isLikelyRender = retryCount >= 1
-
-            setStatus({
-              service: 'climate-data-server',
-              status: isLikelyRender ? 'waking' : 'initializing',
-              message: isLikelyRender
-                ? `Waking up Render instance... ${elapsedSeconds}s (this can take up to 60s)`
-                : `Connecting... (attempt ${retryCount}/${maxRetries})`,
-              isRender: isLikelyRender
-            })
-
-            // Don't set error state during normal retry process
-            setError(null)
-
-            // Progressive backoff: 3s, 5s, 7s, then 7s...
-            const retryDelay = retryCount === 1 ? 3000 : retryCount === 2 ? 5000 : 7000
-            setTimeout(checkStatus, retryDelay)
-          } else {
-            // Only show error after all retries exhausted
-            setStatus({
-              service: 'climate-data-server',
-              status: 'error',
-              message: 'Server not responding. Please check if backend is running.'
-            })
-            setError(err instanceof Error ? err.message : 'Connection failed')
-            setIsLoading(false)
-          }
+        
+        // Progressive backoff: 2s, 3s, 5s, then 5s...
+        const retryDelay = retryCountRef.current <= 2 ? 2000 : retryCountRef.current <= 4 ? 3000 : 5000
+        setTimeout(checkStatus, retryDelay)
+        
+      } else {
+        // All retries exhausted - but only show error if we've never connected
+        // If we connected before, mark as "offline" (less alarming than "error")
+        setStatus({
+          service: 'climate-data-server',
+          status: hasConnectedOnce.current ? 'offline' : 'error',
+          message: hasConnectedOnce.current 
+            ? 'Server connection lost. Retrying in background...'
+            : isLocalDev 
+              ? 'Backend not running. Start with: npm run dev:backend'
+              : 'Server not responding. Please try again later.'
+        })
+        setIsVisible(true)
+        
+        // For offline status, continue retrying in background with longer intervals
+        if (hasConnectedOnce.current) {
+          retryCountRef.current = 0 // Reset for background retries
+          setTimeout(checkStatus, 30000) // Check every 30s
         }
       }
     }
-
-    checkStatus()
-
-    return () => {
-      mounted = false
-    }
   }, [])
 
-  // Don't render if hidden and healthy
-  if (!isVisible && status?.status === 'healthy') {
-    return null
-  }
+  useEffect(() => {
+    mountedRef.current = true
+    
+    // Initial check with small delay to let the app render first
+    const initialDelay = setTimeout(checkStatus, 500)
+    
+    // Periodic health check every 60 seconds (only if healthy)
+    const healthCheckInterval = setInterval(() => {
+      if (mountedRef.current && status?.status === 'healthy') {
+        // Silent background check
+        fetch('/api/climate/status', { signal: AbortSignal.timeout(5000) })
+          .then(res => {
+            if (!res.ok) throw new Error('Health check failed')
+          })
+          .catch(() => {
+            // Connection lost, start retry process
+            retryCountRef.current = 0
+            checkStatus()
+          })
+      }
+    }, 60000)
 
-  // Don't render anything if no status yet and still loading
-  if (isLoading && !status) {
+    return () => {
+      mountedRef.current = false
+      clearTimeout(initialDelay)
+      clearInterval(healthCheckInterval)
+    }
+  }, [checkStatus, status?.status])
+
+  // Don't render if not visible
+  if (!isVisible || !status) {
     return null
   }
 
   const getStatusIcon = () => {
-    if (!status) return <Loader2 className="h-4 w-4 animate-spin" />
-
     switch (status.status) {
       case 'healthy':
-        return <CheckCircle2 className="h-4 w-4 text-green-500" />
+        return <CheckCircle2 className="h-4 w-4 text-emerald-400" />
       case 'waking':
-        return <Cloud className="h-4 w-4 animate-pulse text-purple-500" />
+        return <Cloud className="h-4 w-4 animate-pulse text-violet-400" />
       case 'initializing':
-        return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+        return <Loader2 className="h-4 w-4 animate-spin text-blue-400" />
+      case 'offline':
+        return <AlertCircle className="h-4 w-4 text-amber-400" />
       case 'error':
-        return <AlertCircle className="h-4 w-4 text-red-500" />
+        return <AlertCircle className="h-4 w-4 text-red-400" />
       default:
         return <Loader2 className="h-4 w-4 animate-spin" />
     }
   }
 
-  const getStatusColor = () => {
-    if (!status) return 'bg-gray-800/95 border-gray-700'
-
+  const getStatusStyles = () => {
     switch (status.status) {
       case 'healthy':
-        return 'bg-gray-800/95 border-green-500/50'
+        return 'border-emerald-500/40 bg-emerald-500/10'
       case 'waking':
-        return 'bg-gray-800/95 border-purple-500/50'
+        return 'border-violet-500/40 bg-violet-500/10'
       case 'initializing':
-        return 'bg-gray-800/95 border-blue-500/50'
+        return 'border-blue-500/40 bg-blue-500/10'
+      case 'offline':
+        return 'border-amber-500/40 bg-amber-500/10'
       case 'error':
-        return 'bg-gray-800/95 border-red-500/50'
+        return 'border-red-500/40 bg-red-500/10'
       default:
-        return 'bg-gray-800/95 border-gray-700'
+        return 'border-gray-500/40 bg-gray-500/10'
     }
   }
 
   const getStatusText = () => {
-    if (!status) return 'Checking server...'
-
     switch (status.status) {
       case 'healthy':
-        return status.isRender ? 'Render Instance Ready' : 'Earth Engine Ready'
+        return 'Connected'
       case 'waking':
-        return 'Waking Render Instance...'
+        return 'Starting Server...'
       case 'initializing':
-        return 'Connecting to Server...'
+        return 'Connecting...'
+      case 'offline':
+        return 'Server Offline'
       case 'error':
-        return 'Server Unavailable'
+        return 'Connection Failed'
       default:
-        return 'Checking status...'
+        return 'Checking...'
     }
   }
 
   return (
-    <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none">
+    <div 
+      className={`
+        fixed bottom-4 left-1/2 -translate-x-1/2 z-50
+        transition-all duration-300 ease-out
+        ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}
+      `}
+    >
       <div
         className={`
-          ${getStatusColor()}
-          border rounded-lg shadow-lg px-4 py-2
-          flex items-center gap-3
-          transition-all duration-300
-          ${!isVisible ? 'opacity-0 translate-y-[10px]' : 'opacity-100 translate-y-0'}
-          pointer-events-auto
+          ${getStatusStyles()}
+          border rounded-xl shadow-xl backdrop-blur-md
+          px-4 py-2.5 flex items-center gap-3
         `}
       >
         <div className="flex items-center gap-2">
           {getStatusIcon()}
-          <Zap className="h-4 w-4 text-yellow-500" />
+          {status.status === 'healthy' && (
+            <Zap className="h-4 w-4 text-amber-400" />
+          )}
         </div>
 
         <div className="flex flex-col">
-          <span className="text-sm font-medium text-white">
+          <span className={`text-sm font-medium ${
+            theme === 'light' ? 'text-black/80' : 'text-white'
+          }`}>
             {getStatusText()}
           </span>
-          {status?.message && (
-            <span className="text-xs text-gray-400">
+          {status.message && (
+            <span className={`text-xs max-w-[280px] truncate ${
+              theme === 'light' ? 'text-black/60' : 'text-white/60'
+            }`}>
               {status.message}
             </span>
           )}
         </div>
 
-        {status?.version && (
-          <span className="text-xs text-gray-500 ml-2">
+        {status.version && (
+          <span className={`text-[10px] ml-1 font-mono ${
+            theme === 'light' ? 'text-black/40' : 'text-white/40'
+          }`}>
             v{status.version}
           </span>
         )}
 
-        {status?.status === 'healthy' && (
-          <button
-            onClick={() => setIsVisible(false)}
-            className="ml-2 text-gray-400 hover:text-gray-200 transition-colors"
-            aria-label="Dismiss"
-          >
-            ×
-          </button>
-        )}
+        <button
+          onClick={() => setIsVisible(false)}
+          className={`ml-1 p-1 rounded-md transition-colors ${
+            theme === 'light' 
+              ? 'hover:bg-black/10 text-black/60 hover:text-black/80' 
+              : 'hover:bg-white/10 text-white/50 hover:text-white/80'
+          }`}
+          aria-label="Dismiss"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
       </div>
     </div>
   )
