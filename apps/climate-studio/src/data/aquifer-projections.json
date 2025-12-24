@@ -1,0 +1,544 @@
+{
+  "type": "FeatureCollection",
+  "name": "USGS Principal Aquifers - Volume & Projections",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "High Plains Aquifer (Ogallala)",
+        "state": "Midwest",
+        "volume_data": {
+          "current_vol_gallons": 1042000000000000,
+          "depletion_rate_yr": 2700000000000,
+          "projections": {
+            "10_yr_2035": "Critical shortages in Texas Panhandle/Kansas.",
+            "25_yr_2050": "35% of Southern High Plains unable to irrigate.",
+            "50_yr_2075": "Significant agricultural collapse in Western region.",
+            "75_yr_2100": "Functional depletion in southern half.",
+            "100_yr_2125": "Aquifer stable only in Nebraska (Sandhills)."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-99.5, 43.4], [-98.5, 42.5], [-97.8, 41.0], [-96.8, 40.2], [-97.2, 37.5], [-98.5, 36.5], [-100.0, 35.5], [-101.5, 32.0], [-102.5, 31.8], [-103.5, 33.0], [-103.0, 35.5], [-103.8, 36.8], [-102.5, 38.0], [-104.2, 41.2], [-105.0, 41.8], [-104.0, 42.5], [-102.0, 42.2], [-100.5, 43.0], [-99.5, 43.4]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Central Valley Aquifer System",
+        "state": "CA",
+        "volume_data": {
+          "current_vol_gallons": 260000000000000,
+          "depletion_rate_yr": 1900000000000,
+          "projections": {
+            "10_yr_2035": "High subsidence; drilling depth increases.",
+            "25_yr_2050": "SGMA regulations force reduced pumping.",
+            "50_yr_2075": "Shift to surface water; smaller farms fallow.",
+            "75_yr_2100": "Stabilized at lower capacity.",
+            "100_yr_2125": "Managed sustainable yield only."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-122.5, 40.5], [-121.8, 39.8], [-121.2, 38.5], [-120.5, 37.0], [-119.5, 36.0], [-118.8, 35.0], [-119.2, 34.8], [-120.0, 35.2], [-120.8, 36.5], [-121.5, 37.5], [-122.0, 38.5], [-122.8, 39.8], [-122.5, 40.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Floridan Aquifer System",
+        "state": "FL/GA/SC/AL",
+        "volume_data": {
+          "current_vol_gallons": "1,000+ Trillion (Estimated)",
+          "depletion_rate_yr": "Recharge High / Quality Declining",
+          "projections": {
+            "10_yr_2035": "Localized saltwater intrusion in coastal cities.",
+            "25_yr_2050": "Increased desalination required for Miami/Tampa.",
+            "50_yr_2075": "Significant inland movement of wellfields.",
+            "75_yr_2100": "Coastal wells abandoned due to sea level rise.",
+            "100_yr_2125": "Volume stable, but salinity restricts usage."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-81.0, 33.0], [-80.0, 32.5], [-81.5, 30.5], [-80.5, 28.0], [-80.0, 26.5], [-80.5, 25.0], [-81.5, 24.5], [-82.5, 26.0], [-84.0, 27.5], [-85.5, 29.5], [-86.0, 30.5], [-87.5, 30.5], [-88.0, 31.0], [-85.0, 32.5], [-84.0, 32.0], [-82.5, 33.2], [-81.0, 33.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Mississippi River Valley Alluvial",
+        "state": "MO to LA",
+        "volume_data": {
+          "current_vol_gallons": 50000000000000,
+          "depletion_rate_yr": 300000000000,
+          "projections": {
+            "10_yr_2035": "Cone of depression deepens in Arkansas.",
+            "25_yr_2050": "Irrigation costs rise significantly.",
+            "50_yr_2075": "Shift to surface water for rice farming.",
+            "75_yr_2100": "Partial recovery if farming shifts north.",
+            "100_yr_2125": "Highly managed/restricted use."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-89.5, 37.2], [-89.0, 36.5], [-90.0, 35.5], [-90.5, 34.0], [-91.0, 32.5], [-91.5, 31.0], [-91.2, 30.0], [-90.8, 30.5], [-90.2, 32.0], [-89.5, 33.5], [-89.2, 35.0], [-89.0, 36.0], [-89.5, 37.2]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Basin and Range basin-fill aquifers",
+        "state": "Western US",
+        "volume_data": {
+          "current_vol_gallons": "Unknown (High Variance)",
+          "depletion_rate_yr": "Low Recharge",
+          "projections": {
+            "10_yr_2035": "Stable volume; high demand in urban centers.",
+            "25_yr_2050": "Urban pumping exceeds recharge in NV/AZ.",
+            "50_yr_2075": "Remote basins stable; cities import water.",
+            "75_yr_2100": "Continued reliance on surface water imports.",
+            "100_yr_2125": "Fossil water depletion in isolated basins."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-119.5, 40.0], [-118.0, 41.5], [-116.0, 42.0], [-114.0, 41.5], [-112.5, 40.0], [-113.0, 37.5], [-114.5, 36.0], [-116.5, 36.0], [-118.0, 37.5], [-119.0, 38.5], [-119.5, 40.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Rio Grande aquifer system",
+        "state": "NM, CO, TX",
+        "volume_data": {
+          "current_vol_gallons": "Unknown (River Dependent)",
+          "depletion_rate_yr": "High Stress",
+          "projections": {
+            "10_yr_2035": "Critical surface water linkage issues.",
+            "25_yr_2050": "Reduced agricultural allocation.",
+            "50_yr_2075": "Urban prioritization (Albuquerque/El Paso).",
+            "75_yr_2100": "Heavy reliance on desalination/recycling.",
+            "100_yr_2125": "Volume varies with climate change/snowpack."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-106.5, 38.0], [-105.8, 37.0], [-105.5, 35.5], [-106.0, 34.0], [-107.0, 33.0], [-106.5, 31.8], [-105.0, 31.0], [-103.5, 29.5], [-104.5, 30.5], [-107.2, 32.5], [-107.5, 34.5], [-107.0, 36.5], [-106.5, 38.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "California Coastal Basin aquifers",
+        "state": "CA",
+        "volume_data": {
+          "current_vol_gallons": "Variable (Many small basins)",
+          "depletion_rate_yr": "Managed",
+          "projections": {
+            "10_yr_2035": "Saltwater intrusion management.",
+            "25_yr_2050": "Stable due to strict injection/recharge.",
+            "50_yr_2075": "Stable managed systems.",
+            "75_yr_2100": "Stable.",
+            "100_yr_2125": "Stable."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-124.0, 40.5], [-123.5, 39.0], [-122.8, 38.0], [-122.0, 37.0], [-121.5, 36.0], [-120.0, 34.5], [-118.0, 33.5], [-117.0, 32.5], [-117.5, 33.2], [-119.0, 34.2], [-121.0, 35.5], [-122.5, 37.5], [-124.0, 40.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Pacific Northwest basin-fill aquifers",
+        "state": "WA, OR, ID",
+        "volume_data": {
+          "current_vol_gallons": "Large (Recharge High)",
+          "depletion_rate_yr": "Stable",
+          "projections": {
+            "10_yr_2035": "Stable.",
+            "25_yr_2050": "Stable.",
+            "50_yr_2075": "Stable.",
+            "75_yr_2100": "Stable.",
+            "100_yr_2125": "Stable."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-123.0, 48.0], [-122.0, 47.5], [-122.5, 46.5], [-123.0, 45.0], [-122.5, 44.0], [-123.5, 44.5], [-124.0, 46.0], [-123.5, 47.0], [-123.0, 48.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Glacial sand and gravel aquifers",
+        "state": "Northern US",
+        "volume_data": {
+          "current_vol_gallons": "Unknown (Surface dependent)",
+          "depletion_rate_yr": "Recharges Annually",
+          "projections": {
+            "10_yr_2035": "Stable volume / Risk of contamination.",
+            "25_yr_2050": "Stable volume.",
+            "50_yr_2075": "Stable volume.",
+            "75_yr_2100": "Stable volume.",
+            "100_yr_2125": "Stable volume."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-95.0, 48.0], [-90.0, 46.0], [-85.0, 45.0], [-80.0, 42.0], [-75.0, 42.0], [-72.0, 43.0], [-70.0, 45.0], [-80.0, 46.0], [-90.0, 47.0], [-95.0, 48.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Coastal Lowlands aquifer system",
+        "state": "Gulf Coast",
+        "volume_data": {
+          "current_vol_gallons": "Unknown (Vast)",
+          "depletion_rate_yr": "High (Houston Area)",
+          "projections": {
+            "10_yr_2035": "Subsidence concerns in Houston.",
+            "25_yr_2050": "Shift to surface water slows depletion.",
+            "50_yr_2075": "Stabilized due to regulation.",
+            "75_yr_2100": "Stable.",
+            "100_yr_2125": "Stable."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-97.5, 28.5], [-96.5, 29.5], [-95.0, 30.0], [-93.5, 30.5], [-91.5, 31.0], [-89.5, 30.5], [-88.0, 30.5], [-87.0, 30.0], [-89.0, 29.0], [-91.0, 29.2], [-93.0, 29.5], [-95.0, 28.5], [-97.0, 27.5], [-97.5, 28.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Northern Atlantic Coastal Plain",
+        "state": "East Coast",
+        "volume_data": {
+          "current_vol_gallons": "Unknown (Multi-layer)",
+          "depletion_rate_yr": "Moderate / Recovering",
+          "projections": {
+            "10_yr_2035": "Recovery in NJ/NY due to reduced pumping.",
+            "25_yr_2050": "Saltwater intrusion in VA/NC.",
+            "50_yr_2075": "Deep aquifers stable.",
+            "75_yr_2100": "Sea level rise impacts shallow layers.",
+            "100_yr_2125": "Salinity issues in coastal zones."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-74.0, 40.8], [-74.5, 40.2], [-75.5, 39.5], [-76.8, 38.2], [-77.2, 36.5], [-77.8, 35.0], [-76.5, 34.5], [-75.8, 35.5], [-75.2, 37.0], [-74.5, 38.5], [-73.5, 40.0], [-72.8, 41.0], [-74.0, 40.8]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Columbia Plateau basaltic-rock aquifers",
+        "state": "WA, OR, ID",
+        "volume_data": {
+          "current_vol_gallons": "Unknown (Deep Basalt)",
+          "depletion_rate_yr": "Local Declines",
+          "projections": {
+            "10_yr_2035": "Local declines in heavy ag areas.",
+            "25_yr_2050": "Deepening wells required.",
+            "50_yr_2075": "Stable recharge in upper layers.",
+            "75_yr_2100": "Stable.",
+            "100_yr_2125": "Stable."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-117.5, 47.8], [-118.5, 47.5], [-120.5, 47.5], [-121.0, 46.5], [-121.5, 45.5], [-121.0, 44.5], [-120.0, 44.5], [-119.0, 45.2], [-118.0, 45.5], [-117.0, 46.0], [-116.5, 46.5], [-117.0, 47.5], [-117.5, 47.8]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Snake River Plain aquifer",
+        "state": "ID",
+        "volume_data": {
+          "current_vol_gallons": "500 Trillion (Estimated)",
+          "depletion_rate_yr": "Variable (Flows to River)",
+          "projections": {
+            "10_yr_2035": "Stable due to recharge programs.",
+            "25_yr_2050": "Conflicts over river discharge.",
+            "50_yr_2075": "Stable.",
+            "75_yr_2100": "Stable.",
+            "100_yr_2125": "Stable."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-111.5, 44.5], [-112.5, 43.8], [-114.0, 43.5], [-115.5, 43.2], [-116.8, 44.2], [-117.0, 43.5], [-116.0, 42.5], [-114.5, 42.2], [-113.0, 42.0], [-112.5, 42.5], [-111.5, 43.0], [-111.0, 43.8], [-111.5, 44.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Cambrian-Ordovician aquifer system",
+        "state": "Upper Midwest",
+        "volume_data": {
+          "current_vol_gallons": "Unknown (Deep Sandstone)",
+          "depletion_rate_yr": "Stable / Recovering",
+          "projections": {
+            "10_yr_2035": "Recovering head pressure (less pumping).",
+            "25_yr_2050": "Stable.",
+            "50_yr_2075": "Stable.",
+            "75_yr_2100": "Stable.",
+            "100_yr_2125": "Stable."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-93.5, 44.5], [-92.0, 45.0], [-90.0, 45.5], [-88.5, 46.0], [-87.5, 45.5], [-88.0, 43.5], [-89.0, 41.5], [-91.0, 41.0], [-92.5, 42.0], [-94.0, 43.5], [-93.5, 44.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Edwards-Trinity aquifer system",
+        "state": "TX, OK",
+        "volume_data": {
+          "current_vol_gallons": "Unknown (Karst/Fast Flow)",
+          "depletion_rate_yr": "High Drought Sensitivity",
+          "projections": {
+            "10_yr_2035": "Pumping restricted during droughts.",
+            "25_yr_2050": "Urban growth stresses boundaries.",
+            "50_yr_2075": "Habitat conservation limits use.",
+            "75_yr_2100": "Volatile but renewable.",
+            "100_yr_2125": "Volatile but renewable."
+          }
+        }
+      },
+      "geometry": { "type": "Polygon", "coordinates": [[[-98.0, 32.0], [-97.5, 31.0], [-97.8, 30.0], [-99.0, 29.5], [-100.5, 29.2], [-101.5, 29.5], [-102.5, 30.0], [-103.5, 31.5], [-104.0, 32.0], [-102.5, 32.5], [-101.0, 31.8], [-100.0, 31.5], [-99.0, 31.8], [-98.0, 32.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Pecos River Basin alluvial aquifer", "volume_data": { "status": "Stable/Local Depletion" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-105.5, 35.5], [-104.5, 34.5], [-104.0, 33.0], [-103.5, 31.5], [-102.5, 31.0], [-103.0, 30.5], [-104.0, 31.0], [-104.8, 32.5], [-105.2, 34.0], [-105.5, 35.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Seymour aquifer", "volume_data": { "status": "Stable/Recharges Quickly" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-100.0, 34.0], [-99.5, 33.8], [-99.0, 33.5], [-99.2, 33.2], [-99.8, 33.0], [-100.2, 33.2], [-100.5, 33.5], [-100.3, 33.8], [-100.0, 34.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Surficial aquifer system", "volume_data": { "status": "Stable/Vulnerable to Pollution" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-81.0, 32.0], [-80.5, 31.0], [-81.5, 30.0], [-82.0, 30.5], [-82.5, 31.5], [-81.8, 32.2], [-81.0, 32.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Unconsolidated-deposit aquifers (Alaska)", "volume_data": { "status": "Stable/Undertapped" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-150.0, 61.5], [-149.0, 61.2], [-148.5, 61.0], [-149.5, 60.5], [-150.5, 60.8], [-151.0, 61.2], [-150.0, 61.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "South Coast aquifer (Puerto Rico)", "volume_data": { "status": "Stressed/Saline Intrusion" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-66.8, 18.0], [-66.5, 17.9], [-66.2, 17.9], [-66.0, 18.0], [-66.2, 18.1], [-66.5, 18.1], [-66.8, 18.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Texas coastal uplands aquifer system", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-98.5, 29.5], [-97.5, 30.5], [-96.0, 31.0], [-95.0, 31.5], [-94.0, 32.0], [-93.5, 31.5], [-94.5, 30.5], [-96.0, 29.5], [-97.0, 29.0], [-98.0, 28.5], [-98.5, 29.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Mississippi Embayment aquifer system", "volume_data": { "status": "Declining/High Use" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-92.0, 35.0], [-90.0, 36.5], [-89.0, 37.0], [-88.0, 36.5], [-88.5, 34.5], [-89.0, 32.5], [-90.5, 31.0], [-91.5, 31.5], [-92.0, 33.0], [-92.0, 35.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Southeastern Coastal Plain aquifer system", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-88.5, 33.5], [-87.0, 32.5], [-85.0, 32.0], [-83.0, 33.0], [-81.0, 34.0], [-80.0, 33.5], [-81.0, 32.0], [-82.5, 31.0], [-84.5, 30.5], [-86.5, 31.0], [-88.0, 31.5], [-88.5, 33.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Colorado Plateaus aquifers", "volume_data": { "status": "Stable/Low Recharge" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-111.5, 37.0], [-110.5, 38.5], [-109.0, 39.0], [-108.0, 38.5], [-107.5, 37.0], [-108.0, 35.5], [-109.5, 35.0], [-111.0, 35.5], [-112.0, 36.2], [-111.5, 37.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Denver Basin aquifer system", "volume_data": { "status": "Declining (Mining Water)" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-105.0, 40.0], [-104.5, 40.2], [-104.0, 39.8], [-103.8, 39.0], [-104.0, 38.5], [-104.8, 38.5], [-105.2, 39.2], [-105.0, 40.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Lower Cretaceous aquifers", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-104.0, 45.0], [-102.0, 46.0], [-100.0, 45.5], [-98.0, 44.5], [-99.0, 43.0], [-101.0, 42.5], [-103.5, 43.0], [-105.0, 44.0], [-104.0, 45.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Rush Springs aquifer", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-98.5, 35.5], [-98.0, 35.4], [-97.8, 35.0], [-98.0, 34.8], [-98.5, 34.9], [-98.8, 35.2], [-98.5, 35.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Central Oklahoma aquifer", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-97.5, 35.8], [-97.2, 35.8], [-97.0, 35.5], [-97.1, 35.2], [-97.4, 35.1], [-97.6, 35.4], [-97.5, 35.8]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Ada-Vamoosa aquifer", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-96.8, 36.5], [-96.5, 36.2], [-96.4, 35.5], [-96.6, 34.8], [-96.8, 35.0], [-97.0, 35.8], [-96.8, 36.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Early Mesozoic basin aquifers", "volume_data": { "status": "Stable/Local Contamination" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-75.0, 40.5], [-74.5, 40.8], [-74.0, 40.5], [-74.2, 40.0], [-75.5, 39.8], [-76.5, 39.5], [-77.0, 38.5], [-77.5, 38.8], [-76.5, 40.0], [-75.0, 40.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "New York sandstone aquifers", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-76.0, 43.0], [-75.0, 43.2], [-74.5, 42.8], [-75.0, 42.2], [-76.0, 42.0], [-77.0, 42.5], [-76.0, 43.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Pennsylvanian aquifers", "volume_data": { "status": "Stable/Mining Impacts" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-81.0, 41.0], [-80.0, 40.0], [-79.0, 39.0], [-80.0, 38.0], [-82.0, 38.5], [-83.0, 39.5], [-82.5, 40.5], [-81.0, 41.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Marshall aquifer", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-85.0, 43.5], [-84.0, 43.5], [-83.5, 43.0], [-84.0, 42.0], [-85.0, 42.0], [-85.5, 42.5], [-85.0, 43.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Jacobsville aquifer", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-89.0, 47.0], [-88.0, 47.2], [-87.0, 46.8], [-87.5, 46.2], [-88.5, 46.0], [-89.2, 46.5], [-89.0, 47.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Lower Tertiary aquifers", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-104.0, 48.0], [-102.0, 47.5], [-100.0, 47.0], [-101.0, 46.0], [-103.0, 46.5], [-105.0, 47.0], [-104.0, 48.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Upper Cretaceous aquifers", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-110.0, 45.0], [-108.0, 44.0], [-106.0, 43.0], [-107.0, 41.0], [-109.0, 42.0], [-111.0, 43.5], [-110.0, 45.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Wyoming Tertiary aquifers", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-109.0, 43.0], [-107.0, 43.5], [-106.0, 42.5], [-107.0, 41.5], [-109.0, 41.5], [-109.5, 42.2], [-109.0, 43.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Biscayne aquifer", "volume_data": { "status": "Stable Volume / Salt Intrusion Risk" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-80.2, 26.5], [-80.0, 26.5], [-80.0, 25.2], [-80.5, 25.2], [-80.8, 25.5], [-80.5, 26.0], [-80.2, 26.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Valley and Ridge aquifers", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-76.0, 40.5], [-77.0, 39.5], [-78.5, 38.0], [-80.0, 36.5], [-82.0, 35.5], [-84.0, 34.5], [-85.0, 35.0], [-83.0, 36.5], [-81.0, 37.5], [-79.0, 39.0], [-77.5, 40.5], [-76.0, 40.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Ozark Plateaus aquifer system", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-92.0, 38.5], [-91.0, 37.5], [-91.5, 36.0], [-92.5, 35.5], [-94.0, 35.8], [-95.0, 36.5], [-94.5, 37.5], [-93.5, 38.2], [-92.0, 38.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Mississippian aquifers", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-86.0, 36.5], [-85.5, 35.5], [-86.0, 34.5], [-87.0, 34.0], [-88.0, 34.5], [-88.5, 35.5], [-87.5, 36.5], [-86.0, 36.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Silurian-Devonian aquifers", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-84.0, 42.0], [-83.0, 41.5], [-84.0, 40.0], [-85.5, 39.5], [-87.0, 40.5], [-88.0, 41.5], [-86.5, 42.5], [-84.0, 42.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "New York and New England carbonate-rock aquifers", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-73.5, 45.0], [-73.0, 44.0], [-73.5, 42.5], [-74.0, 41.5], [-75.0, 42.0], [-74.5, 43.5], [-74.0, 44.5], [-73.5, 45.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Piedmont and Blue Ridge carbonate-rock aquifers", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-77.0, 39.5], [-78.0, 38.5], [-79.0, 37.5], [-80.0, 36.5], [-80.5, 37.0], [-79.5, 38.0], [-78.5, 39.0], [-77.0, 39.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Roswell Basin aquifer system", "volume_data": { "status": "Declining" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-104.5, 34.0], [-104.0, 33.5], [-104.2, 33.0], [-104.8, 33.0], [-105.0, 33.5], [-105.2, 34.2], [-104.5, 34.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Blaine aquifer", "volume_data": { "status": "Stable (High Salinity)" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-100.0, 34.5], [-99.5, 34.2], [-99.0, 34.0], [-99.2, 33.8], [-100.0, 33.5], [-100.5, 34.0], [-100.0, 34.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Arbuckle-Simpson aquifer", "volume_data": { "status": "Stable (Protected)" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-97.0, 34.5], [-96.5, 34.4], [-96.6, 34.2], [-97.0, 34.1], [-97.2, 34.3], [-97.0, 34.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Great Basin carbonate and alluvial aquifer system", "volume_data": { "status": "Stable/Low Use" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-116.0, 40.0], [-115.0, 40.5], [-114.0, 40.0], [-113.0, 39.0], [-113.5, 37.0], [-115.0, 36.5], [-116.5, 37.5], [-117.0, 39.0], [-116.0, 40.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Ordovician aquifers", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-86.5, 36.5], [-85.5, 36.2], [-85.0, 35.8], [-85.5, 35.5], [-86.5, 35.8], [-87.0, 36.2], [-86.5, 36.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Upper Tertiary aquifers (Western US)", "volume_data": { "status": "Stable/Local Depletion" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-118.0, 38.0], [-117.0, 37.5], [-116.0, 36.5], [-117.0, 35.5], [-118.5, 36.0], [-119.0, 37.0], [-118.0, 38.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Edwards-Trinity aquifer system (Plateau)", "volume_data": { "status": "Stable/Drought Sensitive" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-101.0, 31.0], [-100.0, 30.5], [-99.0, 30.0], [-100.0, 29.5], [-101.5, 29.8], [-102.5, 30.2], [-102.0, 30.8], [-101.0, 31.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Midwestern basins and arches aquifer system", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-85.0, 41.5], [-83.5, 41.0], [-83.0, 40.0], [-84.0, 39.0], [-85.5, 39.2], [-86.0, 40.5], [-85.0, 41.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Appalachian Plateaus aquifers", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-80.0, 41.0], [-79.0, 40.0], [-78.5, 39.0], [-79.5, 38.0], [-81.0, 37.5], [-82.0, 38.5], [-81.5, 40.0], [-80.0, 41.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Hawaiian volcanic-rock aquifers", "volume_data": { "status": "Stable/Local Salt Intrusion" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-155.0, 19.5], [-155.5, 19.0], [-156.0, 19.5], [-156.0, 20.0], [-155.5, 20.2], [-155.0, 20.0], [-154.8, 19.5], [-155.0, 19.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Piedmont and Blue Ridge crystalline-rock aquifers", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-78.0, 39.0], [-79.0, 38.0], [-80.5, 37.0], [-82.0, 35.5], [-84.0, 34.0], [-85.0, 33.0], [-83.0, 33.5], [-81.0, 35.0], [-79.5, 36.5], [-78.0, 38.0], [-77.0, 38.8], [-78.0, 39.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "New York and New England crystalline-rock aquifers", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-70.0, 45.0], [-69.0, 44.0], [-70.0, 43.0], [-71.5, 42.0], [-72.5, 41.5], [-73.5, 41.5], [-73.0, 43.0], [-72.0, 44.0], [-71.0, 45.5], [-70.0, 45.0]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Southern Nevada volcanic-rock aquifers", "volume_data": { "status": "Stressed" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-116.5, 37.5], [-116.0, 37.0], [-115.5, 36.5], [-116.0, 36.2], [-117.0, 36.5], [-117.5, 37.0], [-116.5, 37.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Marfa, Marathon, Cenozoic Pecos Alluvium", "volume_data": { "status": "Stable/Local" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-104.0, 30.5], [-103.5, 30.0], [-103.0, 30.2], [-103.2, 30.8], [-103.8, 31.0], [-104.0, 30.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Capitan Reef Complex", "volume_data": { "status": "Stable (Brine)" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-104.5, 32.5], [-104.0, 32.2], [-103.5, 31.8], [-103.2, 31.5], [-103.5, 32.0], [-104.2, 32.8], [-104.5, 32.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Rustler", "volume_data": { "status": "Stable (Poor Quality)" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-104.2, 31.8], [-103.8, 31.5], [-103.5, 31.2], [-103.8, 31.8], [-104.0, 32.0], [-104.2, 31.8]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Blossom Sand", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-95.5, 33.8], [-95.0, 33.6], [-94.8, 33.5], [-95.2, 33.4], [-95.6, 33.7], [-95.5, 33.8]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Nacatoch", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-96.0, 33.5], [-95.0, 33.2], [-94.0, 33.0], [-93.5, 33.2], [-94.5, 33.5], [-95.5, 33.8], [-96.0, 33.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Ellenburger-San Saba", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-99.5, 31.5], [-98.5, 31.2], [-98.0, 30.8], [-98.5, 30.5], [-99.2, 30.8], [-99.8, 31.2], [-99.5, 31.5]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Hickory", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-99.2, 31.2], [-98.8, 31.0], [-98.5, 30.8], [-98.8, 30.6], [-99.2, 30.9], [-99.2, 31.2]]] }
+    },
+    {
+      "type": "Feature",
+      "properties": { "name": "Queen City", "volume_data": { "status": "Stable" } },
+      "geometry": { "type": "Polygon", "coordinates": [[[-96.0, 32.5], [-95.0, 32.0], [-94.0, 31.5], [-95.0, 31.2], [-96.5, 31.8], [-96.0, 32.5]]] }
+    }
+  ]
+}
+
+
+

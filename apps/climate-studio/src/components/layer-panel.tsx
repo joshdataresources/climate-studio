@@ -505,7 +505,7 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
   const [showDescriptions, setShowDescriptions] = React.useState(false)
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-4 p-4">
       <div>
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">Climate Layers</h3>
@@ -530,7 +530,7 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
               <label
                 key={layer.id}
                 className={`flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors ${
-                  active ? "border-blue-500/60 bg-blue-500/10" : "border-border/60 bg-muted/20 hover:bg-muted/40"
+                  active ? "border-blue-500/60 bg-blue-500/10" : "border-border/60 bg-muted/50 hover:bg-muted/60"
                 }`}
               >
                 <input

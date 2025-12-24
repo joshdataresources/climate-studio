@@ -26,7 +26,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://postgres:your_password_here@urban-studio-db:5432/urban_studio
       - NODE_ENV=development
-      - CLIMATE_SERVICE_URL=http://urban-studio-qgis:5000
+      - CLIMATE_SERVICE_URL=${CLIMATE_SERVICE_URL:-http://host.docker.internal:5001}
     ports:
       - "3001:3001"
     volumes:

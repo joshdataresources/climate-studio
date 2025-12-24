@@ -18,6 +18,7 @@ const microsoftBuildingsService = require('./services/gis/microsoftBuildings');
 const femaSeaLevelRiseService = require('./services/gis/femaSeaLevelRise');
 const nasaGistempService = require('./services/gis/nasaGistemp');
 const modisLSTService = require('./services/gis/modisLST');
+const usgsAquifersService = require('./services/gis/usgsAquifers');
 const cacheService = require('./services/cacheService');
 
 // Import middleware and utilities
@@ -36,6 +37,36 @@ const logEnvWarnings = () => {
   if (!NASA_API_KEY) {
     console.warn('⚠️  NASA_API_KEY is not set; NASA POWER requests may be rate-limited.');
   }
+};
+
+// Helper function for handling climate service axios errors consistently
+const handleClimateServiceError = (error, res, serviceName = 'Climate service') => {
+  // Handle timeout errors specifically
+  if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+    console.error(`❌ ${serviceName} timeout after 60s`);
+    return res.status(504).json({
+      success: false,
+      error: `Request timeout - ${serviceName.toLowerCase()} took too long to respond. Try reducing the search area or resolution.`,
+      timeout: true
+    });
+  }
+  
+  // Handle connection errors
+  if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+    console.error(`❌ ${serviceName} connection failed:`, error.code);
+    return res.status(503).json({
+      success: false,
+      error: `${serviceName} is unavailable. Please check if the service is running.`,
+      serviceUnavailable: true
+    });
+  }
+  
+  // Generic error handling
+  console.error(`❌ ${serviceName} error:`, error.message);
+  return res.status(500).json({
+    success: false,
+    error: error.message || 'Internal server error'
+  });
 };
 
 // Middleware
@@ -1485,8 +1516,18 @@ app.get('/api/nasa/temperature-projection', async (req, res) => {
     console.log(`📡 Fetching from: ${climateServiceUrl}`);
 
     const response = await axios.get(climateServiceUrl, {
-      timeout: 60000 // 60 second timeout for large areas
+      timeout: 60000, // 60 second timeout for large areas
+      validateStatus: (status) => status < 500 // Don't throw on 4xx errors
     });
+
+    // Handle non-200 responses
+    if (response.status !== 200) {
+      return res.status(response.status).json({
+        success: false,
+        error: `Climate service returned status ${response.status}`,
+        details: response.data
+      });
+    }
 
     // Check if real or fallback data
     const isRealData = response.data.data?.metadata?.isRealData === true;
@@ -1505,11 +1546,7 @@ app.get('/api/nasa/temperature-projection', async (req, res) => {
     res.json(response.data);
 
   } catch (error) {
-    console.error('❌ NASA temperature projection error:', error.message);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    return handleClimateServiceError(error, res, 'NASA temperature projection service');
   }
 });
 
@@ -1572,8 +1609,18 @@ app.get('/api/climate/temperature-projection', async (req, res) => {
     console.log(`📡 Fetching from: ${climateServiceUrl}`);
 
     const response = await axios.get(climateServiceUrl, {
-      timeout: 60000 // 60 second timeout for large areas
+      timeout: 60000, // 60 second timeout for large areas
+      validateStatus: (status) => status < 500 // Don't throw on 4xx errors
     });
+
+    // Handle non-200 responses
+    if (response.status !== 200) {
+      return res.status(response.status).json({
+        success: false,
+        error: `Climate service returned status ${response.status}`,
+        details: response.data
+      });
+    }
 
     // Check if real or fallback data
     const isRealData = response.data.data?.metadata?.isRealData === true;
@@ -1592,10 +1639,31 @@ app.get('/api/climate/temperature-projection', async (req, res) => {
     res.json(response.data);
 
   } catch (error) {
+    // Handle timeout errors specifically
+    if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      console.error('❌ Temperature projection timeout after 60s');
+      return res.status(504).json({
+        success: false,
+        error: 'Request timeout - the climate service took too long to respond. Try reducing the search area or resolution.',
+        timeout: true
+      });
+    }
+    
+    // Handle connection errors
+    if (error.code === 'ECONNREFUSED' || error.code === 'ENOTFOUND') {
+      console.error('❌ Climate service connection failed:', error.code);
+      return res.status(503).json({
+        success: false,
+        error: 'Climate service is unavailable. Please check if the service is running.',
+        serviceUnavailable: true
+      });
+    }
+    
+    // Generic error handling
     console.error('❌ Temperature projection error:', error.message);
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message || 'Internal server error'
     });
   }
 });
@@ -1657,8 +1725,17 @@ app.get('/api/climate/precipitation-drought', async (req, res) => {
     console.log(`📡 Fetching from: ${climateServiceUrl}`);
 
     const response = await axios.get(climateServiceUrl, {
-      timeout: 60000 // 60 second timeout for large areas
+      timeout: 60000, // 60 second timeout for large areas
+      validateStatus: (status) => status < 500
     });
+
+    if (response.status !== 200) {
+      return res.status(response.status).json({
+        success: false,
+        error: `Climate service returned status ${response.status}`,
+        details: response.data
+      });
+    }
 
     // Check if real or fallback data
     const isRealData = response.data.data?.metadata?.isRealData === true;
@@ -1677,11 +1754,7 @@ app.get('/api/climate/precipitation-drought', async (req, res) => {
     res.json(response.data);
 
   } catch (error) {
-    console.error('❌ Precipitation/drought error:', error.message);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    return handleClimateServiceError(error, res, 'Precipitation/drought service');
   }
 });
 
@@ -1707,8 +1780,17 @@ app.get('/api/climate/urban-heat-island/tiles', async (req, res) => {
     console.log(`📡 Fetching from: ${climateServiceUrl}`);
 
     const response = await axios.get(climateServiceUrl, {
-      timeout: 60000 // 60 second timeout
+      timeout: 60000, // 60 second timeout
+      validateStatus: (status) => status < 500
     });
+
+    if (response.status !== 200) {
+      return res.status(response.status).json({
+        success: false,
+        error: `Climate service returned status ${response.status}`,
+        details: response.data
+      });
+    }
 
     console.log(`✅ Received urban heat island tiles from climate service`);
 
@@ -1716,11 +1798,97 @@ app.get('/api/climate/urban-heat-island/tiles', async (req, res) => {
     res.json(response.data);
 
   } catch (error) {
-    console.error('❌ Urban heat island tiles error:', error.message);
-    res.status(500).json({
-      success: false,
-      error: error.message
+    return handleClimateServiceError(error, res, 'Urban heat island service');
+  }
+});
+
+// Temperature Projection Tiles Endpoint - Proxy to Python Climate Service
+app.get('/api/climate/temperature-projection/tiles', async (req, res) => {
+  try {
+    const { north, south, east, west, year, scenario, mode } = req.query;
+
+    console.log(`🌡️ Proxying temperature projection tiles request: year=${year}, scenario=${scenario}, mode=${mode}...`);
+
+    // Build query parameters for climate service
+    const params = new URLSearchParams();
+    if (north) params.append('north', north);
+    if (south) params.append('south', south);
+    if (east) params.append('east', east);
+    if (west) params.append('west', west);
+    if (year) params.append('year', year);
+    if (scenario) params.append('scenario', scenario);
+    if (mode) params.append('mode', mode);
+
+    // Proxy request to Python climate service
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/temperature-projection/tiles?${params.toString()}`;
+
+    console.log(`📡 Fetching from: ${climateServiceUrl}`);
+
+    const response = await axios.get(climateServiceUrl, {
+      timeout: 60000, // 60 second timeout
+      validateStatus: (status) => status < 500
     });
+
+    if (response.status !== 200) {
+      return res.status(response.status).json({
+        success: false,
+        error: `Climate service returned status ${response.status}`,
+        details: response.data
+      });
+    }
+
+    console.log(`✅ Received temperature projection tiles from climate service`);
+
+    // Return the response from climate service
+    res.json(response.data);
+
+  } catch (error) {
+    return handleClimateServiceError(error, res, 'Temperature projection tiles service');
+  }
+});
+
+// Precipitation & Drought Tiles Endpoint - Proxy to Python Climate Service
+app.get('/api/climate/precipitation-drought/tiles', async (req, res) => {
+  try {
+    const { north, south, east, west, scenario, year, metric } = req.query;
+
+    console.log(`🌧️ Proxying precipitation/drought tiles request: year=${year}, scenario=${scenario}, metric=${metric}...`);
+
+    // Build query parameters for climate service
+    const params = new URLSearchParams();
+    if (north) params.append('north', north);
+    if (south) params.append('south', south);
+    if (east) params.append('east', east);
+    if (west) params.append('west', west);
+    if (scenario) params.append('scenario', scenario);
+    if (year) params.append('year', year);
+    if (metric) params.append('metric', metric);
+
+    // Proxy request to Python climate service
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/precipitation-drought/tiles?${params.toString()}`;
+
+    console.log(`📡 Fetching from: ${climateServiceUrl}`);
+
+    const response = await axios.get(climateServiceUrl, {
+      timeout: 60000, // 60 second timeout
+      validateStatus: (status) => status < 500
+    });
+
+    if (response.status !== 200) {
+      return res.status(response.status).json({
+        success: false,
+        error: `Climate service returned status ${response.status}`,
+        details: response.data
+      });
+    }
+
+    console.log(`✅ Received precipitation/drought tiles from climate service`);
+
+    // Return the response from climate service
+    res.json(response.data);
+
+  } catch (error) {
+    return handleClimateServiceError(error, res, 'Precipitation/drought tiles service');
   }
 });
 
@@ -1741,8 +1909,17 @@ app.get('/api/climate/topographic-relief/tiles', async (req, res) => {
     console.log(`📡 Fetching from: ${climateServiceUrl}`);
 
     const response = await axios.get(climateServiceUrl, {
-      timeout: 60000 // 60 second timeout
+      timeout: 60000, // 60 second timeout
+      validateStatus: (status) => status < 500
     });
+
+    if (response.status !== 200) {
+      return res.status(response.status).json({
+        success: false,
+        error: `Climate service returned status ${response.status}`,
+        details: response.data
+      });
+    }
 
     console.log(`✅ Received topographic relief tiles from climate service`);
 
@@ -1750,11 +1927,7 @@ app.get('/api/climate/topographic-relief/tiles', async (req, res) => {
     res.json(response.data);
 
   } catch (error) {
-    console.error('❌ Topographic relief tiles error:', error.message);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
+    return handleClimateServiceError(error, res, 'Topographic relief service');
   }
 });
 
@@ -1810,6 +1983,142 @@ app.get('/api/climate/precipitation-drought', async (req, res) => {
   }
 });
 
+// ============================================
+// USGS Aquifer Endpoints
+// ============================================
+
+/**
+ * GET /api/usgs/aquifers
+ * Fetch principal aquifer boundaries
+ * Query params: north, south, east, west (bounding box), name (filter), generalized, coverage
+ */
+app.get('/api/usgs/aquifers', generalLimiter, async (req, res) => {
+  try {
+    const { north, south, east, west, name, generalized, coverage } = req.query;
+    
+    let bounds = null;
+    if (north && south && east && west) {
+      bounds = {
+        north: parseFloat(north),
+        south: parseFloat(south),
+        east: parseFloat(east),
+        west: parseFloat(west)
+      };
+    }
+
+    // If coverage=true, return generalized coverage polygon
+    if (coverage === 'true' || coverage === '1') {
+      const coverageData = usgsAquifersService.getGeneralizedAquiferCoverage(bounds);
+      return res.json({
+        success: true,
+        data: coverageData,
+        source: 'USGS Principal Aquifer Coverage',
+        type: 'coverage',
+        totalAquifers: 1702
+      });
+    }
+
+    // Always use 'national' endpoint for US-wide coverage
+    // The national endpoint should have all US aquifers
+    const region = 'national';
+    const useGeneralized = generalized === 'true' || generalized === '1';
+    const data = await usgsAquifersService.getAquiferBoundaries(bounds, name, region, useGeneralized);
+    
+    res.json({
+      success: true,
+      data,
+      source: 'USGS Principal Aquifers',
+      generalized: useGeneralized
+    });
+
+  } catch (error) {
+    console.error('❌ USGS aquifers error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/usgs/groundwater
+ * Fetch groundwater level data from USGS NWIS
+ * Query params: stateCd, north, south, east, west, period (days)
+ */
+app.get('/api/usgs/groundwater', generalLimiter, async (req, res) => {
+  try {
+    const { stateCd, north, south, east, west, period } = req.query;
+    
+    let bounds = null;
+    if (north && south && east && west) {
+      bounds = {
+        north: parseFloat(north),
+        south: parseFloat(south),
+        east: parseFloat(east),
+        west: parseFloat(west)
+      };
+    }
+
+    const data = await usgsAquifersService.getGroundwaterLevels(
+      stateCd || null,
+      bounds,
+      parseInt(period) || 30
+    );
+    
+    res.json({
+      success: true,
+      data,
+      source: 'USGS NWIS'
+    });
+
+  } catch (error) {
+    console.error('❌ USGS groundwater error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * GET /api/usgs/aquifers/region/:regionId
+ * Fetch aquifer data for a predefined region
+ * Available regions: long-island, florida, ogallala, california-central-valley
+ */
+app.get('/api/usgs/aquifers/region/:regionId', generalLimiter, async (req, res) => {
+  try {
+    const { regionId } = req.params;
+    
+    const data = await usgsAquifersService.getRegionAquiferData(regionId);
+    
+    res.json({
+      success: true,
+      data,
+      region: usgsAquifersService.REGIONS[regionId],
+      source: 'USGS'
+    });
+
+  } catch (error) {
+    console.error('❌ USGS region aquifer error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      availableRegions: Object.keys(usgsAquifersService.REGIONS)
+    });
+  }
+});
+
+/**
+ * GET /api/usgs/aquifers/regions
+ * List available predefined regions
+ */
+app.get('/api/usgs/aquifers/regions', (req, res) => {
+  res.json({
+    success: true,
+    regions: usgsAquifersService.REGIONS
+  });
+});
+
 // Start server
 const startServer = async () => {
   logEnvWarnings();
@@ -1828,6 +2137,7 @@ const startServer = async () => {
     console.log(`   - FEMA Sea Level Rise: /api/gis/fema-sea-level-rise`);
     console.log(`🌊 NOAA Sea Level Rise: /api/noaa/sea-level-rise`);
     console.log(`🏔️ USGS Elevation: /api/usgs/elevation`);
+    console.log(`💧 USGS Aquifers: /api/usgs/aquifers`);
     console.log(`🌡️ NASA Temperature Projection: /api/nasa/temperature-projection`);
   });
 };

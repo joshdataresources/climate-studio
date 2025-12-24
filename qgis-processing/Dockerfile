@@ -29,7 +29,8 @@ RUN pip3 install --upgrade pip && \
     h3 \
     s3fs \
     boto3 \
-    dask
+    dask \
+    python-dotenv
 
 # Set up QGIS environment
 ENV PYTHONPATH="${PYTHONPATH}:/usr/share/qgis/python:/usr/lib/python3/dist-packages"

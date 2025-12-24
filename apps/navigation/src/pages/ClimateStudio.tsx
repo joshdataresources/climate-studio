@@ -1,5 +1,9 @@
 import { useSidebar } from '../context/SidebarContext'
+import { ClimateStudioApp } from 'climate-studio'
 import './ClimateStudio.css'
+
+// Import climate-studio styles (includes tailwind and CSS variables)
+import 'climate-studio-styles'
 
 export default function ClimateStudio() {
   const { isCollapsed, toggleSidebar } = useSidebar()
@@ -24,11 +28,7 @@ export default function ClimateStudio() {
         )}
       </button>
 
-      <iframe
-        src="http://localhost:8080"
-        className="climate-studio-iframe"
-        title="Climate Studio"
-      />
+      <ClimateStudioApp className="climate-studio-container" />
     </div>
   )
 }

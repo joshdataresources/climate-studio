@@ -1,5 +1,9 @@
 import { useSidebar } from '../context/SidebarContext'
+import { WaterAccessView } from 'climate-studio'
 import './WaterAccess.css'
+
+// Import climate-studio styles (includes tailwind and CSS variables)
+import 'climate-studio-styles'
 
 export default function WaterAccess() {
   const { isCollapsed, toggleSidebar } = useSidebar()
@@ -22,11 +26,7 @@ export default function WaterAccess() {
         )}
       </button>
 
-      <iframe
-        src="http://localhost:8080/water-access.html"
-        className="water-access-iframe"
-        title="Water Access"
-      />
+      <WaterAccessView />
     </div>
   )
 }
