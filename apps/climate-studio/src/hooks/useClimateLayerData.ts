@@ -16,8 +16,9 @@ export interface LayerFetchState {
 
 export type LayerStateMap = Partial<Record<ClimateLayerId, LayerFetchState>>;
 
-const BACKEND_BASE_URL =
-  import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001';
+// Use relative URLs to go through Vite proxy in development
+// In production, use explicit URL if provided, otherwise relative
+const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || '';
 
 const buildQueryString = (params: Record<string, string | number | boolean>) => {
   const search = new URLSearchParams();
@@ -181,6 +182,9 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       try {
         const queryString = buildQueryString(params);
         const hasExplicitBackendUrl = !!import.meta.env.VITE_BACKEND_URL;
+        // Routes already start with /api/, so use them as-is
+        // When using relative URLs (no explicit backend URL), routes go through Vite proxy
+        // When using explicit backend URL, prepend it to the route
         const url = hasExplicitBackendUrl
           ? `${BACKEND_BASE_URL}${layer.fetch.route}${queryString ? `?${queryString}` : ''}`
           : `${layer.fetch.route}${queryString ? `?${queryString}` : ''}`;

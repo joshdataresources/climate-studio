@@ -24,7 +24,8 @@ const PANES: Record<string, string> = {
   urban_heat_island: "pane_urban_heat",
 }
 
-const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001'
+// Use relative URL to go through Vite proxy in development
+const BACKEND_BASE_URL = import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || ''
 
 // Carto free basemap - no API key required
 // Available free styles: dark_all, light_all, voyager, voyager_nolabels, dark_nolabels, light_nolabels
