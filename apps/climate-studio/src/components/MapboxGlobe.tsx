@@ -316,7 +316,7 @@ export function MapboxGlobe({
             <Source
               id="sea-level-rise"
               type="raster"
-              tiles={[`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'}/api/tiles/noaa-slr/${feet}/{z}/{x}/{y}.png`]}
+              tiles={[`${import.meta.env.VITE_BACKEND_URL || window.location.origin}/api/tiles/noaa-slr/${feet}/{z}/{x}/{y}.png`]}
               tileSize={256}
             >
               <Layer

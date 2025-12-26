@@ -1,8 +1,12 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 
 // Base configuration
-const BASE_URL = 'http://localhost:3001/api';
-const QGIS_BASE_URL = 'http://localhost:8081';
+// Use relative URLs to go through Vite proxy in development
+// In production, these will be the same origin
+const BASE_URL = import.meta.env.VITE_BACKEND_URL 
+  ? `${import.meta.env.VITE_BACKEND_URL}/api`
+  : '/api';
+const QGIS_BASE_URL = import.meta.env.VITE_QGIS_URL || 'http://localhost:8081';
 
 // Create axios instances
 const apiClient = axios.create({
