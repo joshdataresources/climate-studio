@@ -62,12 +62,36 @@ def health_check():
 @app.route('/api/climate/status', methods=['GET'])
 def climate_status():
     """Climate server status endpoint for frontend status display"""
+    # Check all Earth Engine services
+    ee_services = {
+        'nasa_climate': climate_service.initialized,
+        'urban_heat': heat_island_service.initialized,
+        'precipitation': drought_service.initialized,
+        'topographic': relief_service.initialized,
+        'urban_expansion': urban_expansion_service.initialized
+    }
+    
+    all_ready = all(ee_services.values())
+    any_ready = any(ee_services.values())
+    
+    if all_ready:
+        message = 'All systems operational'
+    elif any_ready:
+        ready_services = [name for name, ready in ee_services.items() if ready]
+        message = f'Partial: {len(ready_services)}/{len(ee_services)} Earth Engine services ready'
+    else:
+        message = 'Earth Engine not initialized - check authentication and project configuration'
+    
     return jsonify({
         'status': 'healthy',
         'service': 'climate-data-server',
         'version': '1.0.0',
-        'earthEngineReady': climate_service.initialized,
-        'message': 'All systems operational' if climate_service.initialized else 'Earth Engine not initialized'
+        'earthEngine': {
+            'ready': all_ready,
+            'partial': any_ready and not all_ready,
+            'services': ee_services
+        },
+        'message': message
     })
 
 

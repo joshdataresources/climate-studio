@@ -248,9 +248,10 @@ export function DeckGLMap({
     // Change the style
     map.setStyle(mapStyle)
     
-    // After style loads, restore viewport and trigger DeckGL layer refresh
+    // After style loads, restore viewport and refresh DeckGL overlay
+    // The overlay needs to be refreshed to ensure it renders correctly with the new map style
     const onStyleLoad = () => {
-      console.log('✅ DeckGLMap: New style loaded, restoring viewport')
+      console.log('✅ DeckGLMap: New style loaded, restoring viewport and refreshing layers')
       
       // Restore viewport
       map.setCenter(center)
@@ -258,12 +259,11 @@ export function DeckGLMap({
       map.setPitch(pitch)
       map.setBearing(bearing)
       
-      // Force DeckGL layers to refresh by changing a key
-      // Wait a moment for the style to fully settle
-      setTimeout(() => {
-        setLayerRefreshKey(prev => prev + 1)
-        console.log('🔄 DeckGLMap: Triggered layer refresh')
-      }, 100)
+      // Refresh the DeckGL overlay to ensure layers render correctly with new style
+      // This doesn't lose layer data - it just forces a re-render
+      setLayerRefreshKey(prev => prev + 1)
+      
+      console.log('✅ DeckGLMap: Viewport restored, layers refreshed')
     }
     
     map.once('style.load', onStyleLoad)

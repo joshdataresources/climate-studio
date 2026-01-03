@@ -7,6 +7,7 @@ import { LayerControlsPanel, LayerPanel } from "./layer-panel"
 import { MapboxGlobe } from "./MapboxGlobe"
 import { DeckGLMap } from "./DeckGLMap"
 import { EarthEngineStatus } from "./EarthEngineStatus"
+import { BackendHealthIndicator } from "./BackendHealthIndicator"
 import { climateLayers } from "@climate-studio/core/config"
 import type { ClimateControl } from "@climate-studio/core/config"
 import { useClimate } from "@climate-studio/core"
@@ -435,6 +436,9 @@ export function GISAnalysisApp() {
     <div className="relative h-full w-full text-foreground">
       {/* Earth Engine Status Indicator */}
       <EarthEngineStatus />
+      
+      {/* Backend Health Indicator */}
+      <BackendHealthIndicator />
 
       <main className="absolute inset-0 h-full w-full">
         {hasLayerControls && (

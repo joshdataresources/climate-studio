@@ -82,10 +82,19 @@ export function LayerErrorOverlay({ activeLayerIds, onRefresh, onDismiss }: Laye
                       <p className="text-sm text-red-200">
                         {status?.metadata?.errorMessage || 'Unknown error occurred'}
                       </p>
-                      {status?.metadata?.errorMessage?.includes('Earth Engine') && (
-                        <p className="text-xs text-red-300 mt-2">
-                          Please check that the Earth Engine service is running and authenticated.
-                        </p>
+                      {status?.metadata?.errorMessage?.toLowerCase().includes('earth engine') && (
+                        <div className="text-xs text-red-300 mt-2 space-y-1">
+                          <p className="font-semibold">Earth Engine Issue Detected:</p>
+                          <ul className="list-disc list-inside space-y-0.5 ml-2">
+                            <li>Check Earth Engine authentication on the server</li>
+                            <li>Verify EARTHENGINE_PROJECT environment variable is set</li>
+                            <li>Ensure Earth Engine API is enabled in Google Cloud</li>
+                            <li>Check server logs for initialization errors</li>
+                          </ul>
+                          <p className="mt-2 text-yellow-300">
+                            The layer will automatically retry. If the issue persists, contact your administrator.
+                          </p>
+                        </div>
                       )}
                     </div>
                     <button
