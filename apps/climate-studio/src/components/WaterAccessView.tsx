@@ -39,8 +39,8 @@ import aquifersData from '../data/aquifers.json'
 const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1Ijoiam9zaHVhYmJ1dGxlciIsImEiOiJjbWcwNXpyNXUwYTdrMmtva2tiZ2NjcGxhIn0.Fc3d_CloJGiw9-BE4nI_Kw'
 mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
 
-// Backend API base URL - use relative URL to go through Vite proxy
-const API_BASE = import.meta.env.VITE_API_URL || ''
+// Backend API base URL
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001'
 
 // Helper to get volume for a specific year from projections
 function getVolumeForYear(projections: Record<string, number> | undefined, year: number): number | null {
@@ -615,7 +615,7 @@ export default function WaterAccessView() {
               'case',
               ['==', ['feature-state', 'selected'], true],
               0.8,  // Selected: higher opacity
-              0.6   // Not selected: increased from 0.5 for better visibility
+              0.3   // Not selected: 30% opacity
             ],
             'fill-outline-color': [
               'case',

@@ -22,11 +22,10 @@ function AppSimple() {
       try {
         console.log('🔄 Loading GIS data...');
         
-        // Use relative URLs to go through Vite proxy
         const [parcelsRes, stationsRes, floodRes] = await Promise.all([
-          fetch('/api/qgis/nassau/get-data?type=parcels'),
-          fetch('/api/qgis/nassau/get-data?type=stations'),
-          fetch('/api/qgis/nassau/get-data?type=flood_zones')
+          fetch('http://localhost:3001/api/qgis/nassau/get-data?type=parcels'),
+          fetch('http://localhost:3001/api/qgis/nassau/get-data?type=stations'),
+          fetch('http://localhost:3001/api/qgis/nassau/get-data?type=flood_zones')
         ]);
         
         const parcels = await parcelsRes.json();

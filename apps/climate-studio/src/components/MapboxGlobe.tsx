@@ -265,7 +265,7 @@ export function MapboxGlobe({
         mapStyle="mapbox://styles/mapbox/dark-v11"
         style={{ width: '100%', height: '100%' }}
         attributionControl={true}
-        projection={"globe" as any}
+        projection="globe"
         fog={{
           range: [0.8, 8],
           color: '#ffffff',
@@ -316,7 +316,7 @@ export function MapboxGlobe({
             <Source
               id="sea-level-rise"
               type="raster"
-              tiles={[`${import.meta.env.VITE_BACKEND_URL || window.location.origin}/api/tiles/noaa-slr/${feet}/{z}/{x}/{y}.png`]}
+              tiles={[`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'}/api/tiles/noaa-slr/${feet}/{z}/{x}/{y}.png`]}
               tileSize={256}
             >
               <Layer
@@ -417,7 +417,7 @@ export function MapboxGlobe({
       {/* Megaregion & Population Tooltip */}
       {hoverInfo && (
         <div
-          className="absolute z-10 pointer-events-none bg-card/40 backdrop-blur-lg border border-[#3f3f3f] rounded-lg shadow-lg px-2.5 py-1.5 text-xs"
+          className="absolute z-10 pointer-events-none bg-card/95 backdrop-blur-lg border border-border/60 rounded-lg shadow-lg px-2.5 py-1.5 text-xs"
           style={{
             left: hoverInfo.x + 10,
             top: hoverInfo.y + 10

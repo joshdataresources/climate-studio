@@ -9,7 +9,7 @@ import { Input } from "./ui/input"
 import { Loader2 } from "lucide-react"
 import { LayerStateMap } from "../hooks/useClimateLayerData"
 import { AccordionItem } from "./ui/accordion"
-import { WaveIcon, HeatIcon, MountainIcon, WeatherIcon, DropIcon } from "./LayerIcons"
+import { WaveIcon, HeatIcon, MountainIcon, WeatherIcon, DropIcon, PopulationIcon } from "./LayerIcons"
 
 const scenarioOptions = [
   { value: "rcp26", label: "RCP 2.6 (Low)" },
@@ -495,7 +495,14 @@ const getLayerIcon = (layerId: string) => {
       return <DropIcon />
     case 'topographic_relief':
       return <MountainIcon />
+    case 'megaregion_timeseries':
+      console.log('✅ Rendering PopulationIcon for megaregion_timeseries')
+      return <PopulationIcon key="population-icon" />
     default:
+      // Debug: log if layer ID doesn't match
+      if (layerId === 'megaregion_timeseries' || layerId.includes('megaregion')) {
+        console.log('🔍 Layer icon lookup (default case):', layerId)
+      }
       return null
   }
 }
@@ -530,7 +537,7 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
               <label
                 key={layer.id}
                 className={`flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors ${
-                  active ? "border-blue-500/60 bg-blue-500/10" : "border-border/60 bg-muted/50 hover:bg-muted/60"
+                  active ? "border-blue-500/60 bg-blue-500/10" : "border-border/60 bg-muted/20 hover:bg-muted/40"
                 }`}
               >
                 <input
@@ -542,8 +549,15 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
                 <div className="space-y-1 flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2">
                     <h4 className="text-sm font-medium">{layer.title}</h4>
-                    <span className="text-muted-foreground flex-shrink-0">
-                      {getLayerIcon(layer.id)}
+                    <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
+                      {(() => {
+                        const icon = getLayerIcon(layer.id);
+                        if (layer.id === 'megaregion_timeseries' && !icon) {
+                          console.error('❌ Icon not found for megaregion_timeseries');
+                          return <PopulationIcon />;
+                        }
+                        return icon;
+                      })()}
                     </span>
                   </div>
                   {showDescriptions ? (

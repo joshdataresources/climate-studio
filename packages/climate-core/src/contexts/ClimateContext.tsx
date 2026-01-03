@@ -124,10 +124,38 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
   const [megaregionOpacity, setMegaregionOpacity] = useState<number>(0.5);
   const [megaregionAnimating, setMegaregionAnimating] = useState<boolean>(false);
   const [useRealData, setUseRealData] = useState<boolean>(true);
-  const [activeLayerIds, setActiveLayerIds] = useState<ClimateLayerId[]>(
+  const [activeLayerIds, setActiveLayerIdsState] = useState<ClimateLayerId[]>(
     getInitialActiveLayers()
   );
   const [layerErrors, setLayerErrors] = useState<LayerError[]>([]);
+
+  // Wrapped setActiveLayerIds to prevent accidental clearing of layers
+  // This ensures layers persist across theme changes and other state resets
+  const setActiveLayerIds = useCallback((layerIds: ClimateLayerId[] | ((prev: ClimateLayerId[]) => ClimateLayerId[])) => {
+    setActiveLayerIdsState(prev => {
+      const newLayers = typeof layerIds === 'function' ? layerIds(prev) : layerIds;
+      
+      // If trying to set empty array, check if we have stored layers to preserve
+      if (newLayers.length === 0) {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) {
+            const storedLayers = JSON.parse(stored);
+            if (storedLayers.length > 0) {
+              console.log('🛡️ Prevented clearing layers - restoring from localStorage:', storedLayers);
+              // Merge with defaults to ensure defaultActive layers are always included
+              const merged = Array.from(new Set([...defaultActiveLayers, ...storedLayers]));
+              return merged;
+            }
+          }
+        } catch (error) {
+          console.warn('⚠️ Failed to check localStorage when preventing layer clear:', error);
+        }
+      }
+      
+      return newLayers;
+    });
+  }, []);
 
   // Persist active layers to localStorage
   useEffect(() => {
@@ -157,6 +185,53 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
       } else {
         console.error('❌ Failed to save active layers to localStorage:', error);
       }
+    }
+  }, [activeLayerIds]);
+
+  // Safeguard: Restore layers from localStorage if they're unexpectedly reset
+  // This ensures layers persist across theme changes and other state resets
+  // Use a ref to track the last restored state to prevent infinite loops
+  const lastRestoredRef = React.useRef<string>('');
+  
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const storedLayers = JSON.parse(stored);
+        const storedKey = JSON.stringify(storedLayers.sort());
+        const currentKey = JSON.stringify([...activeLayerIds].sort());
+        
+        // Skip if we've already restored this exact state
+        if (lastRestoredRef.current === storedKey && storedKey === currentKey) {
+          return;
+        }
+        
+        // Only restore if layers were unexpectedly cleared/reset
+        const currentIsEmpty = activeLayerIds.length === 0;
+        const currentIsOnlyDefaults = 
+          activeLayerIds.length === defaultActiveLayers.length &&
+          defaultActiveLayers.every(id => activeLayerIds.includes(id)) &&
+          activeLayerIds.every(id => defaultActiveLayers.includes(id));
+        
+        // If we have stored layers that are different and more comprehensive than current
+        const hasStoredLayers = storedLayers.length > 0;
+        const storedHasMoreLayers = storedLayers.length > activeLayerIds.length;
+        
+        // Restore if: layers were cleared OR reset to defaults when we have stored custom layers
+        if (hasStoredLayers && (currentIsEmpty || (currentIsOnlyDefaults && storedHasMoreLayers))) {
+          console.log('🔄 Restoring layers from localStorage after unexpected reset:', storedLayers);
+          // Merge with defaults to ensure defaultActive layers are always included
+          const merged = Array.from(new Set([...defaultActiveLayers, ...storedLayers]));
+          lastRestoredRef.current = JSON.stringify(merged.sort());
+          // Use state setter directly to bypass wrapper when intentionally restoring
+          setActiveLayerIdsState(merged);
+        } else {
+          // Update ref to current state to prevent unnecessary checks
+          lastRestoredRef.current = currentKey;
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ Failed to check/restore layers from localStorage:', error);
     }
   }, [activeLayerIds]);
 
@@ -216,14 +291,20 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
   const toggleLayer = useCallback((layerId: ClimateLayerId) => {
     setActiveLayerIds(prev => {
       if (prev.includes(layerId)) {
-        // Layer is being turned off
-        return prev.filter(id => id !== layerId);
+        // Layer is being turned off - but ensure we don't clear all layers
+        const filtered = prev.filter(id => id !== layerId);
+        // If this would leave us with no layers, keep at least the defaults
+        if (filtered.length === 0 && defaultActiveLayers.length > 0) {
+          console.log('🛡️ Prevented clearing all layers - keeping defaults');
+          return [...defaultActiveLayers];
+        }
+        return filtered;
       }
       // Layer is being turned on - clear any previous errors for this layer
       clearLayerErrors(layerId);
       return [...prev, layerId];
     });
-  }, [clearLayerErrors]);
+  }, [clearLayerErrors, setActiveLayerIds]);
 
   const controls: ClimateControlsState = useMemo(
     () => ({

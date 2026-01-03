@@ -1,7 +1,8 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useSidebar } from '../../contexts/SidebarContext'
 import { useTheme } from '../../contexts/ThemeContext'
-import { Thermometer, Droplets, Sun, Moon, Globe } from 'lucide-react'
+import { Thermometer, Droplets, Sun, Moon } from 'lucide-react'
+import CycloneIcon from '../../assets/cyclone-icon.svg'
 
 export function AppSidebar() {
   const location = useLocation()
@@ -28,11 +29,9 @@ export function AppSidebar() {
     <aside className={`app-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
       {/* Logo */}
       <div className="sidebar-header">
-        <Link to="/" className="logo-link">
-          <div className="logo-icon">
-            <Globe />
-          </div>
-        </Link>
+        <div className="logo-icon">
+          <img src={CycloneIcon} alt="Climate Suite Logo" />
+        </div>
       </div>
 
       {/* Navigation */}

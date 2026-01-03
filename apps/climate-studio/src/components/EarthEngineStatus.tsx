@@ -21,6 +21,10 @@ interface ServerStatus {
 const isLocalDev = typeof window !== 'undefined' && 
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
 
+// Use the same backend URL as the layers to ensure consistency
+const BACKEND_BASE_URL =
+  import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001'
+
 export function EarthEngineStatus() {
   const { theme } = useTheme()
   const [status, setStatus] = useState<ServerStatus | null>(null)
@@ -37,7 +41,8 @@ export function EarthEngineStatus() {
     try {
       // Shorter initial timeout, we'll retry anyway
       const timeout = retryCountRef.current < 2 ? 8000 : 5000
-      const response = await fetch('/api/climate/status', {
+      // Use BACKEND_BASE_URL to match the same backend the layers use
+      const response = await fetch(`${BACKEND_BASE_URL}/api/climate/status`, {
         signal: AbortSignal.timeout(timeout),
         headers: { 'Accept': 'application/json' }
       })
@@ -54,12 +59,24 @@ export function EarthEngineStatus() {
       hasConnectedOnce.current = true
       retryCountRef.current = 0
       
+      // Check Earth Engine status
+      const eeStatus = data.earthEngine;
+      const eeReady = eeStatus?.ready ?? data.earthEngineReady ?? true;
+      const eePartial = eeStatus?.partial ?? false;
+      
+      let statusMessage = data.message || 'All systems operational';
+      if (!eeReady && eePartial) {
+        statusMessage = 'Earth Engine partially initialized - some layers may not work';
+      } else if (!eeReady) {
+        statusMessage = 'Earth Engine not initialized - check server configuration';
+      }
+      
       setStatus({
         service: data.service || 'climate-data-server',
         status: 'healthy',
         version: data.version,
-        earthEngineReady: data.earthEngine?.ready ?? true,
-        message: data.message || 'All systems operational',
+        earthEngineReady: eeReady,
+        message: statusMessage,
         isRender: data.isRender || false
       })
       
@@ -139,8 +156,8 @@ export function EarthEngineStatus() {
     // Periodic health check every 60 seconds (only if healthy)
     const healthCheckInterval = setInterval(() => {
       if (mountedRef.current && status?.status === 'healthy') {
-        // Silent background check
-        fetch('/api/climate/status', { signal: AbortSignal.timeout(5000) })
+        // Silent background check - use BACKEND_BASE_URL to match layers
+        fetch(`${BACKEND_BASE_URL}/api/climate/status`, { signal: AbortSignal.timeout(5000) })
           .then(res => {
             if (!res.ok) throw new Error('Health check failed')
           })
