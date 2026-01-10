@@ -316,14 +316,34 @@ class PrecipitationDroughtService:
                 missing_count += 1
                 continue
 
-            precip_value = feature['properties']['mean']
+            precip_mm = feature['properties']['mean']
+
+            # Calculate derived metrics based on precipitation
+            # Drought index: inverse relationship with precipitation
+            # Scale: 0 (wet) to 10 (extreme drought)
+            drought_index = max(0, min(10, 10 - (precip_mm * 1.0)))
+
+            # Soil moisture proxy: direct relationship with precipitation
+            # Scale: 0% (dry) to 100% (saturated)
+            soil_moisture = min(100, max(0, precip_mm * 10))
+
+            # Select value based on metric
+            if metric == 'precipitation':
+                value = precip_mm
+            elif metric == 'drought_index':
+                value = drought_index
+            else:  # soil_moisture
+                value = soil_moisture
 
             hexagon_data.append({
                 'hex_id': hex_id,
                 'lat': lat,
                 'lon': lon,
                 'boundary': boundary,
-                'value': round(precip_value, 2)
+                'value': round(value, 2),
+                'precipitation': round(precip_mm, 2),
+                'droughtIndex': round(drought_index, 2),
+                'soilMoisture': round(soil_moisture, 1)
             })
 
         if missing_count > 0:
@@ -443,6 +463,9 @@ class PrecipitationDroughtService:
                     'lat': round(hex_data['lat'], 4),
                     'lon': round(hex_data['lon'], 4),
                     'value': hex_data['value'],
+                    'precipitation': hex_data['precipitation'],
+                    'droughtIndex': hex_data['droughtIndex'],
+                    'soilMoisture': hex_data['soilMoisture'],
                     'metric': metric,
                     'scenario': scenario,
                     'year': year
@@ -459,6 +482,6 @@ class PrecipitationDroughtService:
                 'year': year,
                 'count': len(features),
                 'isRealData': True,
-                'dataType': 'real'
+                'dataType': 'hexagons'
             }
         }
