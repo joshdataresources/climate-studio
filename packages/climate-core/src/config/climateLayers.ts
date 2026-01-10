@@ -275,11 +275,11 @@ export const climateLayers: ClimateLayerDefinition[] = [
       url: 'https://www.chc.ucsb.edu/data/chirps'
     },
     defaultActive: false,
-    controls: ['droughtMetric', 'droughtOpacity'],
+    controls: ['droughtMetric', 'droughtOpacity', 'resolution'],
     fetch: {
       method: 'GET',
-      route: '/api/climate/precipitation-drought/tiles',
-      query: ({ bounds, scenario, projectionYear, droughtMetric }) => {
+      route: '/api/climate/precipitation-drought',
+      query: ({ bounds, scenario, projectionYear, droughtMetric, resolution }) => {
         const { north, south, east, west } = bounds ?? {
           north: 41,
           south: 40,
@@ -293,14 +293,15 @@ export const climateLayers: ClimateLayerDefinition[] = [
           west,
           scenario,
           year: projectionYear,
-          metric: droughtMetric
+          metric: droughtMetric,
+          resolution
         };
       }
     },
     style: {
-      color: '#3b82f6',
-      opacity: 0.7,
-      layerType: 'raster',
+      color: '#8b5cf6',
+      opacity: 0.75,
+      layerType: 'polygon',
       blendMode: 'normal',
       valueProperty: 'value'
     }

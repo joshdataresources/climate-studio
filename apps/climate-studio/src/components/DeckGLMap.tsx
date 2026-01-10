@@ -502,54 +502,83 @@ export function DeckGLMap({
     loadTileImage
   ])
 
-  // Precipitation & Drought Tile Layer - raster tiles from Earth Engine
-  const precipitationDroughtTileLayer = useMemo(() => {
-    if (!isLayerActive("precipitation_drought")) return null
-    const data = layerStates.precipitation_drought?.data as any
-    if (!data || !data.tile_url) return null
+  // Helper function to get extreme color for drought/precipitation value
+  const getDroughtColor = (value: number, metric: string): [number, number, number, number] => {
+    const opacity = 255
 
-    return new TileLayer({
-      id: 'precipitation-drought-tiles',
-      data: data.tile_url,
-      minZoom: 0,
-      maxZoom: 19,
-      tileSize: 256,
-      opacity: controls.droughtOpacity ?? 0.2,
-      getTileData: (tile: any) => {
-        const { x, y, z } = tile.index
-        const url = data.tile_url.replace('{z}', z).replace('{x}', x).replace('{y}', y)
-        return new Promise((resolve, reject) => {
-          const image = new Image()
-          image.crossOrigin = 'anonymous'
-          image.onload = () => resolve(image)
-          image.onerror = reject
-          image.src = url
-        })
-      },
-      renderSubLayers: (props: any) => {
-        const { tile, data } = props
-        if (!data) return null
-        const { boundingBox } = tile
-        const bounds: [number, number, number, number] = [
-          boundingBox[0][0], boundingBox[0][1],
-          boundingBox[1][0], boundingBox[1][1]
-        ]
-        return new BitmapLayer({
-          id: `${props.id}-bitmap`,
-          image: data,
-          bounds,
-          opacity: props.opacity ?? 1,
-        })
-      },
-      pickable: false,
+    if (metric === 'drought_index') {
+      // Drought Index: 0 (wet/no drought) to 10 (extreme drought)
+      // EXTREME colors: deep blue → white → bright yellow → orange → deep red
+      if (value <= 1) return [0, 71, 171, opacity]       // Deep blue - very wet
+      if (value <= 2) return [30, 136, 229, opacity]     // Blue - wet
+      if (value <= 3) return [144, 202, 249, opacity]    // Light blue - slightly wet
+      if (value <= 4) return [255, 255, 255, opacity]    // White - normal
+      if (value <= 5) return [255, 241, 118, opacity]    // Bright yellow - slightly dry
+      if (value <= 6) return [255, 213, 79, opacity]     // Yellow - dry
+      if (value <= 7) return [255, 167, 38, opacity]     // Orange - moderate drought
+      if (value <= 8) return [244, 81, 30, opacity]      // Deep orange - severe drought
+      if (value <= 9) return [211, 47, 47, opacity]      // Dark red - extreme drought
+      return [136, 14, 79, opacity]                      // Deep maroon - exceptional drought
+    }
+    else if (metric === 'precipitation') {
+      // Precipitation: 0 (dry) to 10+ mm/day (very wet)
+      // EXTREME colors: deep brown → yellow → green → bright blue
+      if (value <= 1) return [121, 85, 72, opacity]      // Deep brown - very dry
+      if (value <= 2) return [161, 136, 127, opacity]    // Brown - dry
+      if (value <= 3) return [255, 213, 79, opacity]     // Yellow - low precip
+      if (value <= 4) return [255, 241, 118, opacity]    // Light yellow
+      if (value <= 5) return [205, 220, 57, opacity]     // Yellow-green - normal
+      if (value <= 6) return [156, 204, 101, opacity]    // Light green
+      if (value <= 7) return [76, 175, 80, opacity]      // Green - good precip
+      if (value <= 8) return [3, 169, 244, opacity]      // Light blue - high precip
+      if (value <= 9) return [2, 119, 189, opacity]      // Blue - very high
+      return [0, 71, 171, opacity]                       // Deep blue - extreme precip
+    }
+    else {
+      // Soil Moisture: 0% (dry) to 100% (saturated)
+      // EXTREME colors: deep brown → tan → green → deep blue
+      const normalized = value / 100
+      if (normalized <= 0.1) return [101, 67, 33, opacity]      // Deep brown - bone dry
+      if (normalized <= 0.2) return [141, 110, 99, opacity]     // Brown - very dry
+      if (normalized <= 0.3) return [188, 170, 164, opacity]    // Tan - dry
+      if (normalized <= 0.4) return [220, 231, 117, opacity]    // Light yellow-green
+      if (normalized <= 0.5) return [205, 220, 57, opacity]     // Yellow-green - normal
+      if (normalized <= 0.6) return [156, 204, 101, opacity]    // Light green
+      if (normalized <= 0.7) return [76, 175, 80, opacity]      // Green - moist
+      if (normalized <= 0.8) return [38, 166, 154, opacity]     // Teal - wet
+      if (normalized <= 0.9) return [2, 119, 189, opacity]      // Blue - very wet
+      return [0, 71, 171, opacity]                              // Deep blue - saturated
+    }
+  }
+
+  // Precipitation & Drought Hexagon Layer - GeoJSON polygons with extreme colors
+  const precipitationDroughtLayer = useMemo(() => {
+    if (!isLayerActive("precipitation_drought")) return null
+    if (layerStates.precipitation_drought?.status !== "success") return null
+    if (!layerStates.precipitation_drought?.data?.features) return null
+
+    const metric = controls.droughtMetric || 'drought_index'
+
+    return new GeoJsonLayer({
+      id: 'precipitation-drought-hexagons',
+      data: layerStates.precipitation_drought.data,
+      pickable: true,
+      stroked: false,
+      filled: true,
+      getFillColor: (d: any) => getDroughtColor(d.properties.value, metric),
+      getLineColor: [255, 255, 255, 0],
+      getLineWidth: 0,
+      opacity: controls.droughtOpacity ?? 0.75,
       updateTriggers: {
+        getFillColor: [metric, controls.droughtMetric],
         opacity: controls.droughtOpacity
       }
     })
   }, [
     isLayerActive("precipitation_drought"),
     layerStates.precipitation_drought,
-    controls.droughtOpacity
+    controls.droughtOpacity,
+    controls.droughtMetric
   ])
 
   // Urban Heat Island Tile Layer - raster tiles
@@ -1014,8 +1043,8 @@ export function DeckGLMap({
       active: isLayerActive("precipitation_drought"),
       hasState: !!layerStates.precipitation_drought,
       status: layerStates.precipitation_drought?.status,
-      hasTileUrl: !!layerStates.precipitation_drought?.data?.tile_url,
-      layerCreated: !!precipitationDroughtTileLayer
+      hasFeatures: !!layerStates.precipitation_drought?.data?.features,
+      layerCreated: !!precipitationDroughtLayer
     },
     temperature: {
       active: isLayerActive("temperature_projection"),
@@ -1037,7 +1066,7 @@ export function DeckGLMap({
   const layers = [
     topographicReliefTileLayer,    // 1. Bottom - Topographic Relief
     seaLevelTileLayer,             // 2. Sea Level Rise
-    precipitationDroughtTileLayer, // 3. Precipitation & Drought
+    precipitationDroughtLayer,     // 3. Precipitation & Drought (hexagons)
     temperatureProjectionTileLayer, // 4. Future Temperature Anomaly
     urbanHeatTileLayer,            // 5. Urban Heat Island (Heat Map)
     urbanExpansionLayer,           // 6. Urban Expansion (if present)
@@ -1051,7 +1080,7 @@ export function DeckGLMap({
     seaLevel: !!seaLevelTileLayer,
     topographic: !!topographicReliefTileLayer,
     temperature: !!temperatureProjectionTileLayer,
-    precipitation: !!precipitationDroughtTileLayer,
+    precipitation: !!precipitationDroughtLayer,
     urbanHeat: !!urbanHeatTileLayer,
     urbanExpansion: !!urbanExpansionLayer,
     tempHeatmap: !!temperatureHeatmapLayer
@@ -1067,8 +1096,8 @@ export function DeckGLMap({
     precipitation: {
       active: isLayerActive("precipitation_drought"),
       status: layerStates.precipitation_drought?.status,
-      hasTileUrl: !!layerStates.precipitation_drought?.data?.tile_url,
-      tileUrl: layerStates.precipitation_drought?.data?.tile_url?.substring(0, 100)
+      hasFeatures: !!layerStates.precipitation_drought?.data?.features,
+      featureCount: layerStates.precipitation_drought?.data?.features?.length || 0
     },
     temperature: {
       active: isLayerActive("temperature_projection"),
