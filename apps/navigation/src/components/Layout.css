@@ -9,7 +9,7 @@
   display: flex;
   flex-direction: column;
   min-width: 0; /* Allow content to shrink */
-  margin-left: 72px; /* Match narrow sidebar width */
+  margin-left: 76px; /* Match new sidebar width */
   transition: margin-left 0.3s ease-in-out;
   height: 100vh;
 }
@@ -25,4 +25,4 @@
   height: 100%;
 }
 
-/* Sidebar is always 72px, no responsive changes needed */
+/* Sidebar is always 76px, no responsive changes needed */

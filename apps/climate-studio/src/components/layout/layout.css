@@ -14,25 +14,18 @@
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 .app-sidebar {
-  width: 72px;
-  background: linear-gradient(180deg, 
-    rgba(28, 28, 32, 1) 0%, 
-    rgba(20, 20, 24, 1) 100%
-  );
-  display: flex;
-  flex-direction: column;
-  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  width: 76px;
   position: fixed;
   left: 0;
   top: 0;
-  bottom: 0;
   z-index: 2000;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  background: transparent;
+  height: auto;
 }
 
 .app-sidebar.collapsed {
-  transform: translateX(-72px);
+  transform: translateX(-76px);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -41,7 +34,7 @@
 
 .app-main {
   flex: 1;
-  margin-left: 72px;
+  margin-left: 0;
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   height: 100vh;
   overflow: hidden;
@@ -265,12 +258,9 @@
 }
 
 [data-theme="light"] .app-sidebar {
-  background: linear-gradient(180deg, 
-    #ffffff 0%, 
-    #f8fafc 100%
-  );
-  border-right: 1px solid #e2e8f0;
-  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.05);
+  background: transparent;
+  border-right: none;
+  box-shadow: none;
 }
 
 [data-theme="light"] .sidebar-header {

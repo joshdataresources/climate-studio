@@ -45,7 +45,8 @@
   --sidebar-ring: hsl(264 100% 65%);
   
   /* Widget Container Variables - Global style for all widget panels */
-  --widget-bg: rgba(30, 30, 30, 0.85);
+  --widget-bg: rgba(30, 30, 30, 0.90);
+  --widget-bg-panel: rgba(30, 30, 30, 0.45);
   --widget-border: rgba(63, 63, 63, 1);
   --widget-border-radius: 1.0rem;
   --widget-padding: 1rem;
@@ -517,7 +518,8 @@ button[role="combobox"][aria-expanded="true"] {
   --sidebar-border: hsl(214 32% 91%); /* slate-200 */
   
   /* Widget Container Variables - Light Theme */
-  --widget-bg: rgba(255, 255, 255, 0.85);
+  --widget-bg: rgba(255, 255, 255, 0.90);
+  --widget-bg-panel: rgba(255, 255, 255, 0.45);
   --widget-border: rgba(255, 255, 255, 1); /* white */
   --widget-box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   

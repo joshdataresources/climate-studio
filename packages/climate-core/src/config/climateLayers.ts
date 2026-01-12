@@ -29,6 +29,7 @@ export type ClimateControl =
   | 'droughtOpacity'
   | 'droughtMetric'
   | 'megaregionOpacity'
+  | 'megaregionDataMode'
   | 'megaregionAnimating';
 
 export interface ClimateFetchContext {
@@ -120,18 +121,18 @@ export const climateLayers: ClimateLayerDefinition[] = [
       valueProperty: 'depth'
     }
   },
-  // 2. Population Migration (uses local data, no fetch needed)
+  // 2. Metro Data Statistics (uses local data, no fetch needed)
   {
     id: 'megaregion_timeseries',
-    title: 'Population Migration',
-    description: 'Time-series visualization of US metropolitan population growth and megaregion convergence (2025-2095) based on climate migration scenarios. Shows how climate change drives population shifts toward climate havens and away from high-risk areas.',
+    title: 'Metro Data Statistics',
+    description: 'Interactive visualization of US metropolitan areas showing population growth trends and temperature projections (2025-2095). Toggle between population change, average temperature, or view both metrics together.',
     category: 'temperature',
     source: {
       name: 'Climate Migration Model',
       url: undefined
     },
     defaultActive: true,
-    controls: ['megaregionOpacity'],
+    controls: ['megaregionDataMode', 'megaregionOpacity', 'megaregionAnimating'],
     fetch: {
       method: 'GET',
       route: '', // Empty route - uses local data in DeckGLMap.tsx
