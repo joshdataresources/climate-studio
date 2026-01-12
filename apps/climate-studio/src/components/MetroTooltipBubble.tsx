@@ -147,7 +147,7 @@ export const MetroTooltipBubble: React.FC<MetroTooltipBubbleProps> = ({
       padding: '4px 8px',
       fontSize: '10px',
       fontWeight: 600,
-      color: isDark ? '#ffffff' : '#101728',
+      color: isDark ? '#A6A6A6' : '#65758B',
       fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       lineHeight: 'normal',
     },
