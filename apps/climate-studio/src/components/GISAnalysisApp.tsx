@@ -8,13 +8,14 @@ import { MapboxGlobe } from "./MapboxGlobe"
 import { DeckGLMap } from "./DeckGLMap"
 import { EarthEngineStatus } from "./EarthEngineStatus"
 import { BackendHealthIndicator } from "./BackendHealthIndicator"
+import { MetroTemperaturePopup } from "./MetroTemperaturePopup"
 import { climateLayers } from "@climate-studio/core/config"
 import type { ClimateControl } from "@climate-studio/core/config"
 import { useClimate } from "@climate-studio/core"
 import { useClimateLayerData } from "../hooks/useClimateLayerData"
 import { useMap } from "../contexts/MapContext"
 import { LatLngBoundsLiteral } from "../types/geography"
-import { Loader2, MapPin, Search, Save, Bookmark, GripVertical, MoreHorizontal, Trash2, Pencil } from "lucide-react"
+import { Loader2, MapPin, Search, Save, Bookmark, GripVertical, MoreHorizontal, Trash2, Pencil, ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -194,6 +195,8 @@ export function GISAnalysisApp() {
   const [newViewName, setNewViewName] = useState("")
   const [editingViewId, setEditingViewId] = useState<string | null>(null)
   const [editingViewName, setEditingViewName] = useState("")
+  const [selectedMetro, setSelectedMetro] = useState<string | null>(null)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   const { layers: layerStates } = useClimateLayerData(mapBounds)
 
@@ -441,8 +444,8 @@ export function GISAnalysisApp() {
       <BackendHealthIndicator />
 
       <main className="absolute inset-0 h-full w-full">
-        {hasLayerControls && (
-          <div className="absolute top-4 right-4 z-[1100] w-80 pointer-events-auto space-y-4">
+        {hasLayerControls && !sidebarCollapsed && (
+          <div className="absolute top-4 right-4 z-[1100] w-80 pointer-events-auto space-y-4 transition-all duration-300 animate-in fade-in slide-in-from-right-10">
             <LayerControlsPanel layerStates={layerStates} />
           </div>
         )}
@@ -451,12 +454,23 @@ export function GISAnalysisApp() {
           zoom={viewport.zoom}
           onViewportChange={handleViewportChange}
           onMapBoundsChange={handleBoundsChange}
+          onMetroClick={setSelectedMetro}
           layerStates={layerStates}
           className="absolute inset-0"
         />
+
+        {/* Metro Temperature Popup */}
+        {selectedMetro && (
+          <MetroTemperaturePopup
+            metroName={selectedMetro}
+            visible={!!selectedMetro}
+            onClose={() => setSelectedMetro(null)}
+          />
+        )}
       </main>
 
-      <aside className="absolute left-4 top-4 z-[1000] w-[360px] pointer-events-none">
+      {!sidebarCollapsed && (
+      <aside className="absolute left-[92px] top-4 z-[1000] w-[360px] pointer-events-none transition-all duration-300 animate-in fade-in slide-in-from-left-10">
         <div className="space-y-4 pointer-events-auto">
           <div className="widget-container">
             <form className="flex gap-2" onSubmit={handleSearchSubmit}>
@@ -518,7 +532,8 @@ export function GISAnalysisApp() {
                 </p>
               ) : (
                 <div 
-                  className="rounded-md border border-[var(--cs-border-default)] bg-[var(--cs-surface-elevated)] p-2"
+                  className="rounded-md p-2"
+                  style={{ backgroundColor: 'var(--widget-bg-panel)' }}
                 >
                   <DndContext
                     sensors={sensors}
@@ -600,6 +615,22 @@ export function GISAnalysisApp() {
 
         </div>
       </aside>
+      )}
+
+      {/* Bottom left toggle button for panels - aligned with Climate Layers widget content */}
+      <div className="fixed bottom-4 z-[1000] pointer-events-auto" style={{ left: '32px' }}>
+        <Button
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          variant="secondary"
+          className="rounded-full h-10 px-4 shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+          title={sidebarCollapsed ? "Show panels" : "Hide panels"}
+        >
+          <LayoutGrid className="h-4 w-4" />
+          <span className="text-xs font-medium">
+            {sidebarCollapsed ? "show panels on map" : "hide panels on map"}
+          </span>
+        </Button>
+      </div>
     </div>
   )
 }

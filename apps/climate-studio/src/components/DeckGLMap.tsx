@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback, memo } from "react"
 import { Map, useControl, Source, Layer, NavigationControl, Marker } from 'react-map-gl'
 import { MapboxOverlay } from '@deck.gl/mapbox'
-import { GeoJsonLayer, BitmapLayer, TextLayer } from '@deck.gl/layers'
+import { GeoJsonLayer, BitmapLayer, TextLayer, ScatterplotLayer } from '@deck.gl/layers'
 import { HeatmapLayer } from '@deck.gl/aggregation-layers'
 import { TileLayer } from '@deck.gl/geo-layers'
 import type { MapViewState } from '@deck.gl/core'
@@ -11,16 +11,17 @@ import { useClimate } from "@climate-studio/core"
 import type { LayerStateMap } from "../hooks/useClimateLayerData"
 import { getClimateLayer } from "@climate-studio/core/config"
 import megaregionData from "../data/megaregion-data.json"
+import metroTemperatureData from "../data/metro_temperature_projections.json"
 import { useTheme } from "../contexts/ThemeContext"
+import { MetroTooltipBubble } from './MetroTooltipBubble'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 // Memoized DeckGL overlay for better performance
-const DeckGLOverlay = memo(function DeckGLOverlay(props: { layers: any[] }) {
+const DeckGLOverlay = memo(function DeckGLOverlay(props: { layers: any[], getTooltip?: any }) {
   const overlay = useControl<MapboxOverlay>(() => new MapboxOverlay({
     ...props,
     // Performance optimizations
     interleaved: false, // Render DeckGL in separate canvas below Mapbox layers
-    _pickable: false, // Disable picking for better perf when not needed
   }), {
     position: 'top-left' // Position doesn't matter, but required for useControl
   })
@@ -783,9 +784,14 @@ export function DeckGLMap({
     return coords
   }
 
-  // Megaregion Circles Layer (DeckGL GeoJsonLayer)
+  // Megaregion Center Dots Layer - REMOVED
+  // The dots are now rendered by the MetroTooltipBubble component in the HTML Markers
+  const megaregionCenterDotsLayer = null
+
+  // Megaregion Population Bubbles Layer (only visible when "Projected Population" is checked)
   const megaregionCirclesLayer = useMemo(() => {
     if (!isLayerActive("megaregion_timeseries")) return null
+    if (!controls.megaregionShowPopulation) return null // Only show if population checkbox is checked
 
     const year = controls.projectionYear ?? 2050
     const availableYears = [2025, 2035, 2045, 2055, 2065, 2075, 2085, 2095]
@@ -815,8 +821,11 @@ export function DeckGLMap({
         const radius = populationToRadius(currentPop)
         const colorRGBA = getGrowthColorRGBA(currentPop, previousPop)
 
+        // Calculate population change percentage
+        const popChange = previousYear ? ((currentPop - previousPop) / previousPop * 100) : 0
+
         // Validate coordinates
-        if (typeof metro.lon !== 'number' || typeof metro.lat !== 'number' || 
+        if (typeof metro.lon !== 'number' || typeof metro.lat !== 'number' ||
             isNaN(metro.lon) || isNaN(metro.lat)) {
           return null
         }
@@ -830,6 +839,10 @@ export function DeckGLMap({
           properties: {
             name: metro.name,
             population: currentPop,
+            previousPopulation: previousPop,
+            populationChange: popChange,
+            displayYear: displayYear,
+            previousYear: previousYear,
             radius: radius,
             fillColor: colorRGBA,
             lineColor: colorRGBA,
@@ -864,7 +877,8 @@ export function DeckGLMap({
   }, [
     isLayerActive("megaregion_timeseries"),
     controls.projectionYear,
-    controls.megaregionOpacity
+    controls.megaregionOpacity,
+    controls.megaregionShowPopulation
   ])
 
   // Megaregion Labels GeoJSON (for Mapbox symbol layers)
@@ -910,6 +924,11 @@ export function DeckGLMap({
         const isGrowing = growthRate > 0
         const isDecline = growthRate < 0
 
+        // Format percentage for tooltip display (just percentage, no absolute change)
+        const percentageText = previousPop != null && previousPop > 0
+          ? `(${growthRate >= 0 ? '+' : ''}${Math.abs(growthRate).toFixed(0)}%)`
+          : ''
+
         // Validate coordinates
         if (typeof metro.lon !== 'number' || typeof metro.lat !== 'number' || 
             isNaN(metro.lon) || isNaN(metro.lat)) {
@@ -923,11 +942,14 @@ export function DeckGLMap({
             coordinates: [metro.lon, metro.lat]
           },
           properties: {
+            name: metro.name,
             population: formattedPop,
             change: changeText,
+            percentage: percentageText,
             isGrowing,
             isDecline,
-            showGrowth
+            showGrowth,
+            displayYear
           }
         }
       })
@@ -1062,7 +1084,174 @@ export function DeckGLMap({
     }
   }
   console.log('🔧 Layer Creation Status:', JSON.stringify(layerStatus, null, 2))
-  
+
+  // Dynamic tooltip based on checkbox selections
+  const getTooltip = useCallback(({ object }: any) => {
+    // Handle both center dots and population bubbles
+    if (!object) return null
+    const layerId = object.layer?.id
+    if (layerId !== 'megaregion-circles' && layerId !== 'megaregion-center-dots') return null
+
+    // Get properties - different structure for center dots vs bubbles
+    const props = layerId === 'megaregion-center-dots'
+      ? object // ScatterplotLayer data
+      : object.properties // GeoJsonLayer properties
+
+    const showPop = controls.megaregionShowPopulation
+    const showTemp = controls.megaregionShowTemperature
+
+    // Tooltip container - beige/tan background from Figma
+    const tooltipStyle = `
+      position: relative;
+      padding: 20px;
+      background: rgb(229, 223, 218);
+      color: #1a1a1a;
+      border-radius: 12px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+      min-width: 240px;
+    `
+
+    // Triangle connector (pointing down to the dot)
+    const triangleStyle = `
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 10px solid transparent;
+      border-right: 10px solid transparent;
+      border-top: 10px solid rgb(229, 223, 218);
+    `
+
+    // Get temperature data (mock for now - will be replaced with real data)
+    const getTempData = (metroName: string, year: number) => {
+      // This will be replaced with actual temperature lookup
+      // For now, return mock data that varies by year
+      const baselineYear = 2025
+      const yearDiff = year - baselineYear
+      const tempIncrease = (yearDiff / 70) * 4 // 4°F increase by 2095
+
+      return {
+        summer: {
+          temp: Math.round(85 + tempIncrease),
+          change: Math.round((tempIncrease / 85) * 100)
+        },
+        winter: {
+          temp: Math.round(35 + tempIncrease * 0.8),
+          change: Math.round((tempIncrease * 0.8 / 35) * 100)
+        }
+      }
+    }
+
+    // For center dots, we need to look up population data from the year
+    let population, populationChange, previousYear
+    if (layerId === 'megaregion-center-dots') {
+      const year = controls.projectionYear ?? 2050
+      const availableYears = [2025, 2035, 2045, 2055, 2065, 2075, 2085, 2095]
+      const closestYear = availableYears.reduce((prev: number, curr: number) =>
+        Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
+      )
+      const displayYear = (year > 2025 && closestYear === 2025) ? 2035 : closestYear
+      const displayYearIndex = availableYears.indexOf(displayYear)
+      previousYear = displayYearIndex > 0 ? availableYears[displayYearIndex - 1] : null
+
+      population = props.populations?.[String(displayYear)]
+      const previousPop = previousYear ? (props.populations?.[String(previousYear)] || 0) : 0
+      populationChange = previousYear && previousPop > 0 ? ((population - previousPop) / previousPop * 100) : 0
+    } else {
+      population = props.population
+      populationChange = props.populationChange
+      previousYear = props.previousYear
+    }
+
+    // Get metro name for temperature lookup
+    const metroName = props.name || ''
+    const currentYear = controls.projectionYear ?? 2050
+    const tempData = getTempData(metroName, currentYear)
+
+    // Format percentage with color and sign
+    const formatPercent = (change: number) => {
+      const sign = change > 0 ? '+' : ''
+      const color = change > 0 ? '#22c55e' : change < 0 ? '#ef4444' : '#666'
+      return `<span style="color: ${color};">(${sign}${change}%)</span>`
+    }
+
+    if (showPop && !showTemp) {
+      // Population only - ONLY show percentage, no absolute population number
+      return {
+        html: `
+          <div style="${tooltipStyle}">
+            <div style="font-size: 11px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; color: #666;">Population Change</div>
+            <div style="font-size: 48px; font-weight: 700; line-height: 1; color: ${populationChange > 0 ? '#22c55e' : populationChange < 0 ? '#ef4444' : '#666'};">
+              ${previousYear ? `${populationChange > 0 ? '+' : ''}${Math.round(populationChange)}%` : 'N/A'}
+            </div>
+            <div style="${triangleStyle}"></div>
+          </div>
+        `,
+        style: { pointerEvents: 'none' }
+      }
+    } else if (!showPop && showTemp) {
+      // Temperature only
+      return {
+        html: `
+          <div style="${tooltipStyle}">
+            <div style="font-size: 11px; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #666;">Avg Temperature Change</div>
+            <div style="display: flex; flex-direction: column; gap: 16px;">
+              <div>
+                <div style="font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; color: #888;">Summer</div>
+                <div style="font-size: 36px; font-weight: 700; line-height: 1; color: #1a1a1a;">
+                  ${tempData.summer.temp}° <span style="font-size: 20px; font-weight: 600; color: ${tempData.summer.change > 0 ? '#22c55e' : '#666'};">(+${tempData.summer.change}%)</span>
+                </div>
+              </div>
+              <div>
+                <div style="font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; color: #888;">Winter</div>
+                <div style="font-size: 36px; font-weight: 700; line-height: 1; color: #1a1a1a;">
+                  ${tempData.winter.temp}° <span style="font-size: 20px; font-weight: 600; color: ${tempData.winter.change > 0 ? '#22c55e' : '#666'};">(+${tempData.winter.change}%)</span>
+                </div>
+              </div>
+            </div>
+            <div style="${triangleStyle}"></div>
+          </div>
+        `,
+        style: { pointerEvents: 'none' }
+      }
+    } else if (showPop && showTemp) {
+      // Both - show ONLY population percentage, then temperature
+      return {
+        html: `
+          <div style="${tooltipStyle}">
+            <div style="font-size: 11px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; color: #666;">Population Change</div>
+            <div style="font-size: 40px; font-weight: 700; line-height: 1; margin-bottom: 18px; color: ${populationChange > 0 ? '#22c55e' : populationChange < 0 ? '#ef4444' : '#666'};">
+              ${previousYear ? `${populationChange > 0 ? '+' : ''}${Math.round(populationChange)}%` : 'N/A'}
+            </div>
+            <div style="height: 1px; background: rgba(0,0,0,0.15); margin: 18px 0;"></div>
+            <div style="font-size: 11px; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #666;">Avg Temperature Change</div>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <div>
+                <div style="font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; color: #888;">Summer</div>
+                <div style="font-size: 32px; font-weight: 700; line-height: 1; color: #1a1a1a;">
+                  ${tempData.summer.temp}° <span style="font-size: 18px; font-weight: 600; color: ${tempData.summer.change > 0 ? '#22c55e' : '#666'};">(+${tempData.summer.change}%)</span>
+                </div>
+              </div>
+              <div>
+                <div style="font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; color: #888;">Winter</div>
+                <div style="font-size: 32px; font-weight: 700; line-height: 1; color: #1a1a1a;">
+                  ${tempData.winter.temp}° <span style="font-size: 18px; font-weight: 600; color: ${tempData.winter.change > 0 ? '#22c55e' : '#666'};">(+${tempData.winter.change}%)</span>
+                </div>
+              </div>
+            </div>
+            <div style="${triangleStyle}"></div>
+          </div>
+        `,
+        style: { pointerEvents: 'none' }
+      }
+    }
+
+    return null
+  }, [controls.megaregionShowPopulation, controls.megaregionShowTemperature, controls.projectionYear])
+
   const layers = [
     topographicReliefTileLayer,    // 1. Bottom - Topographic Relief
     seaLevelTileLayer,             // 2. Sea Level Rise
@@ -1071,7 +1260,8 @@ export function DeckGLMap({
     urbanHeatTileLayer,            // 5. Urban Heat Island (Heat Map)
     urbanExpansionLayer,           // 6. Urban Expansion (if present)
     temperatureHeatmapLayer,       // 7. Temperature Heatmap (if present)
-    megaregionCirclesLayer,        // 8. Population Migration circles
+    megaregionCirclesLayer,        // 8. Metro Data Statistics population bubbles (conditional)
+    megaregionCenterDotsLayer,     // 9. Metro center dots (always visible when layer active)
   ].filter(Boolean)
 
   console.log('🗺️ DeckGL Layers:', {
@@ -1156,57 +1346,86 @@ export function DeckGLMap({
             <NavigationControl position="bottom-right" />
             
             {/* DeckGL overlay - renders in separate canvas */}
-            <DeckGLOverlay key={`deck-overlay-${layerRefreshKey}`} layers={layers} />
+            <DeckGLOverlay key={`deck-overlay-${layerRefreshKey}`} layers={layers} getTooltip={getTooltip} />
             
-            {/* Population labels - HTML Markers render on top of all canvas elements */}
-            {megaregionLabelsGeoJSON && megaregionLabelsGeoJSON.features.map((feature: any, index: number) => {
+            {/* Metro Data Statistics labels - HTML Markers render on top of all canvas elements */}
+            {megaregionLabelsGeoJSON && megaregionLabelsGeoJSON.features && megaregionLabelsGeoJSON.features.map((feature: any, index: number) => {
               const [lng, lat] = feature.geometry.coordinates
-              const { population, change, showGrowth } = feature.properties
-              
-              // Theme-based styling
-              const isLightMode = theme === 'light'
-              const backgroundColor = isLightMode ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.7)'
-              const textColor = isLightMode ? 'var(--cs-neutral-0)' : '#ffffff'
-              
+              const { name, population, percentage, isGrowing, isDecline, displayYear } = feature.properties
+
+              const showPop = controls.megaregionShowPopulation
+              const showTemp = controls.megaregionShowTemperature
+
+              // Don't show label if both are unchecked
+              if (!showPop && !showTemp) return null
+
+              // Get temperature data from real projections
+              const getTempData = (metroName: string, year: number, scenario: string) => {
+                const tempData = metroTemperatureData as any
+                const metro = tempData[metroName]
+
+                console.log('🌡️ Temperature lookup:', { metroName, year, scenario, found: !!metro, availableMetros: Object.keys(tempData).slice(0, 5) })
+
+                if (!metro || !metro.projections || !metro.projections[scenario]) {
+                  // Fallback to mock data if metro not found
+                  console.warn(`⚠️ Temperature data not found for ${metroName} under scenario ${scenario}`)
+                  return {
+                    summer: { temp: 85, change: 0 },
+                    winter: { temp: 35, change: 0 }
+                  }
+                }
+
+                // Find closest year in available data
+                const availableYears = Object.keys(metro.projections[scenario]).map(Number).sort((a, b) => a - b)
+                const closestYear = availableYears.reduce((prev, curr) =>
+                  Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
+                )
+
+                const projection = metro.projections[scenario][closestYear]
+                const baseline = metro.baseline_1995_2014
+
+                // Calculate changes
+                const summerChange = baseline.summer_avg
+                  ? Math.round(((projection.summer_avg - baseline.summer_avg) / baseline.summer_avg) * 100)
+                  : 0
+                const winterChange = baseline.winter_avg
+                  ? Math.round(((projection.winter_avg - baseline.winter_avg) / baseline.winter_avg) * 100)
+                  : 0
+
+                return {
+                  summer: {
+                    temp: Math.round(projection.summer_avg || projection.summer_max || 85),
+                    change: summerChange
+                  },
+                  winter: {
+                    temp: Math.round(projection.winter_avg || projection.winter_min || 35),
+                    change: winterChange
+                  }
+                }
+              }
+
+              const currentYear = controls.projectionYear ?? 2050
+              const scenario = controls.projectionScenario || 'ssp585'
+              const tempData = getTempData(name || '', currentYear, scenario)
+
+              // Use MetroTooltipBubble component
               return (
-                <Marker key={`label-${index}`} longitude={lng} latitude={lat} anchor="center" offset={[0, -20]}>
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    pointerEvents: 'none',
-                    position: 'relative',
-                    zIndex: 1000,
-                    padding: '4px 8px',
-                    background: backgroundColor,
-                    borderRadius: '6px',
-                    backdropFilter: 'blur(4px)'
-                  }}>
-                    {/* Population number */}
-                    <div style={{
-                      color: textColor,
-                      fontSize: '13.5px',
-                      fontWeight: 'bold',
-                      whiteSpace: 'nowrap',
-                      lineHeight: '1.3'
-                    }}>
-                      {population}
-                    </div>
-                    
-                    {/* Change label */}
-                    {showGrowth && change && (
-                      <div style={{
-                        color: feature.properties.isGrowing ? '#10b981' : feature.properties.isDecline ? '#ef4444' : '#888888',
-                        fontSize: '9.75px',
-                        fontWeight: '600',
-                        whiteSpace: 'nowrap',
-                        lineHeight: '1.3',
-                        marginTop: '3px'
-                      }}>
-                        {change}
-                      </div>
-                    )}
-                  </div>
+                <Marker key={`label-${index}`} longitude={lng} latitude={lat} anchor="center" offset={[0, 0]}>
+                  <MetroTooltipBubble
+                    metroName={name || 'Unknown'}
+                    year={displayYear || currentYear}
+                    population={population || '0'}
+                    populationChange={percentage || '(+0%)'}
+                    populationChangeColor={isGrowing ? '#00a03c' : isDecline ? '#ef4444' : '#666'}
+                    summerTemp={`${tempData.summer.temp}°`}
+                    summerTempChange={`(+${tempData.summer.change}%)`}
+                    winterTemp={`${tempData.winter.temp}°`}
+                    winterTempChange={`(+${tempData.winter.change}%)`}
+                    visible={true}
+                    showPopulation={showPop}
+                    showTemperature={showTemp}
+                    onClose={() => {}}
+                  />
                 </Marker>
               )
             })}

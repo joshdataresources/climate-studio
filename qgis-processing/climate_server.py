@@ -10,6 +10,7 @@ from flask_cors import CORS
 import logging
 import sys
 import os
+import json
 import requests
 from dotenv import load_dotenv
 
@@ -1014,6 +1015,65 @@ def population_at_point():
 
     except Exception as e:
         logger.error(f"Error querying population: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/climate/metro-temperature/<metro_name>', methods=['GET'])
+def metro_temperature(metro_name):
+    """
+    Get temperature projections for a specific metro area
+
+    Args:
+        metro_name: Name of metro (e.g., "Phoenix", "New York")
+
+    Query Parameters:
+        scenario: 'ssp245', 'ssp585', or 'both' (default: 'both')
+
+    Returns:
+        JSON with baseline and projection data
+    """
+    try:
+        scenario = request.args.get('scenario', 'both')
+
+        # Load pre-computed projections
+        projections_file = os.path.join(
+            os.path.dirname(__file__),
+            'metro_temperature_projections.json'
+        )
+
+        if not os.path.exists(projections_file):
+            return jsonify({
+                'success': False,
+                'error': 'Temperature projections not yet generated. Please run metro_temperature_projections.py first.'
+            }), 503
+
+        with open(projections_file) as f:
+            all_projections = json.load(f)
+
+        if metro_name not in all_projections:
+            available_metros = list(all_projections.keys())
+            return jsonify({
+                'success': False,
+                'error': f'Metro "{metro_name}" not found. Available metros: {", ".join(available_metros)}'
+            }), 404
+
+        data = all_projections[metro_name]
+
+        # Filter by scenario if requested
+        if scenario != 'both' and scenario in ['ssp245', 'ssp585']:
+            filtered_projections = {scenario: data['projections'].get(scenario, {})}
+            data['projections'] = filtered_projections
+
+        return jsonify({
+            'success': True,
+            'data': data
+        })
+
+    except Exception as e:
+        logger.error(f"Error fetching metro temperature: {str(e)}", exc_info=True)
         return jsonify({
             'success': False,
             'error': str(e)

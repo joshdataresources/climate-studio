@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react"
 import { LayerStateMap } from "../hooks/useClimateLayerData"
 import { AccordionItem } from "./ui/accordion"
 import { WaveIcon, HeatIcon, MountainIcon, WeatherIcon, DropIcon, PopulationIcon } from "./LayerIcons"
+import { useTheme } from "../contexts/ThemeContext"
 
 const scenarioOptions = [
   { value: "rcp26", label: "RCP 2.6 (Low)" },
@@ -64,6 +65,9 @@ type ControlSetters = Pick<
   "setDroughtMetric" |
   "setDroughtOpacity" |
   "setMegaregionOpacity" |
+  "setMegaregionDataMode" |
+  "setMegaregionShowPopulation" |
+  "setMegaregionShowTemperature" |
   "setMegaregionAnimating"
 >
 
@@ -460,6 +464,31 @@ const renderControl = (
           />
         </div>
       )
+    case "megaregionDataMode":
+      return (
+        <div key="megaregionDataMode" className="space-y-2">
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={values.megaregionShowPopulation}
+                onChange={(e) => setters.setMegaregionShowPopulation(e.target.checked)}
+                className="h-4 w-4 accent-blue-500 rounded"
+              />
+              <span className="text-xs">Projected Population</span>
+            </label>
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={values.megaregionShowTemperature}
+                onChange={(e) => setters.setMegaregionShowTemperature(e.target.checked)}
+                className="h-4 w-4 accent-blue-500 rounded"
+              />
+              <span className="text-xs">Projected Average Temperature</span>
+            </label>
+          </div>
+        </div>
+      )
     case "megaregionAnimating":
       return (
         <div key="megaregionAnimating" className="space-y-2">
@@ -509,6 +538,7 @@ const getLayerIcon = (layerId: string) => {
 
 export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
   const { activeLayerIds, toggleLayer, isLayerActive } = useClimate()
+  const { theme } = useTheme()
   const [showDescriptions, setShowDescriptions] = React.useState(false)
 
   return (
@@ -537,8 +567,25 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
               <label
                 key={layer.id}
                 className={`flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors ${
-                  active ? "border-blue-500/60 bg-blue-500/10" : "border-border/60 bg-muted/20 hover:bg-muted/40"
+                  active 
+                    ? "border-blue-500/60 bg-blue-500/10" 
+                    : "border-border/60"
                 }`}
+                style={!active ? {
+                  backgroundColor: 'var(--widget-bg-panel)'
+                } : undefined}
+                onMouseEnter={(e) => {
+                  if (!active) {
+                    e.currentTarget.style.backgroundColor = theme === 'light' 
+                      ? 'rgba(255, 255, 255, 0.7)' 
+                      : 'rgba(30, 30, 30, 0.7)'
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!active) {
+                    e.currentTarget.style.backgroundColor = 'var(--widget-bg-panel)'
+                  }
+                }}
               >
                 <input
                   type="checkbox"
@@ -623,6 +670,9 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
     setDroughtMetric: climate.setDroughtMetric,
     setDroughtOpacity: climate.setDroughtOpacity,
     setMegaregionOpacity: climate.setMegaregionOpacity,
+    setMegaregionDataMode: climate.setMegaregionDataMode,
+    setMegaregionShowPopulation: climate.setMegaregionShowPopulation,
+    setMegaregionShowTemperature: climate.setMegaregionShowTemperature,
     setMegaregionAnimating: climate.setMegaregionAnimating,
   }
 
@@ -791,7 +841,7 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
                   </div>
                 </>
               )}
-              {layer.id === "megaregion_timeseries" && (
+              {layer.id === "megaregion_timeseries" && climate.controls.megaregionShowPopulation && (
                 <div className="space-y-1">
                   <div className="h-3 w-full rounded-full" style={{
                     background: 'linear-gradient(to right, #dc2626 0%, #ef4444 10%, #f97316 20%, #eab308 30%, #a855f7 40%, #8b5cf6 50%, #3b82f6 60%, #0ea5e9 70%, #06b6d4 85%, #10b981 100%)'
