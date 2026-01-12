@@ -267,7 +267,7 @@ function SortableViewItem({
       </div>
       <button
         onClick={() => loadSavedView(view)}
-        className="flex flex-1 items-center gap-2 rounded-md border-0 h-9 px-4 py-2 text-left text-sm hover:bg-white/5"
+        className="flex flex-1 items-center gap-2 rounded-md border-0 h-9 px-4 py-2 text-left text-sm hover:bg-blue-500/10"
       >
         <Bookmark className="h-4 w-4 text-blue-500 flex-shrink-0" />
         <span className="flex-1 truncate">{view.name}</span>
@@ -1245,7 +1245,7 @@ export default function WaterAccessView() {
       )}
 
       {/* Left Sidebar - Search & Views */}
-      <aside className="absolute left-4 top-4 z-[1000] flex h-[calc(100%-32px)] w-[360px] flex-col pointer-events-none">
+      <aside className="absolute left-[92px] top-4 z-[1000] flex h-[calc(100%-32px)] w-[360px] flex-col pointer-events-none">
         <div className="flex-1 overflow-y-auto space-y-4 pointer-events-auto">
           <div className="widget-container">
             <form className="flex gap-2" onSubmit={handleSearchSubmit}>
@@ -1306,7 +1306,7 @@ export default function WaterAccessView() {
                   No saved views. Click "New View" to save.
                 </p>
               ) : (
-                <div className="rounded-md border border-[var(--cs-border-default)] bg-[var(--cs-surface-elevated)] p-2">
+                <div className="rounded-md bg-[var(--cs-surface-elevated)] p-2">
                   <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}

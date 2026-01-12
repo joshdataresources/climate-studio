@@ -555,7 +555,7 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
                 onChange={(e) => setShowDescriptions(e.target.checked)}
                 className="sr-only peer"
               />
-              <div className="w-9 h-5 bg-muted rounded-full peer peer-checked:bg-blue-500 transition-colors"></div>
+              <div className={`w-9 h-5 rounded-full peer peer-checked:bg-blue-500 transition-colors ${theme === 'dark' ? 'bg-muted' : 'bg-gray-400'}`}></div>
               <div className="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform peer-checked:translate-x-4"></div>
             </div>
           </label>
@@ -566,24 +566,26 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
             return (
               <label
                 key={layer.id}
-                className={`flex cursor-pointer gap-3 rounded-lg border p-3 transition-colors ${
+                className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${
                   active 
-                    ? "border-blue-500/60 bg-blue-500/10" 
-                    : "border-border/60"
+                    ? "border border-blue-500/60 bg-blue-500/10" 
+                    : ""
                 }`}
                 style={!active ? {
-                  backgroundColor: 'var(--widget-bg-panel)'
+                  backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)'
                 } : undefined}
                 onMouseEnter={(e) => {
                   if (!active) {
                     e.currentTarget.style.backgroundColor = theme === 'light' 
                       ? 'rgba(255, 255, 255, 0.7)' 
-                      : 'rgba(30, 30, 30, 0.7)'
+                      : 'rgba(0, 0, 0, 0.2)'
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!active) {
-                    e.currentTarget.style.backgroundColor = 'var(--widget-bg-panel)'
+                    e.currentTarget.style.backgroundColor = theme === 'light' 
+                      ? 'rgba(255, 255, 255, 0.2)' 
+                      : 'rgba(0, 0, 0, 0.2)'
                   }
                 }}
               >

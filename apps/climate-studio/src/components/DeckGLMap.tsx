@@ -1183,7 +1183,7 @@ export function DeckGLMap({
       return {
         html: `
           <div style="${tooltipStyle}">
-            <div style="font-size: 11px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; color: #666;">Population Change</div>
+            <div style="font-size: 11px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; color: #65758B;">Population Change</div>
             <div style="font-size: 48px; font-weight: 700; line-height: 1; color: ${populationChange > 0 ? '#22c55e' : populationChange < 0 ? '#ef4444' : '#666'};">
               ${previousYear ? `${populationChange > 0 ? '+' : ''}${Math.round(populationChange)}%` : 'N/A'}
             </div>
@@ -1197,7 +1197,7 @@ export function DeckGLMap({
       return {
         html: `
           <div style="${tooltipStyle}">
-            <div style="font-size: 11px; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #666;">Avg Temperature Change</div>
+            <div style="font-size: 11px; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #65758B;">Avg Temperature Change</div>
             <div style="display: flex; flex-direction: column; gap: 16px;">
               <div>
                 <div style="font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; color: #888;">Summer</div>
@@ -1222,12 +1222,12 @@ export function DeckGLMap({
       return {
         html: `
           <div style="${tooltipStyle}">
-            <div style="font-size: 11px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; color: #666;">Population Change</div>
+            <div style="font-size: 11px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; color: #65758B;">Population Change</div>
             <div style="font-size: 40px; font-weight: 700; line-height: 1; margin-bottom: 18px; color: ${populationChange > 0 ? '#22c55e' : populationChange < 0 ? '#ef4444' : '#666'};">
               ${previousYear ? `${populationChange > 0 ? '+' : ''}${Math.round(populationChange)}%` : 'N/A'}
             </div>
             <div style="height: 1px; background: rgba(0,0,0,0.15); margin: 18px 0;"></div>
-            <div style="font-size: 11px; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #666;">Avg Temperature Change</div>
+            <div style="font-size: 11px; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #65758B;">Avg Temperature Change</div>
             <div style="display: flex; flex-direction: column; gap: 14px;">
               <div>
                 <div style="font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; color: #888;">Summer</div>

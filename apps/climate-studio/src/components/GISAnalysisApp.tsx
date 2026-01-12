@@ -14,6 +14,7 @@ import type { ClimateControl } from "@climate-studio/core/config"
 import { useClimate } from "@climate-studio/core"
 import { useClimateLayerData } from "../hooks/useClimateLayerData"
 import { useMap } from "../contexts/MapContext"
+import { useTheme } from "../contexts/ThemeContext"
 import { LatLngBoundsLiteral } from "../types/geography"
 import { Loader2, MapPin, Search, Save, Bookmark, GripVertical, MoreHorizontal, Trash2, Pencil, ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react"
 import {
@@ -138,7 +139,7 @@ function SortableViewItem({ view, hasViewChanged, loadSavedView, updateSavedView
       </div>
       <button
         onClick={() => loadSavedView(view)}
-        className="flex flex-1 items-center gap-2 rounded-md border-0 h-9 px-4 py-2 text-left text-sm hover:bg-white/5"
+        className="flex flex-1 items-center gap-2 rounded-md border-0 h-9 px-4 py-2 text-left text-sm hover:bg-blue-500/10"
       >
         <Bookmark className="h-4 w-4 text-blue-500 flex-shrink-0" />
         <span className="flex-1 truncate">{view.name}</span>
@@ -172,6 +173,7 @@ function SortableViewItem({ view, hasViewChanged, loadSavedView, updateSavedView
 }
 
 export function GISAnalysisApp() {
+  const { theme } = useTheme()
   const { activeLayerIds, controls, setActiveLayerIds } = useClimate()
   const {
     viewport,
@@ -533,7 +535,7 @@ export function GISAnalysisApp() {
               ) : (
                 <div 
                   className="rounded-md p-2"
-                  style={{ backgroundColor: 'var(--widget-bg-panel)' }}
+                  style={{ backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)' }}
                 >
                   <DndContext
                     sensors={sensors}
@@ -618,18 +620,34 @@ export function GISAnalysisApp() {
       )}
 
       {/* Bottom left toggle button for panels - aligned with Climate Layers widget content */}
-      <div className="fixed bottom-4 z-[1000] pointer-events-auto" style={{ left: '32px' }}>
-        <Button
+      <div className="fixed bottom-4 z-[1000] pointer-events-auto" style={{ left: '16px' }}>
+        <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          variant="secondary"
-          className="rounded-full h-10 px-4 shadow-lg hover:shadow-xl transition-all flex items-center gap-2"
+          className="h-10 px-4 flex items-center gap-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50"
+          style={{
+            borderRadius: 'var(--widget-border-radius)',
+            border: '1px solid var(--widget-border)',
+            background: 'var(--widget-bg)',
+            backdropFilter: 'var(--widget-backdrop-blur)',
+            WebkitBackdropFilter: 'var(--widget-backdrop-blur)',
+            boxShadow: 'var(--widget-box-shadow)',
+            transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease',
+            color: 'var(--foreground)',
+            cursor: 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.borderColor = 'var(--widget-border)'
+          }}
           title={sidebarCollapsed ? "Show panels" : "Hide panels"}
         >
           <LayoutGrid className="h-4 w-4" />
           <span className="text-xs font-medium">
-            {sidebarCollapsed ? "show panels on map" : "hide panels on map"}
+            {sidebarCollapsed ? "Show Panels" : "Hide Panels"}
           </span>
-        </Button>
+        </button>
       </div>
     </div>
   )

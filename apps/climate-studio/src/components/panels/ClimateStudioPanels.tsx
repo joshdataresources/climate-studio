@@ -281,7 +281,7 @@ export function ClimateStudioPanels({ mapBounds, viewport, onViewportChange }: C
         </div>
         <button
           onClick={() => loadSavedView(view)}
-          className="flex flex-1 items-center gap-2 rounded-md border-0 h-9 px-4 py-2 text-left text-sm hover:bg-white/5"
+          className="flex flex-1 items-center gap-2 rounded-md border-0 h-9 px-4 py-2 text-left text-sm hover:bg-blue-500/10"
         >
           <Bookmark className="h-4 w-4 text-blue-500 flex-shrink-0" />
           <span className="flex-1 truncate">{view.name}</span>
