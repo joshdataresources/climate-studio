@@ -76,8 +76,8 @@ export function DeckGLMap({
   
   // Determine map style based on theme
   const mapStyle = theme === 'light' 
-    ? "mapbox://styles/mapbox/light-v11" 
-    : "mapbox://styles/mapbox/dark-v11"
+    ? "mapbox://styles/mapbox/streets-v12"  // Colorful light style with streets and colors
+    : "mapbox://styles/mapbox/satellite-streets-v12"  // Dark satellite imagery with terrain and street labels
 
   const [viewState, setViewState] = useState<MapViewState>({
     longitude: center.lng,
@@ -552,34 +552,177 @@ export function DeckGLMap({
     }
   }
 
-  // Precipitation & Drought Hexagon Layer - GeoJSON polygons with extreme colors
+  // Precipitation & Drought Layer - TILES ONLY (smooth raster visualization)
   const precipitationDroughtLayer = useMemo(() => {
     if (!isLayerActive("precipitation_drought")) return null
-    if (layerStates.precipitation_drought?.status !== "success") return null
-    if (!layerStates.precipitation_drought?.data?.features) return null
 
-    const metric = controls.droughtMetric || 'drought_index'
+    const tileData = layerStates.precipitation_drought?.data as any
+    if (!tileData || !tileData.tile_url) return null
 
-    return new GeoJsonLayer({
-      id: 'precipitation-drought-hexagons',
-      data: layerStates.precipitation_drought.data,
-      pickable: true,
-      stroked: false,
-      filled: true,
-      getFillColor: (d: any) => getDroughtColor(d.properties.value, metric),
-      getLineColor: [255, 255, 255, 0],
-      getLineWidth: 0,
+    return new TileLayer({
+      id: 'precipitation-drought-tiles',
+      data: tileData.tile_url,
+      minZoom: 0,
+      maxZoom: 19,
+      tileSize: 256,
       opacity: controls.droughtOpacity ?? 0.75,
-      updateTriggers: {
-        getFillColor: [metric, controls.droughtMetric],
-        opacity: controls.droughtOpacity
-      }
+      getTileData: (tile: any) => {
+        const { x, y, z } = tile.index
+        const url = tileData.tile_url.replace('{z}', z).replace('{x}', x).replace('{y}', y)
+        return new Promise((resolve, reject) => {
+          const image = new Image()
+          image.crossOrigin = 'anonymous'
+          image.onload = () => resolve(image)
+          image.onerror = reject
+          image.src = url
+        })
+      },
+      renderSubLayers: (props: any) => {
+        const { tile, data } = props
+        if (!data) return null
+        const { boundingBox } = tile
+        const bounds: [number, number, number, number] = [
+          boundingBox[0][0], boundingBox[0][1],
+          boundingBox[1][0], boundingBox[1][1]
+        ]
+        return new BitmapLayer({
+          id: `${props.id}-bitmap`,
+          image: data,
+          bounds,
+          opacity: props.opacity ?? 1,
+        })
+      },
+      pickable: false
     })
   }, [
     isLayerActive("precipitation_drought"),
     layerStates.precipitation_drought,
-    controls.droughtOpacity,
-    controls.droughtMetric
+    controls.droughtOpacity
+  ])
+
+  // Groundwater Depletion Hexagon Layer with Aquifer Boundaries
+  const groundwaterDepletionLayer = useMemo(() => {
+    if (!isLayerActive("groundwater_depletion")) return null
+    const data = layerStates.groundwater_depletion?.data as any
+    if (!data || !data.features || data.features.length === 0) return null
+
+    // Color scale for depletion: red (severe depletion) → yellow (moderate) → white (stable) → blue (recharge)
+    const getDepletionColor = (trendCmPerYear: number): [number, number, number, number] => {
+      const opacity = 255 * (controls.groundwaterOpacity ?? 0.7)
+
+      // Severe depletion (< -2 cm/year) - dark red
+      if (trendCmPerYear < -2) return [139, 0, 0, opacity]
+      // Strong depletion (-2 to -1 cm/year) - red
+      if (trendCmPerYear < -1) return [220, 38, 38, opacity]
+      // Moderate depletion (-1 to -0.5 cm/year) - orange-red
+      if (trendCmPerYear < -0.5) return [239, 68, 68, opacity]
+      // Slight depletion (-0.5 to -0.2 cm/year) - orange
+      if (trendCmPerYear < -0.2) return [251, 146, 60, opacity]
+      // Minor depletion (-0.2 to 0 cm/year) - yellow
+      if (trendCmPerYear < 0) return [250, 204, 21, opacity]
+      // Stable (0 to 0.2 cm/year) - light gray
+      if (trendCmPerYear < 0.2) return [229, 231, 235, opacity]
+      // Slight recharge (0.2 to 0.5 cm/year) - light blue
+      if (trendCmPerYear < 0.5) return [147, 197, 253, opacity]
+      // Moderate recharge (0.5 to 1 cm/year) - blue
+      if (trendCmPerYear < 1) return [59, 130, 246, opacity]
+      // Strong recharge (> 1 cm/year) - dark blue
+      return [29, 78, 216, opacity]
+    }
+
+    return new GeoJsonLayer({
+      id: 'groundwater-depletion-hexagons',
+      data,
+      filled: true,
+      stroked: true,
+      getFillColor: (d: any) => getDepletionColor(d.properties.trendCmPerYear),
+      getLineColor: [100, 100, 100, 180],
+      getLineWidth: 1,
+      lineWidthMinPixels: 0.5,
+      pickable: true,
+      autoHighlight: true,
+      highlightColor: [255, 255, 255, 100],
+      updateTriggers: {
+        getFillColor: [controls.groundwaterOpacity]
+      }
+    })
+  }, [
+    isLayerActive("groundwater_depletion"),
+    layerStates.groundwater_depletion,
+    controls.groundwaterOpacity
+  ])
+
+  // Aquifer Boundary Outlines - shown when groundwater layer is active
+  const aquiferBoundaryLayer = useMemo(() => {
+    if (!isLayerActive("groundwater_depletion")) return null
+    const data = layerStates.groundwater_depletion?.data as any
+    if (!data || !data.features || data.features.length === 0) return null
+
+    // Group features by aquifer to draw boundaries
+    const aquiferGroups = data.features.reduce((acc: any, feature: any) => {
+      const aquifer = feature.properties.aquifer
+      if (!acc[aquifer]) acc[aquifer] = []
+      acc[aquifer].push(feature)
+      return acc
+    }, {})
+
+    // Create boundary features - just use the outer extent
+    const boundaryFeatures: any[] = []
+    Object.entries(aquiferGroups).forEach(([aquifer, features]: [string, any]) => {
+      if (features.length === 0) return
+
+      // Get all unique coordinates from hexagons
+      const allCoords: any[] = []
+      features.forEach((f: any) => {
+        if (f.geometry?.coordinates?.[0]) {
+          allCoords.push(...f.geometry.coordinates[0])
+        }
+      })
+
+      // Create a simple bounding feature for visual reference
+      if (allCoords.length > 0) {
+        const lons = allCoords.map((c: any) => c[0])
+        const lats = allCoords.map((c: any) => c[1])
+        const minLon = Math.min(...lons)
+        const maxLon = Math.max(...lons)
+        const minLat = Math.min(...lats)
+        const maxLat = Math.max(...lats)
+
+        boundaryFeatures.push({
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: [
+              [minLon, minLat],
+              [maxLon, minLat],
+              [maxLon, maxLat],
+              [minLon, maxLat],
+              [minLon, minLat]
+            ]
+          },
+          properties: { aquifer }
+        })
+      }
+    })
+
+    if (boundaryFeatures.length === 0) return null
+
+    return new GeoJsonLayer({
+      id: 'aquifer-boundaries',
+      data: {
+        type: 'FeatureCollection',
+        features: boundaryFeatures
+      },
+      stroked: true,
+      filled: false,
+      getLineColor: [100, 150, 200, 255],
+      getLineWidth: 3,
+      lineWidthMinPixels: 2,
+      pickable: false
+    })
+  }, [
+    isLayerActive("groundwater_depletion"),
+    layerStates.groundwater_depletion
   ])
 
   // Urban Heat Island Tile Layer - raster tiles
@@ -1255,13 +1398,15 @@ export function DeckGLMap({
   const layers = [
     topographicReliefTileLayer,    // 1. Bottom - Topographic Relief
     seaLevelTileLayer,             // 2. Sea Level Rise
-    precipitationDroughtLayer,     // 3. Precipitation & Drought (hexagons)
-    temperatureProjectionTileLayer, // 4. Future Temperature Anomaly
-    urbanHeatTileLayer,            // 5. Urban Heat Island (Heat Map)
-    urbanExpansionLayer,           // 6. Urban Expansion (if present)
-    temperatureHeatmapLayer,       // 7. Temperature Heatmap (if present)
-    megaregionCirclesLayer,        // 8. Metro Data Statistics population bubbles (conditional)
-    megaregionCenterDotsLayer,     // 9. Metro center dots (always visible when layer active)
+    precipitationDroughtLayer,     // 3. Precipitation & Drought (tiles)
+    aquiferBoundaryLayer,          // 4. Aquifer boundary outlines (shown with groundwater)
+    groundwaterDepletionLayer,     // 5. Groundwater Depletion (hexagons on aquifers)
+    temperatureProjectionTileLayer, // 6. Future Temperature Anomaly
+    urbanHeatTileLayer,            // 7. Urban Heat Island (Heat Map)
+    urbanExpansionLayer,           // 8. Urban Expansion (if present)
+    temperatureHeatmapLayer,       // 9. Temperature Heatmap (if present)
+    megaregionCirclesLayer,        // 10. Metro Data Statistics population bubbles (conditional)
+    megaregionCenterDotsLayer,     // 11. Metro center dots (always visible when layer active)
   ].filter(Boolean)
 
   console.log('🗺️ DeckGL Layers:', {

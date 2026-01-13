@@ -6,6 +6,8 @@ interface SidebarContextType {
   viewEnabled: boolean
   toggleView: () => void
   setViewEnabled: (enabled: boolean) => void
+  panelsCollapsed: boolean
+  togglePanels: () => void
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined)
@@ -13,6 +15,7 @@ const SidebarContext = createContext<SidebarContextType | undefined>(undefined)
 export function SidebarProvider({ children }: { children: ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false)
   const [viewEnabled, setViewEnabled] = useState(true) // Default to enabled (widgets visible)
+  const [panelsCollapsed, setPanelsCollapsed] = useState(false) // Default to panels visible
 
   const toggleSidebar = () => setIsCollapsed(prev => !prev)
 
@@ -24,13 +27,19 @@ export function SidebarProvider({ children }: { children: ReactNode }) {
     setViewEnabled(enabled)
   }
 
+  const togglePanels = () => {
+    setPanelsCollapsed(prev => !prev)
+  }
+
   return (
     <SidebarContext.Provider value={{ 
       isCollapsed, 
       toggleSidebar,
       viewEnabled,
       toggleView,
-      setViewEnabled: setViewEnabledState
+      setViewEnabled: setViewEnabledState,
+      panelsCollapsed,
+      togglePanels
     }}>
       {children}
     </SidebarContext.Provider>

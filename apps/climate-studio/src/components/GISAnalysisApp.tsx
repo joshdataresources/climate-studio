@@ -15,8 +15,9 @@ import { useClimate } from "@climate-studio/core"
 import { useClimateLayerData } from "../hooks/useClimateLayerData"
 import { useMap } from "../contexts/MapContext"
 import { useTheme } from "../contexts/ThemeContext"
+import { useSidebar } from "../contexts/SidebarContext"
 import { LatLngBoundsLiteral } from "../types/geography"
-import { Loader2, MapPin, Search, Save, Bookmark, GripVertical, MoreHorizontal, Trash2, Pencil, ChevronLeft, ChevronRight, LayoutGrid } from "lucide-react"
+import { Loader2, MapPin, Search, Save, Bookmark, GripVertical, MoreHorizontal, Trash2, Pencil, ChevronLeft, ChevronRight } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -191,6 +192,7 @@ export function GISAnalysisApp() {
     deleteSavedView: deleteSavedViewFromContext,
     updateSavedViewName,
   } = useMap()
+  const { panelsCollapsed } = useSidebar()
   
   const [mapBounds, setMapBounds] = useState<LatLngBoundsLiteral | null>(null)
   const [showSaveDialog, setShowSaveDialog] = useState(false)
@@ -198,7 +200,6 @@ export function GISAnalysisApp() {
   const [editingViewId, setEditingViewId] = useState<string | null>(null)
   const [editingViewName, setEditingViewName] = useState("")
   const [selectedMetro, setSelectedMetro] = useState<string | null>(null)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   const { layers: layerStates } = useClimateLayerData(mapBounds)
 
@@ -446,7 +447,7 @@ export function GISAnalysisApp() {
       <BackendHealthIndicator />
 
       <main className="absolute inset-0 h-full w-full">
-        {hasLayerControls && !sidebarCollapsed && (
+        {hasLayerControls && !panelsCollapsed && (
           <div className="absolute top-4 right-4 z-[1100] w-80 pointer-events-auto space-y-4 transition-all duration-300 animate-in fade-in slide-in-from-right-10">
             <LayerControlsPanel layerStates={layerStates} />
           </div>
@@ -471,7 +472,7 @@ export function GISAnalysisApp() {
         )}
       </main>
 
-      {!sidebarCollapsed && (
+      {!panelsCollapsed && (
       <aside className="absolute left-[92px] top-4 z-[1000] w-[360px] pointer-events-none transition-all duration-300 animate-in fade-in slide-in-from-left-10">
         <div className="space-y-4 pointer-events-auto">
           <div className="widget-container">
@@ -619,36 +620,6 @@ export function GISAnalysisApp() {
       </aside>
       )}
 
-      {/* Bottom left toggle button for panels - aligned with Climate Layers widget content */}
-      <div className="fixed bottom-4 z-[1000] pointer-events-auto" style={{ left: '16px' }}>
-        <button
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="h-10 px-4 flex items-center gap-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500/50"
-          style={{
-            borderRadius: 'var(--widget-border-radius)',
-            border: '1px solid var(--widget-border)',
-            background: 'var(--widget-bg)',
-            backdropFilter: 'var(--widget-backdrop-blur)',
-            WebkitBackdropFilter: 'var(--widget-backdrop-blur)',
-            boxShadow: 'var(--widget-box-shadow)',
-            transition: 'border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease',
-            color: 'var(--foreground)',
-            cursor: 'pointer'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.12)'
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.borderColor = 'var(--widget-border)'
-          }}
-          title={sidebarCollapsed ? "Show panels" : "Hide panels"}
-        >
-          <LayoutGrid className="h-4 w-4" />
-          <span className="text-xs font-medium">
-            {sidebarCollapsed ? "Show Panels" : "Hide Panels"}
-          </span>
-        </button>
-      </div>
     </div>
   )
 }
