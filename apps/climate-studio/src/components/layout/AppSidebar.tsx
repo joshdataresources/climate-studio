@@ -1,6 +1,9 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useSidebar } from '../../contexts/SidebarContext'
 import { useTheme } from '../../contexts/ThemeContext'
+import { LayoutGrid, ZoomIn, ZoomOut } from 'lucide-react'
+import { useContext } from 'react'
+import { MapContext, type MapContextValue } from '../../contexts/MapContext'
 
 // SVG path data for all icons
 const SVG_PATHS = {
@@ -101,9 +104,31 @@ function ToggleItem({ icon, label, isActive, onClick }: ToggleItemProps) {
 export function AppSidebar() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { isCollapsed } = useSidebar()
+  const { isCollapsed, panelsCollapsed, togglePanels } = useSidebar()
   const { theme, toggleTheme } = useTheme()
+  
+  // Get map context - it might not be available on all routes
+  const mapContext = useContext(MapContext) as MapContextValue | undefined
+  
   const isDark = theme === 'dark'
+
+  const handleZoomIn = () => {
+    if (mapContext) {
+      mapContext.setViewport({
+        ...mapContext.viewport,
+        zoom: Math.min(mapContext.viewport.zoom + 1, 20) // Max zoom level
+      })
+    }
+  }
+
+  const handleZoomOut = () => {
+    if (mapContext) {
+      mapContext.setViewport({
+        ...mapContext.viewport,
+        zoom: Math.max(mapContext.viewport.zoom - 1, 1) // Min zoom level
+      })
+    }
+  }
 
   // Determine active menu item based on current route
   const getActiveMenuItem = (): MenuItemId => {
@@ -141,21 +166,84 @@ export function AppSidebar() {
   return (
     <aside className={`app-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
     <div 
-      className={`backdrop-blur-[6px] backdrop-filter relative rounded-br-[12px] rounded-tr-[12px] w-[76px] top-[16px] h-auto pointer-events-auto overflow-hidden ${
+      className={`backdrop-blur-[6px] backdrop-filter relative rounded-br-[12px] rounded-tr-[12px] w-[76px] top-[16px] bottom-[16px] h-[calc(100vh-32px)] pointer-events-auto overflow-hidden ${
         isDark ? 'bg-[rgba(0,0,0,0.90)]' : 'bg-[rgba(255,255,255,0.90)]'
       }`}
       style={{ boxShadow: 'var(--widget-box-shadow)' }}
     >
-      <div className="flex flex-col gap-[8px] isolate items-center p-[8px] relative">
-        {/* Logo */}
+      <div className="flex flex-col h-full isolate items-center p-[8px] relative justify-between">
+        {/* Top section: Logo and Menu items */}
         <div className="flex flex-col gap-[8px] items-center relative shrink-0">
-          <div className="h-[59px] relative shrink-0 w-[57px]">
-            <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 57 59">
-              <rect fill={isDark ? '#1F2937' : 'white'} height="59" rx="8" width="57" />
-              <path d={SVG_PATHS.logo} fill="#5A7CEC" />
-            </svg>
+          {/* Logo */}
+          <div className="flex flex-col gap-[8px] items-center relative shrink-0">
+            <div className="h-[59px] relative shrink-0 w-[57px]">
+              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 57 59">
+                <rect fill={isDark ? '#1F2937' : 'white'} height="59" rx="8" width="57" />
+                <path d={SVG_PATHS.logo} fill="#5A7CEC" />
+              </svg>
+            </div>
+            
+            {/* Divider */}
+            <div className="h-px relative shrink-0 w-full">
+              <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 60 1">
+                <path d="M60 0V1H0V0H60Z" fill={isDark ? '#FFFFFF' : '#D7D7D7'} fillOpacity={isDark ? '0.15' : '0.45'} />
+              </svg>
+            </div>
+
+            {/* Menu items (Climate & Water Access) - mutually exclusive */}
+            {menuItems.map((item) => (
+              <MenuItem
+                key={item.id}
+                id={item.id}
+                icon={item.icon}
+                label={item.label}
+                path={item.path}
+                isActive={activeMenuItem === item.id}
+                onClick={() => handleMenuItemClick(item.id)}
+              />
+            ))}
           </div>
-          
+        </div>
+
+        {/* Bottom section: Zoom controls, Panels toggle and UI Mode toggle */}
+        <div className="flex flex-col gap-[8px] items-center relative shrink-0">
+          {/* Zoom Controls - only show if map context is available */}
+          {mapContext && (
+            <div className="flex flex-col gap-[4px] items-center relative shrink-0">
+              {/* Zoom In */}
+              <button
+                onClick={handleZoomIn}
+                className="content-stretch flex flex-col gap-[4px] items-center justify-center px-[5px] py-[8px] relative rounded-[8px] shrink-0 transition-colors hover:bg-[rgba(90,124,236,0.05)]"
+                title="Zoom In"
+              >
+                <div className="relative shrink-0 size-[24px] flex items-center justify-center">
+                  <ZoomIn 
+                    className="size-full" 
+                    style={{ 
+                      color: isDark ? '#D1D5DB' : '#697487'
+                    }} 
+                  />
+                </div>
+              </button>
+
+              {/* Zoom Out */}
+              <button
+                onClick={handleZoomOut}
+                className="content-stretch flex flex-col gap-[4px] items-center justify-center px-[5px] py-[8px] relative rounded-[8px] shrink-0 transition-colors hover:bg-[rgba(90,124,236,0.05)]"
+                title="Zoom Out"
+              >
+                <div className="relative shrink-0 size-[24px] flex items-center justify-center">
+                  <ZoomOut 
+                    className="size-full" 
+                    style={{ 
+                      color: isDark ? '#D1D5DB' : '#697487'
+                    }} 
+                  />
+                </div>
+              </button>
+            </div>
+          )}
+
           {/* Divider */}
           <div className="h-px relative shrink-0 w-full">
             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 60 1">
@@ -163,34 +251,42 @@ export function AppSidebar() {
             </svg>
           </div>
 
-          {/* Menu items (Climate & Water Access) - mutually exclusive */}
-          {menuItems.map((item) => (
-            <MenuItem
-              key={item.id}
-              id={item.id}
-              icon={item.icon}
-              label={item.label}
-              path={item.path}
-              isActive={activeMenuItem === item.id}
-              onClick={() => handleMenuItemClick(item.id)}
-            />
-          ))}
-        </div>
+          {/* Panels toggle - Hide/Show panels */}
+          <button
+            onClick={togglePanels}
+            className={`content-stretch flex flex-col gap-[4px] items-center justify-center px-[5px] py-[10px] relative rounded-[8px] shrink-0 transition-colors ${
+              panelsCollapsed 
+                ? 'bg-[rgba(90,124,236,0.1)] border border-[#5a7cec]' 
+                : 'hover:bg-[rgba(90,124,236,0.05)]'
+            }`}
+            aria-pressed={panelsCollapsed}
+            title={panelsCollapsed ? "Show panels" : "Hide panels"}
+          >
+            <div className="relative shrink-0 size-[24px] flex items-center justify-center">
+              <LayoutGrid 
+                className="size-full" 
+                style={{ 
+                  color: panelsCollapsed ? '#5A7CEC' : (isDark ? '#D1D5DB' : '#697487')
+                }} 
+              />
+            </div>
+            <p 
+              className={`font-['Inter',sans-serif] font-semibold leading-[normal] not-italic relative shrink-0 text-[10px] text-center w-[50px] ${
+                panelsCollapsed ? 'text-[#5a7cec]' : (isDark ? 'text-white' : 'text-black')
+              }`}
+            >
+              {panelsCollapsed ? 'Show' : 'Hide'}
+            </p>
+          </button>
 
-        {/* Middle Divider */}
-        <div className="h-px relative shrink-0 w-full">
-          <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 60 1">
-            <path d="M60 0V1H0V0H60Z" fill={isDark ? '#FFFFFF' : '#D7D7D7'} fillOpacity={isDark ? '0.15' : '0.45'} />
-          </svg>
+          {/* UI Mode toggle - switches between Light and Dark */}
+          <ToggleItem
+            icon={theme === 'light' ? SVG_PATHS.lightUI : SVG_PATHS.darkUI}
+            label={theme === 'light' ? 'Light UI' : 'Dark UI'}
+            isActive={false}
+            onClick={toggleTheme}
+          />
         </div>
-
-        {/* UI Mode toggle - switches between Light and Dark */}
-        <ToggleItem
-          icon={theme === 'light' ? SVG_PATHS.lightUI : SVG_PATHS.darkUI}
-          label={theme === 'light' ? 'Light UI' : 'Dark UI'}
-          isActive={false}
-          onClick={toggleTheme}
-        />
       </div>
       
       {/* Border overlay */}

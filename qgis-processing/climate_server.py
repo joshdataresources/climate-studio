@@ -26,6 +26,7 @@ from urban_heat_island import UrbanHeatIslandService
 from topographic_relief import TopographicReliefService
 from precipitation_drought import PrecipitationDroughtService
 from urban_expansion import UrbanExpansionService
+from grace_groundwater import GRACEGroundwaterService
 
 # Configure logging
 logging.basicConfig(
@@ -48,6 +49,7 @@ heat_island_service = UrbanHeatIslandService(ee_project=ee_project)
 relief_service = TopographicReliefService()
 drought_service = PrecipitationDroughtService(ee_project=ee_project)
 urban_expansion_service = UrbanExpansionService(ee_project=ee_project)
+groundwater_service = GRACEGroundwaterService(ee_project=ee_project)
 
 # Health check endpoint
 @app.route('/health', methods=['GET'])
@@ -1130,6 +1132,91 @@ def climate_info():
             'baseline_period': '1986-2005'
         }
     })
+
+
+@app.route('/api/climate/groundwater', methods=['GET'])
+def groundwater_depletion():
+    """
+    Get GRACE groundwater storage anomaly data for specific aquifer(s)
+
+    Query parameters:
+        - aquifer: Aquifer ID ('high_plains', 'central_valley', 'mississippi_embayment', 'all')
+        - resolution: H3 hexagon resolution (5-7, default 6)
+
+    Returns:
+        GeoJSON FeatureCollection with hexagonal groundwater depletion data
+        Properties include:
+            - trendCmPerYear: Annual depletion rate (negative = water loss)
+            - totalChangeCm: Total change from baseline
+            - status: 'severe_depletion', 'moderate_depletion', 'stable', or 'recharge'
+            - aquifer: Aquifer identifier
+    """
+    try:
+        aquifer_param = request.args.get('aquifer', 'high_plains')
+        resolution = int(request.args.get('resolution', 6))
+
+        # Validate resolution
+        if resolution < 5 or resolution > 7:
+            return jsonify({
+                'error': 'Resolution must be between 5 and 7 for aquifer-scale visualization'
+            }), 400
+
+        # Validate aquifer
+        valid_aquifers = ['high_plains', 'central_valley', 'mississippi_embayment', 'all']
+        if aquifer_param not in valid_aquifers:
+            return jsonify({
+                'error': f'Invalid aquifer. Must be one of: {valid_aquifers}'
+            }), 400
+
+        # If 'all', fetch all three aquifers and merge
+        if aquifer_param == 'all':
+            logger.info(f"Fetching groundwater data for all aquifers, resolution={resolution}")
+
+            all_features = []
+            aquifers_to_fetch = ['high_plains', 'central_valley', 'mississippi_embayment']
+
+            for aquifer_id in aquifers_to_fetch:
+                try:
+                    data = groundwater_service.get_groundwater_depletion(
+                        aquifer_id=aquifer_id,
+                        resolution=resolution
+                    )
+                    all_features.extend(data['features'])
+                except Exception as e:
+                    logger.warning(f"Failed to fetch {aquifer_id}: {e}")
+                    continue
+
+            combined_data = {
+                'type': 'FeatureCollection',
+                'features': all_features,
+                'metadata': {
+                    'source': 'NASA GRACE via Earth Engine',
+                    'aquifers': 'all',
+                    'count': len(all_features),
+                    'isRealData': True
+                }
+            }
+
+            return jsonify(combined_data)
+        else:
+            # Single aquifer
+            logger.info(f"Fetching groundwater data: aquifer={aquifer_param}, resolution={resolution}")
+
+            data = groundwater_service.get_groundwater_depletion(
+                aquifer_id=aquifer_param,
+                resolution=resolution
+            )
+
+            return jsonify(data)
+
+    except ValueError as e:
+        logger.error(f"Validation error: {e}")
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        logger.error(f"Error fetching groundwater data: {e}")
+        import traceback
+        logger.error(traceback.format_exc())
+        return jsonify({'error': 'Failed to fetch groundwater data'}), 500
 
 
 if __name__ == '__main__':

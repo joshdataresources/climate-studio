@@ -361,12 +361,12 @@ class PrecipitationDroughtService:
         3. Including all hexagons that intersect the buffered viewport
         """
         # Add buffer to ensure complete coverage during panning/zooming
-        # Buffer size scales with hexagon size (larger hexagons = larger buffer)
+        # Buffer size scales with hexagon size - REDUCED buffers to prevent distortion
         buffer_factors = {
-            1: 2.0, 2: 2.0, 3: 1.5, 4: 1.5, 5: 1.0,
-            6: 0.75, 7: 0.5, 8: 0.3, 9: 0.2, 10: 0.1
+            1: 0.3, 2: 0.3, 3: 0.25, 4: 0.25, 5: 0.2,
+            6: 0.15, 7: 0.1, 8: 0.1, 9: 0.05, 10: 0.05
         }
-        buffer_factor = buffer_factors.get(resolution, 0.5)
+        buffer_factor = buffer_factors.get(resolution, 0.1)
 
         # Calculate buffer in degrees based on viewport size
         lat_span = bounds['north'] - bounds['south']

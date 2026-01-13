@@ -33,7 +33,7 @@ const DEFAULT_SAVED_VIEW: SavedView = {
   controls: {}
 }
 
-interface MapContextValue {
+export interface MapContextValue {
   // Viewport state - shared across views
   viewport: ViewportState
   setViewport: (viewport: ViewportState) => void
@@ -59,7 +59,7 @@ interface MapContextValue {
   updateSavedViewName: (viewId: string, name: string) => void
 }
 
-const MapContext = createContext<MapContextValue | undefined>(undefined)
+export const MapContext = createContext<MapContextValue | undefined>(undefined)
 
 interface MapProviderProps {
   children: ReactNode

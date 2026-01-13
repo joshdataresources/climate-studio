@@ -42,7 +42,7 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
   // Clear tile layer cache on mount to ensure fresh tile URLs
   useEffect(() => {
     console.log('🔄 useClimateLayerData mounted - clearing tile layer cache');
-    const tileLayers: ClimateLayerId[] = ['temperature_projection', 'urban_heat_island', 'topographic_relief'];
+    const tileLayers: ClimateLayerId[] = ['temperature_projection', 'urban_heat_island', 'topographic_relief', 'precipitation_drought'];
     const keysToDelete: string[] = [];
     cacheRef.current.forEach((value, key) => {
       const layerId = key.split(':')[0] as ClimateLayerId;
@@ -149,7 +149,7 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
         const cacheAge = now - (cached.updatedAt || 0);
         // Tile-based layers should refresh frequently since tile URLs can expire
         // Urban expansion should refresh more frequently to show year changes
-        const tileLayers: ClimateLayerId[] = ['temperature_projection', 'urban_heat_island', 'topographic_relief'];
+        const tileLayers: ClimateLayerId[] = ['temperature_projection', 'urban_heat_island', 'topographic_relief', 'precipitation_drought'];
         const isTileLayer = tileLayers.includes(layerId);
         const maxCacheAge = layerId === 'urban_expansion' ? 5 * 60 * 1000 :
                            isTileLayer ? 10 * 60 * 1000 : // 10 minutes for tile layers
@@ -503,8 +503,8 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       prevBoundsRef.current = currentBoundsKey;
     } else {
       // Tile-based layers that don't depend on bounds (global tiles)
-      // Hexagon layers depend on bounds (sea_level_rise, precipitation_drought, urban_expansion)
-      const globalTileLayers: ClimateLayerId[] = ['temperature_projection', 'urban_heat_island', 'topographic_relief'];
+      // Hexagon layers depend on bounds (sea_level_rise, urban_expansion)
+      const globalTileLayers: ClimateLayerId[] = ['temperature_projection', 'urban_heat_island', 'topographic_relief', 'precipitation_drought'];
 
       // Refetch tile-based layers when control parameters change (not bounds)
       if (controlsChanged) {

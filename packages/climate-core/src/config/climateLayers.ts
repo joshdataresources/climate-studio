@@ -8,6 +8,7 @@ export type ClimateLayerId =
   | 'urban_expansion'
   | 'topographic_relief'
   | 'precipitation_drought'
+  // | 'groundwater_depletion'  // Hidden until GRACE data access is obtained
   | 'megaregion_timeseries';
 
 export type ClimateControl =
@@ -30,7 +31,9 @@ export type ClimateControl =
   | 'droughtMetric'
   | 'megaregionOpacity'
   | 'megaregionDataMode'
-  | 'megaregionAnimating';
+  | 'megaregionAnimating'
+  | 'groundwaterOpacity'
+  | 'groundwaterAquifer';
 
 export interface ClimateFetchContext {
   bounds: LatLngBoundsLiteral | null;
@@ -51,6 +54,8 @@ export interface ClimateFetchContext {
   droughtMetric: 'precipitation' | 'drought_index' | 'soil_moisture';
   megaregionOpacity: number;
   megaregionAnimating: boolean;
+  groundwaterOpacity: number;
+  groundwaterAquifer: 'high_plains' | 'central_valley' | 'mississippi_embayment' | 'all';
   useRealData: boolean;
 }
 
@@ -265,28 +270,29 @@ export const climateLayers: ClimateLayerDefinition[] = [
       valueProperty: 'tempAnomaly'
     }
   },
-  // 6. Precipitation & Drought
+  // 6. Precipitation & Drought - TILES ONLY (smooth raster)
   {
     id: 'precipitation_drought',
     title: 'Precipitation & Drought',
-    description: 'Projected precipitation changes and drought conditions from CHIRPS dataset via Earth Engine.',
+    description: 'Projected precipitation changes and drought conditions from CHIRPS dataset via Earth Engine. Displays as smooth heatmap across all zoom levels.',
     category: 'temperature',
     source: {
       name: 'CHIRPS via Earth Engine',
       url: 'https://www.chc.ucsb.edu/data/chirps'
     },
     defaultActive: false,
-    controls: ['droughtMetric', 'droughtOpacity', 'resolution'],
+    controls: ['droughtMetric', 'droughtOpacity'],
     fetch: {
       method: 'GET',
-      route: '/api/climate/precipitation-drought',
-      query: ({ bounds, scenario, projectionYear, droughtMetric, resolution }) => {
+      route: '/api/climate/precipitation-drought/tiles',
+      query: ({ bounds, scenario, projectionYear, droughtMetric }) => {
         const { north, south, east, west } = bounds ?? {
           north: 41,
           south: 40,
           east: -73,
           west: -74
         };
+
         return {
           north,
           south,
@@ -294,15 +300,14 @@ export const climateLayers: ClimateLayerDefinition[] = [
           west,
           scenario,
           year: projectionYear,
-          metric: droughtMetric,
-          resolution
+          metric: droughtMetric
         };
       }
     },
     style: {
       color: '#8b5cf6',
       opacity: 0.75,
-      layerType: 'polygon',
+      layerType: 'raster',
       blendMode: 'normal',
       valueProperty: 'value'
     }
@@ -345,7 +350,39 @@ export const climateLayers: ClimateLayerDefinition[] = [
       blendMode: 'multiply',
       valueProperty: 'elevation'
     }
-  }
+  },
+  // 8. Groundwater Depletion - HEXAGONS on aquifer boundaries
+  // HIDDEN: Awaiting GRACE data access from NASA/Google Earth Engine
+  // Uncomment when access is granted
+  // {
+  //   id: 'groundwater_depletion',
+  //   title: 'Groundwater Depletion',
+  //   description: 'NASA GRACE satellite measurements of groundwater storage changes (2002-2024) displayed as hexagons over major US aquifers. Shows long-term depletion trends in the High Plains (Ogallala), Central Valley, and Mississippi Embayment aquifers.',
+  //   category: 'temperature',
+  //   source: {
+  //     name: 'NASA GRACE via Earth Engine',
+  //     url: 'https://grace.jpl.nasa.gov/'
+  //   },
+  //   defaultActive: false,
+  //   controls: ['groundwaterAquifer', 'groundwaterOpacity'],
+  //   fetch: {
+  //     method: 'GET',
+  //     route: '/api/climate/groundwater',
+  //     query: ({ groundwaterAquifer }) => {
+  //       return {
+  //         aquifer: groundwaterAquifer ?? 'all',
+  //         resolution: 6
+  //       };
+  //     }
+  //   },
+  //   style: {
+  //     color: '#dc2626',
+  //     opacity: 0.7,
+  //     layerType: 'polygon',
+  //     blendMode: 'normal',
+  //     valueProperty: 'trendCmPerYear'
+  //   }
+  // }
 ];
 
 export const getClimateLayer = (id: ClimateLayerId) =>
