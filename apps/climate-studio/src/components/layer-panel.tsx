@@ -572,19 +572,19 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
                     : ""
                 }`}
                 style={!active ? {
-                  backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)'
+                  backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
                 } : undefined}
                 onMouseEnter={(e) => {
                   if (!active) {
                     e.currentTarget.style.backgroundColor = theme === 'light' 
-                      ? 'rgba(255, 255, 255, 0.7)' 
+                      ? 'rgba(255, 255, 255, 1)' 
                       : 'rgba(0, 0, 0, 0.2)'
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!active) {
                     e.currentTarget.style.backgroundColor = theme === 'light' 
-                      ? 'rgba(255, 255, 255, 0.2)' 
+                      ? 'rgba(255, 255, 255, 1)' 
                       : 'rgba(0, 0, 0, 0.2)'
                   }
                 }}

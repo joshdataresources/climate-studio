@@ -140,9 +140,12 @@ export function AppSidebar() {
 
   return (
     <aside className={`app-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
-    <div className={`backdrop-blur-[6px] backdrop-filter relative rounded-br-[12px] rounded-tr-[12px] w-[76px] top-[16px] h-auto pointer-events-auto overflow-hidden ${
-      isDark ? 'bg-[rgba(0,0,0,0.90)]' : 'bg-[rgba(255,255,255,0.90)]'
-    }`}>
+    <div 
+      className={`backdrop-blur-[6px] backdrop-filter relative rounded-br-[12px] rounded-tr-[12px] w-[76px] top-[16px] h-auto pointer-events-auto overflow-hidden ${
+        isDark ? 'bg-[rgba(0,0,0,0.90)]' : 'bg-[rgba(255,255,255,0.90)]'
+      }`}
+      style={{ boxShadow: 'var(--widget-box-shadow)' }}
+    >
       <div className="flex flex-col gap-[8px] isolate items-center p-[8px] relative">
         {/* Logo */}
         <div className="flex flex-col gap-[8px] items-center relative shrink-0">
@@ -195,9 +198,10 @@ export function AppSidebar() {
         aria-hidden="true" 
         className={`absolute border-[1px_1px_1px_0px] border-solid top-0 right-0 bottom-0 left-0 pointer-events-none rounded-br-[12px] rounded-tr-[12px] ${
           isDark 
-            ? 'border-[rgba(255,255,255,0.2)] shadow-[0px_4px_25px_0px_rgba(0,0,0,0.5)]' 
-            : 'border-[rgba(255,255,255,0.5)] shadow-[0px_4px_25px_0px_rgba(0,0,0,0.1)]'
+            ? 'border-[rgba(255,255,255,0.2)]' 
+            : 'border-[rgba(255,255,255,0.5)]'
         }`}
+        style={{ boxShadow: 'var(--widget-box-shadow)' }}
       />
     </div>
     </aside>

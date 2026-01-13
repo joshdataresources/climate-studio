@@ -535,7 +535,7 @@ export function GISAnalysisApp() {
               ) : (
                 <div 
                   className="rounded-md p-2"
-                  style={{ backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)' }}
+                  style={{ backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.2)' }}
                 >
                   <DndContext
                     sensors={sensors}
