@@ -76,8 +76,8 @@ export function DeckGLMap({
   
   // Determine map style based on theme
   const mapStyle = theme === 'light' 
-    ? "mapbox://styles/mapbox/streets-v12"  // Colorful light style with streets and colors
-    : "mapbox://styles/mapbox/satellite-streets-v12"  // Dark satellite imagery with terrain and street labels
+    ? "mapbox://styles/mapbox/outdoors-v12"  // Outdoor style with terrain features
+    : "mapbox://styles/mapbox/dark-v11"  // Dark style
 
   const [viewState, setViewState] = useState<MapViewState>({
     longitude: center.lng,
@@ -927,9 +927,26 @@ export function DeckGLMap({
     return coords
   }
 
-  // Megaregion Center Dots Layer - REMOVED
-  // The dots are now rendered by the MetroTooltipBubble component in the HTML Markers
-  const megaregionCenterDotsLayer = null
+  // Megaregion Center Dots Layer - Always visible for tooltips (invisible dots)
+  const megaregionCenterDotsLayer = useMemo(() => {
+    if (!isLayerActive("megaregion_timeseries")) return null
+
+    const data = megaregionData as any
+    const metros = data.metros.map((metro: any) => ({
+      ...metro,
+      position: [metro.lon, metro.lat]
+    }))
+
+    return new ScatterplotLayer({
+      id: 'megaregion-center-dots',
+      data: metros,
+      getPosition: (d: any) => d.position,
+      getRadius: 15000, // 15km radius for easier hovering
+      getFillColor: [0, 0, 0, 0], // Completely transparent
+      pickable: true,
+      autoHighlight: false
+    })
+  }, [isLayerActive("megaregion_timeseries")])
 
   // Megaregion Population Bubbles Layer (only visible when "Projected Population" is checked)
   const megaregionCirclesLayer = useMemo(() => {
@@ -1384,6 +1401,19 @@ export function DeckGLMap({
                   ${tempData.winter.temp}° <span style="font-size: 18px; font-weight: 600; color: ${tempData.winter.change > 0 ? '#22c55e' : '#666'};">(+${tempData.winter.change}%)</span>
                 </div>
               </div>
+            </div>
+            <div style="${triangleStyle}"></div>
+          </div>
+        `,
+        style: { pointerEvents: 'none' }
+      }
+    } else {
+      // Neither checked - show just the city name
+      return {
+        html: `
+          <div style="${tooltipStyle}">
+            <div style="font-size: 18px; font-weight: 700; color: #1a1a1a;">
+              ${metroName}
             </div>
             <div style="${triangleStyle}"></div>
           </div>

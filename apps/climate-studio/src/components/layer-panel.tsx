@@ -42,7 +42,6 @@ const controlOrder: ClimateControl[] = [
   "droughtMetric",
   "droughtOpacity",
   "megaregionOpacity",
-  "megaregionAnimating",
 ]
 
 type ControlSetters = Pick<
@@ -67,8 +66,7 @@ type ControlSetters = Pick<
   "setMegaregionOpacity" |
   "setMegaregionDataMode" |
   "setMegaregionShowPopulation" |
-  "setMegaregionShowTemperature" |
-  "setMegaregionAnimating"
+  "setMegaregionShowTemperature"
 >
 
 const renderControl = (
@@ -489,20 +487,6 @@ const renderControl = (
           </div>
         </div>
       )
-    case "megaregionAnimating":
-      return (
-        <div key="megaregionAnimating" className="space-y-2">
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={values.megaregionAnimating}
-              onChange={(e) => setters.setMegaregionAnimating(e.target.checked)}
-              className="h-4 w-4 accent-blue-500"
-            />
-            <span className="text-xs">Auto-animate through years</span>
-          </label>
-        </div>
-      )
     default:
       return null
   }
@@ -675,7 +659,6 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
     setMegaregionDataMode: climate.setMegaregionDataMode,
     setMegaregionShowPopulation: climate.setMegaregionShowPopulation,
     setMegaregionShowTemperature: climate.setMegaregionShowTemperature,
-    setMegaregionAnimating: climate.setMegaregionAnimating,
   }
 
   return (
