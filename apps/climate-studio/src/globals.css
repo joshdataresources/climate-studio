@@ -487,6 +487,12 @@ button[role="combobox"][aria-expanded="true"] {
   display: none !important;
 }
 
+/* Mapbox canvas positioning adjustments */
+.mapboxgl-canvas {
+  left: 50px !important;
+  top: 6px !important;
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
  * LIGHT THEME OVERRIDES
  * ═══════════════════════════════════════════════════════════════════════════ */

@@ -59,9 +59,6 @@ export const MetroTooltipBubble: React.FC<MetroTooltipBubbleProps> = ({
     onHoverEnd?.();
   };
 
-  // Don't show tooltip if both sections are hidden
-  const shouldShowTooltip = visible && (showPopulation || showTemperature);
-
   // Styles object
   const styles = {
     container: {
@@ -86,8 +83,8 @@ export const MetroTooltipBubble: React.FC<MetroTooltipBubbleProps> = ({
       bottom: `${dotSize / 2 + 5}px`, // Raised by 5px so arrow tip touches dot center
       left: '50%',
       transform: 'translateX(-50%)',
-      opacity: shouldShowTooltip ? 1 : 0,
-      visibility: (shouldShowTooltip ? 'visible' : 'hidden') as const,
+      opacity: visible ? 1 : 0,
+      visibility: (visible ? 'visible' : 'hidden') as const,
       transition: 'opacity 0.2s ease, visibility 0.2s ease',
       pointerEvents: 'none' as const,
       zIndex: 100,
@@ -223,64 +220,66 @@ export const MetroTooltipBubble: React.FC<MetroTooltipBubbleProps> = ({
 
   return (
     <div style={styles.container}>
-      {/* Tooltip */}
-      <div style={styles.tooltipContainer}>
-        <div
-          style={styles.tooltip}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-        >
-          {/* Header: City and Year */}
-          <div style={styles.header}>
-            <div style={styles.headerContent}>
-              <span style={styles.cityText}>{metroName}</span>
-              <span style={styles.yearText}>{year}</span>
+      {/* Tooltip - Always show container, but only show sections if checkboxes are on */}
+      {visible && (
+        <div style={styles.tooltipContainer}>
+          <div
+            style={styles.tooltip}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            {/* Header: City and Year - Always visible */}
+            <div style={styles.header}>
+              <div style={styles.headerContent}>
+                <span style={styles.cityText}>{metroName}</span>
+                <span style={styles.yearText}>{year}</span>
+              </div>
             </div>
+
+            {/* Section 1: Population Change - Only show if showPopulation is true */}
+            {showPopulation && (
+              <div style={styles.section}>
+                <div style={styles.sectionHeader}>Population Change</div>
+                <div style={styles.sectionContent}>
+                  <div style={styles.valueRow}>
+                    <span style={styles.valueBold}>{population}</span>
+                    <span style={{ ...styles.changeText, color: populationChangeColor }}>
+                      {populationChange}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Section 2: Temperature Change - Only show if showTemperature is true */}
+            {showTemperature && (
+              <div style={styles.section}>
+                <div style={styles.sectionHeader}>Avg Temperature Change</div>
+                <div style={styles.section2Grid}>
+                  {/* Summer */}
+                  <div style={styles.section2Item}>
+                    <div style={styles.label}>Summer</div>
+                    <div style={styles.section2ValueRow}>
+                      <span style={styles.valueBold}>{summerTemp}</span>
+                      <span style={styles.section2Change}>{summerTempChange}</span>
+                    </div>
+                  </div>
+                  {/* Winter */}
+                  <div style={styles.section2Item}>
+                    <div style={styles.label}>Winter</div>
+                    <div style={styles.section2ValueRow}>
+                      <span style={styles.valueBold}>{winterTemp}</span>
+                      <span style={styles.section2Change}>{winterTempChange}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-
-          {/* Section 1: Population Change - Only show if showPopulation is true */}
-          {showPopulation && (
-            <div style={styles.section}>
-              <div style={styles.sectionHeader}>Population Change</div>
-              <div style={styles.sectionContent}>
-                <div style={styles.valueRow}>
-                  <span style={styles.valueBold}>{population}</span>
-                  <span style={{ ...styles.changeText, color: populationChangeColor }}>
-                    {populationChange}
-                  </span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Section 2: Temperature Change - Only show if showTemperature is true */}
-          {showTemperature && (
-            <div style={styles.section}>
-              <div style={styles.sectionHeader}>Avg Temperature Change</div>
-              <div style={styles.section2Grid}>
-                {/* Summer */}
-                <div style={styles.section2Item}>
-                  <div style={styles.label}>Summer</div>
-                  <div style={styles.section2ValueRow}>
-                    <span style={styles.valueBold}>{summerTemp}</span>
-                    <span style={styles.section2Change}>{summerTempChange}</span>
-                  </div>
-                </div>
-                {/* Winter */}
-                <div style={styles.section2Item}>
-                  <div style={styles.label}>Winter</div>
-                  <div style={styles.section2ValueRow}>
-                    <span style={styles.valueBold}>{winterTemp}</span>
-                    <span style={styles.section2Change}>{winterTempChange}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
+          {/* Triangle arrow */}
+          <div style={styles.tooltipArrow} />
         </div>
-        {/* Triangle arrow */}
-        <div style={styles.tooltipArrow} />
-      </div>
+      )}
 
       {/* Fixed dot - centered at the metro location */}
       <div style={styles.dot} />
