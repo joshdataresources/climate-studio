@@ -148,6 +148,7 @@
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 .widget-container {
+  position: relative; /* Required for backdrop-filter to work properly */
   border-radius: var(--widget-border-radius);
   border: 1px solid var(--widget-border);
   background: var(--widget-bg);
@@ -155,8 +156,11 @@
   -webkit-backdrop-filter: var(--widget-backdrop-blur);
   padding: var(--widget-padding);
   box-shadow: var(--widget-box-shadow);
+  /* GPU acceleration for better performance and compatibility */
+  will-change: backdrop-filter;
+  transform: translateZ(0);
   /* Smooth transitions for interactive states */
-  transition: 
+  transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 }
