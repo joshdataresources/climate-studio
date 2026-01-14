@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useMemo, useRef, useState, useCallback, memo } from "react"
-import { Map, useControl, Source, Layer, NavigationControl, Marker } from 'react-map-gl'
+import { Map, useControl, Source, Layer, Marker } from 'react-map-gl'
 import { MapboxOverlay } from '@deck.gl/mapbox'
 import { GeoJsonLayer, BitmapLayer, TextLayer, ScatterplotLayer } from '@deck.gl/layers'
 import { HeatmapLayer } from '@deck.gl/aggregation-layers'
@@ -71,13 +71,22 @@ export function DeckGLMap({
   onMapBoundsChange,
   layerStates,
 }: DeckGLMapProps) {
-  const { controls, isLayerActive } = useClimate()
+  const { controls, isLayerActive, setReliefStyle } = useClimate()
   const { theme } = useTheme()
-  
+
   // Determine map style based on theme
-  const mapStyle = theme === 'light' 
-    ? "mapbox://styles/mapbox/outdoors-v12"  // Outdoor style with terrain features
+  const mapStyle = theme === 'light'
+    ? "mapbox://styles/mapbox/light-v11"  // Monochrome light style
     : "mapbox://styles/mapbox/dark-v11"  // Dark style
+
+  // Auto-select relief style based on theme
+  useEffect(() => {
+    if (theme === 'light') {
+      setReliefStyle('classic')
+    } else {
+      setReliefStyle('dramatic')
+    }
+  }, [theme, setReliefStyle])
 
   const [viewState, setViewState] = useState<MapViewState>({
     longitude: center.lng,
@@ -199,6 +208,13 @@ export function DeckGLMap({
         const el = canvas as HTMLElement
         el.style.zIndex = '10'
       })
+      
+      // Apply positioning adjustments to mapboxgl-canvas elements
+      const mapboxCanvas = container.querySelector('.mapboxgl-canvas') as HTMLElement
+      if (mapboxCanvas) {
+        mapboxCanvas.style.left = '50px'
+        mapboxCanvas.style.top = '6px'
+      }
     }
     
     // Fix z-index after map loads and on style changes
@@ -929,13 +945,22 @@ export function DeckGLMap({
 
   // Megaregion Center Dots Layer - Always visible for tooltips (invisible dots)
   const megaregionCenterDotsLayer = useMemo(() => {
-    if (!isLayerActive("megaregion_timeseries")) return null
+    if (!isLayerActive("megaregion_timeseries")) {
+      console.log('🔵 Center dots: layer not active')
+      return null
+    }
 
     const data = megaregionData as any
     const metros = data.metros.map((metro: any) => ({
       ...metro,
       position: [metro.lon, metro.lat]
     }))
+
+    console.log('🔵 Center dots layer created:', {
+      metroCount: metros.length,
+      showPopulation: controls.megaregionShowPopulation,
+      showTemperature: controls.megaregionShowTemperature
+    })
 
     return new ScatterplotLayer({
       id: 'megaregion-center-dots',
@@ -944,9 +969,11 @@ export function DeckGLMap({
       getRadius: 15000, // 15km radius for easier hovering
       getFillColor: [0, 0, 0, 0], // Completely transparent
       pickable: true,
-      autoHighlight: false
+      autoHighlight: false,
+      radiusMinPixels: 5, // Minimum 5px radius for easier picking
+      radiusMaxPixels: 50 // Max 50px radius
     })
-  }, [isLayerActive("megaregion_timeseries")])
+  }, [isLayerActive("megaregion_timeseries"), controls.megaregionShowPopulation, controls.megaregionShowTemperature])
 
   // Megaregion Population Bubbles Layer (only visible when "Projected Population" is checked)
   const megaregionCirclesLayer = useMemo(() => {
@@ -1021,16 +1048,12 @@ export function DeckGLMap({
       id: 'megaregion-circles',
       data: geojson as any,
       filled: true,
-      stroked: true,
+      stroked: false, // No stroke - solid filled circles
       getFillColor: (d: any) => d.properties.fillColor,
-      getLineColor: (d: any) => d.properties.lineColor,
-      getLineWidth: 2,
-      lineWidthUnits: 'pixels',
       opacity: controls.megaregionOpacity ?? 0.5,
       pickable: true,
       updateTriggers: {
         getFillColor: [displayYear],
-        getLineColor: [displayYear],
         opacity: controls.megaregionOpacity
       }
     })
@@ -1250,6 +1273,14 @@ export function DeckGLMap({
     // Handle both center dots and population bubbles
     if (!object) return null
     const layerId = object.layer?.id
+
+    console.log('🎯 Tooltip hover:', {
+      layerId,
+      hasObject: !!object,
+      showPop: controls.megaregionShowPopulation,
+      showTemp: controls.megaregionShowTemperature
+    })
+
     if (layerId !== 'megaregion-circles' && layerId !== 'megaregion-center-dots') return null
 
     // Get properties - different structure for center dots vs bubbles
@@ -1331,95 +1362,60 @@ export function DeckGLMap({
     const currentYear = controls.projectionYear ?? 2050
     const tempData = getTempData(metroName, currentYear)
 
-    // Format percentage with color and sign
-    const formatPercent = (change: number) => {
-      const sign = change > 0 ? '+' : ''
-      const color = change > 0 ? '#22c55e' : change < 0 ? '#ef4444' : '#666'
-      return `<span style="color: ${color};">(${sign}${change}%)</span>`
+    // Build tooltip sections conditionally
+    let sections: string[] = []
+
+    // Always show city name at the top
+    sections.push(`
+      <div style="font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: ${showPop || showTemp ? '18px' : '0'};">
+        ${metroName}
+      </div>
+    `)
+
+    // Add population section if checkbox is checked
+    if (showPop) {
+      sections.push(`
+        <div style="font-size: 11px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; color: #65758B;">Population Change</div>
+        <div style="font-size: ${showTemp ? '40px' : '48px'}; font-weight: 700; line-height: 1; margin-bottom: ${showTemp ? '18px' : '0'}; color: ${populationChange > 0 ? '#22c55e' : populationChange < 0 ? '#ef4444' : '#666'};">
+          ${previousYear ? `${populationChange > 0 ? '+' : ''}${Math.round(populationChange)}%` : 'N/A'}
+        </div>
+      `)
     }
 
-    if (showPop && !showTemp) {
-      // Population only - ONLY show percentage, no absolute population number
-      return {
-        html: `
-          <div style="${tooltipStyle}">
-            <div style="font-size: 11px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; color: #65758B;">Population Change</div>
-            <div style="font-size: 48px; font-weight: 700; line-height: 1; color: ${populationChange > 0 ? '#22c55e' : populationChange < 0 ? '#ef4444' : '#666'};">
-              ${previousYear ? `${populationChange > 0 ? '+' : ''}${Math.round(populationChange)}%` : 'N/A'}
+    // Add divider if both sections are shown
+    if (showPop && showTemp) {
+      sections.push(`<div style="height: 1px; background: rgba(0,0,0,0.15); margin: 18px 0;"></div>`)
+    }
+
+    // Add temperature section if checkbox is checked
+    if (showTemp) {
+      sections.push(`
+        <div style="font-size: 11px; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #65758B;">Avg Temperature Change</div>
+        <div style="display: flex; flex-direction: column; gap: ${showPop ? '14px' : '16px'};">
+          <div>
+            <div style="font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; color: #888;">Summer</div>
+            <div style="font-size: ${showPop ? '32px' : '36px'}; font-weight: 700; line-height: 1; color: #1a1a1a;">
+              ${tempData.summer.temp}° <span style="font-size: ${showPop ? '18px' : '20px'}; font-weight: 600; color: ${tempData.summer.change > 0 ? '#22c55e' : '#666'};">(+${tempData.summer.change}%)</span>
             </div>
-            <div style="${triangleStyle}"></div>
           </div>
-        `,
-        style: { pointerEvents: 'none' }
-      }
-    } else if (!showPop && showTemp) {
-      // Temperature only
-      return {
-        html: `
-          <div style="${tooltipStyle}">
-            <div style="font-size: 11px; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #65758B;">Avg Temperature Change</div>
-            <div style="display: flex; flex-direction: column; gap: 16px;">
-              <div>
-                <div style="font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; color: #888;">Summer</div>
-                <div style="font-size: 36px; font-weight: 700; line-height: 1; color: #1a1a1a;">
-                  ${tempData.summer.temp}° <span style="font-size: 20px; font-weight: 600; color: ${tempData.summer.change > 0 ? '#22c55e' : '#666'};">(+${tempData.summer.change}%)</span>
-                </div>
-              </div>
-              <div>
-                <div style="font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; color: #888;">Winter</div>
-                <div style="font-size: 36px; font-weight: 700; line-height: 1; color: #1a1a1a;">
-                  ${tempData.winter.temp}° <span style="font-size: 20px; font-weight: 600; color: ${tempData.winter.change > 0 ? '#22c55e' : '#666'};">(+${tempData.winter.change}%)</span>
-                </div>
-              </div>
+          <div>
+            <div style="font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; color: #888;">Winter</div>
+            <div style="font-size: ${showPop ? '32px' : '36px'}; font-weight: 700; line-height: 1; color: #1a1a1a;">
+              ${tempData.winter.temp}° <span style="font-size: ${showPop ? '18px' : '20px'}; font-weight: 600; color: ${tempData.winter.change > 0 ? '#22c55e' : '#666'};">(+${tempData.winter.change}%)</span>
             </div>
-            <div style="${triangleStyle}"></div>
           </div>
-        `,
-        style: { pointerEvents: 'none' }
-      }
-    } else if (showPop && showTemp) {
-      // Both - show ONLY population percentage, then temperature
-      return {
-        html: `
-          <div style="${tooltipStyle}">
-            <div style="font-size: 11px; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; color: #65758B;">Population Change</div>
-            <div style="font-size: 40px; font-weight: 700; line-height: 1; margin-bottom: 18px; color: ${populationChange > 0 ? '#22c55e' : populationChange < 0 ? '#ef4444' : '#666'};">
-              ${previousYear ? `${populationChange > 0 ? '+' : ''}${Math.round(populationChange)}%` : 'N/A'}
-            </div>
-            <div style="height: 1px; background: rgba(0,0,0,0.15); margin: 18px 0;"></div>
-            <div style="font-size: 11px; font-weight: 600; margin-bottom: 14px; text-transform: uppercase; letter-spacing: 0.8px; color: #65758B;">Avg Temperature Change</div>
-            <div style="display: flex; flex-direction: column; gap: 14px;">
-              <div>
-                <div style="font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; color: #888;">Summer</div>
-                <div style="font-size: 32px; font-weight: 700; line-height: 1; color: #1a1a1a;">
-                  ${tempData.summer.temp}° <span style="font-size: 18px; font-weight: 600; color: ${tempData.summer.change > 0 ? '#22c55e' : '#666'};">(+${tempData.summer.change}%)</span>
-                </div>
-              </div>
-              <div>
-                <div style="font-size: 11px; font-weight: 500; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; color: #888;">Winter</div>
-                <div style="font-size: 32px; font-weight: 700; line-height: 1; color: #1a1a1a;">
-                  ${tempData.winter.temp}° <span style="font-size: 18px; font-weight: 600; color: ${tempData.winter.change > 0 ? '#22c55e' : '#666'};">(+${tempData.winter.change}%)</span>
-                </div>
-              </div>
-            </div>
-            <div style="${triangleStyle}"></div>
-          </div>
-        `,
-        style: { pointerEvents: 'none' }
-      }
-    } else {
-      // Neither checked - show just the city name
-      return {
-        html: `
-          <div style="${tooltipStyle}">
-            <div style="font-size: 18px; font-weight: 700; color: #1a1a1a;">
-              ${metroName}
-            </div>
-            <div style="${triangleStyle}"></div>
-          </div>
-        `,
-        style: { pointerEvents: 'none' }
-      }
+        </div>
+      `)
+    }
+
+    return {
+      html: `
+        <div style="${tooltipStyle}">
+          ${sections.join('')}
+          <div style="${triangleStyle}"></div>
+        </div>
+      `,
+      style: { pointerEvents: 'none' }
     }
 
     return null
@@ -1436,7 +1432,7 @@ export function DeckGLMap({
     urbanExpansionLayer,           // 8. Urban Expansion (if present)
     temperatureHeatmapLayer,       // 9. Temperature Heatmap (if present)
     megaregionCirclesLayer,        // 10. Metro Data Statistics population bubbles (conditional)
-    megaregionCenterDotsLayer,     // 11. Metro center dots (always visible when layer active)
+    megaregionCenterDotsLayer,     // 11. Metro center dots (always on top for tooltips)
   ].filter(Boolean)
 
   console.log('🗺️ DeckGL Layers:', {
@@ -1518,7 +1514,6 @@ export function DeckGLMap({
                 display: none !important;
               }
             `}</style>
-            <NavigationControl position="bottom-right" />
             
             {/* DeckGL overlay - renders in separate canvas */}
             <DeckGLOverlay key={`deck-overlay-${layerRefreshKey}`} layers={layers} getTooltip={getTooltip} />
@@ -1530,9 +1525,6 @@ export function DeckGLMap({
 
               const showPop = controls.megaregionShowPopulation
               const showTemp = controls.megaregionShowTemperature
-
-              // Don't show label if both are unchecked
-              if (!showPop && !showTemp) return null
 
               // Get temperature data from real projections
               const getTempData = (metroName: string, year: number, scenario: string) => {
