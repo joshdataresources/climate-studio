@@ -1,0 +1,54 @@
+{
+  "type": "FeatureCollection",
+  "name": "Colorado River Aqueduct",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Colorado River Aqueduct",
+        "operator": "Metropolitan Water District of Southern California",
+        "length_mi": 242,
+        "capacity_cfs": 1600,
+        "start": "Parker Dam",
+        "end": "Lake Mathews, Riverside County"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.157,
+            34.316
+          ],
+          [
+            -114.244,
+            34.235
+          ],
+          [
+            -115.28,
+            33.865
+          ],
+          [
+            -115.422,
+            33.742
+          ],
+          [
+            -116.115,
+            33.707
+          ],
+          [
+            -116.325,
+            33.685
+          ],
+          [
+            -116.592,
+            33.712
+          ],
+          [
+            -117.435,
+            33.865
+          ]
+        ]
+      }
+    }
+  ]
+}

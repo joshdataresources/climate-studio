@@ -77,7 +77,7 @@ class PrecipitationDroughtService:
                     'min': 0,
                     'max': 10,
                     'palette': [
-                        '#ffffff', '#e3f2fd', '#90caf9', '#42a5f5', '#1e88e5', '#1565c0'
+                        '#F5ED53', '#F5F3CE', '#6B9AF3', '#2357D2'
                     ]
                 }
             elif metric == 'drought_index':

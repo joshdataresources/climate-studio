@@ -1,0 +1,140 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "aquifer": "High Plains Aquifer",
+        "trendCmPerYear": -2.3,
+        "totalChangeCm": -45.8,
+        "status": "severe_depletion"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-101.5, 37.0], [-101.5, 37.5], [-101.0, 37.5], [-101.0, 37.0], [-101.5, 37.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aquifer": "High Plains Aquifer",
+        "trendCmPerYear": -1.8,
+        "totalChangeCm": -36.2,
+        "status": "moderate_depletion"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-101.0, 37.0], [-101.0, 37.5], [-100.5, 37.5], [-100.5, 37.0], [-101.0, 37.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aquifer": "High Plains Aquifer",
+        "trendCmPerYear": -2.7,
+        "totalChangeCm": -52.1,
+        "status": "severe_depletion"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-100.5, 37.0], [-100.5, 37.5], [-100.0, 37.5], [-100.0, 37.0], [-100.5, 37.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aquifer": "High Plains Aquifer",
+        "trendCmPerYear": -1.5,
+        "totalChangeCm": -29.5,
+        "status": "moderate_depletion"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-101.5, 37.5], [-101.5, 38.0], [-101.0, 38.0], [-101.0, 37.5], [-101.5, 37.5]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aquifer": "High Plains Aquifer",
+        "trendCmPerYear": -2.1,
+        "totalChangeCm": -41.3,
+        "status": "severe_depletion"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-101.0, 37.5], [-101.0, 38.0], [-100.5, 38.0], [-100.5, 37.5], [-101.0, 37.5]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aquifer": "High Plains Aquifer",
+        "trendCmPerYear": -1.9,
+        "totalChangeCm": -37.8,
+        "status": "moderate_depletion"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-100.5, 37.5], [-100.5, 38.0], [-100.0, 38.0], [-100.0, 37.5], [-100.5, 37.5]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aquifer": "High Plains Aquifer",
+        "trendCmPerYear": -0.8,
+        "totalChangeCm": -15.2,
+        "status": "moderate_depletion"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-101.5, 38.0], [-101.5, 38.5], [-101.0, 38.5], [-101.0, 38.0], [-101.5, 38.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aquifer": "High Plains Aquifer",
+        "trendCmPerYear": -1.2,
+        "totalChangeCm": -23.1,
+        "status": "moderate_depletion"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-101.0, 38.0], [-101.0, 38.5], [-100.5, 38.5], [-100.5, 38.0], [-101.0, 38.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "aquifer": "High Plains Aquifer",
+        "trendCmPerYear": -0.3,
+        "totalChangeCm": -6.1,
+        "status": "stable"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-100.5, 38.0], [-100.5, 38.5], [-100.0, 38.5], [-100.0, 38.0], [-100.5, 38.0]
+        ]]
+      }
+    }
+  ]
+}

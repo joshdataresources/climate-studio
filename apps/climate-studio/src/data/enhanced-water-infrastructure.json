@@ -1,0 +1,804 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.7377,
+            36.0161
+          ],
+          [
+            -114.72,
+            35.98
+          ],
+          [
+            -114.69,
+            35.92
+          ],
+          [
+            -114.65,
+            35.84
+          ],
+          [
+            -114.62,
+            35.72
+          ],
+          [
+            -114.59,
+            35.58
+          ],
+          [
+            -114.58,
+            35.42
+          ],
+          [
+            -114.575,
+            35.3
+          ],
+          [
+            -114.5703,
+            35.2019
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Colorado River below Hoover Dam",
+        "river": "Colorado River",
+        "impact_source": "Hoover Dam",
+        "flow_status": "reduced",
+        "description": "Flow heavily regulated by Hoover Dam; reduced from natural levels",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.5703,
+            35.2019
+          ],
+          [
+            -114.54,
+            35.12
+          ],
+          [
+            -114.51,
+            35.02
+          ],
+          [
+            -114.48,
+            34.92
+          ],
+          [
+            -114.42,
+            34.78
+          ],
+          [
+            -114.36,
+            34.62
+          ],
+          [
+            -114.28,
+            34.48
+          ],
+          [
+            -114.18,
+            34.36
+          ],
+          [
+            -114.1364,
+            34.2939
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Colorado River below Davis Dam",
+        "river": "Colorado River",
+        "impact_source": "Davis Dam / Parker Dam",
+        "flow_status": "reduced",
+        "description": "Sequential dam regulation; significant flow reduction",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.1364,
+            34.2939
+          ],
+          [
+            -114.2,
+            34.2
+          ],
+          [
+            -114.25,
+            34.08
+          ],
+          [
+            -114.32,
+            33.96
+          ],
+          [
+            -114.38,
+            33.82
+          ],
+          [
+            -114.42,
+            33.68
+          ],
+          [
+            -114.44,
+            33.48
+          ],
+          [
+            -114.45,
+            33.28
+          ],
+          [
+            -114.4533,
+            32.8756
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Colorado River below Parker Dam",
+        "river": "Colorado River",
+        "impact_source": "Parker Dam (CAP/CRA extraction)",
+        "flow_status": "reduced",
+        "description": "Major diversions to CAP and Colorado River Aqueduct; 50% flow reduction",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.4533,
+            32.8756
+          ],
+          [
+            -114.5,
+            32.84
+          ],
+          [
+            -114.58,
+            32.79
+          ],
+          [
+            -114.65,
+            32.75
+          ],
+          [
+            -114.7214,
+            32.7186
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Colorado River below Imperial Dam",
+        "river": "Colorado River",
+        "impact_source": "Imperial Dam (All-American Canal)",
+        "flow_status": "seasonal",
+        "description": "All-American Canal diversion; seasonal flow",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.7214,
+            32.7186
+          ],
+          [
+            -114.75,
+            32.58
+          ],
+          [
+            -114.78,
+            32.42
+          ],
+          [
+            -114.8,
+            32.24
+          ],
+          [
+            -114.82,
+            32.06
+          ],
+          [
+            -114.85,
+            31.87
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Colorado River Delta",
+        "river": "Colorado River",
+        "impact_source": "Morelos Dam (last diversion)",
+        "flow_status": "dry",
+        "description": "River rarely reaches ocean; delta ecosystem severely impacted",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -111.1575,
+            33.6733
+          ],
+          [
+            -111.25,
+            33.64
+          ],
+          [
+            -111.36,
+            33.6
+          ],
+          [
+            -111.48,
+            33.56
+          ],
+          [
+            -111.6,
+            33.53
+          ],
+          [
+            -111.72,
+            33.49
+          ],
+          [
+            -111.82,
+            33.46
+          ],
+          [
+            -111.9,
+            33.44
+          ],
+          [
+            -111.97,
+            33.42
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Salt River below Roosevelt Dam",
+        "river": "Salt River",
+        "impact_source": "Roosevelt Dam",
+        "flow_status": "dry",
+        "description": "River runs completely dry; all water diverted to Phoenix metro",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -111.97,
+            33.42
+          ],
+          [
+            -112.15,
+            33.39
+          ],
+          [
+            -112.4,
+            33.37
+          ],
+          [
+            -112.7,
+            33.32
+          ],
+          [
+            -113.0,
+            33.18
+          ],
+          [
+            -113.3,
+            32.98
+          ],
+          [
+            -113.7,
+            32.82
+          ],
+          [
+            -114.1,
+            32.74
+          ],
+          [
+            -114.4533,
+            32.72
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Gila River lower reach",
+        "river": "Gila River",
+        "impact_source": "Multiple diversions",
+        "flow_status": "seasonal",
+        "description": "Ephemeral flow; seasonal water only",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -107.1825,
+            33.1528
+          ],
+          [
+            -107.16,
+            33.04
+          ],
+          [
+            -107.12,
+            32.88
+          ],
+          [
+            -107.05,
+            32.68
+          ],
+          [
+            -106.95,
+            32.5
+          ],
+          [
+            -106.85,
+            32.38
+          ],
+          [
+            -106.78,
+            32.3
+          ],
+          [
+            -106.65,
+            32.08
+          ],
+          [
+            -106.55,
+            31.92
+          ],
+          [
+            -106.43,
+            31.77
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Rio Grande below Elephant Butte Dam",
+        "river": "Rio Grande",
+        "impact_source": "Elephant Butte Dam",
+        "flow_status": "seasonal",
+        "description": "Often runs dry in summer; irrigation withdrawal exceeds inflow",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.1364,
+            34.2939
+          ],
+          [
+            -113.95,
+            34.22
+          ],
+          [
+            -113.78,
+            34.18
+          ],
+          [
+            -113.6,
+            34.14
+          ],
+          [
+            -113.42,
+            34.08
+          ],
+          [
+            -113.24,
+            34.02
+          ],
+          [
+            -113.06,
+            33.96
+          ],
+          [
+            -112.88,
+            33.9
+          ],
+          [
+            -112.7,
+            33.84
+          ],
+          [
+            -112.52,
+            33.78
+          ],
+          [
+            -112.34,
+            33.72
+          ],
+          [
+            -112.16,
+            33.66
+          ],
+          [
+            -112.074,
+            33.4484
+          ],
+          [
+            -111.95,
+            33.32
+          ],
+          [
+            -111.82,
+            33.18
+          ],
+          [
+            -111.68,
+            33.04
+          ],
+          [
+            -111.54,
+            32.9
+          ],
+          [
+            -111.4,
+            32.76
+          ],
+          [
+            -111.26,
+            32.62
+          ],
+          [
+            -111.12,
+            32.48
+          ],
+          [
+            -110.9747,
+            32.2226
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Central Arizona Project (CAP) - Main Canal",
+        "infrastructure_type": "aqueduct",
+        "system": "CAP",
+        "source": "Colorado River (Lake Havasu / Parker Dam)",
+        "destination": "Phoenix and Tucson",
+        "description": "336-mile canal bringing Colorado River water to Phoenix and Tucson"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.1364,
+            34.2939
+          ],
+          [
+            -114.35,
+            34.18
+          ],
+          [
+            -114.52,
+            34.07
+          ],
+          [
+            -114.72,
+            33.95
+          ],
+          [
+            -114.95,
+            33.82
+          ],
+          [
+            -115.18,
+            33.70
+          ],
+          [
+            -115.42,
+            33.64
+          ],
+          [
+            -115.68,
+            33.62
+          ],
+          [
+            -115.95,
+            33.64
+          ],
+          [
+            -116.22,
+            33.69
+          ],
+          [
+            -116.48,
+            33.76
+          ],
+          [
+            -116.72,
+            33.84
+          ],
+          [
+            -116.95,
+            33.93
+          ],
+          [
+            -117.16,
+            34.02
+          ],
+          [
+            -117.36,
+            34.08
+          ],
+          [
+            -117.56,
+            34.11
+          ],
+          [
+            -117.76,
+            34.11
+          ],
+          [
+            -117.96,
+            34.08
+          ],
+          [
+            -118.16,
+            34.06
+          ],
+          [
+            -118.2437,
+            34.0522
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Colorado River Aqueduct (CRA)",
+        "infrastructure_type": "aqueduct",
+        "system": "CRA",
+        "source": "Colorado River (Lake Havasu / Parker Dam)",
+        "destination": "Los Angeles, San Diego, Southern California",
+        "description": "242-mile aqueduct supplying Southern California"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.4533,
+            32.8756
+          ],
+          [
+            -114.6,
+            32.84
+          ],
+          [
+            -114.75,
+            32.8
+          ],
+          [
+            -114.9,
+            32.76
+          ],
+          [
+            -115.05,
+            32.72
+          ],
+          [
+            -115.2,
+            32.68
+          ],
+          [
+            -115.35,
+            32.64
+          ],
+          [
+            -115.5,
+            32.6
+          ],
+          [
+            -115.5631,
+            32.792
+          ]
+        ]
+      },
+      "properties": {
+        "name": "All-American Canal",
+        "infrastructure_type": "aqueduct",
+        "system": "All-American",
+        "source": "Colorado River (Imperial Dam)",
+        "destination": "Imperial Valley agriculture",
+        "description": "82-mile canal serving Imperial Valley"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.1364,
+            34.2939
+          ],
+          [
+            -114.1364,
+            34.2939
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Parker Dam to CAP Intake",
+        "connection_type": "dam_to_canal",
+        "from": "Parker Dam",
+        "to": "CAP Canal",
+        "description": "Connection point: Colorado River water enters CAP",
+        "infrastructure_type": "connection"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -112.16,
+            33.66
+          ],
+          [
+            -112.074,
+            33.4484
+          ]
+        ]
+      },
+      "properties": {
+        "name": "CAP to Phoenix",
+        "connection_type": "canal_to_city",
+        "from": "CAP Canal",
+        "to": "Phoenix",
+        "description": "CAP water delivery to Phoenix metro",
+        "infrastructure_type": "connection"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -111.12,
+            32.48
+          ],
+          [
+            -110.9747,
+            32.2226
+          ]
+        ]
+      },
+      "properties": {
+        "name": "CAP to Tucson",
+        "connection_type": "canal_to_city",
+        "from": "CAP Canal",
+        "to": "Tucson",
+        "description": "CAP water delivery to Tucson",
+        "infrastructure_type": "connection"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.1364,
+            34.2939
+          ],
+          [
+            -114.48,
+            34.18
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Parker Dam to CRA Intake",
+        "connection_type": "dam_to_canal",
+        "from": "Parker Dam",
+        "to": "Colorado River Aqueduct",
+        "description": "Connection point: Colorado River water enters CRA",
+        "infrastructure_type": "connection"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.4533,
+            32.8756
+          ],
+          [
+            -114.6,
+            32.84
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Imperial Dam to All-American Canal",
+        "connection_type": "dam_to_canal",
+        "from": "Imperial Dam",
+        "to": "All-American Canal",
+        "description": "Connection point: Colorado River water enters All-American Canal",
+        "infrastructure_type": "connection"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -111.1575,
+            33.6733
+          ],
+          [
+            -111.97,
+            33.42
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Roosevelt Dam to Phoenix (SRP)",
+        "connection_type": "dam_to_city",
+        "from": "Roosevelt Dam",
+        "to": "Phoenix (via SRP)",
+        "description": "Salt River Project water delivery to Phoenix",
+        "infrastructure_type": "connection"
+      }
+    }
+  ],
+  "metadata": {
+    "source": "Enhanced water infrastructure dataset",
+    "description": "Detailed impacted rivers, complete aqueduct routes, and infrastructure connections",
+    "flow_status_legend": {
+      "natural": "Unimpacted natural flow",
+      "reduced": "50%+ reduction from historical levels",
+      "seasonal": "Flow only during wet season or flood releases",
+      "dry": "Perennially dry; complete diversion"
+    },
+    "connection_types": {
+      "dam_to_canal": "Water extraction point from dam/reservoir to canal",
+      "canal_to_city": "Water delivery from canal to urban area",
+      "dam_to_city": "Direct water delivery from dam to city"
+    }
+  }
+}

@@ -7,6 +7,7 @@ import { AppLayout } from './components/layout/AppLayout'
 import { GISAnalysisApp } from './components/GISAnalysisApp'
 import WaterAccessView from './components/WaterAccessView'
 import DesignSystemPage from './design-system/DesignSystemPage'
+import GRACEDemo from './pages/GRACEDemo'
 
 export default function App() {
   return (
@@ -16,9 +17,16 @@ export default function App() {
           <ClimateProvider>
             <MapProvider>
               <Routes>
-                {/* Hidden design system page - no layout wrapper */}
-                <Route path="/design-system" element={<DesignSystemPage />} />
-                
+                {/* Design system page - with layout wrapper to show sidebar */}
+                <Route path="/design-system" element={
+                  <AppLayout>
+                    <DesignSystemPage />
+                  </AppLayout>
+                } />
+
+                {/* GRACE groundwater demo - fullscreen, no layout */}
+                <Route path="/grace-demo" element={<GRACEDemo />} />
+
                 {/* Main app routes with layout */}
                 <Route path="*" element={
                   <AppLayout>

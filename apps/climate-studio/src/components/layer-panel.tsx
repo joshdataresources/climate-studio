@@ -545,7 +545,9 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
           </label>
         </div>
         <div className="mt-3 space-y-3">
-          {climateLayers.map(layer => {
+          {climateLayers
+            .filter(layer => layer.id !== 'precipitation_drought') // Exclude precipitation_drought - moved to Water Access
+            .map(layer => {
             const active = isLayerActive(layer.id)
             return (
               <label
@@ -671,7 +673,9 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
 
       {/* Individual Layer Controls - Accordion panels */}
       <div className="space-y-3">
-        {activeLayersWithControls.map(layer => {
+        {activeLayersWithControls
+          .filter(layer => layer.id !== 'precipitation_drought') // Exclude precipitation_drought - moved to Water Access
+          .map(layer => {
           // Auto-close panels that only have opacity controls or topographic relief
           const hasOnlyOpacity = layer.controls.length === 1 &&
             (layer.controls[0] === 'seaLevelOpacity' ||
@@ -783,7 +787,9 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
                   <div className="space-y-1">
                     {climate.controls.droughtMetric === 'precipitation' && (
                       <>
-                        <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#ffffff] via-[#e3f2fd] via-[#90caf9] via-[#42a5f5] via-[#1e88e5] via-[#1565c0] to-[#0d47a1]" />
+                        <div className="h-3 w-full rounded-full" style={{
+                          background: 'linear-gradient(90deg, #F5ED53 0%, #F5F3CE 50%, #6B9AF3 75%, #2357D2 100%)'
+                        }} />
                         <div className="flex justify-between text-[10px] text-muted-foreground">
                           <span>0</span>
                           <span>2</span>

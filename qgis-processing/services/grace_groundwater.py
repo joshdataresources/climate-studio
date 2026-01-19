@@ -23,7 +23,7 @@ class GRACEGroundwaterService:
 
     # GRACE dataset uses Liquid Water Equivalent thickness (cm)
     # Positive values = water gain, Negative values = water loss
-    # Using MASCON_CRI - newer dataset that supersedes V04/LAND
+    # Using MASCON (Mass Concentration) solution for better spatial localization
     DATASET_ID = 'NASA/GRACE/MASS_GRIDS_V04/MASCON_CRI'
 
     # Use lwe_thickness band (Liquid Water Equivalent thickness in cm)
@@ -47,7 +47,7 @@ class GRACEGroundwaterService:
         self.initialized = False
         self.ee_project = ee_project
         self._initialize_ee()
-        self._load_aquifer_boundaries()
+
 
     def _initialize_ee(self):
         """Initialize Google Earth Engine"""
@@ -61,6 +61,10 @@ class GRACEGroundwaterService:
         except Exception as e:
             logger.error(f"Failed to initialize Earth Engine: {e}")
             self.initialized = False
+
+        # Only load boundaries if initialized
+        if self.initialized:
+            self._load_aquifer_boundaries()
 
     def _load_aquifer_boundaries(self):
         """Load aquifer boundary GeoJSON files"""
@@ -76,6 +80,116 @@ class GRACEGroundwaterService:
                     logger.info(f"Loaded aquifer boundary: {aquifer_id}")
             else:
                 logger.warning(f"Aquifer boundary file not found: {filepath}")
+
+    def get_groundwater_depletion_viewport(self, bounds, resolution=7):
+        """
+        Get groundwater storage change for any viewport bounds (entire US or zoomed region)
+
+        Args:
+            bounds: Dict with 'west', 'east', 'south', 'north' keys (longitude, latitude in degrees)
+            resolution: H3 hexagon resolution (6-8 recommended, lower=larger hexagons)
+
+        Returns:
+            GeoJSON FeatureCollection with hexagonal groundwater depletion data
+        """
+        if not self.initialized:
+            logger.error("Earth Engine not initialized")
+            raise RuntimeError("Earth Engine not initialized")
+
+        try:
+            logger.info(f"Fetching GRACE data for viewport bounds: {bounds}, resolution: {resolution}")
+
+            # Create geometry from bounds
+            viewport_geom = ee.Geometry.Rectangle([
+                bounds['west'], bounds['south'],
+                bounds['east'], bounds['north']
+            ])
+
+            # Get GRACE dataset
+            grace = ee.ImageCollection(self.DATASET_ID) \
+                     .select(self.BAND_NAME) \
+                     .filterDate(self.START_DATE, self.END_DATE)
+
+            # Calculate baseline (first 5 years: 2002-2007)
+            baseline = grace.filterDate('2002-04-01', '2007-04-01').mean()
+
+            # Calculate recent period (last 5 years: 2019-2024)
+            recent = grace.filterDate('2019-01-01', '2024-09-30').mean()
+
+            # Calculate change (recent - baseline)
+            change = recent.subtract(baseline)
+
+            # Calculate annual trend using linear regression
+            def add_time_band(image):
+                time = ee.Date(image.get('system:time_start')).difference(
+                    ee.Date('2002-01-01'), 'year'
+                )
+                return image.addBands(ee.Image(time).rename('time').float())
+
+            grace_with_time = grace.map(add_time_band)
+            linear_fit = grace_with_time.select(['time', self.BAND_NAME]).reduce(ee.Reducer.linearFit())
+            trend = linear_fit.select('scale')
+
+            # Generate hexagons for viewport
+            hex_ids = self._get_hexagons_in_bounds(bounds, resolution)
+            logger.info(f"Generated {len(hex_ids)} hexagons for viewport")
+
+            # Limit to prevent Earth Engine timeout
+            if len(hex_ids) > 5000:
+                logger.warning(f"Too many hexagons ({len(hex_ids)}), sampling to 5000")
+                import random
+                hex_ids = random.sample(hex_ids, 5000)
+
+            # Convert hexagons to EE features
+            hex_features = []
+            for hex_id in hex_ids:
+                boundary = h3.cell_to_boundary(hex_id)
+                coords = [[lng, lat] for lat, lng in boundary]
+                coords.append(coords[0])
+
+                hex_features.append(ee.Feature(
+                    ee.Geometry.Polygon([coords]),
+                    {'hexId': hex_id}
+                ))
+
+            hex_fc = ee.FeatureCollection(hex_features)
+
+            # Get trend and change for each hexagon
+            hex_trends = trend.reduceRegions(
+                collection=hex_fc,
+                reducer=ee.Reducer.mean(),
+                scale=111320
+            )
+
+            hex_changes = change.reduceRegions(
+                collection=hex_fc,
+                reducer=ee.Reducer.mean(),
+                scale=111320
+            )
+
+            # Fetch results
+            logger.info("Fetching results from Earth Engine...")
+            trend_features = hex_trends.getInfo()['features']
+            change_features = hex_changes.getInfo()['features']
+
+            change_dict = {f['properties']['hexId']: f['properties'].get('mean')
+                          for f in change_features}
+
+            # Convert to GeoJSON
+            hexagons = self._convert_to_geojson(
+                trend_features,
+                change_dict,
+                'viewport'
+            )
+
+            logger.info(f"✅ GRACE viewport data: {len(hexagons['features'])} hexagons")
+            return hexagons
+
+        except Exception as e:
+            import traceback
+            logger.error(f"🚨 GRACE viewport fetch failed: {str(e)}")
+            logger.error(f"Traceback:\n{traceback.format_exc()}")
+            raise
 
     def get_groundwater_depletion(self, aquifer_id='high_plains', resolution=6):
         """
@@ -212,6 +326,109 @@ class GRACEGroundwaterService:
             logger.error(f"Traceback:\n{traceback.format_exc()}")
             logger.error("=" * 80)
             raise
+
+    def get_tile_url(self, year=None, season=None, color_scheme='red_blue'):
+        """
+        Get Earth Engine tile URL for GRACE groundwater visualization
+        
+        Args:
+            year: Year to visualize (int)
+            season: 'spring', 'summer', 'autumn', 'winter' or None (annual average)
+            color_scheme: 'red_blue' (default)
+            
+        Returns:
+            Dict with 'tile_url' and 'metadata', or None if failed
+        """
+        if not self.initialized:
+            logger.warning("Earth Engine not initialized, cannot generate tiles")
+            return None
+            
+        try:
+            # Determine date range
+            if year is None:
+                year = 2017 # Default to 2017 (known good data year)
+
+            if season == 'spring':
+                start_date = f'{year}-03-01'
+                end_date = f'{year}-05-31'
+                time_label = f"Spring {year}"
+            elif season == 'summer':
+                start_date = f'{year}-06-01'
+                end_date = f'{year}-08-31'
+                time_label = f"Summer {year}"
+            elif season == 'autumn':
+                start_date = f'{year}-09-01'
+                end_date = f'{year}-11-30'
+                time_label = f"Autumn {year}"
+            elif season == 'winter':
+                start_date = f'{year}-12-01'
+                end_date = f'{year+1}-02-28'
+                time_label = f"Winter {year}"
+            else:
+                # Annual average
+                start_date = f'{year}-01-01'
+                end_date = f'{year}-12-31'
+                time_label = f"Annual Average {year}"
+                
+            # Get GRACE dataset
+            # Use mascon solution for better spatial localization
+            grace = ee.ImageCollection(self.DATASET_ID) \
+                     .select(self.BAND_NAME) \
+                     .filterDate(start_date, end_date)
+            
+            # Reduce to single image (mean)
+            image = grace.mean()
+            
+            # Clip to United States
+            us_boundary = ee.FeatureCollection("USDOS/LSIB_SIMPLE/2017") \
+                .filter(ee.Filter.eq("country_na", "United States"))
+            
+            image = image.clip(us_boundary)
+            
+            # Visualization parameters
+            # Range: -20 to +20 cm liquid water equivalent thickness
+            vis_params = {
+                'min': -20, 
+                'max': 20,
+                'palette': ['#b2182b', '#ef8a62', '#fddbc7', '#f7f7f7', '#d1e5f0', '#67a9cf', '#2166ac']
+            }
+            
+            # Get map ID
+            map_id = image.getMapId(vis_params)
+            tile_url = map_id['tile_fetcher'].url_format
+            
+            return {
+                'tile_url': tile_url,
+                'metadata': {
+                    'source': 'NASA GRACE via Earth Engine',
+                    'dataset': self.DATASET_ID,
+                    'time_label': time_label,
+                    'unit': 'cm (Liquid Water Equivalent)',
+                    'description': 'Water Storage Anomaly (Red=Loss, Blue=Gain)'
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Error generating GRACE tile URL: {e}")
+            return None
+
+    def _get_hexagons_in_bounds(self, bounds, resolution):
+        """Generate hexagons within viewport bounds (no filtering, for nationwide coverage)"""
+        # Grid tessellation approach
+        edge_length_map = {5: 0.075, 6: 0.028, 7: 0.010, 8: 0.004}
+        step = edge_length_map.get(resolution, 0.01) * 0.4
+
+        hex_set = set()
+        lat = bounds['south']
+        while lat <= bounds['north']:
+            lon = bounds['west']
+            while lon <= bounds['east']:
+                hex_id = h3.latlng_to_cell(lat, lon, resolution)
+                hex_set.add(hex_id)
+                lon += step
+            lat += step
+
+        return list(hex_set)
 
     def _get_hexagons_in_aquifer(self, aquifer_geom, bbox, resolution):
         """Generate hexagons within aquifer boundary"""

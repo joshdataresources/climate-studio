@@ -1,0 +1,279 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.7377,
+            36.0161
+          ],
+          [
+            -114.5703,
+            35.2019
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Colorado River below Hoover Dam",
+        "river": "Colorado River",
+        "impact_source": "Hoover Dam",
+        "flow_status": "reduced",
+        "description": "Flow heavily regulated by Hoover Dam; reduced from natural levels",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.5703,
+            35.2019
+          ],
+          [
+            -114.1364,
+            34.2939
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Colorado River below Davis Dam",
+        "river": "Colorado River",
+        "impact_source": "Davis Dam / Parker Dam",
+        "flow_status": "reduced",
+        "description": "Sequential dam regulation; significant flow reduction",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.1364,
+            34.2939
+          ],
+          [
+            -114.4533,
+            32.8756
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Colorado River below Parker Dam",
+        "river": "Colorado River",
+        "impact_source": "Parker Dam (CAP/CRA extraction)",
+        "flow_status": "reduced",
+        "description": "Major diversions to CAP and Colorado River Aqueduct; 50% flow reduction",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.4533,
+            32.8756
+          ],
+          [
+            -114.7214,
+            32.7186
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Colorado River below Imperial Dam",
+        "river": "Colorado River",
+        "impact_source": "Imperial Dam (All-American Canal)",
+        "flow_status": "seasonal",
+        "description": "All-American Canal diversion; seasonal flow",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -114.7214,
+            32.7186
+          ],
+          [
+            -114.85,
+            31.87
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Colorado River Delta",
+        "river": "Colorado River",
+        "impact_source": "Morelos Dam (last diversion)",
+        "flow_status": "dry",
+        "description": "River rarely reaches ocean; delta ecosystem severely impacted",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -111.1575,
+            33.6733
+          ],
+          [
+            -111.65,
+            33.52
+          ],
+          [
+            -111.97,
+            33.42
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Salt River below Roosevelt Dam",
+        "river": "Salt River",
+        "impact_source": "Roosevelt Dam",
+        "flow_status": "dry",
+        "description": "River runs completely dry; all water diverted to Phoenix metro",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -111.97,
+            33.42
+          ],
+          [
+            -112.5,
+            33.38
+          ],
+          [
+            -113.3,
+            32.9
+          ],
+          [
+            -114.4533,
+            32.72
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Gila River lower reach",
+        "river": "Gila River",
+        "impact_source": "Multiple diversions",
+        "flow_status": "seasonal",
+        "description": "Ephemeral flow; seasonal water only",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -107.1825,
+            33.1528
+          ],
+          [
+            -106.75,
+            32.37
+          ],
+          [
+            -106.43,
+            31.77
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Rio Grande below Elephant Butte Dam",
+        "river": "Rio Grande",
+        "impact_source": "Elephant Butte Dam",
+        "flow_status": "seasonal",
+        "description": "Often runs dry in summer; irrigation withdrawal exceeds inflow",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -109.4244,
+            40.9186
+          ],
+          [
+            -109.54,
+            40.45
+          ],
+          [
+            -109.85,
+            39.7
+          ]
+        ]
+      },
+      "properties": {
+        "name": "Green River below Flaming Gorge Dam",
+        "river": "Green River",
+        "impact_source": "Flaming Gorge Dam",
+        "flow_status": "reduced",
+        "description": "Flow regulated for power generation; reduced from natural",
+        "infrastructure_type": "impacted_river"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -107.6242,
+            36.8106
+          ],
+          [
+            -108.3,
+            36.7
+          ],
+          [
+            -109.4,
+            36.98
+          ]
+        ]
+      },
+      "properties": {
+        "name": "San Juan River below Navajo Dam",
+        "river": "San Juan River",
+        "impact_source": "Navajo Dam",
+        "flow_status": "reduced",
+        "description": "Flow regulation for irrigation and flood control",
+        "infrastructure_type": "impacted_river"
+      }
+    }
+  ],
+  "metadata": {
+    "source": "Compiled from USGS streamflow data and dam impact studies",
+    "description": "River segments with flow impacted by dam operations",
+    "flow_status_legend": {
+      "natural": "Unimpacted natural flow",
+      "reduced": "50%+ reduction from historical levels",
+      "seasonal": "Flow only during wet season or flood releases",
+      "dry": "Perennially dry; complete diversion"
+    }
+  }
+}

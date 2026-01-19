@@ -1,0 +1,392 @@
+{
+  "metadata": {
+    "generated": "2026-01-14T20:09:34.721Z",
+    "purpose": "Template for manually curating river-metro connections",
+    "instructions": [
+      "1. Research each metro city's primary water sources",
+      "2. Identify rivers that supply >20% of city's water",
+      "3. Focus on rivers with 500-10,000 CFS flow (significant connecting rivers)",
+      "4. Note if river is upstream of city (critical for water access)",
+      "5. Estimate dependency percentage and water access risk"
+    ]
+  },
+  "metros": [
+    {
+      "metro_name": "Chicago",
+      "metro_lat": 41.8781,
+      "metro_lon": -87.6298,
+      "metro_population_2025": 9500000,
+      "metro_region": "great_lakes",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Houston",
+      "metro_lat": 29.7604,
+      "metro_lon": -95.3698,
+      "metro_population_2025": 7200000,
+      "metro_region": "texas",
+      "nearby_rivers": [
+        {
+          "river": "Trinity River",
+          "distance": 89.59991478371307,
+          "closestPoint": {
+            "lat": 30.5,
+            "lon": -95,
+            "distance": 89.59991478371307
+          },
+          "flow": 6000,
+          "riverTier": "significant"
+        }
+      ],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Miami",
+      "metro_lat": 25.7617,
+      "metro_lon": -80.1918,
+      "metro_population_2025": 6200000,
+      "metro_region": "florida",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Boston",
+      "metro_lat": 42.3601,
+      "metro_lon": -71.0589,
+      "metro_population_2025": 4900000,
+      "metro_region": "northeast",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "San Francisco",
+      "metro_lat": 37.7749,
+      "metro_lon": -122.4194,
+      "metro_population_2025": 4700000,
+      "metro_region": "norcal",
+      "nearby_rivers": [
+        {
+          "river": "Sacramento River",
+          "distance": 59.84258262409873,
+          "closestPoint": {
+            "lat": 38,
+            "lon": -121.8,
+            "distance": 59.84258262409873
+          },
+          "flow": 23000,
+          "riverTier": "major"
+        }
+      ],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Detroit",
+      "metro_lat": 42.3314,
+      "metro_lon": -83.0458,
+      "metro_population_2025": 4300000,
+      "metro_region": "great_lakes",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Seattle",
+      "metro_lat": 47.6062,
+      "metro_lon": -122.3321,
+      "metro_population_2025": 4000000,
+      "metro_region": "northwest",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Tampa",
+      "metro_lat": 27.9506,
+      "metro_lon": -82.4572,
+      "metro_population_2025": 3200000,
+      "metro_region": "florida",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Charlotte",
+      "metro_lat": 35.2271,
+      "metro_lon": -80.8431,
+      "metro_population_2025": 2700000,
+      "metro_region": "southeast",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Orlando",
+      "metro_lat": 28.5383,
+      "metro_lon": -81.3792,
+      "metro_population_2025": 2700000,
+      "metro_region": "florida",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "San Antonio",
+      "metro_lat": 29.4241,
+      "metro_lon": -98.4936,
+      "metro_population_2025": 2600000,
+      "metro_region": "texas",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Pittsburgh",
+      "metro_lat": 40.4406,
+      "metro_lon": -79.9959,
+      "metro_population_2025": 2400000,
+      "metro_region": "great_lakes",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Austin",
+      "metro_lat": 30.2672,
+      "metro_lon": -97.7431,
+      "metro_population_2025": 2400000,
+      "metro_region": "texas",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Columbus",
+      "metro_lat": 39.9612,
+      "metro_lon": -82.9988,
+      "metro_population_2025": 2200000,
+      "metro_region": "midwest",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Cincinnati",
+      "metro_lat": 39.1031,
+      "metro_lon": -84.512,
+      "metro_population_2025": 2200000,
+      "metro_region": "midwest",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Kansas City",
+      "metro_lat": 39.0997,
+      "metro_lon": -94.5786,
+      "metro_population_2025": 2200000,
+      "metro_region": "plains",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Cleveland",
+      "metro_lat": 41.4993,
+      "metro_lon": -81.6944,
+      "metro_population_2025": 2100000,
+      "metro_region": "great_lakes",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Indianapolis",
+      "metro_lat": 39.7684,
+      "metro_lon": -86.1581,
+      "metro_population_2025": 2100000,
+      "metro_region": "midwest",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Nashville",
+      "metro_lat": 36.1627,
+      "metro_lon": -86.7816,
+      "metro_population_2025": 2000000,
+      "metro_region": "southeast",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "San Jose",
+      "metro_lat": 37.3382,
+      "metro_lon": -121.8863,
+      "metro_population_2025": 2000000,
+      "metro_region": "norcal",
+      "nearby_rivers": [
+        {
+          "river": "Sacramento River",
+          "distance": 73.97977331919041,
+          "closestPoint": {
+            "lat": 38,
+            "lon": -121.8,
+            "distance": 73.97977331919041
+          },
+          "flow": 23000,
+          "riverTier": "major"
+        }
+      ],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Milwaukee",
+      "metro_lat": 43.0389,
+      "metro_lon": -87.9065,
+      "metro_population_2025": 1600000,
+      "metro_region": "great_lakes",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Jacksonville",
+      "metro_lat": 30.3322,
+      "metro_lon": -81.6557,
+      "metro_population_2025": 1600000,
+      "metro_region": "florida",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Raleigh",
+      "metro_lat": 35.7796,
+      "metro_lon": -78.6382,
+      "metro_population_2025": 1500000,
+      "metro_region": "southeast",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Oklahoma City",
+      "metro_lat": 35.4676,
+      "metro_lon": -97.5164,
+      "metro_population_2025": 1400000,
+      "metro_region": "plains",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Salt Lake City",
+      "metro_lat": 40.7608,
+      "metro_lon": -111.891,
+      "metro_population_2025": 1300000,
+      "metro_region": "mountain",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Richmond",
+      "metro_lat": 37.5407,
+      "metro_lon": -77.436,
+      "metro_population_2025": 1300000,
+      "metro_region": "southeast",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Louisville",
+      "metro_lat": 38.2527,
+      "metro_lon": -85.7585,
+      "metro_population_2025": 1300000,
+      "metro_region": "southeast",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Buffalo",
+      "metro_lat": 42.8864,
+      "metro_lon": -78.8784,
+      "metro_population_2025": 1200000,
+      "metro_region": "great_lakes",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Greenville SC",
+      "metro_lat": 34.8526,
+      "metro_lon": -82.394,
+      "metro_population_2025": 1000000,
+      "metro_region": "southeast",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Greensboro",
+      "metro_lat": 36.0726,
+      "metro_lon": -79.792,
+      "metro_population_2025": 800000,
+      "metro_region": "southeast",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    },
+    {
+      "metro_name": "Colorado Springs",
+      "metro_lat": 38.8339,
+      "metro_lon": -104.8214,
+      "metro_population_2025": 750000,
+      "metro_region": "mountain",
+      "nearby_rivers": [],
+      "manual_research_needed": true,
+      "suggested_rivers": [],
+      "notes": ""
+    }
+  ]
+}

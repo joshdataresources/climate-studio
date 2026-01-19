@@ -13,9 +13,10 @@ const SVG_PATHS = {
   view: "M3 11V3H11V11H3ZM3 21V13H11V21H3ZM13 11V3H21V11H13ZM13 21V13H21V21H13ZM5 9H9V5H5V9ZM15 9H19V5H15V9ZM15 19H19V15H15V19ZM5 19H9V15H5V19Z",
   lightUI: "M11 5V1H13V5H11ZM17.65 7.75L16.275 6.375L19.075 3.5L20.475 4.925L17.65 7.75ZM19 13V11H23V13H19ZM11 23V19H13V23H11ZM6.35 7.7L3.5 4.925L4.925 3.525L7.75 6.35L6.35 7.7ZM19.05 20.5L16.275 17.625L17.625 16.275L20.475 19.025L19.05 20.5ZM1 13V11H5V13H1ZM4.925 20.5L3.525 19.075L6.325 16.275L7.05 16.95L7.775 17.65L4.925 20.5ZM12 18C10.3333 18 8.91667 17.4167 7.75 16.25C6.58333 15.0833 6 13.6667 6 12C6 10.3333 6.58333 8.91667 7.75 7.75C8.91667 6.58333 10.3333 6 12 6C13.6667 6 15.0833 6.58333 16.25 7.75C17.4167 8.91667 18 10.3333 18 12C18 13.6667 17.4167 15.0833 16.25 16.25C15.0833 17.4167 13.6667 18 12 18ZM12 16C13.1 16 14.0417 15.6083 14.825 14.825C15.6083 14.0417 16 13.1 16 12C16 10.9 15.6083 9.95833 14.825 9.175C14.0417 8.39167 13.1 8 12 8C10.9 8 9.95833 8.39167 9.175 9.175C8.39167 9.95833 8 10.9 8 12C8 13.1 8.39167 14.0417 9.175 14.825C9.95833 15.6083 10.9 16 12 16Z",
   darkUI: "M12.0777 21.6C10.7362 21.6 9.47858 21.3445 8.30475 20.8335C7.13108 20.3225 6.109 19.6318 5.2385 18.7615C4.36817 17.891 3.6775 16.8689 3.1665 15.6953C2.6555 14.5214 2.4 13.2638 2.4 11.9223C2.4 9.59075 3.13333 7.52917 4.6 5.7375C6.06667 3.94583 7.96667 2.83333 10.3 2.4C10.0167 4.05 10.1125 5.61667 10.5875 7.1C11.0625 8.58333 11.875 9.9 13.025 11.05C14.1417 12.1667 15.4583 12.9583 16.975 13.425C18.4917 13.8917 20.0333 13.9833 21.6 13.7C21.2 16 20.0958 17.8917 18.2875 19.375C16.4792 20.8583 14.4092 21.6 12.0777 21.6ZM12.075 19.8C13.5417 19.8 14.9083 19.425 16.175 18.675C17.4417 17.925 18.4 16.9083 19.05 15.625C17.6667 15.5417 16.3458 15.2125 15.0875 14.6375C13.8292 14.0625 12.7083 13.2833 11.725 12.3C10.725 11.3 9.94167 10.175 9.375 8.925C8.80833 7.675 8.475 6.35 8.375 4.95C7.09167 5.63333 6.075 6.6015 5.325 7.8545C4.575 9.10767 4.2 10.4645 4.2 11.925C4.2 14.1125 4.96567 15.9718 6.497 17.503C8.02817 19.0343 9.8875 19.8 12.075 19.8Z",
+  designSystem: "M3 3h8v8H3V3zm0 10h8v8H3v-8zM13 3h8v8h-8V3zm0 10h8v8h-8v-8z",
 }
 
-type MenuItemId = 'climate' | 'waterAccess'
+type MenuItemId = 'climate' | 'waterAccess' | 'designSystem'
 
 interface MenuItemProps {
   id: MenuItemId
@@ -31,6 +32,7 @@ interface ToggleItemProps {
   label: string
   isActive: boolean
   onClick: () => void
+  disabled?: boolean
 }
 
 // Menu item component (mutually exclusive selection)
@@ -68,17 +70,18 @@ function MenuItem({ icon, label, isActive, onClick }: MenuItemProps) {
 }
 
 // Toggle item component (independent on/off)
-function ToggleItem({ icon, label, isActive, onClick }: ToggleItemProps) {
+function ToggleItem({ icon, label, isActive, onClick, disabled = false }: ToggleItemProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
   
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       className={`content-stretch flex flex-col gap-[4px] items-center justify-center px-[5px] py-[10px] relative rounded-[8px] shrink-0 transition-colors ${
         isActive 
           ? 'bg-[rgba(90,124,236,0.1)] border border-[#5a7cec]' 
-          : 'hover:bg-[rgba(90,124,236,0.05)]'
+          : disabled ? '' : 'hover:bg-[rgba(90,124,236,0.05)]'
       }`}
       aria-pressed={isActive}
     >
@@ -86,14 +89,20 @@ function ToggleItem({ icon, label, isActive, onClick }: ToggleItemProps) {
         <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">
           <path 
             d={icon} 
-            fill={isActive ? '#5A7CEC' : (isDark ? '#D1D5DB' : '#697487')} 
+            fill={disabled 
+              ? (isDark ? '#9CA3AF' : '#A3A9B3')
+              : (isActive ? '#5A7CEC' : (isDark ? '#D1D5DB' : '#697487'))} 
+            opacity={disabled ? 0.5 : 1}
           />
         </svg>
       </div>
       <p 
         className={`font-['Inter',sans-serif] font-semibold leading-[normal] not-italic relative shrink-0 text-[10px] text-center w-[50px] ${
-          isActive ? 'text-[#5a7cec]' : (isDark ? 'text-white' : 'text-black')
+          disabled 
+            ? (isDark ? '#9CA3AF' : '#A3A9B3')
+            : (isActive ? 'text-[#5a7cec]' : (isDark ? 'text-white' : 'text-black'))
         }`}
+        style={{ opacity: disabled ? 0.5 : 1 }}
       >
         {label}
       </p>
@@ -135,29 +144,35 @@ export function AppSidebar() {
     if (location.pathname === '/water-access') {
       return 'waterAccess'
     }
+    if (location.pathname === '/design-system') {
+      return 'designSystem'
+    }
     return 'climate' // Default to climate for /, /climate-studio, etc.
   }
 
   const activeMenuItem = getActiveMenuItem()
+  const isDesignSystemPage = location.pathname === '/design-system'
 
   const handleMenuItemClick = (item: MenuItemId) => {
     if (item === 'climate') {
       navigate('/climate-studio')
     } else if (item === 'waterAccess') {
       navigate('/water-access')
+    } else if (item === 'designSystem') {
+      navigate('/design-system')
     }
   }
 
   const menuItems = [
-    { 
-      id: 'climate' as MenuItemId, 
-      icon: SVG_PATHS.climate, 
+    {
+      id: 'climate' as MenuItemId,
+      icon: SVG_PATHS.climate,
       label: 'Climate',
       path: '/climate-studio'
     },
-    { 
-      id: 'waterAccess' as MenuItemId, 
-      icon: SVG_PATHS.waterAccess, 
+    {
+      id: 'waterAccess' as MenuItemId,
+      icon: SVG_PATHS.waterAccess,
       label: 'Water Access',
       path: '/water-access'
     },
@@ -213,14 +228,20 @@ export function AppSidebar() {
               {/* Zoom In */}
               <button
                 onClick={handleZoomIn}
-                className="content-stretch flex flex-col gap-[4px] items-center justify-center px-[5px] py-[8px] relative rounded-[8px] shrink-0 transition-colors hover:bg-[rgba(90,124,236,0.05)]"
+                disabled={isDesignSystemPage}
+                className={`content-stretch flex flex-col gap-[4px] items-center justify-center px-[5px] py-[8px] relative rounded-[8px] shrink-0 transition-colors ${
+                  isDesignSystemPage ? '' : 'hover:bg-[rgba(90,124,236,0.05)]'
+                }`}
                 title="Zoom In"
               >
                 <div className="relative shrink-0 size-[24px] flex items-center justify-center">
                   <ZoomIn 
                     className="size-full" 
                     style={{ 
-                      color: isDark ? '#D1D5DB' : '#697487'
+                      color: isDesignSystemPage 
+                        ? (isDark ? '#9CA3AF' : '#A3A9B3') 
+                        : (isDark ? '#D1D5DB' : '#697487'),
+                      opacity: isDesignSystemPage ? 0.5 : 1
                     }} 
                   />
                 </div>
@@ -229,14 +250,20 @@ export function AppSidebar() {
               {/* Zoom Out */}
               <button
                 onClick={handleZoomOut}
-                className="content-stretch flex flex-col gap-[4px] items-center justify-center px-[5px] py-[8px] relative rounded-[8px] shrink-0 transition-colors hover:bg-[rgba(90,124,236,0.05)]"
+                disabled={isDesignSystemPage}
+                className={`content-stretch flex flex-col gap-[4px] items-center justify-center px-[5px] py-[8px] relative rounded-[8px] shrink-0 transition-colors ${
+                  isDesignSystemPage ? '' : 'hover:bg-[rgba(90,124,236,0.05)]'
+                }`}
                 title="Zoom Out"
               >
                 <div className="relative shrink-0 size-[24px] flex items-center justify-center">
                   <ZoomOut 
                     className="size-full" 
                     style={{ 
-                      color: isDark ? '#D1D5DB' : '#697487'
+                      color: isDesignSystemPage 
+                        ? (isDark ? '#9CA3AF' : '#A3A9B3') 
+                        : (isDark ? '#D1D5DB' : '#697487'),
+                      opacity: isDesignSystemPage ? 0.5 : 1
                     }} 
                   />
                 </div>
@@ -254,10 +281,11 @@ export function AppSidebar() {
           {/* Panels toggle - Hide/Show panels */}
           <button
             onClick={togglePanels}
+            disabled={isDesignSystemPage}
             className={`content-stretch flex flex-col gap-[4px] items-center justify-center px-[5px] py-[10px] relative rounded-[8px] shrink-0 transition-colors ${
               panelsCollapsed 
                 ? 'bg-[rgba(90,124,236,0.1)] border border-[#5a7cec]' 
-                : 'hover:bg-[rgba(90,124,236,0.05)]'
+                : isDesignSystemPage ? '' : 'hover:bg-[rgba(90,124,236,0.05)]'
             }`}
             aria-pressed={panelsCollapsed}
             title={panelsCollapsed ? "Show panels" : "Hide panels"}
@@ -266,14 +294,20 @@ export function AppSidebar() {
               <LayoutGrid 
                 className="size-full" 
                 style={{ 
-                  color: panelsCollapsed ? '#5A7CEC' : (isDark ? '#D1D5DB' : '#697487')
+                  color: isDesignSystemPage 
+                    ? (isDark ? '#9CA3AF' : '#A3A9B3') 
+                    : panelsCollapsed ? '#5A7CEC' : (isDark ? '#D1D5DB' : '#697487'),
+                  opacity: isDesignSystemPage ? 0.5 : 1
                 }} 
               />
             </div>
             <p 
               className={`font-['Inter',sans-serif] font-semibold leading-[normal] not-italic relative shrink-0 text-[10px] text-center w-[50px] ${
-                panelsCollapsed ? 'text-[#5a7cec]' : (isDark ? 'text-white' : 'text-black')
+                isDesignSystemPage 
+                  ? (isDark ? '#9CA3AF' : '#A3A9B3') 
+                  : panelsCollapsed ? 'text-[#5a7cec]' : (isDark ? 'text-white' : 'text-black')
               }`}
+              style={{ opacity: isDesignSystemPage ? 0.5 : 1 }}
             >
               {panelsCollapsed ? 'Show' : 'Hide'}
             </p>
@@ -285,6 +319,7 @@ export function AppSidebar() {
             label={theme === 'light' ? 'Light UI' : 'Dark UI'}
             isActive={false}
             onClick={toggleTheme}
+            disabled={isDesignSystemPage}
           />
         </div>
       </div>

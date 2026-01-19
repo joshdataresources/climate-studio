@@ -1,0 +1,57 @@
+{
+  "totalMetros": 50,
+  "connectedCount": 19,
+  "unconnectedCount": 31,
+  "topUnconnected": [
+    {
+      "name": "Chicago",
+      "population": 9500000,
+      "region": "great_lakes"
+    },
+    {
+      "name": "Houston",
+      "population": 7200000,
+      "region": "texas"
+    },
+    {
+      "name": "Miami",
+      "population": 6200000,
+      "region": "florida"
+    },
+    {
+      "name": "Boston",
+      "population": 4900000,
+      "region": "northeast"
+    },
+    {
+      "name": "San Francisco",
+      "population": 4700000,
+      "region": "norcal"
+    },
+    {
+      "name": "Detroit",
+      "population": 4300000,
+      "region": "great_lakes"
+    },
+    {
+      "name": "Seattle",
+      "population": 4000000,
+      "region": "northwest"
+    },
+    {
+      "name": "Tampa",
+      "population": 3200000,
+      "region": "florida"
+    },
+    {
+      "name": "Charlotte",
+      "population": 2700000,
+      "region": "southeast"
+    },
+    {
+      "name": "Orlando",
+      "population": 2700000,
+      "region": "florida"
+    }
+  ]
+}
