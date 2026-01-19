@@ -176,112 +176,120 @@ export function GroundwaterDetailsPanel({ selectedAquifer, projectionYear, onClo
         </Button>
       </div>
 
-      {/* Status Badge with Percentage */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 6,
-        padding: '6px 12px',
-        borderRadius: 6,
-        background: `${status.color}20`,
-        border: `1px solid ${status.color}40`,
-        marginBottom: 16,
-        width: '100%'
-      }}>
-        {status.severity === 'critical' && <AlertTriangle size={14} style={{ color: status.color }} />}
-        {status.severity === 'stressed' && <TrendingDown size={14} style={{ color: status.color }} />}
-        {(status.severity === 'moderate' || status.severity === 'stable') && <Droplets size={14} style={{ color: status.color }} />}
-        <span style={{ 
-          fontSize: 12, 
-          fontWeight: 600, 
-          color: status.color 
-        }}>
-          {status.label} • {status.percentage.toFixed(1)}% of 2025 Capacity
-        </span>
-      </div>
-
-      {/* Metrics Grid */}
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="p-3 rounded-lg bg-background/50 border border-border/60">
-          <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider">
-            Volume ({projectionYear})
+      {/* Two Column Layout */}
+      <div className="grid grid-cols-2 gap-4">
+        {/* Left Column */}
+        <div className="space-y-3">
+          {/* Status Badge with Percentage */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 6,
+            padding: '6px 12px',
+            borderRadius: 6,
+            background: `${status.color}20`,
+            border: `1px solid ${status.color}40`,
+            width: '100%'
+          }}>
+            {status.severity === 'critical' && <AlertTriangle size={14} style={{ color: status.color }} />}
+            {status.severity === 'stressed' && <TrendingDown size={14} style={{ color: status.color }} />}
+            {(status.severity === 'moderate' || status.severity === 'stable') && <Droplets size={14} style={{ color: status.color }} />}
+            <span style={{ 
+              fontSize: 12, 
+              fontWeight: 600, 
+              color: status.color 
+            }}>
+              {status.label} • {status.percentage.toFixed(1)}% of 2025 Capacity
+            </span>
           </div>
-          <div className="text-sm font-semibold" style={{ color: status.color }}>
-            {formatVolume(currentVolume)}
+
+          {/* Metrics Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="p-3 rounded-lg bg-background/50 border border-border/60">
+              <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider">
+                Volume ({projectionYear})
+              </div>
+              <div className="text-sm font-semibold" style={{ color: status.color }}>
+                {formatVolume(currentVolume)}
+              </div>
+            </div>
+            
+            <div className="p-3 rounded-lg bg-background/50 border border-border/60">
+              <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider">
+                2025 Baseline
+              </div>
+              <div className="text-sm font-semibold text-green-500">
+                {formatVolume(baselineVolume)}
+              </div>
+            </div>
+          </div>
+
+          {/* Capacity Gauge */}
+          <div className="p-3 rounded-lg bg-background/50 border border-border/60">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Gauge size={14} className="text-muted-foreground" />
+              <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
+                Capacity Remaining
+              </span>
+            </div>
+            {/* Progress bar */}
+            <div className="h-2 rounded bg-background/80 overflow-hidden">
+              <div 
+                className="h-full rounded transition-all duration-300"
+                style={{
+                  width: `${Math.min(100, status.percentage)}%`,
+                  background: `linear-gradient(90deg, ${status.color}, ${status.color}cc)`
+                }}
+              />
+            </div>
+            <div className="flex justify-between mt-1.5 text-[10px] text-muted-foreground/60">
+              <span>0%</span>
+              <span>50%</span>
+              <span>100%</span>
+            </div>
           </div>
         </div>
-        
-        <div className="p-3 rounded-lg bg-background/50 border border-border/60">
-          <div className="text-[11px] text-muted-foreground mb-1 uppercase tracking-wider">
-            2025 Baseline
+
+        {/* Right Column */}
+        <div className="space-y-3">
+          {/* Year Outlook */}
+          <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
+            <div className="flex items-center gap-1.5 mb-2">
+              <Calendar size={14} className="text-blue-500" />
+              <span className="text-xs font-semibold text-blue-500">
+                {projectionYear} Projection
+              </span>
+            </div>
+            <p className="m-0 text-[13px] text-foreground/80 leading-relaxed">
+              {status.percentage >= 98 
+                ? 'Aquifer capacity remains stable with sustainable recharge rates.'
+                : status.percentage >= 90
+                ? 'Moderate depletion detected. Monitoring recommended for sustainable usage.'
+                : status.percentage >= 75
+                ? 'Significant depletion observed. Conservation measures may be needed.'
+                : 'Critical depletion level. Immediate intervention recommended to prevent irreversible damage.'
+              }
+            </p>
           </div>
-          <div className="text-sm font-semibold text-green-500">
-            {formatVolume(baselineVolume)}
-          </div>
-        </div>
-      </div>
 
-      {/* Capacity Gauge */}
-      <div className="p-3 rounded-lg bg-background/50 border border-border/60 mb-4">
-        <div className="flex items-center gap-1.5 mb-2">
-          <Gauge size={14} className="text-muted-foreground" />
-          <span className="text-[11px] text-muted-foreground uppercase tracking-wider">
-            Capacity Remaining
-          </span>
-        </div>
-        {/* Progress bar */}
-        <div className="h-2 rounded bg-background/80 overflow-hidden">
-          <div 
-            className="h-full rounded transition-all duration-300"
-            style={{
-              width: `${Math.min(100, status.percentage)}%`,
-              background: `linear-gradient(90deg, ${status.color}, ${status.color}cc)`
-            }}
-          />
-        </div>
-        <div className="flex justify-between mt-1.5 text-[10px] text-muted-foreground/60">
-          <span>0%</span>
-          <span>50%</span>
-          <span>100%</span>
-        </div>
-      </div>
-
-      {/* Year Outlook */}
-      <div className="p-3 rounded-lg bg-blue-500/10 border border-blue-500/20">
-        <div className="flex items-center gap-1.5 mb-2">
-          <Calendar size={14} className="text-blue-500" />
-          <span className="text-xs font-semibold text-blue-500">
-            {projectionYear} Projection
-          </span>
-        </div>
-        <p className="m-0 text-[13px] text-foreground/80 leading-relaxed">
-          {status.percentage >= 98 
-            ? 'Aquifer capacity remains stable with sustainable recharge rates.'
-            : status.percentage >= 90
-            ? 'Moderate depletion detected. Monitoring recommended for sustainable usage.'
-            : status.percentage >= 75
-            ? 'Significant depletion observed. Conservation measures may be needed.'
-            : 'Critical depletion level. Immediate intervention recommended to prevent irreversible damage.'
-          }
-        </p>
-      </div>
-
-      {/* Additional Info */}
-      {(selectedAquifer.recharge_rate || selectedAquifer.consumption_factor) && (
-        <div className="mt-3 flex flex-col gap-1">
-          {selectedAquifer.recharge_rate && (
-            <div className="text-[11px] text-muted-foreground">
-              Recharge: <span className="text-foreground/70">{selectedAquifer.recharge_rate}</span>
+          {/* Additional Info */}
+          {(selectedAquifer.recharge_rate || selectedAquifer.consumption_factor) && (
+            <div className="flex flex-col gap-1">
+              {selectedAquifer.recharge_rate && (
+                <div className="text-[11px] text-muted-foreground">
+                  Recharge: <span className="text-foreground/70">{selectedAquifer.recharge_rate}</span>
+                </div>
+              )}
+              {selectedAquifer.consumption_factor && (
+                <div className="text-[11px] text-muted-foreground">
+                  Consumption: <span className="text-foreground/70">{selectedAquifer.consumption_factor}</span>
+                </div>
+              )}
             </div>
           )}
-          {selectedAquifer.consumption_factor && (
-            <div className="text-[11px] text-muted-foreground">
-              Consumption: <span className="text-foreground/70">{selectedAquifer.consumption_factor}</span>
-            </div>
-          )}
         </div>
-      )}
+      </div>
     </div>
   )
 }

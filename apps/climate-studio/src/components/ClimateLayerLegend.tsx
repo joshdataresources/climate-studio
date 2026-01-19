@@ -9,7 +9,7 @@ interface LegendItem {
 const LEGEND_CONFIGS: Record<string, LegendItem> = {
   precipitation: {
     label: 'Precipitation',
-    gradient: 'linear-gradient(to right, #ffffff, #e3f2fd, #90caf9, #42a5f5, #1e88e5, #1565c0, #0d47a1)',
+    gradient: 'linear-gradient(90deg, #F5ED53 0%, #F5F3CE 50%, #6B9AF3 75%, #2357D2 100%)',
     range: '0 - 10 mm/day'
   },
   drought_index: {

@@ -750,7 +750,7 @@ export default function DesignSystemPage() {
   
   return (
     <div 
-      className={`min-h-screen transition-colors duration-300 ${
+      className={`h-full w-full overflow-y-auto ${
         theme === 'light' 
           ? 'bg-[#f8fafc] text-[#0f172a]' 
           : 'bg-background text-foreground'
@@ -758,7 +758,7 @@ export default function DesignSystemPage() {
       data-theme={theme}
     >
       {/* Header */}
-      <header className={`sticky top-0 z-50 backdrop-blur-xl border-b transition-colors duration-300 ${
+      <header className={`sticky top-0 z-50 backdrop-blur-xl border-b ${
         theme === 'light'
           ? 'bg-white/80 border-slate-200'
           : 'bg-background/80 border-white/10'

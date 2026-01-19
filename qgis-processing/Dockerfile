@@ -30,7 +30,8 @@ RUN pip3 install --upgrade pip && \
     s3fs \
     boto3 \
     dask \
-    python-dotenv
+    python-dotenv \
+    earthengine-api
 
 # Set up QGIS environment
 ENV PYTHONPATH="${PYTHONPATH}:/usr/share/qgis/python:/usr/lib/python3/dist-packages"

@@ -21,13 +21,13 @@ interface SavedView {
 }
 
 const DEFAULT_VIEWPORT: ViewportState = {
-  center: { lat: 38.9072, lng: -77.0369 }, // Washington DC - East Coast
-  zoom: 6.0,
+  center: { lat: 37.5, lng: -112.05 }, // Southwest US: centered to show NV, UT, western CO, AZ
+  zoom: 5.5,
 }
 
 const DEFAULT_SAVED_VIEW: SavedView = {
-  id: 'dc-east-coast',
-  name: 'East Coast',
+  id: 'south-west',
+  name: 'South West',
   viewport: DEFAULT_VIEWPORT,
   activeLayerIds: ['topographic_relief'],
   controls: {}
@@ -71,15 +71,7 @@ export function MapProvider({ children }: MapProviderProps) {
   const [searchResults, setSearchResults] = useState<GeoSearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [savedViews, setSavedViewsInternal] = useState<SavedView[]>(() => {
-    try {
-      const stored = localStorage.getItem('climate-saved-views')
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (parsed && parsed.length > 0) return parsed
-      }
-    } catch (e) {
-      console.error('Failed to load saved views:', e)
-    }
+    // Always start fresh with the South West view as default
     return [DEFAULT_SAVED_VIEW]
   })
   

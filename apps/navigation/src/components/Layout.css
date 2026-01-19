@@ -23,6 +23,8 @@
   overflow: hidden;
   position: relative;
   height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 /* Sidebar is always 76px, no responsive changes needed */

@@ -1,0 +1,310 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.7377,
+          36.0161
+        ]
+      },
+      "properties": {
+        "name": "Hoover Dam",
+        "reservoir": "Lake Mead",
+        "river": "Colorado River",
+        "year_completed": 1936,
+        "height_ft": 726,
+        "storage_acre_ft": 26134000,
+        "capacity_mw": 2080,
+        "serves": "Las Vegas, Los Angeles, Phoenix, Tucson",
+        "downstream_impact": "severe",
+        "impact_description": "Controls flow to Lower Colorado River; major downstream reduction",
+        "connected_infrastructure": "Central Arizona Project, Colorado River Aqueduct, All-American Canal",
+        "dam_type": "gravity arch",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -111.4842,
+          36.9364
+        ]
+      },
+      "properties": {
+        "name": "Glen Canyon Dam",
+        "reservoir": "Lake Powell",
+        "river": "Colorado River",
+        "year_completed": 1966,
+        "height_ft": 710,
+        "storage_acre_ft": 24322000,
+        "capacity_mw": 1320,
+        "serves": "Phoenix, Tucson, Las Vegas, Los Angeles, San Diego",
+        "downstream_impact": "severe",
+        "impact_description": "Major flow regulation; feeds Lake Mead and Lower Basin",
+        "connected_infrastructure": "Central Arizona Project, Colorado River Aqueduct",
+        "dam_type": "concrete arch",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -111.1575,
+          33.6733
+        ]
+      },
+      "properties": {
+        "name": "Roosevelt Dam",
+        "reservoir": "Theodore Roosevelt Lake",
+        "river": "Salt River",
+        "year_completed": 1911,
+        "height_ft": 357,
+        "storage_acre_ft": 1653043,
+        "capacity_mw": 36,
+        "serves": "Phoenix, Mesa, Tempe, Scottsdale",
+        "downstream_impact": "severe",
+        "impact_description": "Salt River runs dry downstream; water diverted to Phoenix metro",
+        "connected_infrastructure": "Salt River Project canals",
+        "dam_type": "cyclopean masonry arch",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.5703,
+          35.2019
+        ]
+      },
+      "properties": {
+        "name": "Davis Dam",
+        "reservoir": "Lake Mohave",
+        "river": "Colorado River",
+        "year_completed": 1951,
+        "height_ft": 200,
+        "storage_acre_ft": 1818300,
+        "capacity_mw": 255,
+        "serves": "Bullhead City, Laughlin",
+        "downstream_impact": "moderate",
+        "impact_description": "Regulates flow from Hoover Dam; afterbay for power generation",
+        "connected_infrastructure": "Colorado River Aqueduct intake",
+        "dam_type": "gravity",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.1364,
+          34.2939
+        ]
+      },
+      "properties": {
+        "name": "Parker Dam",
+        "reservoir": "Lake Havasu",
+        "river": "Colorado River",
+        "year_completed": 1938,
+        "height_ft": 320,
+        "storage_acre_ft": 647000,
+        "capacity_mw": 120,
+        "serves": "Phoenix, Tucson, Los Angeles, San Diego",
+        "downstream_impact": "severe",
+        "impact_description": "Diverts to CAP and Colorado River Aqueduct; major extraction point",
+        "connected_infrastructure": "Central Arizona Project, Colorado River Aqueduct",
+        "dam_type": "concrete arch",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.4533,
+          32.8756
+        ]
+      },
+      "properties": {
+        "name": "Imperial Dam",
+        "reservoir": "Senator Wash Reservoir",
+        "river": "Colorado River",
+        "year_completed": 1938,
+        "height_ft": 40,
+        "storage_acre_ft": 62000,
+        "capacity_mw": 0,
+        "serves": "Imperial Valley, Yuma, Coachella Valley",
+        "downstream_impact": "severe",
+        "impact_description": "Diverts to All-American Canal and Gila Gravity Main Canal",
+        "connected_infrastructure": "All-American Canal, Gila Gravity Main Canal",
+        "dam_type": "gravity",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -122.4197,
+          40.7181
+        ]
+      },
+      "properties": {
+        "name": "Shasta Dam",
+        "reservoir": "Shasta Lake",
+        "river": "Sacramento River",
+        "year_completed": 1945,
+        "height_ft": 602,
+        "storage_acre_ft": 4552000,
+        "capacity_mw": 710,
+        "serves": "Sacramento, San Francisco Bay Area, Central Valley",
+        "downstream_impact": "moderate",
+        "impact_description": "Regulates Sacramento River flow; supports California Aqueduct",
+        "connected_infrastructure": "California Aqueduct",
+        "dam_type": "concrete gravity",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -121.4856,
+          39.5386
+        ]
+      },
+      "properties": {
+        "name": "Oroville Dam",
+        "reservoir": "Lake Oroville",
+        "river": "Feather River",
+        "year_completed": 1968,
+        "height_ft": 770,
+        "storage_acre_ft": 3537577,
+        "capacity_mw": 819,
+        "serves": "Sacramento, San Francisco Bay Area, Southern California",
+        "downstream_impact": "moderate",
+        "impact_description": "Major California water project storage; supplies State Water Project",
+        "connected_infrastructure": "California Aqueduct",
+        "dam_type": "earthfill",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -109.4244,
+          40.9186
+        ]
+      },
+      "properties": {
+        "name": "Flaming Gorge Dam",
+        "reservoir": "Flaming Gorge Reservoir",
+        "river": "Green River",
+        "year_completed": 1964,
+        "height_ft": 502,
+        "storage_acre_ft": 3788700,
+        "capacity_mw": 152,
+        "serves": "Salt Lake City region",
+        "downstream_impact": "moderate",
+        "impact_description": "Regulates Green River flow into Colorado River system",
+        "connected_infrastructure": "None",
+        "dam_type": "concrete thin-arch",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -107.6242,
+          36.8106
+        ]
+      },
+      "properties": {
+        "name": "Navajo Dam",
+        "reservoir": "Navajo Lake",
+        "river": "San Juan River",
+        "year_completed": 1963,
+        "height_ft": 402,
+        "storage_acre_ft": 1696000,
+        "capacity_mw": 0,
+        "serves": "Farmington, Navajo Nation",
+        "downstream_impact": "moderate",
+        "impact_description": "Regulates San Juan River tributary to Colorado River",
+        "connected_infrastructure": "None",
+        "dam_type": "earthfill",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -107.1825,
+          33.1528
+        ]
+      },
+      "properties": {
+        "name": "Elephant Butte Dam",
+        "reservoir": "Elephant Butte Reservoir",
+        "river": "Rio Grande",
+        "year_completed": 1916,
+        "height_ft": 301,
+        "storage_acre_ft": 2065010,
+        "capacity_mw": 24,
+        "serves": "El Paso, Las Cruces, Albuquerque",
+        "downstream_impact": "severe",
+        "impact_description": "Rio Grande often runs dry downstream; irrigation diversions",
+        "connected_infrastructure": "None",
+        "dam_type": "concrete gravity",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -114.7214,
+          32.7186
+        ]
+      },
+      "properties": {
+        "name": "Morelos Dam",
+        "reservoir": "None (diversion structure)",
+        "river": "Colorado River",
+        "year_completed": 1950,
+        "height_ft": 30,
+        "storage_acre_ft": 0,
+        "capacity_mw": 0,
+        "serves": "Mexicali Valley (Mexico)",
+        "downstream_impact": "extreme",
+        "impact_description": "Last diversion before Colorado River delta; river rarely reaches ocean",
+        "connected_infrastructure": "Mexican irrigation canals",
+        "dam_type": "diversion",
+        "infrastructure_type": "dam"
+      }
+    }
+  ],
+  "metadata": {
+    "source": "Compiled from USGS, Bureau of Reclamation, and public dam data",
+    "description": "Major water infrastructure dams in southwestern US",
+    "count": 12
+  }
+}

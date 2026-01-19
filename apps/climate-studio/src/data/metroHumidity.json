@@ -1,0 +1,406 @@
+{
+  "type": "FeatureCollection",
+  "name": "Metro Humidity Statistics",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "city": "Baltimore",
+        "lat": 39.2904,
+        "lng": -76.6122,
+        "humidity_projections": {
+          "2025": {
+            "peak_humidity": 48,
+            "wet_bulb_events": 12,
+            "humid_temp": 120,
+            "days_over_100": 32
+          },
+          "2035": {
+            "peak_humidity": 52,
+            "wet_bulb_events": 18,
+            "humid_temp": 125,
+            "days_over_100": 45
+          },
+          "2050": {
+            "peak_humidity": 58,
+            "wet_bulb_events": 28,
+            "humid_temp": 132,
+            "days_over_100": 62
+          },
+          "2075": {
+            "peak_humidity": 65,
+            "wet_bulb_events": 42,
+            "humid_temp": 140,
+            "days_over_100": 85
+          },
+          "2100": {
+            "peak_humidity": 72,
+            "wet_bulb_events": 58,
+            "humid_temp": 148,
+            "days_over_100": 110
+          },
+          "2125": {
+            "peak_humidity": 78,
+            "wet_bulb_events": 75,
+            "humid_temp": 156,
+            "days_over_100": 135
+          }
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-76.6122, 39.2904]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "city": "Houston",
+        "lat": 29.7604,
+        "lng": -95.3698,
+        "humidity_projections": {
+          "2025": {
+            "peak_humidity": 68,
+            "wet_bulb_events": 35,
+            "humid_temp": 128,
+            "days_over_100": 58
+          },
+          "2035": {
+            "peak_humidity": 72,
+            "wet_bulb_events": 48,
+            "humid_temp": 134,
+            "days_over_100": 72
+          },
+          "2050": {
+            "peak_humidity": 78,
+            "wet_bulb_events": 65,
+            "humid_temp": 142,
+            "days_over_100": 95
+          },
+          "2075": {
+            "peak_humidity": 84,
+            "wet_bulb_events": 88,
+            "humid_temp": 152,
+            "days_over_100": 125
+          },
+          "2100": {
+            "peak_humidity": 89,
+            "wet_bulb_events": 115,
+            "humid_temp": 162,
+            "days_over_100": 155
+          },
+          "2125": {
+            "peak_humidity": 93,
+            "wet_bulb_events": 142,
+            "humid_temp": 172,
+            "days_over_100": 185
+          }
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.3698, 29.7604]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "city": "Miami",
+        "lat": 25.7617,
+        "lng": -80.1918,
+        "humidity_projections": {
+          "2025": {
+            "peak_humidity": 75,
+            "wet_bulb_events": 42,
+            "humid_temp": 132,
+            "days_over_100": 68
+          },
+          "2035": {
+            "peak_humidity": 79,
+            "wet_bulb_events": 58,
+            "humid_temp": 138,
+            "days_over_100": 85
+          },
+          "2050": {
+            "peak_humidity": 84,
+            "wet_bulb_events": 78,
+            "humid_temp": 146,
+            "days_over_100": 110
+          },
+          "2075": {
+            "peak_humidity": 89,
+            "wet_bulb_events": 105,
+            "humid_temp": 156,
+            "days_over_100": 142
+          },
+          "2100": {
+            "peak_humidity": 93,
+            "wet_bulb_events": 135,
+            "humid_temp": 166,
+            "days_over_100": 175
+          },
+          "2125": {
+            "peak_humidity": 96,
+            "wet_bulb_events": 168,
+            "humid_temp": 176,
+            "days_over_100": 210
+          }
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-80.1918, 25.7617]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "city": "Phoenix",
+        "lat": 33.4484,
+        "lng": -112.0740,
+        "humidity_projections": {
+          "2025": {
+            "peak_humidity": 28,
+            "wet_bulb_events": 8,
+            "humid_temp": 125,
+            "days_over_100": 115
+          },
+          "2035": {
+            "peak_humidity": 32,
+            "wet_bulb_events": 12,
+            "humid_temp": 130,
+            "days_over_100": 135
+          },
+          "2050": {
+            "peak_humidity": 38,
+            "wet_bulb_events": 18,
+            "humid_temp": 138,
+            "days_over_100": 162
+          },
+          "2075": {
+            "peak_humidity": 45,
+            "wet_bulb_events": 28,
+            "humid_temp": 148,
+            "days_over_100": 195
+          },
+          "2100": {
+            "peak_humidity": 52,
+            "wet_bulb_events": 42,
+            "humid_temp": 158,
+            "days_over_100": 230
+          },
+          "2125": {
+            "peak_humidity": 58,
+            "wet_bulb_events": 58,
+            "humid_temp": 168,
+            "days_over_100": 265
+          }
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-112.0740, 33.4484]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "city": "New York",
+        "lat": 40.7128,
+        "lng": -74.0060,
+        "humidity_projections": {
+          "2025": {
+            "peak_humidity": 52,
+            "wet_bulb_events": 15,
+            "humid_temp": 118,
+            "days_over_100": 28
+          },
+          "2035": {
+            "peak_humidity": 56,
+            "wet_bulb_events": 22,
+            "humid_temp": 124,
+            "days_over_100": 42
+          },
+          "2050": {
+            "peak_humidity": 62,
+            "wet_bulb_events": 32,
+            "humid_temp": 132,
+            "days_over_100": 58
+          },
+          "2075": {
+            "peak_humidity": 69,
+            "wet_bulb_events": 48,
+            "humid_temp": 142,
+            "days_over_100": 82
+          },
+          "2100": {
+            "peak_humidity": 76,
+            "wet_bulb_events": 68,
+            "humid_temp": 152,
+            "days_over_100": 108
+          },
+          "2125": {
+            "peak_humidity": 82,
+            "wet_bulb_events": 88,
+            "humid_temp": 162,
+            "days_over_100": 135
+          }
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-74.0060, 40.7128]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "city": "Chicago",
+        "lat": 41.8781,
+        "lng": -87.6298,
+        "humidity_projections": {
+          "2025": {
+            "peak_humidity": 45,
+            "wet_bulb_events": 10,
+            "humid_temp": 115,
+            "days_over_100": 22
+          },
+          "2035": {
+            "peak_humidity": 49,
+            "wet_bulb_events": 15,
+            "humid_temp": 121,
+            "days_over_100": 35
+          },
+          "2050": {
+            "peak_humidity": 55,
+            "wet_bulb_events": 24,
+            "humid_temp": 129,
+            "days_over_100": 52
+          },
+          "2075": {
+            "peak_humidity": 62,
+            "wet_bulb_events": 38,
+            "humid_temp": 139,
+            "days_over_100": 75
+          },
+          "2100": {
+            "peak_humidity": 69,
+            "wet_bulb_events": 55,
+            "humid_temp": 149,
+            "days_over_100": 102
+          },
+          "2125": {
+            "peak_humidity": 75,
+            "wet_bulb_events": 72,
+            "humid_temp": 159,
+            "days_over_100": 128
+          }
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-87.6298, 41.8781]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "city": "Los Angeles",
+        "lat": 34.0522,
+        "lng": -118.2437,
+        "humidity_projections": {
+          "2025": {
+            "peak_humidity": 38,
+            "wet_bulb_events": 5,
+            "humid_temp": 108,
+            "days_over_100": 42
+          },
+          "2035": {
+            "peak_humidity": 42,
+            "wet_bulb_events": 8,
+            "humid_temp": 114,
+            "days_over_100": 58
+          },
+          "2050": {
+            "peak_humidity": 48,
+            "wet_bulb_events": 14,
+            "humid_temp": 122,
+            "days_over_100": 78
+          },
+          "2075": {
+            "peak_humidity": 55,
+            "wet_bulb_events": 22,
+            "humid_temp": 132,
+            "days_over_100": 105
+          },
+          "2100": {
+            "peak_humidity": 62,
+            "wet_bulb_events": 35,
+            "humid_temp": 142,
+            "days_over_100": 135
+          },
+          "2125": {
+            "peak_humidity": 68,
+            "wet_bulb_events": 48,
+            "humid_temp": 152,
+            "days_over_100": 165
+          }
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-118.2437, 34.0522]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "city": "Atlanta",
+        "lat": 33.7490,
+        "lng": -84.3880,
+        "humidity_projections": {
+          "2025": {
+            "peak_humidity": 58,
+            "wet_bulb_events": 22,
+            "humid_temp": 122,
+            "days_over_100": 48
+          },
+          "2035": {
+            "peak_humidity": 62,
+            "wet_bulb_events": 32,
+            "humid_temp": 128,
+            "days_over_100": 65
+          },
+          "2050": {
+            "peak_humidity": 68,
+            "wet_bulb_events": 45,
+            "humid_temp": 136,
+            "days_over_100": 88
+          },
+          "2075": {
+            "peak_humidity": 75,
+            "wet_bulb_events": 65,
+            "humid_temp": 146,
+            "days_over_100": 118
+          },
+          "2100": {
+            "peak_humidity": 82,
+            "wet_bulb_events": 88,
+            "humid_temp": 156,
+            "days_over_100": 152
+          },
+          "2125": {
+            "peak_humidity": 88,
+            "wet_bulb_events": 112,
+            "humid_temp": 166,
+            "days_over_100": 185
+          }
+        }
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-84.3880, 33.7490]
+      }
+    }
+  ]
+}

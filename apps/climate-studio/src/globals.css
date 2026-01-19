@@ -492,9 +492,15 @@ button[role="combobox"][aria-expanded="true"] {
 }
 
 /* Mapbox canvas positioning adjustments */
-.mapboxgl-canvas {
-  left: 50px !important;
-  top: 6px !important;
+
+.mapboxgl-map {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.mapboxgl-canvas-container {
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -678,5 +684,24 @@ span[data-radix-slider-track] {
 [data-theme="light"] .widget-container label.border:not(.border-blue-500\/60),
 .light .widget-container label.border:not(.border-blue-500\/60) {
   border-color: transparent !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * METRO HUMIDITY POPUP STYLES
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Remove Mapbox default popup styles */
+.metro-humidity-popup .mapboxgl-popup-content {
+  background: transparent !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.metro-humidity-popup .mapboxgl-popup-tip {
+  border-top-color: rgba(255, 255, 255, 0.5) !important;
+  border-bottom-color: rgba(255, 255, 255, 0.5) !important;
+  border-left-color: rgba(255, 255, 255, 0.5) !important;
+  border-right-color: rgba(255, 255, 255, 0.5) !important;
 }
 

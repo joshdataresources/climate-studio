@@ -1,0 +1,330 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -112.074,
+          33.4484
+        ]
+      },
+      "properties": {
+        "city": "Phoenix",
+        "state": "AZ",
+        "population": 1608139,
+        "water_source": "Central Arizona Project",
+        "source_type": "Colorado River via CAP canal",
+        "infrastructure": "CAP",
+        "dependency": "high",
+        "description": "60% of water supply from CAP; critical dependency on Colorado River",
+        "infrastructure_type": "service_area"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -110.9747,
+          32.2226
+        ]
+      },
+      "properties": {
+        "city": "Tucson",
+        "state": "AZ",
+        "population": 542629,
+        "water_source": "Central Arizona Project",
+        "source_type": "Colorado River via CAP canal",
+        "infrastructure": "CAP",
+        "dependency": "high",
+        "description": "Primary water source; 336-mile canal from Lake Havasu",
+        "infrastructure_type": "service_area"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -111.8315,
+          33.4152
+        ]
+      },
+      "properties": {
+        "city": "Mesa",
+        "state": "AZ",
+        "population": 504258,
+        "water_source": "Central Arizona Project + Salt River Project",
+        "source_type": "Colorado River via CAP + Salt River reservoirs",
+        "infrastructure": "CAP",
+        "dependency": "moderate",
+        "description": "Dual source: CAP and Salt River Project",
+        "infrastructure_type": "service_area"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -111.9261,
+          33.4942
+        ]
+      },
+      "properties": {
+        "city": "Scottsdale",
+        "state": "AZ",
+        "population": 241361,
+        "water_source": "Central Arizona Project + Salt River Project",
+        "source_type": "Colorado River via CAP + Salt River reservoirs",
+        "infrastructure": "CAP",
+        "dependency": "moderate",
+        "description": "Mixed CAP and Salt River Project water",
+        "infrastructure_type": "service_area"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -118.2437,
+          34.0522
+        ]
+      },
+      "properties": {
+        "city": "Los Angeles",
+        "state": "CA",
+        "population": 3898747,
+        "water_source": "Colorado River Aqueduct + LA Aqueduct",
+        "source_type": "Colorado River via CRA + Owens Valley",
+        "infrastructure": "CRA",
+        "dependency": "high",
+        "description": "26% from Colorado River; 242-mile aqueduct from Lake Havasu",
+        "infrastructure_type": "service_area"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.1611,
+          32.7157
+        ]
+      },
+      "properties": {
+        "city": "San Diego",
+        "state": "CA",
+        "population": 1386932,
+        "water_source": "Colorado River Aqueduct",
+        "source_type": "Colorado River via CRA",
+        "infrastructure": "CRA",
+        "dependency": "high",
+        "description": "60% from Colorado River via MWD aqueduct",
+        "infrastructure_type": "service_area"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.3755,
+          33.9806
+        ]
+      },
+      "properties": {
+        "city": "Riverside",
+        "state": "CA",
+        "population": 314998,
+        "water_source": "Colorado River Aqueduct",
+        "source_type": "Colorado River via CRA",
+        "infrastructure": "CRA",
+        "dependency": "high",
+        "description": "Primary source: Colorado River Aqueduct via MWD",
+        "infrastructure_type": "service_area"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -117.8677,
+          33.7455
+        ]
+      },
+      "properties": {
+        "city": "Santa Ana",
+        "state": "CA",
+        "population": 310227,
+        "water_source": "Colorado River Aqueduct",
+        "source_type": "Colorado River via CRA",
+        "infrastructure": "CRA",
+        "dependency": "moderate",
+        "description": "MWD supplemental supply from Colorado River",
+        "infrastructure_type": "service_area"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -115.5631,
+          32.792
+        ]
+      },
+      "properties": {
+        "city": "El Centro",
+        "state": "CA",
+        "population": 44322,
+        "water_source": "All-American Canal",
+        "source_type": "Colorado River via All-American Canal",
+        "infrastructure": "All-American Canal",
+        "dependency": "extreme",
+        "description": "100% dependency; supplies Imperial Valley agriculture",
+        "infrastructure_type": "service_area"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -115.4989,
+          32.6789
+        ]
+      },
+      "properties": {
+        "city": "Calexico",
+        "state": "CA",
+        "population": 38633,
+        "water_source": "All-American Canal",
+        "source_type": "Colorado River via All-American Canal",
+        "infrastructure": "All-American Canal",
+        "dependency": "extreme",
+        "description": "Direct dependency on All-American Canal",
+        "infrastructure_type": "service_area"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -119.0187,
+          35.3733
+        ]
+      },
+      "properties": {
+        "city": "Bakersfield",
+        "state": "CA",
+        "population": 403455,
+        "water_source": "California Aqueduct",
+        "source_type": "State Water Project",
+        "infrastructure": "California Aqueduct",
+        "dependency": "high",
+        "description": "Primary source: California Aqueduct from Northern California",
+        "infrastructure_type": "service_area"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -119.7871,
+          36.7378
+        ]
+      },
+      "properties": {
+        "city": "Fresno",
+        "state": "CA",
+        "population": 542107,
+        "water_source": "California Aqueduct",
+        "source_type": "State Water Project + San Joaquin River",
+        "infrastructure": "California Aqueduct",
+        "dependency": "moderate",
+        "description": "Mixed sources: aqueduct and local rivers",
+        "infrastructure_type": "service_area"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -115.1398,
+          36.1699
+        ]
+      },
+      "properties": {
+        "city": "Las Vegas",
+        "state": "NV",
+        "population": 641903,
+        "water_source": "Lake Mead",
+        "source_type": "Colorado River (Lake Mead)",
+        "infrastructure": "Direct intake",
+        "dependency": "extreme",
+        "description": "90% from Lake Mead; critical vulnerability to drought",
+        "infrastructure_type": "service_area"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -111.94,
+          33.4255
+        ]
+      },
+      "properties": {
+        "city": "Tempe",
+        "state": "AZ",
+        "population": 180587,
+        "water_source": "Salt River Project",
+        "source_type": "Salt River reservoirs (Roosevelt Dam)",
+        "infrastructure": "SRP",
+        "dependency": "high",
+        "description": "Salt River completely diverted by Roosevelt Dam",
+        "infrastructure_type": "service_area"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -106.6504,
+          35.0844
+        ]
+      },
+      "properties": {
+        "city": "Albuquerque",
+        "state": "NM",
+        "population": 564559,
+        "water_source": "Rio Grande + aquifer",
+        "source_type": "Rio Grande (upstream of Elephant Butte)",
+        "infrastructure": "Direct diversion",
+        "dependency": "moderate",
+        "description": "Mixed surface water and groundwater",
+        "infrastructure_type": "service_area"
+      }
+    }
+  ],
+  "metadata": {
+    "source": "Compiled from water district data and municipal water reports",
+    "description": "Cities served by major water infrastructure projects",
+    "dependency_levels": {
+      "extreme": "90-100% dependency on source",
+      "high": "60-90% dependency",
+      "moderate": "30-60% dependency",
+      "low": "<30% dependency"
+    }
+  }
+}

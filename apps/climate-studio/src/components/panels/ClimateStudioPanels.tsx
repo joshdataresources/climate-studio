@@ -52,13 +52,13 @@ interface SavedView {
 }
 
 const DEFAULT_VIEWPORT: ViewportState = {
-  center: { lat: 38.9072, lng: -77.0369 },
-  zoom: 6.0,
+  center: { lat: 37.5, lng: -112.05 }, // Southwest US: centered to show NV, UT, western CO, AZ
+  zoom: 5.5,
 }
 
 const DEFAULT_SAVED_VIEW: SavedView = {
-  id: 'dc-east-coast',
-  name: 'East Coast',
+  id: 'south-west',
+  name: 'South West',
   viewport: DEFAULT_VIEWPORT,
   activeLayerIds: ['topographic_relief'],
   controls: {}

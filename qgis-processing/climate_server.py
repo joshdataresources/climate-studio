@@ -27,6 +27,7 @@ from topographic_relief import TopographicReliefService
 from precipitation_drought import PrecipitationDroughtService
 from urban_expansion import UrbanExpansionService
 from grace_groundwater import GRACEGroundwaterService
+from metro_humidity import MetroHumidityService
 
 # Configure logging
 logging.basicConfig(
@@ -50,6 +51,7 @@ relief_service = TopographicReliefService()
 drought_service = PrecipitationDroughtService(ee_project=ee_project)
 urban_expansion_service = UrbanExpansionService(ee_project=ee_project)
 groundwater_service = GRACEGroundwaterService(ee_project=ee_project)
+metro_humidity_service = MetroHumidityService(ee_project=ee_project)
 
 # Health check endpoint
 @app.route('/health', methods=['GET'])
@@ -1137,11 +1139,13 @@ def climate_info():
 @app.route('/api/climate/groundwater', methods=['GET'])
 def groundwater_depletion():
     """
-    Get GRACE groundwater storage anomaly data for specific aquifer(s)
+    Get GRACE groundwater storage anomaly data for specific aquifer(s) or viewport bounds
 
     Query parameters:
         - aquifer: Aquifer ID ('high_plains', 'central_valley', 'mississippi_embayment', 'all')
-        - resolution: H3 hexagon resolution (5-7, default 6)
+        - resolution: H3 hexagon resolution (5-8, default 7)
+        - bounds: Optional viewport bounds as JSON: {"west": -125, "east": -65, "south": 25, "north": 50}
+          If bounds provided, ignores aquifer parameter and returns data for entire viewport
 
     Returns:
         GeoJSON FeatureCollection with hexagonal groundwater depletion data
@@ -1149,11 +1153,42 @@ def groundwater_depletion():
             - trendCmPerYear: Annual depletion rate (negative = water loss)
             - totalChangeCm: Total change from baseline
             - status: 'severe_depletion', 'moderate_depletion', 'stable', or 'recharge'
-            - aquifer: Aquifer identifier
+            - aquifer: Aquifer identifier (or 'viewport' for bounds-based queries)
     """
     try:
-        aquifer_param = request.args.get('aquifer', 'high_plains')
-        resolution = int(request.args.get('resolution', 6))
+        # Check if viewport bounds are provided
+        bounds_param = request.args.get('bounds')
+        resolution = int(request.args.get('resolution', 7))
+
+        if bounds_param:
+            # Viewport-based query (nationwide or zoomed region)
+            import json
+            bounds = json.loads(bounds_param)
+
+            # Validate bounds
+            required_keys = ['west', 'east', 'south', 'north']
+            if not all(k in bounds for k in required_keys):
+                return jsonify({
+                    'error': f'Bounds must include: {required_keys}'
+                }), 400
+
+            # Validate resolution for viewport (allow higher resolution)
+            if resolution < 6 or resolution > 8:
+                return jsonify({
+                    'error': 'Resolution must be between 6 and 8 for viewport visualization'
+                }), 400
+
+            logger.info(f"Fetching GRACE data for viewport bounds: {bounds}, resolution={resolution}")
+
+            data = groundwater_service.get_groundwater_depletion_viewport(
+                bounds=bounds,
+                resolution=resolution
+            )
+
+            return jsonify(data)
+
+        # Aquifer-based query (legacy mode)
+        aquifer_param = request.args.get('aquifer', 'central_valley')
 
         # Validate resolution
         if resolution < 5 or resolution > 7:
@@ -1219,6 +1254,113 @@ def groundwater_depletion():
         return jsonify({'error': 'Failed to fetch groundwater data'}), 500
 
 
+
+@app.route('/api/climate/groundwater/tiles', methods=['GET'])
+def groundwater_tiles():
+    """
+    Get GRACE groundwater storage anomaly tile URL
+    
+    Query Parameters:
+        year (int): Year to visualize (2002-2024), default 2024
+        season (str): 'spring', 'summer', 'autumn', 'winter' or None
+        
+    Returns:
+        JSON with Earth Engine tile URL and metadata
+    """
+    try:
+        year = request.args.get('year', default=2024, type=int)
+        season = request.args.get('season', type=str)
+        
+        # Validate year
+        if not (2002 <= year <= 2024):
+            return jsonify({
+                'success': False,
+                'error': 'Year must be between 2002 and 2024'
+            }), 400
+            
+        logger.info(f"Groundwater tile request: year={year}, season={season}")
+        
+        result = groundwater_service.get_tile_url(year=year, season=season)
+        
+        if result:
+            return jsonify({
+                'success': True,
+                'tile_url': result['tile_url'],
+                'metadata': result['metadata']
+            })
+        else:
+            return jsonify({
+                'success': False,
+                'error': 'Could not generate tile URL'
+            }), 500
+            
+    except Exception as e:
+        logger.error(f"Error generating groundwater tile URL: {e}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
+@app.route('/api/climate/metro-humidity', methods=['GET'])
+def metro_humidity():
+    """
+    Get metro humidity projections from Earth Engine
+
+    Query Parameters:
+        year (int): Projection year (2015-2100), default 2050
+        scenario (str): SSP scenario (ssp245, ssp585), default ssp245
+
+    Returns:
+        GeoJSON FeatureCollection with humidity data for metro cities
+    """
+    try:
+        # Parse query parameters
+        year = request.args.get('year', default=2050, type=int)
+        scenario = request.args.get('scenario', default='ssp245', type=str)
+
+        # Validate year range
+        if not (2015 <= year <= 2100):
+            return jsonify({
+                'success': False,
+                'error': 'Year must be between 2015 and 2100'
+            }), 400
+
+        # Validate scenario
+        valid_scenarios = ['ssp126', 'ssp245', 'ssp370', 'ssp585']
+        if scenario not in valid_scenarios:
+            return jsonify({
+                'success': False,
+                'error': f'Scenario must be one of: {", ".join(valid_scenarios)}'
+            }), 400
+
+        logger.info(f"Metro humidity request: year={year}, scenario={scenario}")
+
+        # Get metro humidity projections
+        data = metro_humidity_service.get_metro_humidity_projections(
+            year=year,
+            scenario=scenario
+        )
+
+        return jsonify({
+            'success': True,
+            'data': data,
+            'metadata': {
+                'year': year,
+                'scenario': scenario,
+                'city_count': len(data.get('features', [])),
+                'source': 'NASA NEX-GDDP-CMIP6'
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Error in metro humidity endpoint: {e}")
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     logger.info(f"🌍 Starting Climate Data Server on port {port}")
@@ -1233,6 +1375,7 @@ if __name__ == '__main__':
     logger.info(f"   GET  /api/climate/precipitation-drought/tiles")
     logger.info(f"   GET  /api/climate/urban-expansion/tiles")
     logger.info(f"   GET  /api/climate/population")
+    logger.info(f"   GET  /api/climate/metro-humidity")
     logger.info(f"   GET  /api/climate/info")
 
     app.run(

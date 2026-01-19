@@ -1,0 +1,906 @@
+{
+  "type": "FeatureCollection",
+  "name": "Major US Rivers - Flow Depletion Projections",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Colorado River",
+        "baseline_flow_cfs_2025": 15000,
+        "cities_supplied": [
+          { "name": "Las Vegas, NV", "lat": 36.1699, "lng": -115.1398, "dependency": "90%" },
+          { "name": "Phoenix, AZ", "lat": 33.4484, "lng": -112.0740, "dependency": "85%" },
+          { "name": "Los Angeles, CA", "lat": 34.0522, "lng": -118.2437, "dependency": "25%" },
+          { "name": "San Diego, CA", "lat": 32.7157, "lng": -117.1611, "dependency": "65%" },
+          { "name": "Tucson, AZ", "lat": 32.2226, "lng": -110.9747, "dependency": "70%" }
+        ],
+        "flow_projections": {
+          "2025": 15000,
+          "2035": 13500,
+          "2050": 11250,
+          "2075": 9000,
+          "2100": 7500,
+          "2125": 6750
+        },
+        "depletion_factors": "Snowpack decline, increased agricultural demand, prolonged drought"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-109.05, 40.47],
+          [-108.8, 40.1],
+          [-108.5, 39.5],
+          [-108.3, 39.1],
+          [-108.0, 38.5],
+          [-107.9, 37.8],
+          [-107.8, 37.2],
+          [-108.5, 36.8],
+          [-109.2, 36.3],
+          [-109.5, 36.0],
+          [-110.3, 35.8],
+          [-110.8, 35.5],
+          [-111.2, 35.3],
+          [-112.5, 35.8],
+          [-113.3, 36.0],
+          [-113.9, 36.1],
+          [-114.3, 35.8],
+          [-114.5, 35.4],
+          [-114.6, 35.0],
+          [-114.65, 34.6],
+          [-114.6, 34.2],
+          [-114.5, 33.8],
+          [-114.45, 33.4],
+          [-114.4, 33.0],
+          [-114.5, 32.7]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Mississippi River",
+        "baseline_flow_cfs_2025": 600000,
+        "cities_supplied": [
+          { "name": "Minneapolis, MN", "lat": 44.9778, "lng": -93.2650, "dependency": "95%" },
+          { "name": "St. Louis, MO", "lat": 38.6270, "lng": -90.1994, "dependency": "90%" },
+          { "name": "Memphis, TN", "lat": 35.1495, "lng": -90.0490, "dependency": "85%" },
+          { "name": "Baton Rouge, LA", "lat": 30.4515, "lng": -91.1871, "dependency": "80%" },
+          { "name": "New Orleans, LA", "lat": 29.9511, "lng": -90.0715, "dependency": "75%" }
+        ],
+        "flow_projections": {
+          "2025": 600000,
+          "2035": 582000,
+          "2050": 558000,
+          "2075": 522000,
+          "2100": 492000,
+          "2125": 468000
+        },
+        "depletion_factors": "Increased evaporation, upstream diversions, reduced precipitation"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-93.2, 45.0],
+          [-91.0, 43.5],
+          [-90.2, 41.5],
+          [-90.6, 39.2],
+          [-90.2, 38.6],
+          [-89.2, 36.8],
+          [-90.0, 35.1],
+          [-91.1, 33.0],
+          [-91.4, 31.3],
+          [-91.2, 30.4],
+          [-90.1, 29.9]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Rio Grande",
+        "baseline_flow_cfs_2025": 2000,
+        "cities_supplied": [
+          { "name": "Albuquerque, NM", "lat": 35.0844, "lng": -106.6504, "dependency": "60%" },
+          { "name": "El Paso, TX", "lat": 31.7619, "lng": -106.4850, "dependency": "75%" },
+          { "name": "Laredo, TX", "lat": 27.5306, "lng": -99.4803, "dependency": "80%" }
+        ],
+        "flow_projections": {
+          "2025": 2000,
+          "2035": 1700,
+          "2050": 1300,
+          "2075": 900,
+          "2100": 600,
+          "2125": 400
+        },
+        "depletion_factors": "Extreme drought, agricultural overuse, snowpack loss"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-106.9, 37.8],
+          [-106.8, 37.3],
+          [-106.7, 36.8],
+          [-106.65, 36.3],
+          [-106.6, 35.8],
+          [-106.6, 35.4],
+          [-106.6, 35.1],
+          [-106.55, 34.5],
+          [-106.5, 34.0],
+          [-106.5, 33.5],
+          [-106.5, 32.8],
+          [-106.5, 32.3],
+          [-106.5, 31.8],
+          [-106.4, 31.3],
+          [-106.2, 30.5],
+          [-105.8, 29.8],
+          [-105.0, 29.3],
+          [-104.0, 28.8],
+          [-103.0, 28.3],
+          [-101.5, 27.9],
+          [-100.5, 27.6],
+          [-100.0, 27.5],
+          [-99.7, 27.2],
+          [-99.5, 26.8],
+          [-99.5, 26.4],
+          [-99.5, 26.0]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Columbia River",
+        "baseline_flow_cfs_2025": 265000,
+        "cities_supplied": [
+          { "name": "Portland, OR", "lat": 45.5152, "lng": -122.6784, "dependency": "70%" },
+          { "name": "Vancouver, WA", "lat": 45.6387, "lng": -122.6615, "dependency": "65%" },
+          { "name": "Tri-Cities, WA", "lat": 46.2396, "lng": -119.1308, "dependency": "90%" }
+        ],
+        "flow_projections": {
+          "2025": 265000,
+          "2035": 254000,
+          "2050": 238500,
+          "2075": 217250,
+          "2100": 201000,
+          "2125": 185000
+        },
+        "depletion_factors": "Reduced snowpack, earlier snowmelt, dam management changes"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-116.0, 50.2],
+          [-118.0, 49.0],
+          [-119.5, 47.5],
+          [-119.3, 46.2],
+          [-120.5, 45.6],
+          [-122.4, 45.6],
+          [-123.0, 46.2]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Sacramento River",
+        "baseline_flow_cfs_2025": 23000,
+        "cities_supplied": [
+          { "name": "Sacramento, CA", "lat": 38.5816, "lng": -121.4944, "dependency": "85%" },
+          { "name": "Redding, CA", "lat": 40.5865, "lng": -122.3917, "dependency": "95%" }
+        ],
+        "flow_projections": {
+          "2025": 23000,
+          "2035": 20700,
+          "2050": 17250,
+          "2075": 13800,
+          "2100": 11500,
+          "2125": 9200
+        },
+        "depletion_factors": "Drought intensification, agricultural demand, reservoir management"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.2, 41.2],
+          [-122.4, 40.6],
+          [-122.0, 39.7],
+          [-121.9, 39.0],
+          [-121.5, 38.6],
+          [-121.8, 38.0]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Hudson River",
+        "baseline_flow_cfs_2025": 21000,
+        "cities_supplied": [
+          { "name": "New York, NY", "lat": 40.7128, "lng": -74.006, "dependency": "30%" }
+        ],
+        "flow_projections": {
+          "2025": 21000,
+          "2035": 20370,
+          "2050": 19530,
+          "2075": 18480,
+          "2100": 17640,
+          "2125": 16800
+        },
+        "depletion_factors": "Increased urban demand, climate variability, reduced snowmelt"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-73.95, 43.3],
+          [-73.85, 42.8],
+          [-73.9, 42.2],
+          [-73.95, 41.5],
+          [-73.98, 41.0],
+          [-74.0, 40.7]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Delaware River",
+        "baseline_flow_cfs_2025": 11000,
+        "cities_supplied": [
+          { "name": "Philadelphia, PA", "lat": 39.9526, "lng": -75.1652, "dependency": "50%" },
+          { "name": "New York, NY", "lat": 40.7128, "lng": -74.006, "dependency": "50%" }
+        ],
+        "flow_projections": {
+          "2025": 11000,
+          "2035": 10560,
+          "2050": 9900,
+          "2075": 9130,
+          "2100": 8470,
+          "2125": 7700
+        },
+        "depletion_factors": "Drought, agricultural use, urban withdrawal"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-75.0, 42.2],
+          [-75.1, 41.5],
+          [-75.2, 40.8],
+          [-75.15, 40.0],
+          [-75.13, 39.5]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Potomac River",
+        "baseline_flow_cfs_2025": 11000,
+        "cities_supplied": [
+          { "name": "Washington DC", "lat": 38.9072, "lng": -77.0369, "dependency": "75%" },
+          { "name": "Baltimore, MD", "lat": 39.2904, "lng": -76.6122, "dependency": "20%" }
+        ],
+        "flow_projections": {
+          "2025": 11000,
+          "2035": 10450,
+          "2050": 9680,
+          "2075": 8800,
+          "2100": 8030,
+          "2125": 7150
+        },
+        "depletion_factors": "Urban growth, reduced precipitation, seasonal variability"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.0, 39.4],
+          [-78.2, 39.3],
+          [-77.8, 39.0],
+          [-77.4, 38.7],
+          [-77.05, 38.9],
+          [-76.9, 38.8]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "South Platte River",
+        "baseline_flow_cfs_2025": 500,
+        "cities_supplied": [
+          { "name": "Denver, CO", "lat": 39.7392, "lng": -104.9903, "dependency": "45%" }
+        ],
+        "flow_projections": {
+          "2025": 500,
+          "2035": 450,
+          "2050": 375,
+          "2075": 290,
+          "2100": 225,
+          "2125": 175
+        },
+        "depletion_factors": "Snowpack decline, agricultural overuse, climate change"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-105.8, 39.5],
+          [-105.5, 39.7],
+          [-105.0, 39.75],
+          [-104.5, 40.2],
+          [-103.5, 40.5]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Chattahoochee River",
+        "baseline_flow_cfs_2025": 6500,
+        "cities_supplied": [
+          { "name": "Atlanta, GA", "lat": 33.749, "lng": -84.388, "dependency": "70%" }
+        ],
+        "flow_projections": {
+          "2025": 6500,
+          "2035": 6175,
+          "2050": 5720,
+          "2075": 5200,
+          "2100": 4745,
+          "2125": 4225
+        },
+        "depletion_factors": "Population growth, drought, interstate water disputes"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-83.9, 34.7],
+          [-84.0, 34.3],
+          [-84.2, 33.9],
+          [-84.4, 33.75],
+          [-84.5, 33.4],
+          [-85.0, 32.5]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Trinity River",
+        "baseline_flow_cfs_2025": 6000,
+        "cities_supplied": [
+          { "name": "Dallas, TX", "lat": 32.7767, "lng": -96.797, "dependency": "55%" }
+        ],
+        "flow_projections": {
+          "2025": 6000,
+          "2035": 5520,
+          "2050": 4860,
+          "2075": 4080,
+          "2100": 3420,
+          "2125": 2760
+        },
+        "depletion_factors": "Extreme heat, drought, reservoir evaporation"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-96.8, 33.2],
+          [-96.8, 32.78],
+          [-96.7, 32.3],
+          [-95.8, 31.5],
+          [-95.0, 30.5]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Schuylkill River",
+        "baseline_flow_cfs_2025": 2000,
+        "cities_supplied": [
+          { "name": "Philadelphia, PA", "lat": 39.9526, "lng": -75.1652, "dependency": "35%" }
+        ],
+        "flow_projections": {
+          "2025": 2000,
+          "2035": 1900,
+          "2050": 1760,
+          "2075": 1600,
+          "2100": 1460,
+          "2125": 1320
+        },
+        "depletion_factors": "Urban runoff, reduced precipitation, industrial use"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-76.0, 40.6],
+          [-75.9, 40.3],
+          [-75.7, 40.1],
+          [-75.5, 40.0],
+          [-75.2, 39.95]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Charles River",
+        "baseline_flow_cfs_2025": 350,
+        "cities_supplied": [
+          { "name": "Boston, MA", "lat": 42.3601, "lng": -71.0589, "dependency": "15%" }
+        ],
+        "flow_projections": {
+          "2025": 350,
+          "2035": 336,
+          "2050": 315,
+          "2075": 287,
+          "2100": 263,
+          "2125": 238
+        },
+        "depletion_factors": "Urban development, stormwater changes, climate shifts"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-71.4, 42.35],
+          [-71.3, 42.37],
+          [-71.2, 42.36],
+          [-71.1, 42.35],
+          [-71.06, 42.36]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Susquehanna River",
+        "baseline_flow_cfs_2025": 40000,
+        "cities_supplied": [
+          { "name": "Baltimore, MD", "lat": 39.2904, "lng": -76.6122, "dependency": "60%" }
+        ],
+        "flow_projections": {
+          "2025": 40000,
+          "2035": 38400,
+          "2050": 36000,
+          "2075": 33200,
+          "2100": 30800,
+          "2125": 28400
+        },
+        "depletion_factors": "Agricultural use, dam operations, climate variability"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-76.5, 42.5],
+          [-76.2, 42.0],
+          [-76.0, 41.5],
+          [-76.1, 40.8],
+          [-76.3, 40.2],
+          [-76.5, 39.5]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Chicago River",
+        "baseline_flow_cfs_2025": 300,
+        "cities_supplied": [
+          { "name": "Chicago, IL", "lat": 41.8781, "lng": -87.6298, "dependency": "5%" }
+        ],
+        "flow_projections": {
+          "2025": 300,
+          "2035": 294,
+          "2050": 285,
+          "2075": 273,
+          "2100": 264,
+          "2125": 255
+        },
+        "depletion_factors": "Reversed flow engineering, Lake Michigan dependency"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-87.68, 41.95],
+          [-87.65, 41.89],
+          [-87.63, 41.88]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Detroit River",
+        "baseline_flow_cfs_2025": 180000,
+        "cities_supplied": [
+          { "name": "Detroit, MI", "lat": 42.3314, "lng": -83.0458, "dependency": "10%" }
+        ],
+        "flow_projections": {
+          "2025": 180000,
+          "2035": 177300,
+          "2050": 173700,
+          "2075": 169200,
+          "2100": 165600,
+          "2125": 162000
+        },
+        "depletion_factors": "Great Lakes level changes, connecting waterway"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-83.0, 42.4],
+          [-83.1, 42.3],
+          [-83.15, 42.0]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Cuyahoga River",
+        "baseline_flow_cfs_2025": 1800,
+        "cities_supplied": [
+          { "name": "Cleveland, OH", "lat": 41.4993, "lng": -81.6944, "dependency": "5%" }
+        ],
+        "flow_projections": {
+          "2025": 1800,
+          "2035": 1746,
+          "2050": 1674,
+          "2075": 1584,
+          "2100": 1512,
+          "2125": 1440
+        },
+        "depletion_factors": "Industrial history, watershed development"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-81.5, 41.2],
+          [-81.6, 41.3],
+          [-81.65, 41.45],
+          [-81.7, 41.5]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Catawba River",
+        "baseline_flow_cfs_2025": 4000,
+        "cities_supplied": [
+          { "name": "Charlotte, NC", "lat": 35.2271, "lng": -80.8431, "dependency": "75%" }
+        ],
+        "flow_projections": {
+          "2025": 4000,
+          "2035": 3760,
+          "2050": 3440,
+          "2075": 3080,
+          "2100": 2760,
+          "2125": 2440
+        },
+        "depletion_factors": "Population growth, reservoir management, drought"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-81.7, 35.8],
+          [-81.5, 35.5],
+          [-81.2, 35.3],
+          [-80.9, 35.2],
+          [-80.5, 34.9]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "San Jacinto River",
+        "baseline_flow_cfs_2025": 500,
+        "cities_supplied": [
+          { "name": "Houston, TX", "lat": 29.7604, "lng": -95.3698, "dependency": "40%" }
+        ],
+        "flow_projections": {
+          "2025": 500,
+          "2035": 455,
+          "2050": 395,
+          "2075": 325,
+          "2100": 270,
+          "2125": 215
+        },
+        "depletion_factors": "Drought, flood control, urban expansion"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-95.0, 30.2],
+          [-95.1, 30.0],
+          [-95.2, 29.8],
+          [-95.3, 29.75]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Salt River",
+        "baseline_flow_cfs_2025": 2000,
+        "cities_supplied": [
+          { "name": "Phoenix, AZ", "lat": 33.4484, "lng": -112.0740, "dependency": "50%" }
+        ],
+        "flow_projections": {
+          "2025": 2000,
+          "2035": 1800,
+          "2050": 1540,
+          "2075": 1240,
+          "2100": 1000,
+          "2125": 800
+        },
+        "depletion_factors": "Desert climate, CAP water, reservoir storage"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-110.5, 33.8],
+          [-111.0, 33.6],
+          [-111.5, 33.5],
+          [-112.0, 33.45]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Verde River",
+        "baseline_flow_cfs_2025": 600,
+        "cities_supplied": [
+          { "name": "Phoenix, AZ", "lat": 33.4484, "lng": -112.0740, "dependency": "20%" }
+        ],
+        "flow_projections": {
+          "2025": 600,
+          "2035": 540,
+          "2050": 462,
+          "2075": 372,
+          "2100": 300,
+          "2125": 240
+        },
+        "depletion_factors": "Groundwater pumping, agricultural demand, climate"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-112.1, 34.8],
+          [-111.9, 34.5],
+          [-111.7, 34.2],
+          [-111.6, 33.9],
+          [-111.7, 33.6]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Cedar River",
+        "baseline_flow_cfs_2025": 600,
+        "cities_supplied": [
+          { "name": "Seattle, WA", "lat": 47.6062, "lng": -122.3321, "dependency": "45%" }
+        ],
+        "flow_projections": {
+          "2025": 600,
+          "2035": 582,
+          "2050": 558,
+          "2075": 528,
+          "2100": 504,
+          "2125": 480
+        },
+        "depletion_factors": "Snowpack changes, earlier snowmelt timing"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.7, 47.4],
+          [-122.0, 47.45],
+          [-122.2, 47.5]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Willamette River",
+        "baseline_flow_cfs_2025": 35000,
+        "cities_supplied": [
+          { "name": "Portland, OR", "lat": 45.5152, "lng": -122.6784, "dependency": "60%" }
+        ],
+        "flow_projections": {
+          "2025": 35000,
+          "2035": 33950,
+          "2050": 32550,
+          "2075": 30800,
+          "2100": 29400,
+          "2125": 28000
+        },
+        "depletion_factors": "Dam operations, agricultural use, urban demand"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-122.0, 44.0],
+          [-122.9, 44.5],
+          [-123.0, 45.0],
+          [-122.8, 45.4],
+          [-122.67, 45.52]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Bull Run River",
+        "baseline_flow_cfs_2025": 500,
+        "cities_supplied": [
+          { "name": "Portland, OR", "lat": 45.5152, "lng": -122.6784, "dependency": "40%" }
+        ],
+        "flow_projections": {
+          "2025": 500,
+          "2035": 485,
+          "2050": 465,
+          "2075": 440,
+          "2100": 420,
+          "2125": 400
+        },
+        "depletion_factors": "Protected watershed, climate-driven snowpack loss"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.8, 45.5],
+          [-121.85, 45.51],
+          [-121.92, 45.515],
+          [-122.0, 45.52],
+          [-122.1, 45.525],
+          [-122.2, 45.53]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "CAP Canal (Central Arizona Project)",
+        "baseline_flow_cfs_2025": 3000,
+        "cities_supplied": [
+          { "name": "Phoenix, AZ", "lat": 33.4484, "lng": -112.0740, "dependency": "50%" },
+          { "name": "Tucson, AZ", "lat": 32.2226, "lng": -110.9747, "dependency": "60%" }
+        ],
+        "flow_projections": {
+          "2025": 3000,
+          "2035": 2700,
+          "2050": 2250,
+          "2075": 1800,
+          "2100": 1500,
+          "2125": 1200
+        },
+        "depletion_factors": "Colorado River cuts, Lake Mead levels, upstream allocation disputes"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-114.6, 34.2],
+          [-114.45, 34.25],
+          [-114.32, 34.3],
+          [-114.1, 34.25],
+          [-113.85, 34.15],
+          [-113.6, 34.05],
+          [-113.35, 33.95],
+          [-113.1, 33.85],
+          [-112.85, 33.75],
+          [-112.6, 33.65],
+          [-112.35, 33.55],
+          [-112.1, 33.48],
+          [-111.85, 33.42],
+          [-111.6, 33.35],
+          [-111.35, 33.25],
+          [-111.1, 33.1],
+          [-110.9, 32.9],
+          [-110.75, 32.7],
+          [-110.65, 32.5],
+          [-110.97, 32.22]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Neuse River",
+        "baseline_flow_cfs_2025": 3500,
+        "cities_supplied": [
+          { "name": "Raleigh, NC", "lat": 35.7796, "lng": -78.6382, "dependency": "80%" }
+        ],
+        "flow_projections": {
+          "2025": 3500,
+          "2035": 3325,
+          "2050": 3080,
+          "2075": 2800,
+          "2100": 2555,
+          "2125": 2310
+        },
+        "depletion_factors": "Urban growth, agricultural runoff, drought cycles"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-79.0, 36.0],
+          [-78.8, 35.9],
+          [-78.65, 35.85],
+          [-78.5, 35.8],
+          [-78.35, 35.75],
+          [-78.0, 35.6],
+          [-77.5, 35.4],
+          [-77.0, 35.1]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "California Aqueduct",
+        "baseline_flow_cfs_2025": 10000,
+        "cities_supplied": [
+          { "name": "Los Angeles, CA", "lat": 34.0522, "lng": -118.2437, "dependency": "30%" },
+          { "name": "San Diego, CA", "lat": 32.7157, "lng": -117.1611, "dependency": "15%" }
+        ],
+        "flow_projections": {
+          "2025": 10000,
+          "2035": 9200,
+          "2050": 8200,
+          "2075": 7000,
+          "2100": 6000,
+          "2125": 5000
+        },
+        "depletion_factors": "Delta ecosystem, drought restrictions, agricultural priority"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-121.5, 38.0],
+          [-121.3, 37.5],
+          [-121.0, 37.0],
+          [-120.5, 36.5],
+          [-120.0, 36.0],
+          [-119.5, 35.5],
+          [-119.0, 35.0],
+          [-118.5, 34.5],
+          [-118.24, 34.05]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Colorado River Aqueduct",
+        "baseline_flow_cfs_2025": 1600,
+        "cities_supplied": [
+          { "name": "Los Angeles, CA", "lat": 34.0522, "lng": -118.2437, "dependency": "25%" },
+          { "name": "San Diego, CA", "lat": 32.7157, "lng": -117.1611, "dependency": "20%" }
+        ],
+        "flow_projections": {
+          "2025": 1600,
+          "2035": 1440,
+          "2050": 1200,
+          "2075": 960,
+          "2100": 800,
+          "2125": 640
+        },
+        "depletion_factors": "Colorado River compact, Lake Mead decline, interstate disputes"
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [-114.47, 34.30],
+          [-114.3, 34.1],
+          [-114.0, 33.9],
+          [-113.5, 33.8],
+          [-117.2, 33.95],
+          [-117.8, 34.0],
+          [-118.24, 34.05]
+        ]
+      }
+    }
+  ]
+}
