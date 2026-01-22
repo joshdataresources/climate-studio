@@ -9,7 +9,8 @@ export type ClimateLayerId =
   | 'topographic_relief'
   | 'precipitation_drought'
   // | 'groundwater_depletion'  // Hidden until GRACE data access is obtained
-  | 'megaregion_timeseries';
+  | 'megaregion_timeseries'
+  | 'wet_bulb';
 
 export type ClimateControl =
   | 'seaLevelFeet'
@@ -33,7 +34,8 @@ export type ClimateControl =
   | 'megaregionDataMode'
   | 'megaregionAnimating'
   | 'groundwaterOpacity'
-  | 'groundwaterAquifer';
+  | 'groundwaterAquifer'
+  | 'wetBulbOpacity';
 
 export interface ClimateFetchContext {
   bounds: LatLngBoundsLiteral | null;
@@ -47,6 +49,7 @@ export interface ClimateFetchContext {
   urbanHeatSeason: 'summer' | 'winter';
   urbanHeatColorScheme: 'temperature' | 'heat' | 'urban';
   urbanExpansionOpacity: number;
+  wetBulbOpacity?: number;
   reliefStyle: 'classic' | 'dark' | 'depth' | 'dramatic';
   reliefOpacity: number;
   temperatureMode: 'anomaly' | 'actual';
@@ -351,7 +354,36 @@ export const climateLayers: ClimateLayerDefinition[] = [
       valueProperty: 'elevation'
     }
   },
-  // 8. Groundwater Depletion - HEXAGONS on aquifer boundaries
+  // 8. Wet Bulb Temperature - HEXAGONS
+  {
+    id: 'wet_bulb',
+    title: 'Wet Bulb Temperature',
+    description: 'Projected Wet Bulb Temperature (WBT) risk analysis based on NASA NEX-GDDP-CMIP6 data. Shows the combined effect of heat and humidity, identifying areas approaching human physiological limits (35°C).',
+    category: 'temperature',
+    source: {
+      name: 'NASA NEX-GDDP-CMIP6',
+      url: 'https://www.nccs.nasa.gov/services/data-collections/land-based-products/nex-gddp-cmip6'
+    },
+    defaultActive: false,
+    controls: ['projectionYear', 'scenario', 'wetBulbOpacity'],
+    fetch: {
+      method: 'GET',
+      route: '/api/climate/wet-bulb-temperature',
+      query: ({ projectionYear, scenario }) => ({
+        year: projectionYear,
+        scenario: scenario,
+        resolution: 4
+      })
+    },
+    style: {
+      color: '#ff4d00',
+      opacity: 0.6,
+      layerType: 'polygon',
+      blendMode: 'normal',
+      valueProperty: 'wet_bulb_c'
+    }
+  },
+  // 9. Groundwater Depletion - HEXAGONS on aquifer boundaries
   // HIDDEN: Awaiting GRACE data access from NASA/Google Earth Engine
   // Uncomment when access is granted
   // {

@@ -15,6 +15,7 @@ import { GroundwaterDetailsPanel, SelectedAquifer } from './panels/GroundwaterDe
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Slider } from './ui/slider'
+import { AccordionItem } from './ui/accordion'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { Search, Loader2, MapPin, Save, Bookmark, GripVertical, MoreHorizontal, Trash2, Pencil, Waves, Droplets, CloudRain } from 'lucide-react'
 import {
@@ -47,8 +48,12 @@ import aquifersData from '../data/aquifers.json'
 import riversData from '../data/rivers-with-depletion.json'
 // Import lakes data with water level projections
 import lakesData from '../data/lakes.json'
-// Import metro humidity data with projections
-import metroHumidityData from '../data/metroHumidity.json'
+// Import metro temperature data with projections (same as Climate view)
+import metroTemperatureData from '../data/metro_temperature_projections.json'
+// Import wet bulb projections for high-risk cities
+import wetBulbProjectionsData from '../data/wet_bulb_projections.json'
+// Import expanded wet bulb projections with more cities
+import expandedWetBulbData from '../data/expanded_wet_bulb_projections.json'
 // Import megaregion data for Metro Data Statistics layer
 import megaregionData from '../data/megaregion-data.json'
 // Removed aqueductsData import - using canal-lines layer only (no dashed lines)
@@ -64,7 +69,38 @@ const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1
 mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
 
 // Backend API base URL
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+const API_BASE = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL || 'http://localhost:5001'
+
+// Combine all metro cities with wet bulb data from expanded 30-city dataset
+const metroHumidityData = {
+  type: "FeatureCollection",
+  name: "Metro Temperature & Wet Bulb Statistics",
+  features: [
+    // Use the expanded wet bulb data (30 cities with accurate projections)
+    ...Object.entries(expandedWetBulbData as any).map(([cityName, cityData]: [string, any]) => ({
+      type: "Feature",
+      properties: {
+        city: cityData.name,
+        lat: cityData.lat,
+        lng: cityData.lon,
+        population: cityData.population_2024,
+        metro_population: cityData.metro_population_2024,
+        // Use actual wet bulb projection data
+        humidity_projections: cityData.projections
+      },
+      geometry: {
+        type: "Point",
+        coordinates: [cityData.lon, cityData.lat]
+      }
+    }))
+  ]
+}
+
+console.log('📊 Metro Humidity Data:', {
+  totalCities: metroHumidityData.features.length,
+  wetBulbCities: Object.keys(expandedWetBulbData).length,
+  cities: metroHumidityData.features.map(f => f.properties.city)
+})
 
 // Helper: Create circle polygon from center point (for Metro Humidity circles)
 function createCircle(lng: number, lat: number, radiusKm: number, points: number = 64): number[][] {
@@ -87,28 +123,30 @@ function createCircle(lng: number, lat: number, radiusKm: number, points: number
   return coords
 }
 
-// Helper: Calculate circle radius based on peak humidity (larger humidity = larger circle)
-function humidityToRadius(peakHumidity: number): number {
-  const scaleFactor = 0.3 // Adjust this to control overall size
-  const baseRadius = peakHumidity * scaleFactor
-  return Math.max(baseRadius, 20) // Minimum 20km radius for visibility
+// Helper: Use extent radius from wet bulb projection data
+function wetBulbDangerToRadius(extentRadiusKm: number): number {
+  // Use the extent_radius_km from the wet bulb projections data
+  // This represents how far the wet bulb danger zone extends
+  return extentRadiusKm
 }
 
-// Helper: Determine circle color based on humidity/temperature metrics
-function getHumidityColor(peakHumidity: number, humidTemp: number): string {
-  // Use a combination of humidity and temperature
-  // Higher humidity + higher temp = more dangerous (red)
-  // Lower values = safer (blue/green)
-  
-  const dangerScore = (peakHumidity / 100) * 0.5 + (humidTemp / 150) * 0.5
-  
-  if (dangerScore < 0.3) return '#3b82f6' // Blue - low risk
-  if (dangerScore < 0.4) return '#06b6d4' // Cyan - moderate-low
-  if (dangerScore < 0.5) return '#10b981' // Green - moderate
-  if (dangerScore < 0.6) return '#eab308' // Yellow - moderate-high
-  if (dangerScore < 0.7) return '#f97316' // Orange - high
-  if (dangerScore < 0.8) return '#ef4444' // Red - very high
-  return '#dc2626' // Dark red - extreme
+// Helper: Determine circle color based on wet bulb danger intensity
+function getWetBulbDangerColor(wetBulbEvents: number, humidTemp: number): string {
+  // Wet bulb events + temperature create dangerous conditions
+  // More events = more dangerous (red)
+  // Fewer events = safer (yellow/orange) - still visible!
+
+  // Calculate danger score: wet bulb events are the primary factor
+  const dangerScore = (wetBulbEvents / 50) * 0.7 + ((humidTemp - 100) / 50) * 0.3
+
+  // Use bold, highly visible colors even for low danger
+  if (dangerScore < 0.15) return '#fbbf24' // Bold amber - low risk but VISIBLE
+  if (dangerScore < 0.30) return '#fb923c' // Bold orange - moderate-low
+  if (dangerScore < 0.45) return '#f97316' // Strong orange - moderate
+  if (dangerScore < 0.60) return '#ea580c' // Dark orange - high
+  if (dangerScore < 0.75) return '#ef4444' // Red - very high
+  if (dangerScore < 0.90) return '#dc2626' // Dark red - extreme
+  return '#991b1b' // Very dark red - catastrophic
 }
 
 // Helper: Calculate circle radius based on population (from Metro Data Statistics)
@@ -147,19 +185,19 @@ function getGrowthColor(currentPop: number, previousPop: number): string {
 // Helper to get volume for a specific year from projections
 function getVolumeForYear(projections: Record<string, number> | undefined, year: number): number | null {
   if (!projections) return null
-  
+
   // Available projection years in the data
   const availableYears = Object.keys(projections).map(Number).sort((a, b) => a - b)
-  
+
   // If exact year exists, return it
   if (projections[year.toString()]) {
     return projections[year.toString()]
   }
-  
+
   // Otherwise interpolate between nearest years
   let lowerYear = availableYears[0]
   let upperYear = availableYears[availableYears.length - 1]
-  
+
   for (let i = 0; i < availableYears.length - 1; i++) {
     if (availableYears[i] <= year && availableYears[i + 1] >= year) {
       lowerYear = availableYears[i]
@@ -167,16 +205,16 @@ function getVolumeForYear(projections: Record<string, number> | undefined, year:
       break
     }
   }
-  
+
   // Clamp to available range
   if (year <= lowerYear) return projections[lowerYear.toString()]
   if (year >= upperYear) return projections[upperYear.toString()]
-  
+
   // Linear interpolation
   const lowerVol = projections[lowerYear.toString()]
   const upperVol = projections[upperYear.toString()]
   const ratio = (year - lowerYear) / (upperYear - lowerYear)
-  
+
   return lowerVol + (upperVol - lowerVol) * ratio
 }
 
@@ -188,18 +226,18 @@ function getVolumeForYear(projections: Record<string, number> | undefined, year:
 function getDepletionColor(properties: any, projectionYear: number = 2025): string {
   const baseline = properties?.volume_gallons_2025 || properties?.projections?.['2025']
   const projections = properties?.projections
-  
+
   if (!baseline || !projections) {
     return '#6366f1' // Default purple for unknown
   }
-  
+
   const currentVolume = getVolumeForYear(projections, projectionYear)
   if (currentVolume === null) {
     return '#6366f1' // Default purple for unknown
   }
-  
+
   const percentageOfBaseline = (currentVolume / baseline) * 100
-  
+
   if (percentageOfBaseline >= 98) {
     return '#22c55e' // Green - Stable
   }
@@ -209,7 +247,7 @@ function getDepletionColor(properties: any, projectionYear: number = 2025): stri
   if (percentageOfBaseline >= 75) {
     return '#f97316' // Orange - Stressed
   }
-  
+
   return '#ef4444' // Red - Critical
 }
 
@@ -272,18 +310,18 @@ function getRiverDepletionPercentage(properties: any, projectionYear: number): n
 function getDepletionStatus(properties: any, projectionYear: number): { label: string; severity: string; percentage: number } {
   const baseline = properties?.volume_gallons_2025 || properties?.projections?.['2025']
   const projections = properties?.projections
-  
+
   if (!baseline || !projections) {
     return { label: 'Unknown', severity: 'unknown', percentage: 100 }
   }
-  
+
   const currentVolume = getVolumeForYear(projections, projectionYear)
   if (currentVolume === null) {
     return { label: 'Unknown', severity: 'unknown', percentage: 100 }
   }
-  
+
   const percentage = (currentVolume / baseline) * 100
-  
+
   if (percentage >= 98) {
     return { label: 'Stable', severity: 'stable', percentage }
   }
@@ -293,7 +331,7 @@ function getDepletionStatus(properties: any, projectionYear: number): { label: s
   if (percentage >= 75) {
     return { label: 'Stressed', severity: 'stressed', percentage }
   }
-  
+
   return { label: 'Critical', severity: 'critical', percentage }
 }
 
@@ -350,16 +388,16 @@ interface SortableViewItemProps {
   cancelEdit: () => void
 }
 
-function SortableViewItem({ 
-  view, 
-  loadSavedView, 
-  deleteSavedView, 
-  editSavedView, 
-  editingViewId, 
-  editingViewName, 
-  setEditingViewName, 
-  saveEditedViewName, 
-  cancelEdit 
+function SortableViewItem({
+  view,
+  loadSavedView,
+  deleteSavedView,
+  editSavedView,
+  editingViewId,
+  editingViewName,
+  setEditingViewName,
+  saveEditedViewName,
+  cancelEdit
 }: SortableViewItemProps) {
   const {
     attributes,
@@ -516,10 +554,10 @@ export default function WaterAccessView() {
     deleteSavedView: deleteSavedViewFromContext,
     updateSavedViewName,
   } = useMap()
-  
+
   // Determine map style based on theme
-  const mapStyle = theme === 'light' 
-    ? 'mapbox://styles/mapbox/light-v11' 
+  const mapStyle = theme === 'light'
+    ? 'mapbox://styles/mapbox/light-v11'
     : 'mapbox://styles/mapbox/dark-v11'
 
   // Local state for editing views
@@ -531,26 +569,32 @@ export default function WaterAccessView() {
   // Water access layer toggles
   const [showRiversLayer, setShowRiversLayer] = useState(true)
   const [showCanalsLayer, setShowCanalsLayer] = useState(true)
-  const [showAquifersLayer, setShowAquifersLayer] = useState(false) // Default OFF
+  const [showAquifersLayer, setShowAquifersLayer] = useState(true) // Default ON
   const [showDamsLayer, setShowDamsLayer] = useState(true) // Default ON
   const [showServiceAreasLayer, setShowServiceAreasLayer] = useState(true) // Default ON
   const [showMetroHumidityLayer, setShowMetroHumidityLayer] = useState(true) // Default ON
   const [showGroundwaterLayer, setShowGroundwaterLayer] = useState(true) // Default ON
   const [showHumidityWetBulb, setShowHumidityWetBulb] = useState(true)
-  const [showTempHumidity, setShowTempHumidity] = useState(true)
+  const [showTempHumidity, setShowTempHumidity] = useState(false) // Disabled - fields don't exist in data
   const [showMetroDataStatistics, setShowMetroDataStatistics] = useState(true) // Test: Metro Data Statistics layer
+  const [activeBubbleIndex, setActiveBubbleIndex] = useState<number | null>(null) // Track which bubble is active
 
   // Climate context for precipitation & drought layer
-  const { toggleLayer, isLayerActive, controls, setDroughtMetric, setDroughtOpacity } = useClimate()
+  const { toggleLayer, isLayerActive, controls, setDroughtMetric, setDroughtOpacity, setWetBulbOpacity } = useClimate()
   const precipitationDroughtLayer = climateLayers.find(l => l.id === 'precipitation_drought')
   const isPrecipitationDroughtActive = isLayerActive('precipitation_drought')
+  const wetBulbLayer = climateLayers.find(l => l.id === 'wet_bulb')
+  const isWetBulbActive = isLayerActive('wet_bulb')
   const [aquiferOpacity, setAquiferOpacity] = useState(0.25)
-  
+  const [riverOpacity, setRiverOpacity] = useState(1.0) // Default full opacity for rivers
+
   // Get map bounds for layer data fetching
   const [mapBounds, setMapBounds] = useState<{ north: number; south: number; east: number; west: number; zoom?: number } | null>(null)
   const { layers: layerStates } = useClimateLayerData(mapBounds)
   const precipitationDroughtData = layerStates.precipitation_drought?.data
   const precipitationDroughtStatus = layerStates.precipitation_drought?.status
+  const wetBulbData = layerStates.wet_bulb?.data
+  const wetBulbStatus = layerStates.wet_bulb?.status
 
   // Keep ref in sync with state for use in event handlers (avoids stale closure)
   useEffect(() => {
@@ -604,9 +648,9 @@ export default function WaterAccessView() {
     // Start with API features, enhanced with local data
     const enhancedFeatures = (baseData?.features || []).map((feature: any, index: number) => {
       const name = feature.properties?.displayName ||
-                   feature.properties?.AQ_NAME ||
-                   feature.properties?.NAME ||
-                   feature.properties?.name || ''
+        feature.properties?.AQ_NAME ||
+        feature.properties?.NAME ||
+        feature.properties?.name || ''
 
       // Try to find matching aquifer data with projections
       const localAquiferData = aquiferLookup.get(name.toLowerCase())
@@ -686,10 +730,10 @@ export default function WaterAccessView() {
   const fetchAquiferData = useCallback(async (bounds?: { north: number; south: number; east: number; west: number }) => {
     setLoading(true)
     setError(null)
-    
+
     let url = `${API_BASE}/api/usgs/aquifers`
     const params = new URLSearchParams()
-    
+
     if (bounds) {
       params.append('north', bounds.north.toString())
       params.append('south', bounds.south.toString())
@@ -702,37 +746,37 @@ export default function WaterAccessView() {
       params.append('east', '-66')
       params.append('west', '-125')
     }
-    
+
     url += `?${params.toString()}`
 
     try {
       // Add timeout to prevent infinite loading
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
-      
+
       try {
         const response = await fetch(url, {
           signal: controller.signal
         })
-        
+
         clearTimeout(timeoutId)
-        
+
         if (!response.ok) {
           throw new Error(`Failed to fetch aquifer data: ${response.statusText}`)
         }
 
         const result = await response.json()
 
-      if (result.success && result.data) {
-        const aquifers = result.data
-        
-        if (!aquifers || !aquifers.features) {
-          setLoading(false)
-          return
-        }
+        if (result.success && result.data) {
+          const aquifers = result.data
 
-        // Enhance with projection data and colors
-        const enhancedAquifers = enhanceAquiferData(aquifers)
+          if (!aquifers || !aquifers.features) {
+            setLoading(false)
+            return
+          }
+
+          // Enhance with projection data and colors
+          const enhancedAquifers = enhanceAquiferData(aquifers)
 
           setAquiferData(prevData => {
             if (!prevData) {
@@ -740,7 +784,7 @@ export default function WaterAccessView() {
               return enhancedAquifers
             }
 
-          // Merge with existing data
+            // Merge with existing data
             const existingMap = new Map()
             prevData.features.forEach((f: any) => {
               const key = f.id || JSON.stringify(f.geometry?.coordinates?.[0]?.[0])
@@ -758,21 +802,43 @@ export default function WaterAccessView() {
               type: 'FeatureCollection' as const,
               features: Array.from(existingMap.values())
             }
-            
+
             setAquiferCount(merged.features.length)
             return merged
           })
-      }
+        }
       } catch (fetchErr) {
         clearTimeout(timeoutId)
         throw fetchErr
       }
     } catch (err) {
       console.error('Error fetching aquifer data:', err)
-      if (err instanceof Error && err.name === 'AbortError') {
-        setError('Request timed out. The backend may not be running. Please check that the backend server is started.')
-      } else {
-        setError(err instanceof Error ? err.message : 'Failed to load aquifer data. Please check that the backend server is running.')
+      console.log('📂 Falling back to local aquifer data...')
+
+      // Fallback to local static aquifer data when API fails
+      try {
+        const localAquifers = aquifersData as GeoJSON.FeatureCollection
+        if (localAquifers && localAquifers.features && localAquifers.features.length > 0) {
+          const enhancedAquifers = enhanceAquiferData(localAquifers)
+          setAquiferData(enhancedAquifers)
+          setAquiferCount(enhancedAquifers.features.length)
+          console.log('✅ Loaded', enhancedAquifers.features.length, 'aquifers from local data')
+          setError(null) // Clear error since we have fallback data
+        } else {
+          // Only show error if fallback also fails
+          if (err instanceof Error && err.name === 'AbortError') {
+            setError('Request timed out. Using limited local data.')
+          } else {
+            setError('Failed to load aquifer data from API. Using local data.')
+          }
+        }
+      } catch (fallbackErr) {
+        console.error('Fallback to local aquifer data also failed:', fallbackErr)
+        if (err instanceof Error && err.name === 'AbortError') {
+          setError('Request timed out. The backend may not be running. Please check that the backend server is started.')
+        } else {
+          setError(err instanceof Error ? err.message : 'Failed to load aquifer data. Please check that the backend server is running.')
+        }
       }
     } finally {
       setLoading(false)
@@ -793,7 +859,7 @@ export default function WaterAccessView() {
         return false
       }
     }
-    
+
     try {
       // Remove existing layers and source if force is true (for style changes)
       // This is necessary because setStyle() removes all custom layers
@@ -821,12 +887,12 @@ export default function WaterAccessView() {
           break
         }
       }
-      
+
       // If no label layer found, try to insert before any layer with 'label' in the name
       if (!beforeId) {
         const style = map.getStyle()
         if (style && style.layers) {
-          const labelLayer = style.layers.find((layer: any) => 
+          const labelLayer = style.layers.find((layer: any) =>
             layer.id && (layer.id.includes('label') || layer.id.includes('Label'))
           )
           if (labelLayer) {
@@ -1297,71 +1363,92 @@ export default function WaterAccessView() {
         }, beforeId)
       }
 
-      // Add metro humidity circles (like Metro Data Statistics)
-      // Generate GeoJSON with polygon circles based on current projection year
-      const generateMetroHumidityCircles = () => {
-        const features = (metroHumidityData as any).features.map((feature: any) => {
-          const cityName = feature.properties.city
-          const lat = feature.properties.lat
-          const lng = feature.properties.lng
-          
-          // Get humidity data for current year
-          const getHumidityDataForYear = (projections: any, year: number) => {
-            const yearStr = year.toString()
-            if (projections[yearStr]) {
-              return projections[yearStr]
-            }
+      // Add metro humidity heat map (organic blob-like visualization)
+      // Generate GeoJSON with point features that will be rendered as a heatmap
+      const generateMetroHumidityHeatmap = () => {
+        // Use all cities from expanded wet bulb data (30 cities with accurate projections)
+        const features = (metroHumidityData as any).features
+          .map((feature: any) => {
+            const cityName = feature.properties.city
+            const lat = feature.properties.lat
+            const lng = feature.properties.lng
 
-            const years = Object.keys(projections).map(Number).sort((a, b) => a - b)
-            let lowerYear = years[0]
-            let upperYear = years[years.length - 1]
+            // Get humidity data for current year
+            const getHumidityDataForYear = (projections: any, year: number) => {
+              const yearStr = year.toString()
+              if (projections[yearStr]) {
+                return projections[yearStr]
+              }
 
-            for (let i = 0; i < years.length - 1; i++) {
-              if (years[i] <= year && years[i + 1] >= year) {
-                lowerYear = years[i]
-                upperYear = years[i + 1]
-                break
+              const years = Object.keys(projections).map(Number).sort((a, b) => a - b)
+              let lowerYear = years[0]
+              let upperYear = years[years.length - 1]
+
+              for (let i = 0; i < years.length - 1; i++) {
+                if (years[i] <= year && years[i + 1] >= year) {
+                  lowerYear = years[i]
+                  upperYear = years[i + 1]
+                  break
+                }
+              }
+
+              if (year <= lowerYear) return projections[lowerYear.toString()]
+              if (year >= upperYear) return projections[upperYear.toString()]
+
+              const ratio = (year - lowerYear) / (upperYear - lowerYear)
+              const lower = projections[lowerYear.toString()]
+              const upper = projections[upperYear.toString()]
+
+              return {
+                peak_humidity: Math.round(lower.peak_humidity + (upper.peak_humidity - lower.peak_humidity) * ratio),
+                wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
+                days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
+                days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
+                estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
+                casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
+                extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
               }
             }
 
-            if (year <= lowerYear) return projections[lowerYear.toString()]
-            if (year >= upperYear) return projections[upperYear.toString()]
+            const humidityData = getHumidityDataForYear(feature.properties.humidity_projections, projectionYear)
+            const color = getWetBulbDangerColor(humidityData.wet_bulb_events, humidityData.days_over_95F)
 
-            const ratio = (year - lowerYear) / (upperYear - lowerYear)
-            const lower = projections[lowerYear.toString()]
-            const upper = projections[upperYear.toString()]
+            // Normalize wet bulb events to 0-1 scale for heatmap intensity (max 100 events)
+            const intensity = Math.min(humidityData.wet_bulb_events / 100, 1)
+
+            // Debug log for high-risk wet bulb cities
+            if (humidityData.wet_bulb_events > 20) {
+              console.log(`🔴 Wet Bulb Heatmap (high risk): ${cityName}`, {
+                intensity,
+                color,
+                wet_bulb_events: humidityData.wet_bulb_events,
+                days_over_95F: humidityData.days_over_95F,
+                extent_radius_km: humidityData.extent_radius_km
+              })
+            }
 
             return {
-              peak_humidity: Math.round(lower.peak_humidity + (upper.peak_humidity - lower.peak_humidity) * ratio),
-              wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
-              humid_temp: Math.round(lower.humid_temp + (upper.humid_temp - lower.humid_temp) * ratio),
-              days_over_100: Math.round(lower.days_over_100 + (upper.days_over_100 - lower.days_over_100) * ratio)
+              type: 'Feature' as const,
+              properties: {
+                city: cityName,
+                lat: lat,
+                lng: lng,
+                peak_humidity: humidityData.peak_humidity,
+                wet_bulb_events: humidityData.wet_bulb_events,
+                days_over_95F: humidityData.days_over_95F,
+                days_over_100F: humidityData.days_over_100F,
+                at_risk_population: humidityData.estimated_at_risk_population,
+                casualty_rate_percent: humidityData.casualty_rate_percent,
+                extent_radius_km: humidityData.extent_radius_km,
+                color: color,
+                intensity: intensity  // Used for heatmap weight
+              },
+              geometry: {
+                type: 'Point' as const,
+                coordinates: [lng, lat]
+              }
             }
-          }
-
-          const humidityData = getHumidityDataForYear(feature.properties.humidity_projections, projectionYear)
-          const radiusKm = humidityToRadius(humidityData.peak_humidity)
-          const color = getHumidityColor(humidityData.peak_humidity, humidityData.humid_temp)
-
-          return {
-            type: 'Feature' as const,
-            properties: {
-              city: cityName,
-              lat: lat,
-              lng: lng,
-              peak_humidity: humidityData.peak_humidity,
-              wet_bulb_events: humidityData.wet_bulb_events,
-              humid_temp: humidityData.humid_temp,
-              days_over_100: humidityData.days_over_100,
-              color: color,
-              radius: radiusKm
-            },
-            geometry: {
-              type: 'Polygon' as const,
-              coordinates: [createCircle(lng, lat, radiusKm)]
-            }
-          }
-        })
+          })
 
         return {
           type: 'FeatureCollection' as const,
@@ -1369,53 +1456,80 @@ export default function WaterAccessView() {
         }
       }
 
-      // Always create/update the source (circles are always constructed, visibility is controlled separately)
-      if (!map.getSource('metro-humidity-circles')) {
-        console.log('📦 Adding metro-humidity-circles source...')
-        map.addSource('metro-humidity-circles', {
+      // Always create/update the source (heatmap points are always constructed, visibility is controlled separately)
+      if (!map.getSource('metro-humidity-heatmap')) {
+        console.log('📦 Adding metro-humidity-heatmap source...')
+        map.addSource('metro-humidity-heatmap', {
           type: 'geojson',
-          data: generateMetroHumidityCircles()
+          data: generateMetroHumidityHeatmap()
         })
       } else {
-        // Update source data when year changes (circles are always constructed)
-        const source = map.getSource('metro-humidity-circles') as mapboxgl.GeoJSONSource
-        source.setData(generateMetroHumidityCircles())
+        // Update source data when year changes (heatmap is always constructed)
+        const source = map.getSource('metro-humidity-heatmap') as mapboxgl.GeoJSONSource
+        source.setData(generateMetroHumidityHeatmap())
       }
 
-      // Add metro humidity circle fill layer (always visible when layer is active, like Metro Data Statistics)
-      if (!map.getLayer('metro-humidity-circles-fill')) {
-        console.log('🎨 Adding metro-humidity-circles-fill layer...')
+      // Add metro humidity heatmap layer (organic blob-like visualization with gradient fade)
+      if (!map.getLayer('metro-humidity-heatmap-layer')) {
+        console.log('🎨 Adding metro-humidity-heatmap-layer...')
         map.addLayer({
-          id: 'metro-humidity-circles-fill',
-          type: 'fill',
-          source: 'metro-humidity-circles',
+          id: 'metro-humidity-heatmap-layer',
+          type: 'heatmap',
+          source: 'metro-humidity-heatmap',
           layout: {
             visibility: showMetroHumidityLayer ? 'visible' : 'none'
           },
           paint: {
-            'fill-color': ['get', 'color'],
-            'fill-opacity': 0.6
+            // Increase weight as wet bulb events increase
+            'heatmap-weight': [
+              'interpolate',
+              ['linear'],
+              ['get', 'intensity'],
+              0, 0,
+              1, 1
+            ],
+            // Increase intensity as zoom level increases
+            'heatmap-intensity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 0.8,
+              9, 1.2
+            ],
+            // Color ramp: transparent → yellow → orange → red (matching wet bulb danger colors)
+            'heatmap-color': [
+              'interpolate',
+              ['linear'],
+              ['heatmap-density'],
+              0, 'rgba(0, 0, 0, 0)',
+              0.2, '#fbbf24',  // Amber
+              0.4, '#fb923c',  // Bold orange
+              0.6, '#f97316',  // Strong orange
+              0.8, '#ef4444',  // Red
+              1, '#991b1b'     // Dark red
+            ],
+            // Adjust radius based on zoom level and extent_radius_km
+            'heatmap-radius': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 20,
+              5, 40,
+              10, 80,
+              15, 120
+            ],
+            // Fade out heatmap at higher zoom levels to reduce visual clutter
+            'heatmap-opacity': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 0.8,
+              12, 0.6,
+              15, 0.3
+            ]
           }
         }, beforeId)
-        }
-
-      // Add metro humidity circle outline layer (always visible when layer is active)
-      if (!map.getLayer('metro-humidity-circles-stroke')) {
-        console.log('🎨 Adding metro-humidity-circles-stroke layer...')
-        map.addLayer({
-          id: 'metro-humidity-circles-stroke',
-          type: 'line',
-          source: 'metro-humidity-circles',
-          layout: {
-            visibility: showMetroHumidityLayer ? 'visible' : 'none'
-          },
-          paint: {
-            'line-color': ['get', 'color'],
-            'line-width': 2,
-            'line-opacity': 0.8
-          }
-        }, beforeId)
-        }
+      }
 
       // Add metro city labels (point features for labels)
       if (!map.getSource('metro-humidity-labels')) {
@@ -1460,7 +1574,7 @@ export default function WaterAccessView() {
             'text-halo-width': 2
           }
         })
-        }
+      }
 
       console.log('✅ All river layers set up successfully (MIDDLE - on top of aquifers)')
 
@@ -1481,23 +1595,23 @@ export default function WaterAccessView() {
   // Initialize map
   useEffect(() => {
     isMountedRef.current = true
-    
+
     if (!mapContainer.current) return
-    
+
     if (mapRef.current) {
       // Map already exists, just update viewport
       try {
         mapRef.current.setCenter([viewport.center.lng, viewport.center.lat])
         mapRef.current.setZoom(viewport.zoom)
-        } catch (e) {
+      } catch (e) {
         // Map might be in bad state
-          }
-          return
+      }
+      return
     }
 
     const container = mapContainer.current
     const rect = container.getBoundingClientRect()
-    
+
     if (rect.width === 0 || rect.height === 0) {
       const timer = setTimeout(() => {
         // Retry
@@ -1545,10 +1659,10 @@ export default function WaterAccessView() {
 
     let moveTimeout: NodeJS.Timeout | null = null
     let hoveredFeatureId: string | number | null = null
-    
+
     map.on('load', () => {
       setupMapLayers(map)
-      
+
       const bounds = map.getBounds()
       const ne = bounds.getNorthEast()
       const sw = bounds.getSouthWest()
@@ -1560,17 +1674,17 @@ export default function WaterAccessView() {
         west: sw.lng - padding
       })
     })
-    
+
     map.on('moveend', () => {
       if (moveTimeout) clearTimeout(moveTimeout)
       moveTimeout = setTimeout(() => {
         if (!mapRef.current || mapRef.current !== map) return
-        
+
         const bounds = map.getBounds()
         const ne = bounds.getNorthEast()
         const sw = bounds.getSouthWest()
         const padding = 2.0
-        
+
         // Update map bounds for layer data fetching
         setMapBounds({
           north: ne.lat + padding,
@@ -1579,14 +1693,14 @@ export default function WaterAccessView() {
           west: sw.lng - padding,
           zoom: map.getZoom()
         })
-        
+
         fetchAquiferData({
           north: ne.lat + padding,
           south: sw.lat - padding,
           east: ne.lng + padding,
           west: sw.lng - padding
         })
-        
+
         // Update shared viewport state
         setViewport({
           center: { lat: map.getCenter().lat, lng: map.getCenter().lng },
@@ -1594,7 +1708,7 @@ export default function WaterAccessView() {
         })
       }, 500)
     })
-    
+
     // Set initial bounds after map loads
     map.once('load', () => {
       const initialBounds = map.getBounds()
@@ -1648,8 +1762,11 @@ export default function WaterAccessView() {
       return {
         peak_humidity: Math.round(lower.peak_humidity + (upper.peak_humidity - lower.peak_humidity) * ratio),
         wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
-        humid_temp: Math.round(lower.humid_temp + (upper.humid_temp - lower.humid_temp) * ratio),
-        days_over_100: Math.round(lower.days_over_100 + (upper.days_over_100 - lower.days_over_100) * ratio)
+        days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
+        days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
+        estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
+        casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
+        extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
       }
     }
 
@@ -1737,9 +1854,8 @@ export default function WaterAccessView() {
           </div>
           ` : ''}
 
-          ${showTempHumidity ? `
-          <!-- Temperature & Humidity -->
-          <div style="border-radius: 4px; overflow: hidden;">
+          <!-- Extreme Heat Days -->
+          <div style="margin-bottom: 4px; border-radius: 4px; overflow: hidden;">
             <div style="
               background: rgba(255, 255, 255, 0.35);
               padding: 4px 8px;
@@ -1750,7 +1866,7 @@ export default function WaterAccessView() {
                 font-weight: 600;
                 color: #697487;
                 margin: 0;
-              ">Temperature & Humidity</p>
+              ">Extreme Heat Days</p>
             </div>
             <div style="display: flex;">
               <div style="flex: 1; padding: 4px 8px;">
@@ -1759,13 +1875,13 @@ export default function WaterAccessView() {
                   font-weight: 500;
                   color: #101728;
                   margin: 0 0 2px 0;
-                ">Humid Temp.</p>
+                ">95°F+ Days</p>
                 <p style="
                   font-size: 12px;
                   font-weight: 700;
                   color: #101728;
                   margin: 0;
-                ">${humidityData.humid_temp}°</p>
+                ">${humidityData.days_over_95F || 0}</p>
               </div>
               <div style="flex: 1; padding: 4px 8px;">
                 <p style="
@@ -1773,18 +1889,47 @@ export default function WaterAccessView() {
                   font-weight: 500;
                   color: #101728;
                   margin: 0 0 2px 0;
-                "><span style="font-weight: 500;">100</span><span style="font-weight: 700;">°+ </span>Days</p>
+                ">100°F+ Days</p>
                 <p style="
                   font-size: 12px;
                   font-weight: 700;
                   color: #101728;
                   margin: 0;
                   text-align: center;
-                ">${humidityData.days_over_100}</p>
+                ">${humidityData.days_over_100F || 0}</p>
               </div>
             </div>
           </div>
-          ` : ''}
+
+          <!-- Health Impact Statistics -->
+          <div style="border-radius: 4px; overflow: hidden;">
+            <div style="
+              background: rgba(239, 68, 68, 0.15);
+              padding: 4px 8px;
+              border-radius: 4px;
+            ">
+              <p style="
+                font-size: 10px;
+                font-weight: 600;
+                color: #991b1b;
+                margin: 0;
+              ">Health Impact & Extent</p>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 4px; padding: 4px 8px;">
+              <div style="display: flex; justify-content: space-between;">
+                <p style="font-size: 9px; font-weight: 500; color: #101728; margin: 0;">At-Risk Population:</p>
+                <p style="font-size: 10px; font-weight: 700; color: #dc2626; margin: 0;">${(humidityData.estimated_at_risk_population || 0).toLocaleString()}</p>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <p style="font-size: 9px; font-weight: 500; color: #101728; margin: 0;">Casualty Rate:</p>
+                <p style="font-size: 10px; font-weight: 700; color: #dc2626; margin: 0;">${humidityData.casualty_rate_percent || 0}%</p>
+              </div>
+              <div style="display: flex; justify-content: space-between;">
+                <p style="font-size: 9px; font-weight: 500; color: #101728; margin: 0;">Danger Zone Radius:</p>
+                <p style="font-size: 10px; font-weight: 700; color: #dc2626; margin: 0;">${humidityData.extent_radius_km || 0} km</p>
+              </div>
+            </div>
+          </div>
         </div>
       `
     }
@@ -1794,9 +1939,9 @@ export default function WaterAccessView() {
     map.on('click', 'aquifer-fill', (e) => {
       // Stop event propagation to prevent the general map click handler from firing
       e.originalEvent?.stopPropagation()
-      
+
       if (!e.features || e.features.length === 0) return
-      
+
       const feature = e.features[0]
       const properties = feature.properties
       if (!properties) return
@@ -1867,7 +2012,7 @@ export default function WaterAccessView() {
     map.on('click', (e) => {
       // Check if click was on an aquifer layer
       const features = map.queryRenderedFeatures(e.point, { layers: ['aquifer-fill'] })
-      
+
       // Only clear feature states if clicking outside of any aquifer (but keep panel open)
       if (features.length === 0) {
         // Clear ALL feature states from the source (visual deselection)
@@ -1902,7 +2047,7 @@ export default function WaterAccessView() {
         }
       }
     })
-    
+
     map.on('mouseleave', 'aquifer-fill', () => {
       map.getCanvas().style.cursor = ''
       if (hoveredFeatureId !== null) {
@@ -1919,11 +2064,11 @@ export default function WaterAccessView() {
     return () => {
       if (moveTimeout) clearTimeout(moveTimeout)
       isMountedRef.current = false
-      
+
       // Clean up resize handlers
       window.removeEventListener('resize', handleResize)
       resizeObserver.disconnect()
-      
+
       if (mapRef.current === map) {
         if (!mapContainer.current) {
           try {
@@ -1943,7 +2088,7 @@ export default function WaterAccessView() {
       const map = mapRef.current
       const currentCenter = map.getCenter()
       const currentZoom = map.getZoom()
-      
+
       // Only update if significantly different to avoid infinite loops
       if (
         Math.abs(currentCenter.lat - viewport.center.lat) > 0.001 ||
@@ -1970,22 +2115,22 @@ export default function WaterAccessView() {
   // Update map style when theme changes
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return
-    
+
     // Skip if style hasn't actually changed
     if (prevMapStyleRef.current === mapStyle) return
     prevMapStyleRef.current = mapStyle
 
     const map = mapRef.current
-    
+
     // Store current viewport
     const center = map.getCenter()
     const zoom = map.getZoom()
     const pitch = map.getPitch()
     const bearing = map.getBearing()
-    
+
     // Store current aquifer data from ref
     const currentAquiferData = aquiferDataRef.current
-    
+
     console.log('🎨 WaterAccessView: Changing map style to:', mapStyle)
     console.log('📦 Current aquifer data:', currentAquiferData ? `${currentAquiferData.features.length} features` : 'none')
 
@@ -1995,7 +2140,7 @@ export default function WaterAccessView() {
     // Function to restore everything after style loads with retry logic
     const restoreLayersAndData = (retryCount = 0) => {
       const maxRetries = 5
-      
+
       try {
         // Check if map is ready
         if (!map.isStyleLoaded()) {
@@ -2011,13 +2156,13 @@ export default function WaterAccessView() {
         map.setZoom(zoom)
         map.setPitch(pitch)
         map.setBearing(bearing)
-        
+
         console.log('🔧 Setting up aquifer layers...')
 
         // Force re-setup the layers
         const layersReady = setupMapLayers(map, true)
         console.log('✅ Layers setup result:', layersReady)
-        
+
         if (currentAquiferData && currentAquiferData.features && currentAquiferData.features.length > 0) {
           // Try to add data with retry
           const addData = (dataRetry = 0) => {
@@ -2041,7 +2186,7 @@ export default function WaterAccessView() {
               }
             }
           }
-          
+
           setTimeout(() => addData(), 150)
         }
       } catch (error) {
@@ -2058,12 +2203,17 @@ export default function WaterAccessView() {
       // Small delay to ensure style is fully settled
       setTimeout(() => restoreLayersAndData(), 100)
     }
-    
+
     map.once('style.load', onStyleLoad)
-    
+
     // Cleanup
     return () => {
-      map.off('style.load', onStyleLoad)
+      if (!map || map._removed) return
+      try {
+        map.off('style.load', onStyleLoad)
+      } catch (error) {
+        console.log('Map already removed during style.load cleanup')
+      }
     }
   }, [mapStyle, mapLoaded, setupMapLayers, enhanceAquiferData])
 
@@ -2109,7 +2259,7 @@ export default function WaterAccessView() {
     }
   }, [aquiferData, mapLoaded, projectionYear, enhanceAquiferData])
 
-  // Toggle river layers visibility
+  // Toggle river layers visibility and opacity
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return
 
@@ -2121,9 +2271,13 @@ export default function WaterAccessView() {
     riverLayerIds.forEach(layerId => {
       if (map.getLayer(layerId)) {
         map.setLayoutProperty(layerId, 'visibility', visibility)
+        // Apply opacity to line layers
+        if (layerId === 'river-lines' || layerId === 'river-lines-casing') {
+          map.setPaintProperty(layerId, 'line-opacity', riverOpacity)
+        }
       }
     })
-  }, [showRiversLayer, mapLoaded])
+  }, [showRiversLayer, mapLoaded, riverOpacity])
 
   // Toggle canals/aqueducts layer visibility
   useEffect(() => {
@@ -2141,12 +2295,12 @@ export default function WaterAccessView() {
     })
   }, [showCanalsLayer, mapLoaded])
 
-  // Toggle aquifer layers visibility
+  // Toggle aquifer layers visibility (requires both showAquifersLayer AND showGroundwaterLayer)
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return
 
     const map = mapRef.current
-    const visibility = showAquifersLayer ? 'visible' : 'none'
+    const visibility = (showAquifersLayer && showGroundwaterLayer) ? 'visible' : 'none'
 
     const aquiferLayerIds = ['aquifer-fill', 'aquifer-outline', 'aquifer-hover']
 
@@ -2155,7 +2309,7 @@ export default function WaterAccessView() {
         map.setLayoutProperty(layerId, 'visibility', visibility)
       }
     })
-  }, [showAquifersLayer, mapLoaded])
+  }, [showAquifersLayer, showGroundwaterLayer, mapLoaded])
 
   // Toggle dams layer visibility
   useEffect(() => {
@@ -2195,8 +2349,8 @@ export default function WaterAccessView() {
 
     const map = mapRef.current
 
-    // Add GRACE raster source and layer if enabled
-    if (showGRACELayer) {
+    // Add GRACE raster source and layer if enabled (requires both groundwater layer AND GRACE toggle)
+    if (showGRACELayer && showGroundwaterLayer) {
       if (!map.getSource('grace-tiles')) {
         console.log('🌍 Adding GRACE tile source...')
         map.addSource('grace-tiles', {
@@ -2262,27 +2416,205 @@ export default function WaterAccessView() {
         console.log('Map already removed during GRACE layer cleanup')
       }
     }
-  }, [showGRACELayer, graceTileUrl, mapLoaded, graceOpacity])
+  }, [showGRACELayer, showGroundwaterLayer, graceTileUrl, mapLoaded, graceOpacity])
 
-  // Toggle metro humidity layers visibility - Hide old circle layers since we use React markers now
+  // Toggle metro humidity heatmap layer visibility - SHOW heatmap for wet bulb visualization!
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return
-    console.log('🔵 Metro Humidity useEffect running', { showMetroHumidityLayer, mapLoaded })
+    console.log('🔵 Metro Humidity Heatmap useEffect running', { showMetroHumidityLayer, mapLoaded })
 
     const map = mapRef.current
 
-    // Hide the old circle and label layers - we use React markers instead
-    const metroLayerIds = ['metro-humidity-circles-fill', 'metro-humidity-circles-stroke', 'metro-humidity-labels']
-
-    metroLayerIds.forEach(layerId => {
-      if (map.getLayer(layerId)) {
-        console.log(`🎨 Hiding old layer ${layerId} (using React markers instead)`)
-        map.setLayoutProperty(layerId, 'visibility', 'none')
-      }
-    })
-
-    // No hover handlers needed - React markers handle their own hover behavior
+    // Show the heatmap layer for wet bulb danger zone visualization
+    if (map.getLayer('metro-humidity-heatmap-layer')) {
+      const visibility = showMetroHumidityLayer ? 'visible' : 'none'
+      console.log(`🎨 Setting metro-humidity-heatmap-layer visibility to ${visibility}`)
+      map.setLayoutProperty('metro-humidity-heatmap-layer', 'visibility', visibility)
+    }
   }, [showMetroHumidityLayer, mapLoaded])
+
+  // Manage Wet Bulb Temperature Danger Zone layer - uses local expanded data
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return
+
+    const map = mapRef.current
+    const sourceId = 'wet-bulb-danger-zones'
+    const layerId = 'wet-bulb-layer'
+
+    // Helper to create circle polygon from center point
+    const createCirclePolygon = (lng: number, lat: number, radiusKm: number, numPoints: number = 64): number[][] => {
+      const coords: number[][] = []
+      const earthRadiusKm = 6371
+      for (let i = 0; i <= numPoints; i++) {
+        const angle = (i / numPoints) * 2 * Math.PI
+        const latOffset = (radiusKm / earthRadiusKm) * (180 / Math.PI)
+        const lngOffset = (radiusKm / earthRadiusKm) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180)
+        coords.push([lng + lngOffset * Math.cos(angle), lat + latOffset * Math.sin(angle)])
+      }
+      return coords
+    }
+
+    // Helper to interpolate between projection years
+    const interpolateProjection = (projections: Record<string, any>, targetYear: number) => {
+      const years = Object.keys(projections).map(Number).sort((a, b) => a - b)
+      let lowerYear = years[0]
+      let upperYear = years[years.length - 1]
+
+      for (const year of years) {
+        if (year <= targetYear) lowerYear = year
+        if (year >= targetYear && upperYear === years[years.length - 1]) upperYear = year
+      }
+
+      if (lowerYear === upperYear || targetYear <= lowerYear) return projections[lowerYear.toString()]
+      if (targetYear >= upperYear) return projections[upperYear.toString()]
+
+      const ratio = (targetYear - lowerYear) / (upperYear - lowerYear)
+      const lower = projections[lowerYear.toString()]
+      const upper = projections[upperYear.toString()]
+
+      return {
+        avg_summer_humidity: Math.round(lower.avg_summer_humidity + (upper.avg_summer_humidity - lower.avg_summer_humidity) * ratio),
+        peak_humidity: Math.round(lower.peak_humidity + (upper.peak_humidity - lower.peak_humidity) * ratio),
+        wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
+        days_over_95F: Math.round(lower.days_over_95F + (upper.days_over_95F - lower.days_over_95F) * ratio),
+        days_over_100F: Math.round(lower.days_over_100F + (upper.days_over_100F - lower.days_over_100F) * ratio),
+        estimated_at_risk_population: Math.round(lower.estimated_at_risk_population + (upper.estimated_at_risk_population - lower.estimated_at_risk_population) * ratio),
+        casualty_rate_percent: Math.round((lower.casualty_rate_percent + (upper.casualty_rate_percent - lower.casualty_rate_percent) * ratio) * 10) / 10,
+        extent_radius_km: Math.round(lower.extent_radius_km + (upper.extent_radius_km - lower.extent_radius_km) * ratio)
+      }
+    }
+
+    // COLOR based on danger level (combines frequency and humidity intensity)
+    const getDangerColor = (wetBulbEvents: number, peakHumidity: number): string => {
+      const dangerScore = wetBulbEvents * (peakHumidity / 70)
+      if (dangerScore < 5) return '#93c5fd'   // Light blue - minimal risk
+      if (dangerScore < 15) return '#fde047'  // Yellow - low risk
+      if (dangerScore < 30) return '#fbbf24'  // Amber - moderate
+      if (dangerScore < 50) return '#fb923c'  // Orange - elevated
+      if (dangerScore < 80) return '#ef4444'  // Red - high risk
+      return '#991b1b' // Dark red - extreme danger
+    }
+
+    // OPACITY based on danger level - faint for low risk, solid for high risk
+    const getDangerOpacity = (wetBulbEvents: number, peakHumidity: number): number => {
+      const dangerScore = wetBulbEvents * (peakHumidity / 70)
+      if (dangerScore < 5) return 0.15
+      if (dangerScore < 15) return 0.25
+      if (dangerScore < 30) return 0.4
+      if (dangerScore < 50) return 0.55
+      if (dangerScore < 80) return 0.7
+      return 0.85
+    }
+
+    // SIZE based on events and population
+    const getRadiusFromDanger = (wetBulbEvents: number, metroPop: number): number => {
+      let baseRadius = 20
+      if (wetBulbEvents <= 3) baseRadius = 25
+      else if (wetBulbEvents <= 10) baseRadius = 35
+      else if (wetBulbEvents <= 25) baseRadius = 50
+      else if (wetBulbEvents <= 50) baseRadius = 70
+      else if (wetBulbEvents <= 75) baseRadius = 95
+      else baseRadius = 120
+      const popFactor = Math.min(1.3, 0.8 + (metroPop / 10000000))
+      return Math.round(baseRadius * popFactor)
+    }
+
+    // Generate GeoJSON features from expanded wet bulb data
+    const wetBulbDataTyped = expandedWetBulbData as Record<string, {
+      name: string
+      lat: number
+      lon: number
+      population_2024: number
+      metro_population_2024: number
+      baseline_humidity: number
+      projections: Record<string, any>
+    }>
+
+    const features = Object.entries(wetBulbDataTyped)
+      .map(([cityKey, cityData]) => {
+        const { lat, lon, name, projections, metro_population_2024, baseline_humidity } = cityData
+        const projection = interpolateProjection(projections, projectionYear)
+
+        const radiusKm = getRadiusFromDanger(projection.wet_bulb_events, metro_population_2024)
+        const color = getDangerColor(projection.wet_bulb_events, projection.peak_humidity)
+        const opacity = getDangerOpacity(projection.wet_bulb_events, projection.peak_humidity)
+
+        if (projection.wet_bulb_events === 0 && projectionYear < 2035) return null
+
+        return {
+          type: 'Feature' as const,
+          geometry: {
+            type: 'Polygon' as const,
+            coordinates: [createCirclePolygon(lon, lat, radiusKm)]
+          },
+          properties: {
+            name,
+            cityKey,
+            wet_bulb_events: projection.wet_bulb_events,
+            peak_humidity: projection.peak_humidity,
+            avg_summer_humidity: projection.avg_summer_humidity,
+            days_over_95F: projection.days_over_95F,
+            days_over_100F: projection.days_over_100F,
+            at_risk_population: projection.estimated_at_risk_population,
+            radius_km: radiusKm,
+            metro_population: metro_population_2024,
+            baseline_humidity,
+            color,
+            opacity
+          }
+        }
+      })
+      .filter((f): f is NonNullable<typeof f> => f !== null)
+
+    const geojsonData: GeoJSON.FeatureCollection = {
+      type: 'FeatureCollection',
+      features
+    }
+
+    console.log(`🌡️ Wet Bulb Danger Zones: ${features.length} cities for year ${projectionYear}`)
+
+    // Add or update source
+    if (!map.getSource(sourceId)) {
+      console.log('📦 Adding Wet Bulb danger zones source...')
+      map.addSource(sourceId, {
+        type: 'geojson',
+        data: geojsonData as any
+      })
+    } else {
+      // Update data when year changes
+      (map.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(geojsonData as any)
+    }
+
+    // Add layer if needed
+    if (!map.getLayer(layerId)) {
+      console.log('🎨 Adding Wet Bulb danger zones layer...')
+      // Insert below labels but above base map
+      let beforeId: string | undefined = 'waterway-label'
+      if (!map.getLayer(beforeId)) beforeId = undefined
+      if (!beforeId && map.getLayer('river-lines-casing')) beforeId = 'river-lines-casing'
+
+      map.addLayer({
+        id: layerId,
+        type: 'fill',
+        source: sourceId,
+        paint: {
+          'fill-color': ['get', 'color'],
+          // Per-feature opacity multiplied by global slider control
+          'fill-opacity': ['*', ['get', 'opacity'], controls.wetBulbOpacity || 0.8]
+        }
+      }, beforeId)
+    } else {
+      // Update opacity
+      map.setPaintProperty(layerId, 'fill-opacity', ['*', ['get', 'opacity'], controls.wetBulbOpacity || 0.8])
+    }
+
+    // Toggle visibility based on active state
+    const visibility = isWetBulbActive ? 'visible' : 'none'
+    if (map.getLayer(layerId)) {
+      map.setLayoutProperty(layerId, 'visibility', visibility)
+    }
+
+  }, [mapLoaded, isWetBulbActive, controls.wetBulbOpacity, projectionYear])
 
   // Update metro humidity circles when projection year changes - DISABLED (using React markers instead)
   // This useEffect is kept for reference but no longer active since we use React markers
@@ -2381,8 +2713,13 @@ export default function WaterAccessView() {
     map.on('zoom', handleMapMove)
 
     return () => {
-      map.off('move', handleMapMove)
-      map.off('zoom', handleMapMove)
+      if (!map || map._removed) return
+      try {
+        map.off('move', handleMapMove)
+        map.off('zoom', handleMapMove)
+      } catch (error) {
+        console.log('Map already removed during move/zoom listener cleanup')
+      }
     }
   }, [mapLoaded, showMetroHumidityLayer])
 
@@ -2435,45 +2772,48 @@ export default function WaterAccessView() {
       return {
         peak_humidity: Math.round(lower.peak_humidity + (upper.peak_humidity - lower.peak_humidity) * ratio),
         wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
-        humid_temp: Math.round(lower.humid_temp + (upper.humid_temp - lower.humid_temp) * ratio),
-        days_over_100: Math.round(lower.days_over_100 + (upper.days_over_100 - lower.days_over_100) * ratio)
+        days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
+        days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
+        estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
+        casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
+        extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
       }
     }
 
-    // Create markers for each metro city
-    ;(metroHumidityData as any).features.forEach((feature: any) => {
-      const { city, lat, lng, humidity_projections } = feature.properties
-      const humidityData = getHumidityDataForYear(humidity_projections, projectionYear)
+      // Create markers for each metro city
+      ; (metroHumidityData as any).features.forEach((feature: any) => {
+        const { city, lat, lng, humidity_projections } = feature.properties
+        const humidityData = getHumidityDataForYear(humidity_projections, projectionYear)
 
-      // Create marker element
-      const el = document.createElement('div')
-      el.style.width = '0px'
-      el.style.height = '0px'
+        // Create marker element
+        const el = document.createElement('div')
+        el.style.width = '0px'
+        el.style.height = '0px'
 
-      // Create React root and render MetroHumidityBubble
-      const root = createRoot(el)
-      root.render(
-        <MetroHumidityBubble
-          metroName={city}
-          year={projectionYear}
-          peakHumidity={`${humidityData.peak_humidity}%`}
-          wetBulbEvents={`${humidityData.wet_bulb_events}`}
-          humidTemp={`${humidityData.humid_temp}°`}
-          daysOver100={`${humidityData.days_over_100}`}
-          visible={true}
-          showHumidityWetBulb={showHumidityWetBulb}
-          showTempHumidity={showTempHumidity}
-          onClose={() => {}}
-        />
-      )
+        // Create React root and render MetroHumidityBubble
+        const root = createRoot(el)
+        root.render(
+          <MetroHumidityBubble
+            metroName={city}
+            year={projectionYear}
+            peakHumidity={`${humidityData.peak_humidity}%`}
+            wetBulbEvents={`${humidityData.wet_bulb_events}`}
+            humidTemp={`${humidityData.days_over_95F || 0}°`}
+            daysOver100={`${humidityData.days_over_100F || 0}`}
+            visible={true}
+            showHumidityWetBulb={showHumidityWetBulb}
+            showTempHumidity={showTempHumidity}
+            onClose={() => { }}
+          />
+        )
 
-      // Create Mapbox marker
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
-        .setLngLat([lng, lat])
-        .addTo(map)
+        // Create Mapbox marker
+        const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+          .setLngLat([lng, lat])
+          .addTo(map)
 
-      metroMarkersRef.current.push({ marker, root })
-    })
+        metroMarkersRef.current.push({ marker, root })
+      })
 
     console.log(`✅ Created ${metroMarkersRef.current.length} metro humidity markers`)
 
@@ -2520,10 +2860,10 @@ export default function WaterAccessView() {
         console.log('🎨 Adding precipitation-drought layer (TOP)...')
         // Insert after aquifers (TOP LAYER) - use aquifer-hover as reference
         // This ensures: Rivers (bottom) -> Aquifers (middle) -> Precipitation (top)
-        const afterAquiferId = map.getLayer('aquifer-hover') ? 'aquifer-hover' : 
-                               map.getLayer('aquifer-outline') ? 'aquifer-outline' :
-                               map.getLayer('aquifer-fill') ? 'aquifer-fill' : undefined
-        
+        const afterAquiferId = map.getLayer('aquifer-hover') ? 'aquifer-hover' :
+          map.getLayer('aquifer-outline') ? 'aquifer-outline' :
+            map.getLayer('aquifer-fill') ? 'aquifer-fill' : undefined
+
         // Find insertion point - before labels but after aquifers
         let beforeId: string | undefined = undefined
         if (afterAquiferId) {
@@ -2543,7 +2883,7 @@ export default function WaterAccessView() {
             }
           }
         }
-        
+
         // Fallback to label layers if no better position found
         if (!beforeId) {
           const labelLayerIds = ['waterway-label', 'place-labels', 'poi-label', 'road-label', 'water-label', 'settlement-label']
@@ -2676,9 +3016,9 @@ export default function WaterAccessView() {
   }, [])
 
   return (
-    <div style={{ 
-      width: '100%', 
-      height: '100%', 
+    <div style={{
+      width: '100%',
+      height: '100%',
       minHeight: '100vh',
       position: 'absolute',
       top: 0,
@@ -2690,10 +3030,10 @@ export default function WaterAccessView() {
       margin: 0,
       padding: 0
     }}>
-      <div 
-        ref={mapContainer} 
-        style={{ 
-          width: '100%', 
+      <div
+        ref={mapContainer}
+        style={{
+          width: '100%',
           height: '100%',
           position: 'absolute',
           top: 0,
@@ -2704,11 +3044,11 @@ export default function WaterAccessView() {
           padding: 0,
           border: 'none',
           outline: 'none'
-        }} 
+        }}
       />
 
       {loading && <LoadingOverlay message="Loading aquifer data from USGS..." />}
-      
+
       {/* Error overlay for map issues */}
       {error && error.includes('Mapbox') && (
         <div style={{
@@ -2734,802 +3074,865 @@ export default function WaterAccessView() {
       {!panelsCollapsed && (
         <aside className="absolute left-[92px] top-4 z-[1000] flex h-[calc(100%-32px)] w-[360px] flex-col pointer-events-none">
           <div className="flex-1 overflow-y-auto space-y-4 pointer-events-auto">
-          <div className="widget-container">
-            <form className="flex gap-2" onSubmit={handleSearchSubmit}>
-              <div className="relative flex-1">
-                <Input
-                  value={searchTerm}
-                  onChange={e => setSearchTerm(e.target.value)}
-                  placeholder="Search for a city, state, or country"
-                  className="pr-10"
-                />
-                <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              </div>
-              <Button
-                type="submit"
-                variant="secondary"
-                disabled={isSearching}
-              >
-                {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
-              </Button>
-            </form>
-
-            {searchResults.length > 0 && (
-              <div className="mt-3 space-y-2 border-t border-border/60 pt-3">
-                <div className="text-xs font-semibold uppercase text-muted-foreground">Search results</div>
-                <ul className="space-y-2">
-                  {searchResults.map(result => (
-                    <li key={`${result.lat}-${result.lon}`}>
-                      <button
-                        onClick={() => moveToResult(result)}
-                        className="flex w-full items-start gap-2 rounded-md border border-transparent p-2 text-left text-sm hover:border-border hover:bg-background/80"
-                      >
-                        <MapPin className="mt-0.5 h-4 w-4 text-blue-500" />
-                        <span>{result.display_name}</span>
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {/* Saved Views Section */}
-            <div className="mt-3 space-y-2 border-t border-border/60 pt-3">
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-semibold">Views</h3>
+            <div className="widget-container">
+              <form className="flex gap-2" onSubmit={handleSearchSubmit}>
+                <div className="relative flex-1">
+                  <Input
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                    placeholder="Search for a city, state, or country"
+                    className="pr-10"
+                  />
+                  <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                </div>
                 <Button
-                  size="sm"
-                  variant="text"
-                  className="h-6 px-2 text-xs"
-                  onClick={() => setShowSaveDialog(true)}
+                  type="submit"
+                  variant="secondary"
+                  disabled={isSearching}
                 >
-                  <Save className="h-3 w-3 mr-1" />
-                  New View
+                  {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
                 </Button>
-              </div>
+              </form>
 
-              {savedViews.length === 0 && !showSaveDialog ? (
-                <p className="text-xs text-muted-foreground py-4">
-                  No saved views. Click "New View" to save.
-                </p>
-              ) : (
-                <div className="rounded-md bg-[var(--cs-surface-elevated)] p-2">
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
+              {searchResults.length > 0 && (
+                <div className="mt-3 space-y-2 border-t border-border/60 pt-3">
+                  <div className="text-xs font-semibold uppercase text-muted-foreground">Search results</div>
+                  <ul className="space-y-2">
+                    {searchResults.map(result => (
+                      <li key={`${result.lat}-${result.lon}`}>
+                        <button
+                          onClick={() => moveToResult(result)}
+                          className="flex w-full items-start gap-2 rounded-md border border-transparent p-2 text-left text-sm hover:border-border hover:bg-background/80"
+                        >
+                          <MapPin className="mt-0.5 h-4 w-4 text-blue-500" />
+                          <span>{result.display_name}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Saved Views Section */}
+              <div className="mt-3 space-y-2 border-t border-border/60 pt-3">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold">Views</h3>
+                  <Button
+                    size="sm"
+                    variant="text"
+                    className="h-6 px-2 text-xs"
+                    onClick={() => setShowSaveDialog(true)}
                   >
-                    <SortableContext
-                      items={savedViews.map(v => v.id)}
-                      strategy={verticalListSortingStrategy}
-                    >
-                      <ul className="space-y-1">
-                        {savedViews.map(view => (
-                          <SortableViewItem
-                            key={view.id}
-                            view={view}
-                            loadSavedView={loadSavedView}
-                            deleteSavedView={deleteSavedView}
-                            editSavedView={editSavedView}
-                            editingViewId={editingViewId}
-                            editingViewName={editingViewName}
-                            setEditingViewName={setEditingViewName}
-                            saveEditedViewName={saveEditedViewName}
-                            cancelEdit={cancelEdit}
-                          />
-                        ))}
+                    <Save className="h-3 w-3 mr-1" />
+                    New View
+                  </Button>
+                </div>
 
-                        {showSaveDialog && (
-                          <li className="flex items-center gap-2 p-2 rounded-md border border-border/60 bg-background/50">
-                            <Input
-                              value={newViewName}
-                              onChange={e => setNewViewName(e.target.value)}
-                              placeholder="Enter view name..."
-                              className="h-8 text-sm flex-1 border-none bg-transparent px-2"
-                              onKeyDown={e => {
-                                if (e.key === 'Enter') handleSaveCurrentView()
-                                if (e.key === 'Escape') {
+                {savedViews.length === 0 && !showSaveDialog ? (
+                  <p className="text-xs text-muted-foreground py-4">
+                    No saved views. Click "New View" to save.
+                  </p>
+                ) : (
+                  <div className="rounded-md bg-[var(--cs-surface-elevated)] p-2">
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <SortableContext
+                        items={savedViews.map(v => v.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <ul className="space-y-1">
+                          {savedViews.map(view => (
+                            <SortableViewItem
+                              key={view.id}
+                              view={view}
+                              loadSavedView={loadSavedView}
+                              deleteSavedView={deleteSavedView}
+                              editSavedView={editSavedView}
+                              editingViewId={editingViewId}
+                              editingViewName={editingViewName}
+                              setEditingViewName={setEditingViewName}
+                              saveEditedViewName={saveEditedViewName}
+                              cancelEdit={cancelEdit}
+                            />
+                          ))}
+
+                          {showSaveDialog && (
+                            <li className="flex items-center gap-2 p-2 rounded-md border border-border/60 bg-background/50">
+                              <Input
+                                value={newViewName}
+                                onChange={e => setNewViewName(e.target.value)}
+                                placeholder="Enter view name..."
+                                className="h-8 text-sm flex-1 border-none bg-transparent px-2"
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter') handleSaveCurrentView()
+                                  if (e.key === 'Escape') {
+                                    setShowSaveDialog(false)
+                                    setNewViewName('')
+                                  }
+                                }}
+                                autoFocus
+                              />
+                              <Button
+                                size="sm"
+                                className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600"
+                                onClick={handleSaveCurrentView}
+                              >
+                                <Save className="h-3.5 w-3.5 text-white" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-8 w-8 p-0"
+                                onClick={() => {
                                   setShowSaveDialog(false)
                                   setNewViewName('')
-                                }
-                              }}
-                              autoFocus
-                            />
-                            <Button
-                              size="sm"
-                              className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600"
-                              onClick={handleSaveCurrentView}
-                            >
-                              <Save className="h-3.5 w-3.5 text-white" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-8 w-8 p-0"
-                              onClick={() => {
-                                setShowSaveDialog(false)
-                                setNewViewName('')
-                              }}
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </li>
-                        )}
-                      </ul>
-                    </SortableContext>
-                  </DndContext>
-        </div>
-      )}
+                                }}
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </li>
+                          )}
+                        </ul>
+                      </SortableContext>
+                    </DndContext>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Water Access Layers Panel */}
-          <div className="widget-container">
-            <h3 className="text-sm font-semibold mb-3">Water Access Layers</h3>
-            <div className="space-y-3">
-              {/* Metro Temperature & Humidity Layer */}
-              <label
-                className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${
-                  showMetroHumidityLayer
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                }`}
-                style={!showMetroHumidityLayer ? {
-                  backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                } : undefined}
-              >
-                <input
-                  type="checkbox"
-                  className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                  checked={showMetroHumidityLayer}
-                  onChange={() => setShowMetroHumidityLayer(!showMetroHumidityLayer)}
-                />
-                <div className="space-y-1 flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-sm font-medium">Metro Temperature & Humidity</h4>
-                    <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                      <MapPin className="h-4 w-4" />
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground/80 truncate">
-                    Source: <span className="font-medium text-foreground">NOAA / NASA</span>
-                  </p>
-                </div>
-              </label>
-
-
-              {/* Rivers Layer */}
-              <label
-                className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${
-                  showRiversLayer
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                }`}
-                style={!showRiversLayer ? {
-                  backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                } : undefined}
-              >
-                <input
-                  type="checkbox"
-                  className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                  checked={showRiversLayer}
-                  onChange={() => setShowRiversLayer(!showRiversLayer)}
-                />
-                <div className="space-y-1 flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-sm font-medium">River Flow Status</h4>
-                    <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                      <Waves className="h-4 w-4" />
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground/80 truncate">
-                    Source: <span className="font-medium text-foreground">Natural Earth / USGS</span>
-                  </p>
-                </div>
-              </label>
-
-              {/* Canals & Aqueducts Layer */}
-              <label
-                className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${
-                  showCanalsLayer
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                }`}
-                style={!showCanalsLayer ? {
-                  backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                } : undefined}
-              >
-                <input
-                  type="checkbox"
-                  className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                  checked={showCanalsLayer}
-                  onChange={() => setShowCanalsLayer(!showCanalsLayer)}
-                />
-                <div className="space-y-1 flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-sm font-medium">Canals & Aqueducts</h4>
-                    <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M2 12h20M2 8h20M2 16h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                      </svg>
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground/80 truncate">
-                    Source: <span className="font-medium text-foreground">USBR / MWD</span>
-                  </p>
-                </div>
-              </label>
-
-              {/* Major Dams Layer */}
-              <label
-                className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${
-                  showDamsLayer
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                }`}
-                style={!showDamsLayer ? {
-                  backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                } : undefined}
-              >
-                <input
-                  type="checkbox"
-                  className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                  checked={showDamsLayer}
-                  onChange={() => setShowDamsLayer(!showDamsLayer)}
-                />
-                <div className="space-y-1 flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-sm font-medium">Major Dams</h4>
-                    <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M2 22h20v-2H2v2zm2-18v12h16V4H4zm2 10V6h12v8H6z"/>
-                      </svg>
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground/80 truncate">
-                    Source: <span className="font-medium text-foreground">USGS / USBR</span>
-                  </p>
-                </div>
-              </label>
-
-              {/* Metro Service Areas Layer */}
-              <label
-                className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${
-                  showServiceAreasLayer
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                }`}
-                style={!showServiceAreasLayer ? {
-                  backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                } : undefined}
-              >
-                <input
-                  type="checkbox"
-                  className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                  checked={showServiceAreasLayer}
-                  onChange={() => setShowServiceAreasLayer(!showServiceAreasLayer)}
-                />
-                <div className="space-y-1 flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-sm font-medium">Metro Service Areas</h4>
-                    <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                      <MapPin className="h-4 w-4" />
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground/80 truncate">
-                    Source: <span className="font-medium text-foreground">Municipal Water Agencies</span>
-                  </p>
-                </div>
-              </label>
-
-              {/* Groundwater Layer */}
-              <label
-                className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${
-                  showGroundwaterLayer
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                }`}
-                style={!showGroundwaterLayer ? {
-                  backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                } : undefined}
-              >
-                <input
-                  type="checkbox"
-                  className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                  checked={showGroundwaterLayer}
-                  onChange={() => setShowGroundwaterLayer(!showGroundwaterLayer)}
-                />
-                <div className="space-y-1 flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-sm font-medium">Groundwater</h4>
-                    <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"/>
-                      </svg>
-                    </span>
-                  </div>
-                  <p className="text-[11px] text-muted-foreground/80 truncate">
-                    Source: <span className="font-medium text-foreground">NASA GRACE / USGS</span>
-                  </p>
-                </div>
-              </label>
-
-              {/* Precipitation & Drought Layer */}
-              {precipitationDroughtLayer && (
+            {/* Water Access Layers Panel */}
+            <div className="widget-container">
+              <h3 className="text-sm font-semibold mb-3">Water Access Layers</h3>
+              <div className="space-y-3">
+                {/* Metro Temperature & Humidity Layer */}
                 <label
-                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${
-                    isPrecipitationDroughtActive
-                      ? "border border-blue-500/60 bg-blue-500/10"
-                      : ""
-                  }`}
-                  style={!isPrecipitationDroughtActive ? {
+                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showMetroHumidityLayer
+                    ? "border border-blue-500/60 bg-blue-500/10"
+                    : ""
+                    }`}
+                  style={!showMetroHumidityLayer ? {
                     backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
                   } : undefined}
                 >
                   <input
                     type="checkbox"
                     className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                    checked={isPrecipitationDroughtActive}
-                    onChange={() => toggleLayer('precipitation_drought')}
+                    checked={showMetroHumidityLayer}
+                    onChange={() => setShowMetroHumidityLayer(!showMetroHumidityLayer)}
                   />
                   <div className="space-y-1 flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-medium">{precipitationDroughtLayer.title}</h4>
+                      <h4 className="text-sm font-medium">Metro Temperature & Humidity</h4>
                       <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                        <CloudRain className="h-4 w-4" />
+                        <MapPin className="h-4 w-4" />
                       </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground/80 truncate">
-                      Source: <span className="font-medium text-foreground">{precipitationDroughtLayer.source.name}</span>
+                      Source: <span className="font-medium text-foreground">NOAA / NASA</span>
                     </p>
                   </div>
                 </label>
-              )}
 
+
+                {/* Rivers Layer */}
+                <label
+                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showRiversLayer
+                    ? "border border-blue-500/60 bg-blue-500/10"
+                    : ""
+                    }`}
+                  style={!showRiversLayer ? {
+                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
+                  } : undefined}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
+                    checked={showRiversLayer}
+                    onChange={() => setShowRiversLayer(!showRiversLayer)}
+                  />
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-sm font-medium">River Flow Status</h4>
+                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
+                        <Waves className="h-4 w-4" />
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/80 truncate">
+                      Source: <span className="font-medium text-foreground">Natural Earth / USGS</span>
+                    </p>
+                  </div>
+                </label>
+
+                {/* Canals & Aqueducts Layer */}
+                <label
+                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showCanalsLayer
+                    ? "border border-blue-500/60 bg-blue-500/10"
+                    : ""
+                    }`}
+                  style={!showCanalsLayer ? {
+                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
+                  } : undefined}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
+                    checked={showCanalsLayer}
+                    onChange={() => setShowCanalsLayer(!showCanalsLayer)}
+                  />
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-sm font-medium">Canals & Aqueducts</h4>
+                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
+                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M2 12h20M2 8h20M2 16h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                        </svg>
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/80 truncate">
+                      Source: <span className="font-medium text-foreground">USBR / MWD</span>
+                    </p>
+                  </div>
+                </label>
+
+                {/* Major Dams Layer */}
+                <label
+                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showDamsLayer
+                    ? "border border-blue-500/60 bg-blue-500/10"
+                    : ""
+                    }`}
+                  style={!showDamsLayer ? {
+                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
+                  } : undefined}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
+                    checked={showDamsLayer}
+                    onChange={() => setShowDamsLayer(!showDamsLayer)}
+                  />
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-sm font-medium">Major Dams</h4>
+                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
+                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M2 22h20v-2H2v2zm2-18v12h16V4H4zm2 10V6h12v8H6z" />
+                        </svg>
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/80 truncate">
+                      Source: <span className="font-medium text-foreground">USGS / USBR</span>
+                    </p>
+                  </div>
+                </label>
+
+                {/* Metro Service Areas Layer */}
+                <label
+                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showServiceAreasLayer
+                    ? "border border-blue-500/60 bg-blue-500/10"
+                    : ""
+                    }`}
+                  style={!showServiceAreasLayer ? {
+                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
+                  } : undefined}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
+                    checked={showServiceAreasLayer}
+                    onChange={() => setShowServiceAreasLayer(!showServiceAreasLayer)}
+                  />
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-sm font-medium">Metro Service Areas</h4>
+                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
+                        <MapPin className="h-4 w-4" />
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/80 truncate">
+                      Source: <span className="font-medium text-foreground">Municipal Water Agencies</span>
+                    </p>
+                  </div>
+                </label>
+
+                {/* Groundwater Layer */}
+                <label
+                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showGroundwaterLayer
+                    ? "border border-blue-500/60 bg-blue-500/10"
+                    : ""
+                    }`}
+                  style={!showGroundwaterLayer ? {
+                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
+                  } : undefined}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
+                    checked={showGroundwaterLayer}
+                    onChange={() => setShowGroundwaterLayer(!showGroundwaterLayer)}
+                  />
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-sm font-medium">Groundwater</h4>
+                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
+                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
+                        </svg>
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/80 truncate">
+                      Source: <span className="font-medium text-foreground">NASA GRACE / USGS</span>
+                    </p>
+                  </div>
+                </label>
+
+                {/* Precipitation & Drought Layer */}
+                {precipitationDroughtLayer && (
+                  <label
+                    className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${isPrecipitationDroughtActive
+                      ? "border border-blue-500/60 bg-blue-500/10"
+                      : ""
+                      }`}
+                    style={!isPrecipitationDroughtActive ? {
+                      backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
+                    } : undefined}
+                  >
+                    <input
+                      type="checkbox"
+                      className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
+                      checked={isPrecipitationDroughtActive}
+                      onChange={() => toggleLayer('precipitation_drought')}
+                    />
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-medium">{precipitationDroughtLayer.title}</h4>
+                        <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
+                          <CloudRain className="h-4 w-4" />
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground/80 truncate">
+                        Source: <span className="font-medium text-foreground">{precipitationDroughtLayer.source.name}</span>
+                      </p>
+                    </div>
+                  </label>
+                )}
+
+                {/* Wet Bulb Temperature Layer */}
+                {wetBulbLayer && (
+                  <label
+                    className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${isWetBulbActive
+                      ? "border border-blue-500/60 bg-blue-500/10"
+                      : ""
+                      }`}
+                    style={!isWetBulbActive ? {
+                      backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
+                    } : undefined}
+                  >
+                    <input
+                      type="checkbox"
+                      className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
+                      checked={isWetBulbActive}
+                      onChange={() => toggleLayer('wet_bulb')}
+                    />
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-medium">{wetBulbLayer.title}</h4>
+                        <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
+                          <Droplets className="h-4 w-4 text-blue-500" />
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground/80 truncate">
+                        Source: <span className="font-medium text-foreground">{wetBulbLayer.source.name}</span>
+                      </p>
+                    </div>
+                  </label>
+                )}
+
+              </div>
             </div>
           </div>
-        </div>
-      </aside>
+        </aside>
       )}
 
       {/* Right Sidebar - Projection Year & Details */}
       {!panelsCollapsed && (
-        <div className="absolute top-4 right-4 z-[1000] w-80 space-y-4 pointer-events-auto">
-        {/* Projection Year Widget */}
-        <div className="widget-container">
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 16
-          }}>
-            <h3 className="text-sm font-medium text-foreground">
-              Projection Year
-            </h3>
-            <span style={{
-              fontSize: 18,
-              fontWeight: 700,
-              color: '#3b82f6'
+        <div className="absolute top-4 right-4 z-[1000] w-80 h-[calc(100vh-32px)] pointer-events-auto overflow-y-auto">
+          <div className="space-y-4 pr-4">
+          {/* Projection Year Widget */}
+          <div className="widget-container">
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 16
             }}>
-              {projectionYear}
-            </span>
-          </div>
-
-          {/* Slider */}
-          <div className="space-y-2">
-            <Slider
-              value={[projectionYear]}
-              min={2025}
-              max={2125}
-              step={1}
-              onValueChange={(value) => setProjectionYear(value[0])}
-            />
-          </div>
-
-          {/* Gradient Legend */}
-          <div className="space-y-1 mt-3">
-            <div className="h-3 w-full rounded-full" style={{
-              background: 'linear-gradient(to right, #22c55e 0%, #3b82f6 33%, #f97316 66%, #ef4444 100%)'
-            }} />
-            <div className="flex justify-between text-[10px] text-muted-foreground">
-              <span>2025</span>
-              <span>2050</span>
-              <span>2075</span>
-              <span>2100</span>
-              <span>2125</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Rivers Flow Status Widget - Shows when Rivers layer is active */}
-        {showRiversLayer && (
-          <div className="widget-container">
-            <h3 className="text-sm font-semibold mb-3">River Flow Status</h3>
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-1 rounded" style={{ backgroundColor: '#dc2626' }}></div>
-                <span className="text-[11px] text-foreground/70">Dry - Complete diversion</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-1 rounded" style={{ backgroundColor: '#f59e0b' }}></div>
-                <span className="text-[11px] text-foreground/70">Seasonal - Wet season only</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-1 rounded" style={{ backgroundColor: '#fbbf24' }}></div>
-                <span className="text-[11px] text-foreground/70">Reduced - 50%+ reduction</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-1 rounded" style={{ backgroundColor: '#3b82f6' }}></div>
-                <span className="text-[11px] text-foreground/70">Natural - Unimpacted flow</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Metro Humidity Controls - Shows when layer is active */}
-        {showMetroHumidityLayer && (
-          <div className="widget-container">
-            <h3 className="text-sm font-semibold mb-3">Metro Humidity</h3>
-
-            <div className="space-y-3">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 accent-blue-500"
-                  checked={showHumidityWetBulb}
-                  onChange={() => setShowHumidityWetBulb(!showHumidityWetBulb)}
-                />
-                <span className="text-sm text-foreground">Humidity & Wet Bulbs</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 accent-blue-500"
-                  checked={showTempHumidity}
-                  onChange={() => setShowTempHumidity(!showTempHumidity)}
-                />
-                <span className="text-sm text-foreground">Temperature & Humidity</span>
-              </label>
-            </div>
-          </div>
-        )}
-
-        {/* Groundwater Widget - Shows when groundwater layer is active */}
-        {showGroundwaterLayer && (
-          <div className="widget-container">
-            <h3 className="text-sm font-semibold mb-3">Groundwater</h3>
-
-            {/* Water Depletion Areas (GRACE) Section */}
-            <div className="space-y-3 mb-4">
-              <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg ${
-                showGRACELayer 
-                  ? 'border-[1px] border-blue-500 bg-blue-500/5' 
-                  : 'border-0 bg-white'
-              }`}>
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 accent-blue-500"
-                  checked={showGRACELayer}
-                  onChange={() => setShowGRACELayer(!showGRACELayer)}
-                />
-                <span className="text-sm font-medium text-foreground">Water Depletion Areas</span>
-              </label>
-
-              {showGRACELayer && (
-                <div className="ml-1 space-y-2">
-                  <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
-                  <Slider
-                    min={0}
-                    max={1}
-                    step={0.05}
-                    value={[graceOpacity]}
-                    onValueChange={(value) => setGraceOpacity(value[0])}
-                    className="mb-2"
-                  />
-
-                  {/* GRACE Legend */}
-                  <div className="mt-4 space-y-1.5">
-                    <div className="text-xs font-medium text-foreground mb-2">Change vs. 2004-2009 Baseline</div>
-                    <div className="h-3 w-full rounded" style={{
-                      background: 'linear-gradient(to right, #b2182b 0%, #ef8a62 20%, #fddbc7 40%, #f7f7f7 50%, #d1e5f0 60%, #67a9cf 80%, #2166ac 100%)'
-                    }} />
-                    <div className="flex justify-between text-[9px] text-muted-foreground">
-                      <span>-20 cm</span>
-                      <span>Depletion</span>
-                      <span>0</span>
-                      <span>Recharge</span>
-                      <span>+20 cm</span>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <h3 className="text-sm font-medium text-foreground">
+                Projection Year
+              </h3>
+              <span style={{
+                fontSize: 18,
+                fontWeight: 700,
+                color: '#3b82f6'
+              }}>
+                {projectionYear}
+              </span>
             </div>
 
-            {/* Aquifers Section */}
-            <div className="space-y-3">
-              <label className="flex items-center gap-2 cursor-pointer p-3 rounded-lg border-[1px] border-blue-500 bg-blue-500/5">
-                <input
-                  type="checkbox"
-                  className="h-4 w-4 accent-blue-500"
-                  checked={showAquifersLayer}
-                  onChange={() => setShowAquifersLayer(!showAquifersLayer)}
-                />
-                <span className="text-sm font-medium text-foreground">Aquifers</span>
-              </label>
-
-              {showAquifersLayer && (
-                <div className="ml-1 space-y-2">
-                  <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
-                  <Slider
-                    min={0}
-                    max={1}
-                    step={0.05}
-                    value={[aquiferOpacity]}
-                    onValueChange={(value) => setAquiferOpacity(value[0])}
-                    className="mb-2"
-                  />
-
-                  {/* Aquifer Health Legend */}
-                  <div className="mt-4 space-y-1.5">
-                    <div className="h-3 w-full rounded" style={{
-                      background: 'linear-gradient(to right, #22c55e 0%, #3b82f6 25%, #94a3b8 50%, #f97316 75%, #ef4444 100%)'
-                    }} />
-                    <div className="flex justify-between text-[9px] text-muted-foreground">
-                      <span>Healthy</span>
-                      <span>Mending</span>
-                      <span>Stressed</span>
-                      <span>Depleting</span>
-                      <span>Unknown</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Precipitation & Drought Controls - Only shows when layer is active */}
-        {isPrecipitationDroughtActive && (
-          <div className="widget-container">
-            <h3 className="text-sm font-semibold mb-3">Precipitation & Drought</h3>
-            
-            {/* Status Indicator */}
-            {precipitationDroughtStatus === 'loading' && (
-              <div className="space-y-2 rounded-md border border-blue-500/30 bg-blue-500/10 p-3 mb-3">
-                <div className="flex items-center gap-2">
-                  <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                  <p className="text-xs text-foreground">Loading precipitation/drought data...</p>
-                </div>
-              </div>
-            )}
-            
-            {precipitationDroughtStatus === 'success' && (
-              <div className="space-y-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="rounded-full bg-green-500 p-0.5">
-                    <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <p className="text-xs text-foreground">
-                    {precipitationDroughtData?.metadata?.isRealData
-                      ? '✓ Real CHIRPS data (Earth Engine)'
-                      : '⚠ Data unavailable (Earth Engine error)'}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Metric Type Selector */}
-            <div className="space-y-2 mb-4">
-              <label className="text-xs font-semibold text-muted-foreground">Metric Type</label>
-              <Select 
-                value={controls.droughtMetric} 
-                onValueChange={(value) => setDroughtMetric(value as 'precipitation' | 'drought_index' | 'soil_moisture')}
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Choose metric" />
-                </SelectTrigger>
-                <SelectContent className="z-[9999]">
-                  <SelectItem value="precipitation">Precipitation</SelectItem>
-                  <SelectItem value="drought_index">Drought Index</SelectItem>
-                  <SelectItem value="soil_moisture">Soil Moisture</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Opacity Slider */}
-            <div className="space-y-2 mb-4">
-              <div className="flex items-center justify-between">
-                <label className="text-xs text-muted-foreground">Layer Opacity</label>
-                <span className="text-xs font-medium">{Math.round(controls.droughtOpacity * 100)}%</span>
-              </div>
+            {/* Slider */}
+            <div className="space-y-2">
               <Slider
-                value={[Math.round(controls.droughtOpacity * 100)]}
-                min={10}
-                max={100}
-                step={5}
-                onValueChange={(value) => setDroughtOpacity(value[0] / 100)}
+                value={[projectionYear]}
+                min={2025}
+                max={2125}
+                step={1}
+                onValueChange={(value) => setProjectionYear(value[0])}
               />
             </div>
 
-            {/* Legend based on selected metric */}
+            {/* Gradient Legend */}
             <div className="space-y-1 mt-3">
-              {controls.droughtMetric === 'precipitation' && (
-                <>
-                  <div className="h-3 w-full rounded-full" style={{
-                    background: 'linear-gradient(90deg, #F5ED53 0%, #F5F3CE 50%, #6B9AF3 75%, #2357D2 100%)'
-                  }} />
-                  <div className="flex justify-between text-[10px] text-muted-foreground">
-                    <span>0</span>
-                    <span>2</span>
-                    <span>4</span>
-                    <span>6</span>
-                    <span>8</span>
-                    <span>10 mm/day</span>
-                  </div>
-                </>
-              )}
-              {controls.droughtMetric === 'drought_index' && (
-                <>
-                  <div className="h-3 w-full rounded-full" style={{
-                    background: 'linear-gradient(to right, #dc2626 0%, #f59e0b 16.67%, #fef08a 33.33%, #ffffff 50%, #90caf9 66.67%, #42a5f5 83.33%, #1e88e5 100%)'
-                  }} />
-                  <div className="flex justify-between text-[10px] text-muted-foreground">
-                    <span>0</span>
-                    <span>1</span>
-                    <span>2</span>
-                    <span>3</span>
-                    <span>4</span>
-                    <span>5</span>
-                    <span>6+</span>
-                  </div>
-                </>
-              )}
-              {controls.droughtMetric === 'soil_moisture' && (
-                <>
-                  <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#8b4513] via-[#daa520] via-[#f0e68c] via-[#adff2f] via-[#7cfc00] to-[#32cd32]" />
-                  <div className="flex justify-between text-[10px] text-muted-foreground">
-                    <span>0</span>
-                    <span>2</span>
-                    <span>4</span>
-                    <span>6</span>
-                    <span>8</span>
-                    <span>10 mm</span>
-                  </div>
-                </>
-              )}
+              <div className="h-3 w-full rounded-full" style={{
+                background: 'linear-gradient(to right, #22c55e 0%, #3b82f6 33%, #f97316 66%, #ef4444 100%)'
+              }} />
+              <div className="flex justify-between text-[10px] text-muted-foreground">
+                <span>2025</span>
+                <span>2050</span>
+                <span>2075</span>
+                <span>2100</span>
+                <span>2125</span>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* Metro Humidity Widget - Shows when layer is active */}
-        {showMetroHumidityLayer && selectedMetroCity && (() => {
-          const cityFeature = (metroHumidityData as any).features.find((f: any) => f.properties.city === selectedMetroCity)
-          if (!cityFeature) return null
-
-          const humidityData = cityFeature.properties.humidity_projections[projectionYear.toString()] ||
-                             cityFeature.properties.humidity_projections['2025']
-          if (!humidityData) return null
-
-          return (
-            <div className="widget-container" style={{
-              backdropFilter: 'blur(2px)',
-              backgroundColor: 'rgba(255, 255, 255, 0.5)'
-            }}>
-              {/* Header */}
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 4,
-                padding: '4px 8px',
-                marginBottom: 4
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}>
-                  <p className="text-xs font-bold uppercase text-foreground">
-                    {selectedMetroCity.toUpperCase()}
-                  </p>
-                  <p className="text-xs font-semibold text-foreground">
-                    {projectionYear}
-                  </p>
+          {/* Rivers Flow Status Widget - Shows when Rivers layer is active */}
+          {showRiversLayer && (
+            <AccordionItem title="River Flow Status" icon={<Waves className="h-4 w-4" />}>
+              {/* Opacity Slider */}
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-muted-foreground">River Opacity</label>
+                  <span className="text-xs font-medium">{Math.round(riverOpacity * 100)}%</span>
                 </div>
+                <Slider
+                  value={[Math.round(riverOpacity * 100)]}
+                  min={10}
+                  max={100}
+                  step={5}
+                  onValueChange={(value) => setRiverOpacity(value[0] / 100)}
+                />
               </div>
 
-              {/* Humidity & Wet Bulb Events Section */}
-              {showHumidityWetBulb && (
+              {/* Legend */}
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-1 rounded" style={{ backgroundColor: '#dc2626' }}></div>
+                  <span className="text-[11px] text-foreground/70">Dry - Complete diversion</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-1 rounded" style={{ backgroundColor: '#f59e0b' }}></div>
+                  <span className="text-[11px] text-foreground/70">Seasonal - Wet season only</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-1 rounded" style={{ backgroundColor: '#fbbf24' }}></div>
+                  <span className="text-[11px] text-foreground/70">Reduced - 50%+ reduction</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-5 h-1 rounded" style={{ backgroundColor: '#3b82f6' }}></div>
+                  <span className="text-[11px] text-foreground/70">Natural - Unimpacted flow</span>
+                </div>
+              </div>
+            </AccordionItem>
+          )}
+
+          {/* Metro Humidity Controls - Shows when layer is active */}
+          {showMetroHumidityLayer && (
+            <AccordionItem title="Metro Humidity" icon={<Droplets className="h-4 w-4" />}>
+              {/* Wet Bulb Danger Zone Legend */}
+              <div>
+                <h4 className="text-xs font-semibold text-muted-foreground mb-2">Wet Bulb Danger Zones</h4>
+                <p className="text-xs text-muted-foreground mb-2">Circle size = geographic extent of danger zone</p>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#fbbf24' }}></div>
+                    <span className="text-xs text-foreground">Low Risk (2-10 events/year)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#f97316' }}></div>
+                    <span className="text-xs text-foreground">Moderate Risk (11-30 events)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ef4444' }}></div>
+                    <span className="text-xs text-foreground">High Risk (31-50 events)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#991b1b' }}></div>
+                    <span className="text-xs text-foreground">Extreme Risk (50+ events)</span>
+                  </div>
+                </div>
+              </div>
+            </AccordionItem>
+          )}
+
+          {/* Wet Bulb Temperature Widget */}
+          {isWetBulbActive && (
+            <AccordionItem title="Wet Bulb Temperature" icon={<CloudRain className="h-4 w-4" />}>
+              {/* Opacity Slider - Always show since we use local data */}
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                  <span className="text-xs font-medium">{Math.round((controls.wetBulbOpacity || 0.6) * 100)}%</span>
+                </div>
+                <Slider
+                  value={[Math.round((controls.wetBulbOpacity || 0.6) * 100)]}
+                  min={10}
+                  max={100}
+                  step={5}
+                  onValueChange={(value) => setWetBulbOpacity(value[0] / 100)}
+                />
+              </div>
+
+              {/* Year indicator */}
+              <div className="text-xs text-muted-foreground mb-3">
+                Showing projections for <span className="font-semibold text-foreground">{projectionYear}</span>
+              </div>
+
+              {/* Legend - Color & Opacity show danger level */}
+              <div className="space-y-3 pt-3 border-t border-border/40">
+
+                {/* Danger Level Legend */}
+                <div>
+                  <h4 className="text-xs font-semibold text-muted-foreground mb-2">Danger Level</h4>
+                  <p className="text-[10px] text-muted-foreground mb-2">Size, color & opacity all increase with danger</p>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#93c5fd', opacity: 0.3 }}></div>
+                      <span className="text-[11px] text-foreground">Minimal risk (faint, small)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#fde047', opacity: 0.5 }}></div>
+                      <span className="text-[11px] text-foreground">Low risk</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 rounded-full" style={{ backgroundColor: '#fbbf24', opacity: 0.6 }}></div>
+                      <span className="text-[11px] text-foreground">Moderate risk</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-6 h-6 rounded-full" style={{ backgroundColor: '#fb923c', opacity: 0.7 }}></div>
+                      <span className="text-[11px] text-foreground">Elevated risk</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full" style={{ backgroundColor: '#ef4444', opacity: 0.8 }}></div>
+                      <span className="text-[11px] text-foreground">High risk</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full" style={{ backgroundColor: '#991b1b', opacity: 0.9 }}></div>
+                      <span className="text-[11px] text-foreground">Extreme danger (large, solid)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-[10px] text-muted-foreground mt-2 italic border-t border-border/40 pt-2">
+                  Gulf Coast cities (Houston, New Orleans, Miami) show as large, solid red circles. Northern and arid cities appear as small, faint circles.
+                </p>
+              </div>
+            </AccordionItem>
+          )}
+
+          {/* Groundwater Widget - Shows when groundwater layer is active */}
+          {showGroundwaterLayer && (
+            <AccordionItem title="Groundwater" icon={<Droplets className="h-4 w-4" />}>
+              {/* Water Depletion Areas (GRACE) Section */}
+              <div className="space-y-3 mb-4">
+                <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg ${showGRACELayer
+                  ? 'border-[1px] border-blue-500 bg-blue-500/5'
+                  : 'border-0 bg-white'
+                  }`}>
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-blue-500"
+                    checked={showGRACELayer}
+                    onChange={() => setShowGRACELayer(!showGRACELayer)}
+                  />
+                  <span className="text-sm font-medium text-foreground">Water Depletion Areas</span>
+                </label>
+
+                {showGRACELayer && (
+                  <div className="ml-1 space-y-2">
+                    <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
+                    <Slider
+                      min={0}
+                      max={1}
+                      step={0.05}
+                      value={[graceOpacity]}
+                      onValueChange={(value) => setGraceOpacity(value[0])}
+                      className="mb-2"
+                    />
+
+                    {/* GRACE Legend */}
+                    <div className="mt-4 space-y-1.5">
+                      <div className="text-xs font-medium text-foreground mb-2">Change vs. 2004-2009 Baseline</div>
+                      <div className="h-3 w-full rounded" style={{
+                        background: 'linear-gradient(to right, #b2182b 0%, #ef8a62 20%, #fddbc7 40%, #f7f7f7 50%, #d1e5f0 60%, #67a9cf 80%, #2166ac 100%)'
+                      }} />
+                      <div className="flex justify-between text-[9px] text-muted-foreground">
+                        <span>-20 cm</span>
+                        <span>Depletion</span>
+                        <span>0</span>
+                        <span>Recharge</span>
+                        <span>+20 cm</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Aquifers Section */}
+              <div className="space-y-3">
+                <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg ${showAquifersLayer
+                  ? 'border-[1px] border-blue-500 bg-blue-500/5'
+                  : 'border-0 bg-white'
+                  }`}>
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-blue-500"
+                    checked={showAquifersLayer}
+                    onChange={() => setShowAquifersLayer(!showAquifersLayer)}
+                  />
+                  <span className="text-sm font-medium text-foreground">Aquifers</span>
+                </label>
+
+                {showAquifersLayer && (
+                  <div className="ml-1 space-y-2">
+                    <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
+                    <Slider
+                      min={0}
+                      max={1}
+                      step={0.05}
+                      value={[aquiferOpacity]}
+                      onValueChange={(value) => setAquiferOpacity(value[0])}
+                      className="mb-2"
+                    />
+
+                    {/* Aquifer Health Legend */}
+                    <div className="mt-4 space-y-1.5">
+                      <div className="h-3 w-full rounded" style={{
+                        background: 'linear-gradient(to right, #22c55e 0%, #3b82f6 25%, #94a3b8 50%, #f97316 75%, #ef4444 100%)'
+                      }} />
+                      <div className="flex justify-between text-[9px] text-muted-foreground">
+                        <span>Healthy</span>
+                        <span>Mending</span>
+                        <span>Stressed</span>
+                        <span>Depleting</span>
+                        <span>Unknown</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </AccordionItem>
+          )}
+
+          {/* Precipitation & Drought Controls - Only shows when layer is active */}
+          {isPrecipitationDroughtActive && (
+            <AccordionItem title="Precipitation & Drought" icon={<CloudRain className="h-4 w-4" />}>
+              {/* Status Indicator */}
+              {precipitationDroughtStatus === 'loading' && (
+                <div className="space-y-2 rounded-md border border-blue-500/30 bg-blue-500/10 p-3 mb-3">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                    <p className="text-xs text-foreground">Loading precipitation/drought data...</p>
+                  </div>
+                </div>
+              )}
+
+              {precipitationDroughtStatus === 'success' && (
+                <div className="space-y-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="rounded-full bg-green-500 p-0.5">
+                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    <p className="text-xs text-foreground">
+                      {precipitationDroughtData?.metadata?.isRealData
+                        ? '✓ Real CHIRPS data (Earth Engine)'
+                        : '⚠ Data unavailable (Earth Engine error)'}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Metric Type Selector */}
+              <div className="space-y-2 mb-4">
+                <label className="text-xs font-semibold text-muted-foreground">Metric Type</label>
+                <Select
+                  value={controls.droughtMetric}
+                  onValueChange={(value) => setDroughtMetric(value as 'precipitation' | 'drought_index' | 'soil_moisture')}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Choose metric" />
+                  </SelectTrigger>
+                  <SelectContent className="z-[9999]">
+                    <SelectItem value="precipitation">Precipitation</SelectItem>
+                    <SelectItem value="drought_index">Drought Index</SelectItem>
+                    <SelectItem value="soil_moisture">Soil Moisture</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Opacity Slider */}
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                  <span className="text-xs font-medium">{Math.round(controls.droughtOpacity * 100)}%</span>
+                </div>
+                <Slider
+                  value={[Math.round(controls.droughtOpacity * 100)]}
+                  min={10}
+                  max={100}
+                  step={5}
+                  onValueChange={(value) => setDroughtOpacity(value[0] / 100)}
+                />
+              </div>
+
+              {/* Legend based on selected metric */}
+              <div className="space-y-1">
+                {controls.droughtMetric === 'precipitation' && (
+                  <>
+                    <div className="h-3 w-full rounded-full" style={{
+                      background: 'linear-gradient(90deg, #F5ED53 0%, #F5F3CE 50%, #6B9AF3 75%, #2357D2 100%)'
+                    }} />
+                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <span>0</span>
+                      <span>2</span>
+                      <span>4</span>
+                      <span>6</span>
+                      <span>8</span>
+                      <span>10 mm/day</span>
+                    </div>
+                  </>
+                )}
+                {controls.droughtMetric === 'drought_index' && (
+                  <>
+                    <div className="h-3 w-full rounded-full" style={{
+                      background: 'linear-gradient(to right, #dc2626 0%, #f59e0b 16.67%, #fef08a 33.33%, #ffffff 50%, #90caf9 66.67%, #42a5f5 83.33%, #1e88e5 100%)'
+                    }} />
+                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <span>0</span>
+                      <span>1</span>
+                      <span>2</span>
+                      <span>3</span>
+                      <span>4</span>
+                      <span>5</span>
+                      <span>6+</span>
+                    </div>
+                  </>
+                )}
+                {controls.droughtMetric === 'soil_moisture' && (
+                  <>
+                    <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#8b4513] via-[#daa520] via-[#f0e68c] via-[#adff2f] via-[#7cfc00] to-[#32cd32]" />
+                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <span>0</span>
+                      <span>2</span>
+                      <span>4</span>
+                      <span>6</span>
+                      <span>8</span>
+                      <span>10 mm</span>
+                    </div>
+                  </>
+                )}
+              </div>
+            </AccordionItem>
+          )}
+
+          {/* Metro Humidity Widget - Shows when layer is active */}
+          {showMetroHumidityLayer && selectedMetroCity && (() => {
+            const cityFeature = (metroHumidityData as any).features.find((f: any) => f.properties.city === selectedMetroCity)
+            if (!cityFeature) return null
+
+            const humidityData = cityFeature.properties.humidity_projections[projectionYear.toString()] ||
+              cityFeature.properties.humidity_projections['2025']
+            if (!humidityData) return null
+
+            return (
+              <div className="widget-container" style={{
+                backdropFilter: 'blur(2px)',
+                backgroundColor: 'rgba(255, 255, 255, 0.5)'
+              }}>
+                {/* Header */}
                 <div style={{
                   display: 'flex',
                   flexDirection: 'column',
-                  borderRadius: 4,
-                  overflow: 'hidden',
+                  gap: 4,
+                  padding: '4px 8px',
                   marginBottom: 4
                 }}>
                   <div style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.35)',
-                    padding: '4px 8px',
-                    borderRadius: 4
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
                   }}>
-                    <p className="text-xs font-semibold text-muted-foreground">
-                      Humidity & Wet Bulb Events
+                    <p className="text-xs font-bold uppercase text-foreground">
+                      {selectedMetroCity.toUpperCase()}
+                    </p>
+                    <p className="text-xs font-semibold text-foreground">
+                      {projectionYear}
                     </p>
                   </div>
-                  <div style={{ display: 'flex' }}>
-                    <div style={{ flex: 1, padding: '4px 8px' }}>
-                      <p className="text-[9px] font-medium text-foreground" style={{ minWidth: 'max-content' }}>
-                        Peak Humidity
-                      </p>
-                      <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                        <p className="text-xs font-bold text-foreground">
-                          {humidityData.peak_humidity}%
-                        </p>
-                      </div>
-                    </div>
-                    <div style={{ flex: 1, padding: '4px 8px' }}>
-                      <p className="text-[9px] font-medium text-foreground" style={{ minWidth: 'max-content' }}>
-                        # Wet Bulbs
-                      </p>
-                      <div style={{ display: 'flex', gap: 4, alignItems: 'center', justifyContent: 'center' }}>
-                        <p className="text-xs font-bold text-foreground">
-                          {humidityData.wet_bulb_events}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
                 </div>
-              )}
 
-              {/* Temperature & Humidity Section */}
-              {showTempHumidity && (
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  borderRadius: 4,
-                  overflow: 'hidden'
-                }}>
+                {/* Humidity & Wet Bulb Events Section */}
+                {showHumidityWetBulb && (
                   <div style={{
-                    backgroundColor: 'rgba(255, 255, 255, 0.35)',
-                    padding: '4px 8px',
-                    borderRadius: 4
+                    display: 'flex',
+                    flexDirection: 'column',
+                    borderRadius: 4,
+                    overflow: 'hidden',
+                    marginBottom: 4
                   }}>
-                    <p className="text-xs font-semibold text-muted-foreground">
-                      Temperature & Humidity
-                    </p>
-                  </div>
-                  <div style={{ display: 'flex' }}>
-                    <div style={{ flex: 1, padding: '4px 8px' }}>
-                      <p className="text-[9px] font-medium text-foreground" style={{ minWidth: 'max-content' }}>
-                        Humid Temp.
+                    <div style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.35)',
+                      padding: '4px 8px',
+                      borderRadius: 4
+                    }}>
+                      <p className="text-xs font-semibold text-muted-foreground">
+                        Humidity & Wet Bulb Events
                       </p>
-                      <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                        <p className="text-xs font-bold text-foreground">
-                          {humidityData.humid_temp}°
+                    </div>
+                    <div style={{ display: 'flex' }}>
+                      <div style={{ flex: 1, padding: '4px 8px' }}>
+                        <p className="text-[9px] font-medium text-foreground" style={{ minWidth: 'max-content' }}>
+                          Peak Humidity
                         </p>
+                        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                          <p className="text-xs font-bold text-foreground">
+                            {humidityData.peak_humidity}%
+                          </p>
+                        </div>
+                      </div>
+                      <div style={{ flex: 1, padding: '4px 8px' }}>
+                        <p className="text-[9px] font-medium text-foreground" style={{ minWidth: 'max-content' }}>
+                          # Wet Bulbs
+                        </p>
+                        <div style={{ display: 'flex', gap: 4, alignItems: 'center', justifyContent: 'center' }}>
+                          <p className="text-xs font-bold text-foreground">
+                            {humidityData.wet_bulb_events}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                    <div style={{ flex: 1, padding: '4px 8px' }}>
-                      <p className="text-[9px] font-medium text-foreground" style={{ minWidth: 'max-content' }}>
-                        <span className="font-medium">100</span>
-                        <span className="font-bold">°+ </span>
-                        Days
-                      </p>
-                      <div style={{ display: 'flex', gap: 4, alignItems: 'center', justifyContent: 'center' }}>
-                        <p className="text-xs font-bold text-foreground">
-                          {humidityData.days_over_100}
-                        </p>
-                      </div>
-                    </div>
                   </div>
-                </div>
-              )}
-            </div>
-          )
-        })()}
+                )}
 
-      </div>
+                {/* Temperature & Humidity Section - REMOVED - fields don't exist in wet bulb data */}
+              </div>
+            )
+          })()}
+
+          </div>
+        </div>
       )}
 
       {/* Groundwater Details Panel - Bottom Center */}
@@ -3626,67 +4029,7 @@ export default function WaterAccessView() {
             </>
           )}
 
-          {showTempHumidity && (
-            <>
-              {/* Section 2: Temperature & Humidity */}
-              <div style={{
-                padding: '4px 8px',
-                fontSize: '10px',
-                fontWeight: 600,
-                color: '#65758B',
-                lineHeight: 'normal',
-                borderBottom: '1px solid rgba(0, 0, 0, 0.05)'
-              }}>
-                Temperature & Humidity
-              </div>
-              <div style={{ display: 'flex', gap: 0, padding: '4px 8px' }}>
-                <div style={{ flex: 1, padding: '4px 8px' }}>
-                  <div style={{
-                    fontSize: '9px',
-                    fontWeight: 500,
-                    color: '#101728',
-                    marginBottom: '2px',
-                    lineHeight: 'normal'
-                  }}>
-                    Humid Temp.
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    gap: '4px',
-                    alignItems: 'center',
-                    fontSize: '12px',
-                    lineHeight: 'normal'
-                  }}>
-                    <span style={{ fontWeight: 700, color: '#101728' }}>
-                      {metroHoverInfo.humidityData.humid_temp}°
-                    </span>
-                  </div>
-                </div>
-                <div style={{ flex: 1, padding: '4px 8px' }}>
-                  <div style={{
-                    fontSize: '9px',
-                    fontWeight: 500,
-                    color: '#101728',
-                    marginBottom: '2px',
-                    lineHeight: 'normal'
-                  }}>
-                    100°+ Days
-                  </div>
-                  <div style={{
-                    display: 'flex',
-                    gap: '4px',
-                    alignItems: 'center',
-                    fontSize: '12px',
-                    lineHeight: 'normal'
-                  }}>
-                    <span style={{ fontWeight: 700, color: '#101728' }}>
-                      {metroHoverInfo.humidityData.days_over_100}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
+          {/* Temperature & Humidity section removed - fields don't exist in data */}
         </div>
       )}
 
@@ -3719,7 +4062,14 @@ export default function WaterAccessView() {
 
       {/* Metro Humidity React Overlay - Render MetroHumidityBubble components using map projection */}
       {showMetroHumidityLayer && mapRef.current && mapLoaded && (
-        <>
+        <div
+          onClick={(e) => {
+            // Deactivate bubble when clicking on the container (but not on a bubble itself)
+            if (e.target === e.currentTarget) {
+              setActiveBubbleIndex(null)
+            }
+          }}
+        >
           {(metroHumidityData as any).features.map((feature: any, index: number) => {
             const { city, lat, lng, humidity_projections } = feature.properties
 
@@ -3750,8 +4100,11 @@ export default function WaterAccessView() {
               return {
                 peak_humidity: Math.round(lower.peak_humidity + (upper.peak_humidity - lower.peak_humidity) * ratio),
                 wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
-                humid_temp: Math.round(lower.humid_temp + (upper.humid_temp - lower.humid_temp) * ratio),
-                days_over_100: Math.round(lower.days_over_100 + (upper.days_over_100 - lower.days_over_100) * ratio)
+                days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
+                days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
+                estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
+                casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
+                extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
               }
             }
 
@@ -3759,6 +4112,8 @@ export default function WaterAccessView() {
 
             // Convert lat/lng to screen coordinates
             const point = mapRef.current!.project([lng, lat])
+
+            const isActive = activeBubbleIndex === index
 
             return (
               <div
@@ -3769,7 +4124,7 @@ export default function WaterAccessView() {
                   top: `${point.y}px`,
                   transform: 'translate(-50%, -50%)',
                   pointerEvents: 'auto',
-                  zIndex: 100
+                  zIndex: isActive ? 1000 : 100 // Higher z-index when active
                 }}
               >
                 <MetroHumidityBubble
@@ -3777,17 +4132,22 @@ export default function WaterAccessView() {
                   year={projectionYear}
                   peakHumidity={`${humidityData.peak_humidity}%`}
                   wetBulbEvents={`${humidityData.wet_bulb_events}`}
-                  humidTemp={`${humidityData.humid_temp}°`}
-                  daysOver100={`${humidityData.days_over_100}`}
+                  humidTemp={`${humidityData.days_over_95F || 0}°`}
+                  daysOver100={humidityData.days_over_100F ? `${humidityData.days_over_100F}` : 'N/A'}
                   visible={true}
                   showHumidityWetBulb={showHumidityWetBulb}
                   showTempHumidity={showTempHumidity}
-                  onClose={() => {}}
+                  onClose={() => { }}
+                  isActive={isActive}
+                  onClick={() => {
+                    // Toggle: if clicking the same bubble, deactivate it; otherwise activate the clicked one
+                    setActiveBubbleIndex(isActive ? null : index)
+                  }}
                 />
               </div>
             )
           })}
-        </>
+        </div>
       )}
 
     </div>

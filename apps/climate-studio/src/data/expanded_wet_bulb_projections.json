@@ -1,0 +1,695 @@
+{
+  "Houston": {
+    "name": "Houston, TX",
+    "lat": 29.7604,
+    "lon": -95.3698,
+    "population_2024": 2304580,
+    "metro_population_2024": 7122240,
+    "baseline_humidity": 76,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 76,
+      "wet_bulb_events": 0,
+      "days_over_95F": 96
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 78, "peak_humidity": 82, "wet_bulb_events": 2, "days_over_95F": 102, "days_over_100F": 12, "estimated_at_risk_population": 142434, "casualty_rate_percent": 2.0, "extent_radius_km": 45 },
+      "2035": { "avg_summer_humidity": 79, "peak_humidity": 84, "wet_bulb_events": 8, "days_over_95F": 115, "days_over_100F": 24, "estimated_at_risk_population": 213651, "casualty_rate_percent": 3.0, "extent_radius_km": 52 },
+      "2045": { "avg_summer_humidity": 81, "peak_humidity": 86, "wet_bulb_events": 18, "days_over_95F": 128, "days_over_100F": 38, "estimated_at_risk_population": 356085, "casualty_rate_percent": 5.0, "extent_radius_km": 62 },
+      "2055": { "avg_summer_humidity": 82, "peak_humidity": 88, "wet_bulb_events": 32, "days_over_95F": 142, "days_over_100F": 54, "estimated_at_risk_population": 569736, "casualty_rate_percent": 8.0, "extent_radius_km": 75 },
+      "2065": { "avg_summer_humidity": 84, "peak_humidity": 90, "wet_bulb_events": 51, "days_over_95F": 156, "days_over_100F": 72, "estimated_at_risk_population": 854604, "casualty_rate_percent": 12.0, "extent_radius_km": 88 },
+      "2075": { "avg_summer_humidity": 85, "peak_humidity": 91, "wet_bulb_events": 73, "days_over_95F": 168, "days_over_100F": 89, "estimated_at_risk_population": 1068672, "casualty_rate_percent": 15.0, "extent_radius_km": 98 }
+    }
+  },
+  "New Orleans": {
+    "name": "New Orleans, LA",
+    "lat": 29.9511,
+    "lon": -90.0715,
+    "population_2024": 383997,
+    "metro_population_2024": 1270530,
+    "baseline_humidity": 78,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 78,
+      "wet_bulb_events": 0,
+      "days_over_95F": 68
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 79, "peak_humidity": 83, "wet_bulb_events": 3, "days_over_95F": 74, "days_over_100F": 8, "estimated_at_risk_population": 25421, "casualty_rate_percent": 2.0, "extent_radius_km": 38 },
+      "2035": { "avg_summer_humidity": 81, "peak_humidity": 85, "wet_bulb_events": 12, "days_over_95F": 86, "days_over_100F": 18, "estimated_at_risk_population": 50842, "casualty_rate_percent": 4.0, "extent_radius_km": 48 },
+      "2045": { "avg_summer_humidity": 82, "peak_humidity": 87, "wet_bulb_events": 24, "days_over_95F": 98, "days_over_100F": 32, "estimated_at_risk_population": 88869, "casualty_rate_percent": 7.0, "extent_radius_km": 58 },
+      "2055": { "avg_summer_humidity": 84, "peak_humidity": 89, "wet_bulb_events": 41, "days_over_95F": 112, "days_over_100F": 48, "estimated_at_risk_population": 139163, "casualty_rate_percent": 11.0, "extent_radius_km": 72 },
+      "2065": { "avg_summer_humidity": 85, "peak_humidity": 91, "wet_bulb_events": 62, "days_over_95F": 124, "days_over_100F": 66, "estimated_at_risk_population": 190579, "casualty_rate_percent": 15.0, "extent_radius_km": 84 },
+      "2075": { "avg_summer_humidity": 87, "peak_humidity": 92, "wet_bulb_events": 86, "days_over_95F": 138, "days_over_100F": 82, "estimated_at_risk_population": 228095, "casualty_rate_percent": 18.0, "extent_radius_km": 94 }
+    }
+  },
+  "Miami": {
+    "name": "Miami, FL",
+    "lat": 25.7617,
+    "lon": -80.1918,
+    "population_2024": 449514,
+    "metro_population_2024": 6138333,
+    "baseline_humidity": 75,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 75,
+      "wet_bulb_events": 0,
+      "days_over_95F": 52
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 77, "peak_humidity": 81, "wet_bulb_events": 4, "days_over_95F": 58, "days_over_100F": 6, "estimated_at_risk_population": 122767, "casualty_rate_percent": 2.0, "extent_radius_km": 42 },
+      "2035": { "avg_summer_humidity": 78, "peak_humidity": 83, "wet_bulb_events": 14, "days_over_95F": 72, "days_over_100F": 14, "estimated_at_risk_population": 245533, "casualty_rate_percent": 4.0, "extent_radius_km": 54 },
+      "2045": { "avg_summer_humidity": 80, "peak_humidity": 85, "wet_bulb_events": 28, "days_over_95F": 86, "days_over_100F": 26, "estimated_at_risk_population": 429683, "casualty_rate_percent": 7.0, "extent_radius_km": 66 },
+      "2055": { "avg_summer_humidity": 81, "peak_humidity": 87, "wet_bulb_events": 48, "days_over_95F": 102, "days_over_100F": 42, "estimated_at_risk_population": 675218, "casualty_rate_percent": 11.0, "extent_radius_km": 78 },
+      "2065": { "avg_summer_humidity": 83, "peak_humidity": 89, "wet_bulb_events": 71, "days_over_95F": 118, "days_over_100F": 58, "estimated_at_risk_population": 920752, "casualty_rate_percent": 15.0, "extent_radius_km": 92 },
+      "2075": { "avg_summer_humidity": 84, "peak_humidity": 90, "wet_bulb_events": 98, "days_over_95F": 132, "days_over_100F": 76, "estimated_at_risk_population": 1104600, "casualty_rate_percent": 18.0, "extent_radius_km": 102 }
+    }
+  },
+  "Tampa": {
+    "name": "Tampa, FL",
+    "lat": 27.9506,
+    "lon": -82.4572,
+    "population_2024": 384959,
+    "metro_population_2024": 3175275,
+    "baseline_humidity": 74,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 74,
+      "wet_bulb_events": 0,
+      "days_over_95F": 86
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 76, "peak_humidity": 80, "wet_bulb_events": 3, "days_over_95F": 92, "days_over_100F": 8, "estimated_at_risk_population": 63505, "casualty_rate_percent": 2.0, "extent_radius_km": 40 },
+      "2035": { "avg_summer_humidity": 77, "peak_humidity": 82, "wet_bulb_events": 11, "days_over_95F": 104, "days_over_100F": 16, "estimated_at_risk_population": 127011, "casualty_rate_percent": 4.0, "extent_radius_km": 50 },
+      "2045": { "avg_summer_humidity": 79, "peak_humidity": 84, "wet_bulb_events": 22, "days_over_95F": 118, "days_over_100F": 28, "estimated_at_risk_population": 222269, "casualty_rate_percent": 7.0, "extent_radius_km": 60 },
+      "2055": { "avg_summer_humidity": 80, "peak_humidity": 86, "wet_bulb_events": 38, "days_over_95F": 132, "days_over_100F": 44, "estimated_at_risk_population": 349280, "casualty_rate_percent": 11.0, "extent_radius_km": 74 },
+      "2065": { "avg_summer_humidity": 82, "peak_humidity": 88, "wet_bulb_events": 58, "days_over_95F": 146, "days_over_100F": 62, "estimated_at_risk_population": 476291, "casualty_rate_percent": 15.0, "extent_radius_km": 86 },
+      "2075": { "avg_summer_humidity": 83, "peak_humidity": 89, "wet_bulb_events": 81, "days_over_95F": 158, "days_over_100F": 78, "estimated_at_risk_population": 571549, "casualty_rate_percent": 18.0, "extent_radius_km": 96 }
+    }
+  },
+  "Orlando": {
+    "name": "Orlando, FL",
+    "lat": 28.5383,
+    "lon": -81.3792,
+    "population_2024": 307573,
+    "metro_population_2024": 2691925,
+    "baseline_humidity": 72,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 72,
+      "wet_bulb_events": 0,
+      "days_over_95F": 78
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 74, "peak_humidity": 78, "wet_bulb_events": 2, "days_over_95F": 84, "days_over_100F": 6, "estimated_at_risk_population": 53838, "casualty_rate_percent": 2.0, "extent_radius_km": 38 },
+      "2035": { "avg_summer_humidity": 75, "peak_humidity": 80, "wet_bulb_events": 9, "days_over_95F": 96, "days_over_100F": 14, "estimated_at_risk_population": 107677, "casualty_rate_percent": 4.0, "extent_radius_km": 46 },
+      "2045": { "avg_summer_humidity": 77, "peak_humidity": 82, "wet_bulb_events": 18, "days_over_95F": 108, "days_over_100F": 24, "estimated_at_risk_population": 188434, "casualty_rate_percent": 7.0, "extent_radius_km": 56 },
+      "2055": { "avg_summer_humidity": 78, "peak_humidity": 84, "wet_bulb_events": 32, "days_over_95F": 122, "days_over_100F": 38, "estimated_at_risk_population": 296112, "casualty_rate_percent": 11.0, "extent_radius_km": 68 },
+      "2065": { "avg_summer_humidity": 80, "peak_humidity": 86, "wet_bulb_events": 49, "days_over_95F": 136, "days_over_100F": 54, "estimated_at_risk_population": 403789, "casualty_rate_percent": 15.0, "extent_radius_km": 80 },
+      "2075": { "avg_summer_humidity": 81, "peak_humidity": 87, "wet_bulb_events": 69, "days_over_95F": 148, "days_over_100F": 68, "estimated_at_risk_population": 484547, "casualty_rate_percent": 18.0, "extent_radius_km": 90 }
+    }
+  },
+  "Jacksonville": {
+    "name": "Jacksonville, FL",
+    "lat": 30.3322,
+    "lon": -81.6557,
+    "population_2024": 954614,
+    "metro_population_2024": 1605848,
+    "baseline_humidity": 73,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 73,
+      "wet_bulb_events": 0,
+      "days_over_95F": 72
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 75, "peak_humidity": 79, "wet_bulb_events": 2, "days_over_95F": 78, "days_over_100F": 5, "estimated_at_risk_population": 32117, "casualty_rate_percent": 2.0, "extent_radius_km": 36 },
+      "2035": { "avg_summer_humidity": 76, "peak_humidity": 81, "wet_bulb_events": 8, "days_over_95F": 89, "days_over_100F": 12, "estimated_at_risk_population": 64234, "casualty_rate_percent": 4.0, "extent_radius_km": 44 },
+      "2045": { "avg_summer_humidity": 78, "peak_humidity": 83, "wet_bulb_events": 16, "days_over_95F": 101, "days_over_100F": 21, "estimated_at_risk_population": 112409, "casualty_rate_percent": 7.0, "extent_radius_km": 54 },
+      "2055": { "avg_summer_humidity": 79, "peak_humidity": 85, "wet_bulb_events": 28, "days_over_95F": 114, "days_over_100F": 34, "estimated_at_risk_population": 176643, "casualty_rate_percent": 11.0, "extent_radius_km": 66 },
+      "2065": { "avg_summer_humidity": 81, "peak_humidity": 87, "wet_bulb_events": 43, "days_over_95F": 127, "days_over_100F": 48, "estimated_at_risk_population": 240877, "casualty_rate_percent": 15.0, "extent_radius_km": 78 },
+      "2075": { "avg_summer_humidity": 82, "peak_humidity": 88, "wet_bulb_events": 61, "days_over_95F": 139, "days_over_100F": 62, "estimated_at_risk_population": 289053, "casualty_rate_percent": 18.0, "extent_radius_km": 88 }
+    }
+  },
+  "Atlanta": {
+    "name": "Atlanta, GA",
+    "lat": 33.749,
+    "lon": -84.388,
+    "population_2024": 498715,
+    "metro_population_2024": 6144050,
+    "baseline_humidity": 68,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 68,
+      "wet_bulb_events": 0,
+      "days_over_95F": 45
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 70, "peak_humidity": 74, "wet_bulb_events": 1, "days_over_95F": 52, "days_over_100F": 4, "estimated_at_risk_population": 61441, "casualty_rate_percent": 1.0, "extent_radius_km": 35 },
+      "2035": { "avg_summer_humidity": 71, "peak_humidity": 76, "wet_bulb_events": 5, "days_over_95F": 64, "days_over_100F": 10, "estimated_at_risk_population": 122881, "casualty_rate_percent": 2.0, "extent_radius_km": 42 },
+      "2045": { "avg_summer_humidity": 73, "peak_humidity": 78, "wet_bulb_events": 12, "days_over_95F": 78, "days_over_100F": 18, "estimated_at_risk_population": 245162, "casualty_rate_percent": 4.0, "extent_radius_km": 52 },
+      "2055": { "avg_summer_humidity": 74, "peak_humidity": 80, "wet_bulb_events": 22, "days_over_95F": 92, "days_over_100F": 28, "estimated_at_risk_population": 429284, "casualty_rate_percent": 7.0, "extent_radius_km": 64 },
+      "2065": { "avg_summer_humidity": 76, "peak_humidity": 82, "wet_bulb_events": 36, "days_over_95F": 108, "days_over_100F": 42, "estimated_at_risk_population": 614405, "casualty_rate_percent": 10.0, "extent_radius_km": 76 },
+      "2075": { "avg_summer_humidity": 77, "peak_humidity": 83, "wet_bulb_events": 52, "days_over_95F": 122, "days_over_100F": 56, "estimated_at_risk_population": 799326, "casualty_rate_percent": 13.0, "extent_radius_km": 86 }
+    }
+  },
+  "Dallas": {
+    "name": "Dallas, TX",
+    "lat": 32.7767,
+    "lon": -96.797,
+    "population_2024": 1304379,
+    "metro_population_2024": 7694110,
+    "baseline_humidity": 58,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 58,
+      "wet_bulb_events": 0,
+      "days_over_95F": 68
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 60, "peak_humidity": 65, "wet_bulb_events": 1, "days_over_95F": 76, "days_over_100F": 18, "estimated_at_risk_population": 76941, "casualty_rate_percent": 1.0, "extent_radius_km": 38 },
+      "2035": { "avg_summer_humidity": 61, "peak_humidity": 67, "wet_bulb_events": 4, "days_over_95F": 88, "days_over_100F": 28, "estimated_at_risk_population": 153882, "casualty_rate_percent": 2.0, "extent_radius_km": 46 },
+      "2045": { "avg_summer_humidity": 63, "peak_humidity": 69, "wet_bulb_events": 10, "days_over_95F": 102, "days_over_100F": 42, "estimated_at_risk_population": 307764, "casualty_rate_percent": 4.0, "extent_radius_km": 56 },
+      "2055": { "avg_summer_humidity": 64, "peak_humidity": 71, "wet_bulb_events": 18, "days_over_95F": 116, "days_over_100F": 58, "estimated_at_risk_population": 538588, "casualty_rate_percent": 7.0, "extent_radius_km": 68 },
+      "2065": { "avg_summer_humidity": 66, "peak_humidity": 73, "wet_bulb_events": 30, "days_over_95F": 132, "days_over_100F": 76, "estimated_at_risk_population": 769411, "casualty_rate_percent": 10.0, "extent_radius_km": 82 },
+      "2075": { "avg_summer_humidity": 67, "peak_humidity": 74, "wet_bulb_events": 44, "days_over_95F": 146, "days_over_100F": 92, "estimated_at_risk_population": 1000234, "casualty_rate_percent": 13.0, "extent_radius_km": 94 }
+    }
+  },
+  "Austin": {
+    "name": "Austin, TX",
+    "lat": 30.2672,
+    "lon": -97.7431,
+    "population_2024": 978908,
+    "metro_population_2024": 2283371,
+    "baseline_humidity": 62,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 62,
+      "wet_bulb_events": 0,
+      "days_over_95F": 62
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 64, "peak_humidity": 69, "wet_bulb_events": 1, "days_over_95F": 70, "days_over_100F": 14, "estimated_at_risk_population": 22834, "casualty_rate_percent": 1.0, "extent_radius_km": 34 },
+      "2035": { "avg_summer_humidity": 65, "peak_humidity": 71, "wet_bulb_events": 5, "days_over_95F": 82, "days_over_100F": 24, "estimated_at_risk_population": 45667, "casualty_rate_percent": 2.0, "extent_radius_km": 42 },
+      "2045": { "avg_summer_humidity": 67, "peak_humidity": 73, "wet_bulb_events": 11, "days_over_95F": 96, "days_over_100F": 36, "estimated_at_risk_population": 91335, "casualty_rate_percent": 4.0, "extent_radius_km": 52 },
+      "2055": { "avg_summer_humidity": 68, "peak_humidity": 75, "wet_bulb_events": 20, "days_over_95F": 110, "days_over_100F": 50, "estimated_at_risk_population": 159836, "casualty_rate_percent": 7.0, "extent_radius_km": 64 },
+      "2065": { "avg_summer_humidity": 70, "peak_humidity": 77, "wet_bulb_events": 33, "days_over_95F": 126, "days_over_100F": 66, "estimated_at_risk_population": 228337, "casualty_rate_percent": 10.0, "extent_radius_km": 76 },
+      "2075": { "avg_summer_humidity": 71, "peak_humidity": 78, "wet_bulb_events": 48, "days_over_95F": 140, "days_over_100F": 82, "estimated_at_risk_population": 296838, "casualty_rate_percent": 13.0, "extent_radius_km": 86 }
+    }
+  },
+  "San Antonio": {
+    "name": "San Antonio, TX",
+    "lat": 29.4241,
+    "lon": -98.4936,
+    "population_2024": 1472909,
+    "metro_population_2024": 2558143,
+    "baseline_humidity": 60,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 60,
+      "wet_bulb_events": 0,
+      "days_over_95F": 58
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 62, "peak_humidity": 67, "wet_bulb_events": 1, "days_over_95F": 66, "days_over_100F": 12, "estimated_at_risk_population": 25581, "casualty_rate_percent": 1.0, "extent_radius_km": 35 },
+      "2035": { "avg_summer_humidity": 63, "peak_humidity": 69, "wet_bulb_events": 4, "days_over_95F": 78, "days_over_100F": 22, "estimated_at_risk_population": 51163, "casualty_rate_percent": 2.0, "extent_radius_km": 43 },
+      "2045": { "avg_summer_humidity": 65, "peak_humidity": 71, "wet_bulb_events": 10, "days_over_95F": 92, "days_over_100F": 34, "estimated_at_risk_population": 102326, "casualty_rate_percent": 4.0, "extent_radius_km": 53 },
+      "2055": { "avg_summer_humidity": 66, "peak_humidity": 73, "wet_bulb_events": 18, "days_over_95F": 106, "days_over_100F": 48, "estimated_at_risk_population": 179070, "casualty_rate_percent": 7.0, "extent_radius_km": 65 },
+      "2065": { "avg_summer_humidity": 68, "peak_humidity": 75, "wet_bulb_events": 30, "days_over_95F": 122, "days_over_100F": 64, "estimated_at_risk_population": 255814, "casualty_rate_percent": 10.0, "extent_radius_km": 77 },
+      "2075": { "avg_summer_humidity": 69, "peak_humidity": 76, "wet_bulb_events": 44, "days_over_95F": 136, "days_over_100F": 80, "estimated_at_risk_population": 332558, "casualty_rate_percent": 13.0, "extent_radius_km": 87 }
+    }
+  },
+  "Phoenix": {
+    "name": "Phoenix, AZ",
+    "lat": 33.4484,
+    "lon": -112.074,
+    "population_2024": 1650070,
+    "metro_population_2024": 4845832,
+    "baseline_humidity": 24,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 24,
+      "wet_bulb_events": 0,
+      "days_over_95F": 142
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 25, "peak_humidity": 35, "wet_bulb_events": 0, "days_over_95F": 148, "days_over_100F": 96, "estimated_at_risk_population": 48458, "casualty_rate_percent": 1.0, "extent_radius_km": 40 },
+      "2035": { "avg_summer_humidity": 26, "peak_humidity": 36, "wet_bulb_events": 1, "days_over_95F": 156, "days_over_100F": 108, "estimated_at_risk_population": 96917, "casualty_rate_percent": 2.0, "extent_radius_km": 48 },
+      "2045": { "avg_summer_humidity": 27, "peak_humidity": 38, "wet_bulb_events": 3, "days_over_95F": 164, "days_over_100F": 122, "estimated_at_risk_population": 193833, "casualty_rate_percent": 4.0, "extent_radius_km": 58 },
+      "2055": { "avg_summer_humidity": 28, "peak_humidity": 40, "wet_bulb_events": 6, "days_over_95F": 174, "days_over_100F": 138, "estimated_at_risk_population": 339208, "casualty_rate_percent": 7.0, "extent_radius_km": 70 },
+      "2065": { "avg_summer_humidity": 29, "peak_humidity": 42, "wet_bulb_events": 12, "days_over_95F": 182, "days_over_100F": 154, "estimated_at_risk_population": 484583, "casualty_rate_percent": 10.0, "extent_radius_km": 84 },
+      "2075": { "avg_summer_humidity": 30, "peak_humidity": 44, "wet_bulb_events": 20, "days_over_95F": 192, "days_over_100F": 168, "estimated_at_risk_population": 629958, "casualty_rate_percent": 13.0, "extent_radius_km": 96 }
+    }
+  },
+  "Las Vegas": {
+    "name": "Las Vegas, NV",
+    "lat": 36.1699,
+    "lon": -115.1398,
+    "population_2024": 660929,
+    "metro_population_2024": 2265461,
+    "baseline_humidity": 22,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 22,
+      "wet_bulb_events": 0,
+      "days_over_95F": 134
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 23, "peak_humidity": 32, "wet_bulb_events": 0, "days_over_95F": 140, "days_over_100F": 86, "estimated_at_risk_population": 22655, "casualty_rate_percent": 1.0, "extent_radius_km": 36 },
+      "2035": { "avg_summer_humidity": 24, "peak_humidity": 34, "wet_bulb_events": 0, "days_over_95F": 148, "days_over_100F": 98, "estimated_at_risk_population": 45309, "casualty_rate_percent": 2.0, "extent_radius_km": 44 },
+      "2045": { "avg_summer_humidity": 25, "peak_humidity": 36, "wet_bulb_events": 1, "days_over_95F": 156, "days_over_100F": 112, "estimated_at_risk_population": 90618, "casualty_rate_percent": 4.0, "extent_radius_km": 54 },
+      "2055": { "avg_summer_humidity": 26, "peak_humidity": 38, "wet_bulb_events": 3, "days_over_95F": 166, "days_over_100F": 128, "estimated_at_risk_population": 158582, "casualty_rate_percent": 7.0, "extent_radius_km": 66 },
+      "2065": { "avg_summer_humidity": 27, "peak_humidity": 40, "wet_bulb_events": 7, "days_over_95F": 174, "days_over_100F": 144, "estimated_at_risk_population": 226546, "casualty_rate_percent": 10.0, "extent_radius_km": 78 },
+      "2075": { "avg_summer_humidity": 28, "peak_humidity": 42, "wet_bulb_events": 13, "days_over_95F": 184, "days_over_100F": 158, "estimated_at_risk_population": 294510, "casualty_rate_percent": 13.0, "extent_radius_km": 88 }
+    }
+  },
+  "Memphis": {
+    "name": "Memphis, TN",
+    "lat": 35.1495,
+    "lon": -90.049,
+    "population_2024": 633104,
+    "metro_population_2024": 1337779,
+    "baseline_humidity": 68,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 68,
+      "wet_bulb_events": 0,
+      "days_over_95F": 52
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 70, "peak_humidity": 75, "wet_bulb_events": 1, "days_over_95F": 60, "days_over_100F": 8, "estimated_at_risk_population": 13378, "casualty_rate_percent": 1.0, "extent_radius_km": 32 },
+      "2035": { "avg_summer_humidity": 71, "peak_humidity": 77, "wet_bulb_events": 5, "days_over_95F": 72, "days_over_100F": 16, "estimated_at_risk_population": 26756, "casualty_rate_percent": 2.0, "extent_radius_km": 40 },
+      "2045": { "avg_summer_humidity": 73, "peak_humidity": 79, "wet_bulb_events": 12, "days_over_95F": 86, "days_over_100F": 26, "estimated_at_risk_population": 53511, "casualty_rate_percent": 4.0, "extent_radius_km": 50 },
+      "2055": { "avg_summer_humidity": 74, "peak_humidity": 81, "wet_bulb_events": 22, "days_over_95F": 100, "days_over_100F": 38, "estimated_at_risk_population": 93644, "casualty_rate_percent": 7.0, "extent_radius_km": 62 },
+      "2065": { "avg_summer_humidity": 76, "peak_humidity": 83, "wet_bulb_events": 36, "days_over_95F": 116, "days_over_100F": 52, "estimated_at_risk_population": 133778, "casualty_rate_percent": 10.0, "extent_radius_km": 74 },
+      "2075": { "avg_summer_humidity": 77, "peak_humidity": 84, "wet_bulb_events": 52, "days_over_95F": 130, "days_over_100F": 66, "estimated_at_risk_population": 173911, "casualty_rate_percent": 13.0, "extent_radius_km": 84 }
+    }
+  },
+  "Nashville": {
+    "name": "Nashville, TN",
+    "lat": 36.1627,
+    "lon": -86.7816,
+    "population_2024": 689447,
+    "metro_population_2024": 1989519,
+    "baseline_humidity": 65,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 65,
+      "wet_bulb_events": 0,
+      "days_over_95F": 38
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 67, "peak_humidity": 72, "wet_bulb_events": 0, "days_over_95F": 46, "days_over_100F": 5, "estimated_at_risk_population": 19895, "casualty_rate_percent": 1.0, "extent_radius_km": 32 },
+      "2035": { "avg_summer_humidity": 68, "peak_humidity": 74, "wet_bulb_events": 3, "days_over_95F": 58, "days_over_100F": 11, "estimated_at_risk_population": 39790, "casualty_rate_percent": 2.0, "extent_radius_km": 40 },
+      "2045": { "avg_summer_humidity": 70, "peak_humidity": 76, "wet_bulb_events": 8, "days_over_95F": 72, "days_over_100F": 19, "estimated_at_risk_population": 79581, "casualty_rate_percent": 4.0, "extent_radius_km": 50 },
+      "2055": { "avg_summer_humidity": 71, "peak_humidity": 78, "wet_bulb_events": 16, "days_over_95F": 86, "days_over_100F": 29, "estimated_at_risk_population": 139266, "casualty_rate_percent": 7.0, "extent_radius_km": 62 },
+      "2065": { "avg_summer_humidity": 73, "peak_humidity": 80, "wet_bulb_events": 28, "days_over_95F": 102, "days_over_100F": 42, "estimated_at_risk_population": 198952, "casualty_rate_percent": 10.0, "extent_radius_km": 74 },
+      "2075": { "avg_summer_humidity": 74, "peak_humidity": 81, "wet_bulb_events": 42, "days_over_95F": 116, "days_over_100F": 56, "estimated_at_risk_population": 258637, "casualty_rate_percent": 13.0, "extent_radius_km": 84 }
+    }
+  },
+  "Charlotte": {
+    "name": "Charlotte, NC",
+    "lat": 35.2271,
+    "lon": -80.8431,
+    "population_2024": 897720,
+    "metro_population_2024": 2805115,
+    "baseline_humidity": 66,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 66,
+      "wet_bulb_events": 0,
+      "days_over_95F": 32
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 68, "peak_humidity": 73, "wet_bulb_events": 0, "days_over_95F": 40, "days_over_100F": 4, "estimated_at_risk_population": 28051, "casualty_rate_percent": 1.0, "extent_radius_km": 34 },
+      "2035": { "avg_summer_humidity": 69, "peak_humidity": 75, "wet_bulb_events": 3, "days_over_95F": 52, "days_over_100F": 10, "estimated_at_risk_population": 56102, "casualty_rate_percent": 2.0, "extent_radius_km": 42 },
+      "2045": { "avg_summer_humidity": 71, "peak_humidity": 77, "wet_bulb_events": 8, "days_over_95F": 66, "days_over_100F": 18, "estimated_at_risk_population": 112205, "casualty_rate_percent": 4.0, "extent_radius_km": 52 },
+      "2055": { "avg_summer_humidity": 72, "peak_humidity": 79, "wet_bulb_events": 16, "days_over_95F": 82, "days_over_100F": 28, "estimated_at_risk_population": 196358, "casualty_rate_percent": 7.0, "extent_radius_km": 64 },
+      "2065": { "avg_summer_humidity": 74, "peak_humidity": 81, "wet_bulb_events": 28, "days_over_95F": 98, "days_over_100F": 40, "estimated_at_risk_population": 280512, "casualty_rate_percent": 10.0, "extent_radius_km": 76 },
+      "2075": { "avg_summer_humidity": 75, "peak_humidity": 82, "wet_bulb_events": 42, "days_over_95F": 112, "days_over_100F": 54, "estimated_at_risk_population": 364665, "casualty_rate_percent": 13.0, "extent_radius_km": 86 }
+    }
+  },
+  "St. Louis": {
+    "name": "St. Louis, MO",
+    "lat": 38.627,
+    "lon": -90.1994,
+    "population_2024": 293310,
+    "metro_population_2024": 2820253,
+    "baseline_humidity": 64,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 64,
+      "wet_bulb_events": 0,
+      "days_over_95F": 36
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 66, "peak_humidity": 71, "wet_bulb_events": 0, "days_over_95F": 44, "days_over_100F": 6, "estimated_at_risk_population": 28203, "casualty_rate_percent": 1.0, "extent_radius_km": 34 },
+      "2035": { "avg_summer_humidity": 67, "peak_humidity": 73, "wet_bulb_events": 3, "days_over_95F": 56, "days_over_100F": 13, "estimated_at_risk_population": 56405, "casualty_rate_percent": 2.0, "extent_radius_km": 42 },
+      "2045": { "avg_summer_humidity": 69, "peak_humidity": 75, "wet_bulb_events": 8, "days_over_95F": 70, "days_over_100F": 22, "estimated_at_risk_population": 112810, "casualty_rate_percent": 4.0, "extent_radius_km": 52 },
+      "2055": { "avg_summer_humidity": 70, "peak_humidity": 77, "wet_bulb_events": 16, "days_over_95F": 86, "days_over_100F": 34, "estimated_at_risk_population": 197418, "casualty_rate_percent": 7.0, "extent_radius_km": 64 },
+      "2065": { "avg_summer_humidity": 72, "peak_humidity": 79, "wet_bulb_events": 28, "days_over_95F": 102, "days_over_100F": 48, "estimated_at_risk_population": 282025, "casualty_rate_percent": 10.0, "extent_radius_km": 76 },
+      "2075": { "avg_summer_humidity": 73, "peak_humidity": 80, "wet_bulb_events": 42, "days_over_95F": 116, "days_over_100F": 62, "estimated_at_risk_population": 366633, "casualty_rate_percent": 13.0, "extent_radius_km": 86 }
+    }
+  },
+  "Kansas City": {
+    "name": "Kansas City, MO",
+    "lat": 39.0997,
+    "lon": -94.5786,
+    "population_2024": 508090,
+    "metro_population_2024": 2192035,
+    "baseline_humidity": 62,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 62,
+      "wet_bulb_events": 0,
+      "days_over_95F": 34
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 64, "peak_humidity": 69, "wet_bulb_events": 0, "days_over_95F": 42, "days_over_100F": 5, "estimated_at_risk_population": 21920, "casualty_rate_percent": 1.0, "extent_radius_km": 33 },
+      "2035": { "avg_summer_humidity": 65, "peak_humidity": 71, "wet_bulb_events": 2, "days_over_95F": 54, "days_over_100F": 12, "estimated_at_risk_population": 43841, "casualty_rate_percent": 2.0, "extent_radius_km": 41 },
+      "2045": { "avg_summer_humidity": 67, "peak_humidity": 73, "wet_bulb_events": 6, "days_over_95F": 68, "days_over_100F": 21, "estimated_at_risk_population": 87681, "casualty_rate_percent": 4.0, "extent_radius_km": 51 },
+      "2055": { "avg_summer_humidity": 68, "peak_humidity": 75, "wet_bulb_events": 14, "days_over_95F": 84, "days_over_100F": 32, "estimated_at_risk_population": 153442, "casualty_rate_percent": 7.0, "extent_radius_km": 63 },
+      "2065": { "avg_summer_humidity": 70, "peak_humidity": 77, "wet_bulb_events": 24, "days_over_95F": 100, "days_over_100F": 46, "estimated_at_risk_population": 219204, "casualty_rate_percent": 10.0, "extent_radius_km": 75 },
+      "2075": { "avg_summer_humidity": 71, "peak_humidity": 78, "wet_bulb_events": 38, "days_over_95F": 114, "days_over_100F": 60, "estimated_at_risk_population": 284965, "casualty_rate_percent": 13.0, "extent_radius_km": 85 }
+    }
+  },
+  "Indianapolis": {
+    "name": "Indianapolis, IN",
+    "lat": 39.7684,
+    "lon": -86.158,
+    "population_2024": 887642,
+    "metro_population_2024": 2111040,
+    "baseline_humidity": 63,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 63,
+      "wet_bulb_events": 0,
+      "days_over_95F": 28
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 65, "peak_humidity": 70, "wet_bulb_events": 0, "days_over_95F": 36, "days_over_100F": 4, "estimated_at_risk_population": 21110, "casualty_rate_percent": 1.0, "extent_radius_km": 32 },
+      "2035": { "avg_summer_humidity": 66, "peak_humidity": 72, "wet_bulb_events": 2, "days_over_95F": 48, "days_over_100F": 10, "estimated_at_risk_population": 42221, "casualty_rate_percent": 2.0, "extent_radius_km": 40 },
+      "2045": { "avg_summer_humidity": 68, "peak_humidity": 74, "wet_bulb_events": 6, "days_over_95F": 62, "days_over_100F": 18, "estimated_at_risk_population": 84442, "casualty_rate_percent": 4.0, "extent_radius_km": 50 },
+      "2055": { "avg_summer_humidity": 69, "peak_humidity": 76, "wet_bulb_events": 13, "days_over_95F": 78, "days_over_100F": 28, "estimated_at_risk_population": 147773, "casualty_rate_percent": 7.0, "extent_radius_km": 62 },
+      "2065": { "avg_summer_humidity": 71, "peak_humidity": 78, "wet_bulb_events": 24, "days_over_95F": 94, "days_over_100F": 40, "estimated_at_risk_population": 211104, "casualty_rate_percent": 10.0, "extent_radius_km": 74 },
+      "2075": { "avg_summer_humidity": 72, "peak_humidity": 79, "wet_bulb_events": 36, "days_over_95F": 108, "days_over_100F": 54, "estimated_at_risk_population": 274435, "casualty_rate_percent": 13.0, "extent_radius_km": 84 }
+    }
+  },
+  "Columbus": {
+    "name": "Columbus, OH",
+    "lat": 39.9612,
+    "lon": -82.9988,
+    "population_2024": 905748,
+    "metro_population_2024": 2138926,
+    "baseline_humidity": 62,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 62,
+      "wet_bulb_events": 0,
+      "days_over_95F": 22
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 64, "peak_humidity": 69, "wet_bulb_events": 0, "days_over_95F": 30, "days_over_100F": 3, "estimated_at_risk_population": 21389, "casualty_rate_percent": 1.0, "extent_radius_km": 32 },
+      "2035": { "avg_summer_humidity": 65, "peak_humidity": 71, "wet_bulb_events": 2, "days_over_95F": 42, "days_over_100F": 8, "estimated_at_risk_population": 42779, "casualty_rate_percent": 2.0, "extent_radius_km": 40 },
+      "2045": { "avg_summer_humidity": 67, "peak_humidity": 73, "wet_bulb_events": 5, "days_over_95F": 56, "days_over_100F": 15, "estimated_at_risk_population": 85557, "casualty_rate_percent": 4.0, "extent_radius_km": 50 },
+      "2055": { "avg_summer_humidity": 68, "peak_humidity": 75, "wet_bulb_events": 12, "days_over_95F": 72, "days_over_100F": 24, "estimated_at_risk_population": 149725, "casualty_rate_percent": 7.0, "extent_radius_km": 62 },
+      "2065": { "avg_summer_humidity": 70, "peak_humidity": 77, "wet_bulb_events": 22, "days_over_95F": 88, "days_over_100F": 36, "estimated_at_risk_population": 213893, "casualty_rate_percent": 10.0, "extent_radius_km": 74 },
+      "2075": { "avg_summer_humidity": 71, "peak_humidity": 78, "wet_bulb_events": 34, "days_over_95F": 102, "days_over_100F": 48, "estimated_at_risk_population": 278060, "casualty_rate_percent": 13.0, "extent_radius_km": 84 }
+    }
+  },
+  "Cincinnati": {
+    "name": "Cincinnati, OH",
+    "lat": 39.1031,
+    "lon": -84.512,
+    "population_2024": 309317,
+    "metro_population_2024": 2256884,
+    "baseline_humidity": 63,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 63,
+      "wet_bulb_events": 0,
+      "days_over_95F": 26
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 65, "peak_humidity": 70, "wet_bulb_events": 0, "days_over_95F": 34, "days_over_100F": 4, "estimated_at_risk_population": 22569, "casualty_rate_percent": 1.0, "extent_radius_km": 33 },
+      "2035": { "avg_summer_humidity": 66, "peak_humidity": 72, "wet_bulb_events": 2, "days_over_95F": 46, "days_over_100F": 10, "estimated_at_risk_population": 45138, "casualty_rate_percent": 2.0, "extent_radius_km": 41 },
+      "2045": { "avg_summer_humidity": 68, "peak_humidity": 74, "wet_bulb_events": 6, "days_over_95F": 60, "days_over_100F": 18, "estimated_at_risk_population": 90275, "casualty_rate_percent": 4.0, "extent_radius_km": 51 },
+      "2055": { "avg_summer_humidity": 69, "peak_humidity": 76, "wet_bulb_events": 13, "days_over_95F": 76, "days_over_100F": 28, "estimated_at_risk_population": 157982, "casualty_rate_percent": 7.0, "extent_radius_km": 63 },
+      "2065": { "avg_summer_humidity": 71, "peak_humidity": 78, "wet_bulb_events": 24, "days_over_95F": 92, "days_over_100F": 40, "estimated_at_risk_population": 225688, "casualty_rate_percent": 10.0, "extent_radius_km": 75 },
+      "2075": { "avg_summer_humidity": 72, "peak_humidity": 79, "wet_bulb_events": 36, "days_over_95F": 106, "days_over_100F": 54, "estimated_at_risk_population": 293395, "casualty_rate_percent": 13.0, "extent_radius_km": 85 }
+    }
+  },
+  "Oklahoma City": {
+    "name": "Oklahoma City, OK",
+    "lat": 35.4676,
+    "lon": -97.5164,
+    "population_2024": 687725,
+    "metro_population_2024": 1425695,
+    "baseline_humidity": 55,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 55,
+      "wet_bulb_events": 0,
+      "days_over_95F": 56
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 57, "peak_humidity": 63, "wet_bulb_events": 0, "days_over_95F": 64, "days_over_100F": 16, "estimated_at_risk_population": 14257, "casualty_rate_percent": 1.0, "extent_radius_km": 32 },
+      "2035": { "avg_summer_humidity": 58, "peak_humidity": 65, "wet_bulb_events": 2, "days_over_95F": 76, "days_over_100F": 26, "estimated_at_risk_population": 28514, "casualty_rate_percent": 2.0, "extent_radius_km": 40 },
+      "2045": { "avg_summer_humidity": 60, "peak_humidity": 67, "wet_bulb_events": 6, "days_over_95F": 90, "days_over_100F": 38, "estimated_at_risk_population": 57028, "casualty_rate_percent": 4.0, "extent_radius_km": 50 },
+      "2055": { "avg_summer_humidity": 61, "peak_humidity": 69, "wet_bulb_events": 12, "days_over_95F": 106, "days_over_100F": 52, "estimated_at_risk_population": 99799, "casualty_rate_percent": 7.0, "extent_radius_km": 62 },
+      "2065": { "avg_summer_humidity": 63, "peak_humidity": 71, "wet_bulb_events": 22, "days_over_95F": 122, "days_over_100F": 68, "estimated_at_risk_population": 142570, "casualty_rate_percent": 10.0, "extent_radius_km": 74 },
+      "2075": { "avg_summer_humidity": 64, "peak_humidity": 72, "wet_bulb_events": 34, "days_over_95F": 136, "days_over_100F": 84, "estimated_at_risk_population": 185340, "casualty_rate_percent": 13.0, "extent_radius_km": 84 }
+    }
+  },
+  "Washington DC": {
+    "name": "Washington, DC",
+    "lat": 38.9072,
+    "lon": -77.0369,
+    "population_2024": 678972,
+    "metro_population_2024": 6385162,
+    "baseline_humidity": 64,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 64,
+      "wet_bulb_events": 0,
+      "days_over_95F": 24
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 66, "peak_humidity": 71, "wet_bulb_events": 0, "days_over_95F": 32, "days_over_100F": 4, "estimated_at_risk_population": 63852, "casualty_rate_percent": 1.0, "extent_radius_km": 36 },
+      "2035": { "avg_summer_humidity": 67, "peak_humidity": 73, "wet_bulb_events": 2, "days_over_95F": 44, "days_over_100F": 10, "estimated_at_risk_population": 127703, "casualty_rate_percent": 2.0, "extent_radius_km": 44 },
+      "2045": { "avg_summer_humidity": 69, "peak_humidity": 75, "wet_bulb_events": 6, "days_over_95F": 58, "days_over_100F": 18, "estimated_at_risk_population": 255406, "casualty_rate_percent": 4.0, "extent_radius_km": 54 },
+      "2055": { "avg_summer_humidity": 70, "peak_humidity": 77, "wet_bulb_events": 14, "days_over_95F": 74, "days_over_100F": 28, "estimated_at_risk_population": 446961, "casualty_rate_percent": 7.0, "extent_radius_km": 66 },
+      "2065": { "avg_summer_humidity": 72, "peak_humidity": 79, "wet_bulb_events": 26, "days_over_95F": 90, "days_over_100F": 40, "estimated_at_risk_population": 638516, "casualty_rate_percent": 10.0, "extent_radius_km": 78 },
+      "2075": { "avg_summer_humidity": 73, "peak_humidity": 80, "wet_bulb_events": 40, "days_over_95F": 104, "days_over_100F": 54, "estimated_at_risk_population": 830071, "casualty_rate_percent": 13.0, "extent_radius_km": 90 }
+    }
+  },
+  "Philadelphia": {
+    "name": "Philadelphia, PA",
+    "lat": 39.9526,
+    "lon": -75.1652,
+    "population_2024": 1603797,
+    "metro_population_2024": 6245051,
+    "baseline_humidity": 62,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 62,
+      "wet_bulb_events": 0,
+      "days_over_95F": 18
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 64, "peak_humidity": 69, "wet_bulb_events": 0, "days_over_95F": 26, "days_over_100F": 3, "estimated_at_risk_population": 62451, "casualty_rate_percent": 1.0, "extent_radius_km": 36 },
+      "2035": { "avg_summer_humidity": 65, "peak_humidity": 71, "wet_bulb_events": 1, "days_over_95F": 38, "days_over_100F": 8, "estimated_at_risk_population": 124901, "casualty_rate_percent": 2.0, "extent_radius_km": 44 },
+      "2045": { "avg_summer_humidity": 67, "peak_humidity": 73, "wet_bulb_events": 4, "days_over_95F": 52, "days_over_100F": 15, "estimated_at_risk_population": 249802, "casualty_rate_percent": 4.0, "extent_radius_km": 54 },
+      "2055": { "avg_summer_humidity": 68, "peak_humidity": 75, "wet_bulb_events": 10, "days_over_95F": 68, "days_over_100F": 24, "estimated_at_risk_population": 437154, "casualty_rate_percent": 7.0, "extent_radius_km": 66 },
+      "2065": { "avg_summer_humidity": 70, "peak_humidity": 77, "wet_bulb_events": 20, "days_over_95F": 84, "days_over_100F": 36, "estimated_at_risk_population": 624505, "casualty_rate_percent": 10.0, "extent_radius_km": 78 },
+      "2075": { "avg_summer_humidity": 71, "peak_humidity": 78, "wet_bulb_events": 32, "days_over_95F": 98, "days_over_100F": 48, "estimated_at_risk_population": 811857, "casualty_rate_percent": 13.0, "extent_radius_km": 90 }
+    }
+  },
+  "New York": {
+    "name": "New York, NY",
+    "lat": 40.7128,
+    "lon": -74.006,
+    "population_2024": 8336817,
+    "metro_population_2024": 19618210,
+    "baseline_humidity": 61,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 61,
+      "wet_bulb_events": 0,
+      "days_over_95F": 14
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 63, "peak_humidity": 68, "wet_bulb_events": 0, "days_over_95F": 22, "days_over_100F": 2, "estimated_at_risk_population": 196182, "casualty_rate_percent": 1.0, "extent_radius_km": 45 },
+      "2035": { "avg_summer_humidity": 64, "peak_humidity": 70, "wet_bulb_events": 1, "days_over_95F": 34, "days_over_100F": 6, "estimated_at_risk_population": 392364, "casualty_rate_percent": 2.0, "extent_radius_km": 55 },
+      "2045": { "avg_summer_humidity": 66, "peak_humidity": 72, "wet_bulb_events": 3, "days_over_95F": 48, "days_over_100F": 12, "estimated_at_risk_population": 784728, "casualty_rate_percent": 4.0, "extent_radius_km": 68 },
+      "2055": { "avg_summer_humidity": 67, "peak_humidity": 74, "wet_bulb_events": 8, "days_over_95F": 64, "days_over_100F": 20, "estimated_at_risk_population": 1373275, "casualty_rate_percent": 7.0, "extent_radius_km": 82 },
+      "2065": { "avg_summer_humidity": 69, "peak_humidity": 76, "wet_bulb_events": 16, "days_over_95F": 80, "days_over_100F": 30, "estimated_at_risk_population": 1961821, "casualty_rate_percent": 10.0, "extent_radius_km": 98 },
+      "2075": { "avg_summer_humidity": 70, "peak_humidity": 77, "wet_bulb_events": 28, "days_over_95F": 94, "days_over_100F": 42, "estimated_at_risk_population": 2550367, "casualty_rate_percent": 13.0, "extent_radius_km": 112 }
+    }
+  },
+  "Boston": {
+    "name": "Boston, MA",
+    "lat": 42.3601,
+    "lon": -71.0589,
+    "population_2024": 675647,
+    "metro_population_2024": 4941632,
+    "baseline_humidity": 60,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 60,
+      "wet_bulb_events": 0,
+      "days_over_95F": 8
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 62, "peak_humidity": 67, "wet_bulb_events": 0, "days_over_95F": 14, "days_over_100F": 1, "estimated_at_risk_population": 49416, "casualty_rate_percent": 1.0, "extent_radius_km": 35 },
+      "2035": { "avg_summer_humidity": 63, "peak_humidity": 69, "wet_bulb_events": 0, "days_over_95F": 24, "days_over_100F": 4, "estimated_at_risk_population": 98833, "casualty_rate_percent": 2.0, "extent_radius_km": 42 },
+      "2045": { "avg_summer_humidity": 65, "peak_humidity": 71, "wet_bulb_events": 2, "days_over_95F": 38, "days_over_100F": 9, "estimated_at_risk_population": 197665, "casualty_rate_percent": 4.0, "extent_radius_km": 52 },
+      "2055": { "avg_summer_humidity": 66, "peak_humidity": 73, "wet_bulb_events": 6, "days_over_95F": 54, "days_over_100F": 16, "estimated_at_risk_population": 345914, "casualty_rate_percent": 7.0, "extent_radius_km": 64 },
+      "2065": { "avg_summer_humidity": 68, "peak_humidity": 75, "wet_bulb_events": 14, "days_over_95F": 70, "days_over_100F": 26, "estimated_at_risk_population": 494163, "casualty_rate_percent": 10.0, "extent_radius_km": 76 },
+      "2075": { "avg_summer_humidity": 69, "peak_humidity": 76, "wet_bulb_events": 24, "days_over_95F": 84, "days_over_100F": 38, "estimated_at_risk_population": 642412, "casualty_rate_percent": 13.0, "extent_radius_km": 86 }
+    }
+  },
+  "Chicago": {
+    "name": "Chicago, IL",
+    "lat": 41.8781,
+    "lon": -87.6298,
+    "population_2024": 2665039,
+    "metro_population_2024": 9490240,
+    "baseline_humidity": 58,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 58,
+      "wet_bulb_events": 0,
+      "days_over_95F": 12
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 60, "peak_humidity": 65, "wet_bulb_events": 0, "days_over_95F": 20, "days_over_100F": 2, "estimated_at_risk_population": 94902, "casualty_rate_percent": 1.0, "extent_radius_km": 40 },
+      "2035": { "avg_summer_humidity": 61, "peak_humidity": 67, "wet_bulb_events": 1, "days_over_95F": 32, "days_over_100F": 6, "estimated_at_risk_population": 189805, "casualty_rate_percent": 2.0, "extent_radius_km": 50 },
+      "2045": { "avg_summer_humidity": 63, "peak_humidity": 69, "wet_bulb_events": 4, "days_over_95F": 48, "days_over_100F": 14, "estimated_at_risk_population": 379610, "casualty_rate_percent": 4.0, "extent_radius_km": 62 },
+      "2055": { "avg_summer_humidity": 64, "peak_humidity": 71, "wet_bulb_events": 10, "days_over_95F": 64, "days_over_100F": 24, "estimated_at_risk_population": 664317, "casualty_rate_percent": 7.0, "extent_radius_km": 76 },
+      "2065": { "avg_summer_humidity": 66, "peak_humidity": 73, "wet_bulb_events": 20, "days_over_95F": 82, "days_over_100F": 36, "estimated_at_risk_population": 949024, "casualty_rate_percent": 10.0, "extent_radius_km": 92 },
+      "2075": { "avg_summer_humidity": 67, "peak_humidity": 74, "wet_bulb_events": 32, "days_over_95F": 98, "days_over_100F": 50, "estimated_at_risk_population": 1233731, "casualty_rate_percent": 13.0, "extent_radius_km": 105 }
+    }
+  },
+  "Detroit": {
+    "name": "Detroit, MI",
+    "lat": 42.3314,
+    "lon": -83.0458,
+    "population_2024": 620376,
+    "metro_population_2024": 4342304,
+    "baseline_humidity": 59,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 59,
+      "wet_bulb_events": 0,
+      "days_over_95F": 10
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 61, "peak_humidity": 66, "wet_bulb_events": 0, "days_over_95F": 18, "days_over_100F": 2, "estimated_at_risk_population": 43423, "casualty_rate_percent": 1.0, "extent_radius_km": 35 },
+      "2035": { "avg_summer_humidity": 62, "peak_humidity": 68, "wet_bulb_events": 1, "days_over_95F": 30, "days_over_100F": 5, "estimated_at_risk_population": 86846, "casualty_rate_percent": 2.0, "extent_radius_km": 43 },
+      "2045": { "avg_summer_humidity": 64, "peak_humidity": 70, "wet_bulb_events": 3, "days_over_95F": 44, "days_over_100F": 11, "estimated_at_risk_population": 173692, "casualty_rate_percent": 4.0, "extent_radius_km": 53 },
+      "2055": { "avg_summer_humidity": 65, "peak_humidity": 72, "wet_bulb_events": 8, "days_over_95F": 60, "days_over_100F": 20, "estimated_at_risk_population": 303961, "casualty_rate_percent": 7.0, "extent_radius_km": 65 },
+      "2065": { "avg_summer_humidity": 67, "peak_humidity": 74, "wet_bulb_events": 16, "days_over_95F": 76, "days_over_100F": 30, "estimated_at_risk_population": 434230, "casualty_rate_percent": 10.0, "extent_radius_km": 77 },
+      "2075": { "avg_summer_humidity": 68, "peak_humidity": 75, "wet_bulb_events": 26, "days_over_95F": 90, "days_over_100F": 42, "estimated_at_risk_population": 564500, "casualty_rate_percent": 13.0, "extent_radius_km": 87 }
+    }
+  },
+  "Minneapolis": {
+    "name": "Minneapolis, MN",
+    "lat": 44.9778,
+    "lon": -93.265,
+    "population_2024": 425336,
+    "metro_population_2024": 3690512,
+    "baseline_humidity": 56,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 56,
+      "wet_bulb_events": 0,
+      "days_over_95F": 6
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 58, "peak_humidity": 63, "wet_bulb_events": 0, "days_over_95F": 12, "days_over_100F": 1, "estimated_at_risk_population": 36905, "casualty_rate_percent": 1.0, "extent_radius_km": 34 },
+      "2035": { "avg_summer_humidity": 59, "peak_humidity": 65, "wet_bulb_events": 0, "days_over_95F": 22, "days_over_100F": 4, "estimated_at_risk_population": 73810, "casualty_rate_percent": 2.0, "extent_radius_km": 42 },
+      "2045": { "avg_summer_humidity": 61, "peak_humidity": 67, "wet_bulb_events": 2, "days_over_95F": 36, "days_over_100F": 9, "estimated_at_risk_population": 147620, "casualty_rate_percent": 4.0, "extent_radius_km": 52 },
+      "2055": { "avg_summer_humidity": 62, "peak_humidity": 69, "wet_bulb_events": 6, "days_over_95F": 52, "days_over_100F": 16, "estimated_at_risk_population": 258336, "casualty_rate_percent": 7.0, "extent_radius_km": 64 },
+      "2065": { "avg_summer_humidity": 64, "peak_humidity": 71, "wet_bulb_events": 14, "days_over_95F": 68, "days_over_100F": 26, "estimated_at_risk_population": 369051, "casualty_rate_percent": 10.0, "extent_radius_km": 76 },
+      "2075": { "avg_summer_humidity": 65, "peak_humidity": 72, "wet_bulb_events": 24, "days_over_95F": 82, "days_over_100F": 38, "estimated_at_risk_population": 479767, "casualty_rate_percent": 13.0, "extent_radius_km": 86 }
+    }
+  },
+  "Denver": {
+    "name": "Denver, CO",
+    "lat": 39.7392,
+    "lon": -104.9903,
+    "population_2024": 715522,
+    "metro_population_2024": 2963821,
+    "baseline_humidity": 38,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 38,
+      "wet_bulb_events": 0,
+      "days_over_95F": 32
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 39, "peak_humidity": 48, "wet_bulb_events": 0, "days_over_95F": 40, "days_over_100F": 6, "estimated_at_risk_population": 29638, "casualty_rate_percent": 1.0, "extent_radius_km": 33 },
+      "2035": { "avg_summer_humidity": 40, "peak_humidity": 50, "wet_bulb_events": 0, "days_over_95F": 52, "days_over_100F": 12, "estimated_at_risk_population": 59276, "casualty_rate_percent": 2.0, "extent_radius_km": 40 },
+      "2045": { "avg_summer_humidity": 41, "peak_humidity": 52, "wet_bulb_events": 1, "days_over_95F": 66, "days_over_100F": 20, "estimated_at_risk_population": 118553, "casualty_rate_percent": 4.0, "extent_radius_km": 50 },
+      "2055": { "avg_summer_humidity": 42, "peak_humidity": 54, "wet_bulb_events": 3, "days_over_95F": 82, "days_over_100F": 30, "estimated_at_risk_population": 207467, "casualty_rate_percent": 7.0, "extent_radius_km": 62 },
+      "2065": { "avg_summer_humidity": 43, "peak_humidity": 56, "wet_bulb_events": 7, "days_over_95F": 98, "days_over_100F": 42, "estimated_at_risk_population": 296382, "casualty_rate_percent": 10.0, "extent_radius_km": 74 },
+      "2075": { "avg_summer_humidity": 44, "peak_humidity": 58, "wet_bulb_events": 13, "days_over_95F": 112, "days_over_100F": 56, "estimated_at_risk_population": 385297, "casualty_rate_percent": 13.0, "extent_radius_km": 84 }
+    }
+  },
+  "Los Angeles": {
+    "name": "Los Angeles, CA",
+    "lat": 34.0522,
+    "lon": -118.2437,
+    "population_2024": 3898747,
+    "metro_population_2024": 12997353,
+    "baseline_humidity": 48,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 48,
+      "wet_bulb_events": 0,
+      "days_over_95F": 18
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 49, "peak_humidity": 58, "wet_bulb_events": 0, "days_over_95F": 26, "days_over_100F": 4, "estimated_at_risk_population": 129974, "casualty_rate_percent": 1.0, "extent_radius_km": 45 },
+      "2035": { "avg_summer_humidity": 50, "peak_humidity": 60, "wet_bulb_events": 1, "days_over_95F": 38, "days_over_100F": 10, "estimated_at_risk_population": 259947, "casualty_rate_percent": 2.0, "extent_radius_km": 55 },
+      "2045": { "avg_summer_humidity": 51, "peak_humidity": 62, "wet_bulb_events": 3, "days_over_95F": 52, "days_over_100F": 18, "estimated_at_risk_population": 519894, "casualty_rate_percent": 4.0, "extent_radius_km": 68 },
+      "2055": { "avg_summer_humidity": 52, "peak_humidity": 64, "wet_bulb_events": 7, "days_over_95F": 68, "days_over_100F": 28, "estimated_at_risk_population": 909815, "casualty_rate_percent": 7.0, "extent_radius_km": 82 },
+      "2065": { "avg_summer_humidity": 53, "peak_humidity": 66, "wet_bulb_events": 14, "days_over_95F": 86, "days_over_100F": 40, "estimated_at_risk_population": 1299735, "casualty_rate_percent": 10.0, "extent_radius_km": 98 },
+      "2075": { "avg_summer_humidity": 54, "peak_humidity": 68, "wet_bulb_events": 24, "days_over_95F": 102, "days_over_100F": 54, "estimated_at_risk_population": 1689656, "casualty_rate_percent": 13.0, "extent_radius_km": 112 }
+    }
+  },
+  "San Francisco": {
+    "name": "San Francisco, CA",
+    "lat": 37.7749,
+    "lon": -122.4194,
+    "population_2024": 873965,
+    "metro_population_2024": 4566961,
+    "baseline_humidity": 62,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 62,
+      "wet_bulb_events": 0,
+      "days_over_95F": 2
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 63, "peak_humidity": 70, "wet_bulb_events": 0, "days_over_95F": 6, "days_over_100F": 0, "estimated_at_risk_population": 45670, "casualty_rate_percent": 1.0, "extent_radius_km": 35 },
+      "2035": { "avg_summer_humidity": 64, "peak_humidity": 72, "wet_bulb_events": 0, "days_over_95F": 12, "days_over_100F": 1, "estimated_at_risk_population": 91339, "casualty_rate_percent": 2.0, "extent_radius_km": 42 },
+      "2045": { "avg_summer_humidity": 65, "peak_humidity": 74, "wet_bulb_events": 1, "days_over_95F": 20, "days_over_100F": 4, "estimated_at_risk_population": 182678, "casualty_rate_percent": 4.0, "extent_radius_km": 52 },
+      "2055": { "avg_summer_humidity": 66, "peak_humidity": 76, "wet_bulb_events": 3, "days_over_95F": 32, "days_over_100F": 8, "estimated_at_risk_population": 319687, "casualty_rate_percent": 7.0, "extent_radius_km": 64 },
+      "2065": { "avg_summer_humidity": 67, "peak_humidity": 78, "wet_bulb_events": 8, "days_over_95F": 46, "days_over_100F": 14, "estimated_at_risk_population": 456696, "casualty_rate_percent": 10.0, "extent_radius_km": 76 },
+      "2075": { "avg_summer_humidity": 68, "peak_humidity": 79, "wet_bulb_events": 16, "days_over_95F": 60, "days_over_100F": 22, "estimated_at_risk_population": 593705, "casualty_rate_percent": 13.0, "extent_radius_km": 86 }
+    }
+  },
+  "Seattle": {
+    "name": "Seattle, WA",
+    "lat": 47.6062,
+    "lon": -122.3321,
+    "population_2024": 737015,
+    "metro_population_2024": 4018762,
+    "baseline_humidity": 58,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 58,
+      "wet_bulb_events": 0,
+      "days_over_95F": 1
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 59, "peak_humidity": 66, "wet_bulb_events": 0, "days_over_95F": 4, "days_over_100F": 0, "estimated_at_risk_population": 40188, "casualty_rate_percent": 1.0, "extent_radius_km": 34 },
+      "2035": { "avg_summer_humidity": 60, "peak_humidity": 68, "wet_bulb_events": 0, "days_over_95F": 10, "days_over_100F": 1, "estimated_at_risk_population": 80375, "casualty_rate_percent": 2.0, "extent_radius_km": 42 },
+      "2045": { "avg_summer_humidity": 61, "peak_humidity": 70, "wet_bulb_events": 1, "days_over_95F": 18, "days_over_100F": 3, "estimated_at_risk_population": 160750, "casualty_rate_percent": 4.0, "extent_radius_km": 52 },
+      "2055": { "avg_summer_humidity": 62, "peak_humidity": 72, "wet_bulb_events": 3, "days_over_95F": 30, "days_over_100F": 7, "estimated_at_risk_population": 281313, "casualty_rate_percent": 7.0, "extent_radius_km": 64 },
+      "2065": { "avg_summer_humidity": 63, "peak_humidity": 74, "wet_bulb_events": 8, "days_over_95F": 44, "days_over_100F": 12, "estimated_at_risk_population": 401876, "casualty_rate_percent": 10.0, "extent_radius_km": 76 },
+      "2075": { "avg_summer_humidity": 64, "peak_humidity": 75, "wet_bulb_events": 15, "days_over_95F": 58, "days_over_100F": 20, "estimated_at_risk_population": 522439, "casualty_rate_percent": 13.0, "extent_radius_km": 86 }
+    }
+  },
+  "Portland": {
+    "name": "Portland, OR",
+    "lat": 45.5152,
+    "lon": -122.6784,
+    "population_2024": 652503,
+    "metro_population_2024": 2508050,
+    "baseline_humidity": 55,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 55,
+      "wet_bulb_events": 0,
+      "days_over_95F": 4
+    },
+    "projections": {
+      "2025": { "avg_summer_humidity": 56, "peak_humidity": 64, "wet_bulb_events": 0, "days_over_95F": 10, "days_over_100F": 1, "estimated_at_risk_population": 25081, "casualty_rate_percent": 1.0, "extent_radius_km": 33 },
+      "2035": { "avg_summer_humidity": 57, "peak_humidity": 66, "wet_bulb_events": 0, "days_over_95F": 18, "days_over_100F": 3, "estimated_at_risk_population": 50161, "casualty_rate_percent": 2.0, "extent_radius_km": 41 },
+      "2045": { "avg_summer_humidity": 58, "peak_humidity": 68, "wet_bulb_events": 1, "days_over_95F": 30, "days_over_100F": 7, "estimated_at_risk_population": 100322, "casualty_rate_percent": 4.0, "extent_radius_km": 51 },
+      "2055": { "avg_summer_humidity": 59, "peak_humidity": 70, "wet_bulb_events": 4, "days_over_95F": 44, "days_over_100F": 14, "estimated_at_risk_population": 175564, "casualty_rate_percent": 7.0, "extent_radius_km": 63 },
+      "2065": { "avg_summer_humidity": 60, "peak_humidity": 72, "wet_bulb_events": 10, "days_over_95F": 60, "days_over_100F": 22, "estimated_at_risk_population": 250805, "casualty_rate_percent": 10.0, "extent_radius_km": 75 },
+      "2075": { "avg_summer_humidity": 61, "peak_humidity": 73, "wet_bulb_events": 18, "days_over_95F": 76, "days_over_100F": 32, "estimated_at_risk_population": 326046, "casualty_rate_percent": 13.0, "extent_radius_km": 85 }
+    }
+  }
+}

@@ -27,6 +27,7 @@ interface ClimateControlsState {
   megaregionShowTemperature: boolean;
   megaregionAnimating: boolean;
   useRealData: boolean;
+  wetBulbOpacity: number; // Wet Bulb
 }
 
 interface LayerError {
@@ -62,6 +63,7 @@ interface ClimateContextValue {
   setMegaregionShowTemperature: (value: boolean) => void;
   setMegaregionAnimating: (value: boolean) => void;
   setUseRealData: (value: boolean) => void;
+  setWetBulbOpacity: (value: number) => void;
   activeLayerIds: ClimateLayerId[];
   setActiveLayerIds: (layerIds: ClimateLayerId[]) => void;
   toggleLayer: (layerId: ClimateLayerId) => void;
@@ -133,6 +135,7 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
   const [megaregionShowTemperature, setMegaregionShowTemperature] = useState<boolean>(true);
   const [megaregionAnimating, setMegaregionAnimating] = useState<boolean>(false);
   const [useRealData, setUseRealData] = useState<boolean>(true);
+  const [wetBulbOpacity, setWetBulbOpacity] = useState<number>(0.6);
   const [activeLayerIds, setActiveLayerIdsState] = useState<ClimateLayerId[]>(
     getInitialActiveLayers()
   );
@@ -143,7 +146,7 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
   const setActiveLayerIds = useCallback((layerIds: ClimateLayerId[] | ((prev: ClimateLayerId[]) => ClimateLayerId[])) => {
     setActiveLayerIdsState(prev => {
       const newLayers = typeof layerIds === 'function' ? layerIds(prev) : layerIds;
-      
+
       // If trying to set empty array, check if we have stored layers to preserve
       if (newLayers.length === 0) {
         try {
@@ -161,7 +164,7 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
           console.warn('⚠️ Failed to check localStorage when preventing layer clear:', error);
         }
       }
-      
+
       return newLayers;
     });
   }, []);
@@ -201,7 +204,7 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
   // This ensures layers persist across theme changes and other state resets
   // Use a ref to track the last restored state to prevent infinite loops
   const lastRestoredRef = React.useRef<string>('');
-  
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -209,23 +212,23 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
         const storedLayers = JSON.parse(stored);
         const storedKey = JSON.stringify(storedLayers.sort());
         const currentKey = JSON.stringify([...activeLayerIds].sort());
-        
+
         // Skip if we've already restored this exact state
         if (lastRestoredRef.current === storedKey && storedKey === currentKey) {
           return;
         }
-        
+
         // Only restore if layers were unexpectedly cleared/reset
         const currentIsEmpty = activeLayerIds.length === 0;
-        const currentIsOnlyDefaults = 
+        const currentIsOnlyDefaults =
           activeLayerIds.length === defaultActiveLayers.length &&
           defaultActiveLayers.every(id => activeLayerIds.includes(id)) &&
           activeLayerIds.every(id => defaultActiveLayers.includes(id));
-        
+
         // If we have stored layers that are different and more comprehensive than current
         const hasStoredLayers = storedLayers.length > 0;
         const storedHasMoreLayers = storedLayers.length > activeLayerIds.length;
-        
+
         // Restore if: layers were cleared OR reset to defaults when we have stored custom layers
         if (hasStoredLayers && (currentIsEmpty || (currentIsOnlyDefaults && storedHasMoreLayers))) {
           console.log('🔄 Restoring layers from localStorage after unexpected reset:', storedLayers);
@@ -339,9 +342,10 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
       megaregionShowPopulation,
       megaregionShowTemperature,
       megaregionAnimating,
-      useRealData
+      useRealData,
+      wetBulbOpacity
     }),
-    [scenario, projectionYear, seaLevelFeet, analysisDate, displayStyle, resolution, projectionOpacity, seaLevelOpacity, urbanHeatOpacity, urbanHeatSeason, urbanHeatColorScheme, urbanExpansionOpacity, reliefStyle, reliefOpacity, temperatureMode, droughtOpacity, droughtMetric, megaregionOpacity, megaregionDataMode, megaregionShowPopulation, megaregionShowTemperature, megaregionAnimating, useRealData]
+    [scenario, projectionYear, seaLevelFeet, analysisDate, displayStyle, resolution, projectionOpacity, seaLevelOpacity, urbanHeatOpacity, urbanHeatSeason, urbanHeatColorScheme, urbanExpansionOpacity, reliefStyle, reliefOpacity, temperatureMode, droughtOpacity, droughtMetric, megaregionOpacity, megaregionDataMode, megaregionShowPopulation, megaregionShowTemperature, megaregionAnimating, useRealData, wetBulbOpacity]
   );
 
   const isLayerActive = useCallback(
@@ -375,6 +379,7 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
       setMegaregionShowTemperature,
       setMegaregionAnimating,
       setUseRealData,
+      setWetBulbOpacity,
       activeLayerIds,
       setActiveLayerIds,
       toggleLayer,
