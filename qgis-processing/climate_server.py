@@ -28,6 +28,7 @@ from precipitation_drought import PrecipitationDroughtService
 from urban_expansion import UrbanExpansionService
 from grace_groundwater import GRACEGroundwaterService
 from metro_humidity import MetroHumidityService
+from wet_bulb_service import WetBulbService
 
 # Configure logging
 logging.basicConfig(
@@ -50,6 +51,7 @@ heat_island_service = UrbanHeatIslandService(ee_project=ee_project)
 relief_service = TopographicReliefService()
 drought_service = PrecipitationDroughtService(ee_project=ee_project)
 urban_expansion_service = UrbanExpansionService(ee_project=ee_project)
+wet_bulb_service = WetBulbService(project_id=ee_project)
 groundwater_service = GRACEGroundwaterService(ee_project=ee_project)
 metro_humidity_service = MetroHumidityService(ee_project=ee_project)
 
@@ -1361,25 +1363,82 @@ def metro_humidity():
         }), 500
 
 
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    logger.info(f"🌍 Starting Climate Data Server on port {port}")
-    logger.info(f"📊 Endpoints:")
-    logger.info(f"   GET  /health")
-    logger.info(f"   GET  /api/climate/temperature-projection")
-    logger.info(f"   GET  /api/climate/temperature-projection/tiles")
-    logger.info(f"   GET  /api/climate/sea-level-rise")
-    logger.info(f"   GET  /api/climate/urban-heat-island/tiles")
-    logger.info(f"   GET  /api/climate/topographic-relief/tiles")
-    logger.info(f"   GET  /api/climate/precipitation-drought")
-    logger.info(f"   GET  /api/climate/precipitation-drought/tiles")
-    logger.info(f"   GET  /api/climate/urban-expansion/tiles")
-    logger.info(f"   GET  /api/climate/population")
-    logger.info(f"   GET  /api/climate/metro-humidity")
-    logger.info(f"   GET  /api/climate/info")
+@app.route('/api/climate/wet-bulb-temperature', methods=['GET'])
+def wet_bulb_temperature():
+    """
+    Get wet bulb temperature hexagons from Earth Engine
 
-    app.run(
-        host='0.0.0.0',
-        port=port,
-        debug=os.environ.get('FLASK_ENV') == 'development'
-    )
+    Query Parameters:
+        west (float): Western longitude bound
+        south (float): Southern latitude bound
+        east (float): Eastern longitude bound
+        north (float): Northern latitude bound
+        year (int): Projection year (2025-2100), default 2050
+        scenario (str): SSP scenario (ssp245, ssp585), default ssp245
+        resolution (int): H3 resolution (0-15), default 4
+
+    Returns:
+        GeoJSON FeatureCollection with wet bulb temperature data
+    """
+    try:
+        # Parse query parameters
+        west = request.args.get('west', type=float)
+        south = request.args.get('south', type=float)
+        east = request.args.get('east', type=float)
+        north = request.args.get('north', type=float)
+        year = request.args.get('year', default=2050, type=int)
+        scenario = request.args.get('scenario', default='ssp245', type=str)
+        resolution = request.args.get('resolution', default=4, type=int)
+
+        # Validate bounds
+        if None in [west, south, east, north]:
+            return jsonify({
+                'success': False,
+                'error': 'Missing required bounds parameters (west, south, east, north)'
+            }), 400
+
+        # Validate year range
+        if not (2025 <= year <= 2100):
+            return jsonify({
+                'success': False,
+                'error': 'Year must be between 2025 and 2100'
+            }), 400
+
+        # Validate scenario
+        valid_scenarios = ['ssp126', 'ssp245', 'ssp370', 'ssp585']
+        if scenario not in valid_scenarios:
+            return jsonify({
+                'success': False,
+                'error': f'Scenario must be one of: {", ".join(valid_scenarios)}'
+            }), 400
+
+        # Validate resolution
+        if not (0 <= resolution <= 15):
+            return jsonify({
+                'success': False,
+                'error': 'H3 resolution must be between 0 and 15'
+            }), 400
+
+        logger.info(f"Wet bulb temperature request: bounds=({west},{south},{east},{north}), year={year}, scenario={scenario}, res={resolution}")
+
+        # Get wet bulb temperature hexagons
+        data = wet_bulb_service.get_wet_bulb_hexagons(
+            bounds=(west, south, east, north),
+            year=year,
+            scenario=scenario,
+            resolution=resolution
+        )
+
+        return jsonify({
+            'success': True,
+            'data': data
+        })
+
+    except Exception as e:
+        logger.error(f"Error getting wet bulb data: {e}", exc_info=True)
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5001))
+    app.run(host='0.0.0.0', port=port, debug=True)

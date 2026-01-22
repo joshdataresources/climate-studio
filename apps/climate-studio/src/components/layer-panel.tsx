@@ -42,6 +42,7 @@ const controlOrder: ClimateControl[] = [
   "droughtMetric",
   "droughtOpacity",
   "megaregionOpacity",
+  "wetBulbOpacity",
 ]
 
 type ControlSetters = Pick<
@@ -66,7 +67,8 @@ type ControlSetters = Pick<
   "setMegaregionOpacity" |
   "setMegaregionDataMode" |
   "setMegaregionShowPopulation" |
-  "setMegaregionShowTemperature"
+  "setMegaregionShowTemperature" |
+  "setWetBulbOpacity"
 >
 
 const renderControl = (
@@ -487,6 +489,25 @@ const renderControl = (
           </div>
         </div>
       )
+    case "wetBulbOpacity":
+      return (
+        <div key="wetBulbOpacity" className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-xs text-muted-foreground">Danger Zone Opacity</label>
+            <span className="text-xs font-medium">{Math.round(values.wetBulbOpacity * 100)}%</span>
+          </div>
+          <Slider
+            value={[Math.round(values.wetBulbOpacity * 100)]}
+            min={10}
+            max={100}
+            step={5}
+            onValueChange={value => setters.setWetBulbOpacity(value[0] / 100)}
+          />
+          <p className="text-[10px] text-muted-foreground mt-1">
+            Shows cities at risk of dangerous wet bulb temperatures. Use the projection year slider to see how risk zones expand over time.
+          </p>
+        </div>
+      )
     default:
       return null
   }
@@ -511,6 +532,8 @@ const getLayerIcon = (layerId: string) => {
     case 'megaregion_timeseries':
       console.log('✅ Rendering PopulationIcon for megaregion_timeseries')
       return <PopulationIcon key="population-icon" />
+    case 'wet_bulb':
+      return <HeatIcon />
     default:
       // Debug: log if layer ID doesn't match
       if (layerId === 'megaregion_timeseries' || layerId.includes('megaregion')) {

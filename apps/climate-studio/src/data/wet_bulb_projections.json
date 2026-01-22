@@ -1,0 +1,298 @@
+{
+  "Houston": {
+    "name": "Houston, TX",
+    "lat": 29.7604,
+    "lon": -95.3698,
+    "population_2024": 2304580,
+    "metro_population_2024": 7122240,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 76,
+      "wet_bulb_events": 0,
+      "days_over_95F": 96
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 78,
+        "peak_humidity": 82,
+        "wet_bulb_events": 2,
+        "days_over_95F": 102,
+        "days_over_100F": 12,
+        "estimated_at_risk_population": 142434,
+        "casualty_rate_percent": 2.0,
+        "extent_radius_km": 45
+      },
+      "2035": {
+        "avg_summer_humidity": 79,
+        "peak_humidity": 84,
+        "wet_bulb_events": 8,
+        "days_over_95F": 115,
+        "days_over_100F": 24,
+        "estimated_at_risk_population": 213651,
+        "casualty_rate_percent": 3.0,
+        "extent_radius_km": 52
+      },
+      "2045": {
+        "avg_summer_humidity": 81,
+        "peak_humidity": 86,
+        "wet_bulb_events": 18,
+        "days_over_95F": 128,
+        "days_over_100F": 38,
+        "estimated_at_risk_population": 356085,
+        "casualty_rate_percent": 5.0,
+        "extent_radius_km": 62
+      },
+      "2055": {
+        "avg_summer_humidity": 82,
+        "peak_humidity": 88,
+        "wet_bulb_events": 32,
+        "days_over_95F": 142,
+        "days_over_100F": 54,
+        "estimated_at_risk_population": 569736,
+        "casualty_rate_percent": 8.0,
+        "extent_radius_km": 75
+      },
+      "2065": {
+        "avg_summer_humidity": 84,
+        "peak_humidity": 90,
+        "wet_bulb_events": 51,
+        "days_over_95F": 156,
+        "days_over_100F": 72,
+        "estimated_at_risk_population": 854604,
+        "casualty_rate_percent": 12.0,
+        "extent_radius_km": 88
+      },
+      "2075": {
+        "avg_summer_humidity": 85,
+        "peak_humidity": 91,
+        "wet_bulb_events": 73,
+        "days_over_95F": 168,
+        "days_over_100F": 89,
+        "estimated_at_risk_population": 1068672,
+        "casualty_rate_percent": 15.0,
+        "extent_radius_km": 98
+      }
+    }
+  },
+  "New Orleans": {
+    "name": "New Orleans, LA",
+    "lat": 29.9511,
+    "lon": -90.0715,
+    "population_2024": 383997,
+    "metro_population_2024": 1270530,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 78,
+      "wet_bulb_events": 0,
+      "days_over_95F": 68
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 79,
+        "peak_humidity": 83,
+        "wet_bulb_events": 3,
+        "days_over_95F": 74,
+        "days_over_100F": 8,
+        "estimated_at_risk_population": 25421,
+        "casualty_rate_percent": 2.0,
+        "extent_radius_km": 38
+      },
+      "2035": {
+        "avg_summer_humidity": 81,
+        "peak_humidity": 85,
+        "wet_bulb_events": 12,
+        "days_over_95F": 86,
+        "days_over_100F": 18,
+        "estimated_at_risk_population": 50842,
+        "casualty_rate_percent": 4.0,
+        "extent_radius_km": 48
+      },
+      "2045": {
+        "avg_summer_humidity": 82,
+        "peak_humidity": 87,
+        "wet_bulb_events": 24,
+        "days_over_95F": 98,
+        "days_over_100F": 32,
+        "estimated_at_risk_population": 88869,
+        "casualty_rate_percent": 7.0,
+        "extent_radius_km": 58
+      },
+      "2055": {
+        "avg_summer_humidity": 84,
+        "peak_humidity": 89,
+        "wet_bulb_events": 41,
+        "days_over_95F": 112,
+        "days_over_100F": 48,
+        "estimated_at_risk_population": 139163,
+        "casualty_rate_percent": 11.0,
+        "extent_radius_km": 72
+      },
+      "2065": {
+        "avg_summer_humidity": 85,
+        "peak_humidity": 91,
+        "wet_bulb_events": 62,
+        "days_over_95F": 124,
+        "days_over_100F": 66,
+        "estimated_at_risk_population": 190579,
+        "casualty_rate_percent": 15.0,
+        "extent_radius_km": 84
+      },
+      "2075": {
+        "avg_summer_humidity": 87,
+        "peak_humidity": 92,
+        "wet_bulb_events": 86,
+        "days_over_95F": 138,
+        "days_over_100F": 82,
+        "estimated_at_risk_population": 228095,
+        "casualty_rate_percent": 18.0,
+        "extent_radius_km": 94
+      }
+    }
+  },
+  "Miami": {
+    "name": "Miami, FL",
+    "lat": 25.7617,
+    "lon": -80.1918,
+    "population_2024": 449514,
+    "metro_population_2024": 6138333,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 75,
+      "wet_bulb_events": 0,
+      "days_over_95F": 52
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 77,
+        "peak_humidity": 81,
+        "wet_bulb_events": 4,
+        "days_over_95F": 58,
+        "days_over_100F": 6,
+        "estimated_at_risk_population": 122767,
+        "casualty_rate_percent": 2.0,
+        "extent_radius_km": 42
+      },
+      "2035": {
+        "avg_summer_humidity": 78,
+        "peak_humidity": 83,
+        "wet_bulb_events": 14,
+        "days_over_95F": 72,
+        "days_over_100F": 14,
+        "estimated_at_risk_population": 245533,
+        "casualty_rate_percent": 4.0,
+        "extent_radius_km": 54
+      },
+      "2045": {
+        "avg_summer_humidity": 80,
+        "peak_humidity": 85,
+        "wet_bulb_events": 28,
+        "days_over_95F": 86,
+        "days_over_100F": 26,
+        "estimated_at_risk_population": 429683,
+        "casualty_rate_percent": 7.0,
+        "extent_radius_km": 66
+      },
+      "2055": {
+        "avg_summer_humidity": 81,
+        "peak_humidity": 87,
+        "wet_bulb_events": 48,
+        "days_over_95F": 102,
+        "days_over_100F": 42,
+        "estimated_at_risk_population": 675218,
+        "casualty_rate_percent": 11.0,
+        "extent_radius_km": 78
+      },
+      "2065": {
+        "avg_summer_humidity": 83,
+        "peak_humidity": 89,
+        "wet_bulb_events": 71,
+        "days_over_95F": 118,
+        "days_over_100F": 58,
+        "estimated_at_risk_population": 920752,
+        "casualty_rate_percent": 15.0,
+        "extent_radius_km": 92
+      },
+      "2075": {
+        "avg_summer_humidity": 84,
+        "peak_humidity": 90,
+        "wet_bulb_events": 98,
+        "days_over_95F": 132,
+        "days_over_100F": 76,
+        "estimated_at_risk_population": 1104600,
+        "casualty_rate_percent": 18.0,
+        "extent_radius_km": 102
+      }
+    }
+  },
+  "Tampa": {
+    "name": "Tampa, FL",
+    "lat": 27.9506,
+    "lon": -82.4572,
+    "population_2024": 384959,
+    "metro_population_2024": 3175275,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 74,
+      "wet_bulb_events": 0,
+      "days_over_95F": 86
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 76,
+        "peak_humidity": 80,
+        "wet_bulb_events": 3,
+        "days_over_95F": 92,
+        "days_over_100F": 8,
+        "estimated_at_risk_population": 63505,
+        "casualty_rate_percent": 2.0,
+        "extent_radius_km": 40
+      },
+      "2035": {
+        "avg_summer_humidity": 77,
+        "peak_humidity": 82,
+        "wet_bulb_events": 11,
+        "days_over_95F": 104,
+        "days_over_100F": 16,
+        "estimated_at_risk_population": 127011,
+        "casualty_rate_percent": 4.0,
+        "extent_radius_km": 50
+      },
+      "2045": {
+        "avg_summer_humidity": 79,
+        "peak_humidity": 84,
+        "wet_bulb_events": 22,
+        "days_over_95F": 118,
+        "days_over_100F": 28,
+        "estimated_at_risk_population": 222269,
+        "casualty_rate_percent": 7.0,
+        "extent_radius_km": 60
+      },
+      "2055": {
+        "avg_summer_humidity": 80,
+        "peak_humidity": 86,
+        "wet_bulb_events": 38,
+        "days_over_95F": 132,
+        "days_over_100F": 44,
+        "estimated_at_risk_population": 349280,
+        "casualty_rate_percent": 11.0,
+        "extent_radius_km": 74
+      },
+      "2065": {
+        "avg_summer_humidity": 82,
+        "peak_humidity": 88,
+        "wet_bulb_events": 58,
+        "days_over_95F": 146,
+        "days_over_100F": 62,
+        "estimated_at_risk_population": 476291,
+        "casualty_rate_percent": 15.0,
+        "extent_radius_km": 86
+      },
+      "2075": {
+        "avg_summer_humidity": 83,
+        "peak_humidity": 89,
+        "wet_bulb_events": 81,
+        "days_over_95F": 158,
+        "days_over_100F": 78,
+        "estimated_at_risk_population": 571549,
+        "casualty_rate_percent": 18.0,
+        "extent_radius_km": 96
+      }
+    }
+  }
+}

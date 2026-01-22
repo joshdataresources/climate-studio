@@ -12,7 +12,13 @@ import type { LayerStateMap } from "../hooks/useClimateLayerData"
 import { getClimateLayer } from "@climate-studio/core/config"
 import megaregionData from "../data/megaregion-data.json"
 import metroTemperatureData from "../data/metro_temperature_projections.json"
+import expandedWetBulbData from "../data/expanded_wet_bulb_projections.json"
 import { useTheme } from "../contexts/ThemeContext"
+import {
+  getWetBulbColorRGBA,
+  interpolateWetBulbProjection,
+  calculateWetBulbC
+} from "../utils/wetBulbCalculator"
 import { MetroTooltipBubble } from './MetroTooltipBubble'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
@@ -79,14 +85,27 @@ export function DeckGLMap({
     ? "mapbox://styles/mapbox/light-v11"  // Monochrome light style
     : "mapbox://styles/mapbox/dark-v11"  // Dark style
 
-  // Auto-select relief style based on theme
+  // Auto-select relief style based on theme and force layer refresh
   useEffect(() => {
     if (theme === 'light') {
       setReliefStyle('classic')
     } else {
       setReliefStyle('dramatic')
     }
-  }, [theme, setReliefStyle])
+
+    // If map style changed, trigger layer refresh after a short delay
+    // to ensure the new style has loaded
+    if (prevMapStyleRef.current !== mapStyle) {
+      console.log('🎨 Theme changed, refreshing layers...')
+      prevMapStyleRef.current = mapStyle
+
+      // Wait for style to load, then refresh layers
+      setTimeout(() => {
+        setLayerRefreshKey(prev => prev + 1)
+        console.log('✅ Layers refreshed after theme change')
+      }, 500)
+    }
+  }, [theme, mapStyle, setReliefStyle])
 
   const [viewState, setViewState] = useState<MapViewState>({
     longitude: center.lng,
@@ -1064,6 +1083,111 @@ export function DeckGLMap({
     controls.megaregionShowPopulation
   ])
 
+  // Wet Bulb Temperature Danger Zone Layer
+  const wetBulbDangerZoneLayer = useMemo(() => {
+    if (!isLayerActive("wet_bulb")) return null
+
+    const year = controls.projectionYear ?? 2050
+    const availableYears = [2025, 2035, 2045, 2055, 2065, 2075]
+
+    // Find closest available year
+    const closestYear = availableYears.reduce((prev, curr) =>
+      Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
+    )
+
+    const wetBulbDataTyped = expandedWetBulbData as Record<string, {
+      name: string
+      lat: number
+      lon: number
+      population_2024: number
+      metro_population_2024: number
+      baseline_humidity: number
+      projections: Record<string, {
+        avg_summer_humidity: number
+        peak_humidity: number
+        wet_bulb_events: number
+        days_over_95F: number
+        days_over_100F: number
+        estimated_at_risk_population: number
+        casualty_rate_percent: number
+        extent_radius_km: number
+      }>
+    }>
+
+    const features = Object.entries(wetBulbDataTyped)
+      .map(([cityKey, cityData]) => {
+        const { lat, lon, name, projections, metro_population_2024, baseline_humidity } = cityData
+
+        // Interpolate projection data for the selected year
+        const projection = interpolateWetBulbProjection(projections, year)
+
+        // Calculate wet bulb temperature from summer temp estimate and humidity
+        // Use days_over_95F as a proxy for summer temperature intensity
+        const estimatedSummerTempF = 90 + (projection.days_over_95F / 20)
+        const wetBulbTempC = calculateWetBulbC(
+          (estimatedSummerTempF - 32) * 5 / 9,
+          projection.avg_summer_humidity
+        )
+
+        // Get color based on wet bulb danger level
+        const colorRGBA = getWetBulbColorRGBA(wetBulbTempC, 180)
+
+        // Use extent_radius_km from projections
+        const radiusKm = projection.extent_radius_km
+
+        return {
+          type: 'Feature' as const,
+          geometry: {
+            type: 'Polygon' as const,
+            coordinates: [createCircle(lon, lat, radiusKm)]
+          },
+          properties: {
+            name,
+            cityKey,
+            year: closestYear,
+            wet_bulb_events: projection.wet_bulb_events,
+            wet_bulb_temp_c: Math.round(wetBulbTempC * 10) / 10,
+            avg_summer_humidity: projection.avg_summer_humidity,
+            peak_humidity: projection.peak_humidity,
+            days_over_95F: projection.days_over_95F,
+            days_over_100F: projection.days_over_100F,
+            at_risk_population: projection.estimated_at_risk_population,
+            casualty_rate_percent: projection.casualty_rate_percent,
+            extent_radius_km: radiusKm,
+            metro_population: metro_population_2024,
+            fillColor: colorRGBA,
+            center: [lon, lat]
+          }
+        }
+      })
+      .filter(f => f.properties.wet_bulb_events > 0 || year >= 2045) // Show all cities by 2045
+
+    const geojson: GeoJSON.FeatureCollection = {
+      type: 'FeatureCollection',
+      features
+    }
+
+    return new GeoJsonLayer({
+      id: 'wet-bulb-danger-zones',
+      data: geojson as any,
+      filled: true,
+      stroked: true,
+      lineWidthMinPixels: 1,
+      getLineColor: [153, 27, 27, 200], // Dark red border
+      getFillColor: (d: any) => d.properties.fillColor,
+      opacity: controls.wetBulbOpacity ?? 0.6,
+      pickable: true,
+      updateTriggers: {
+        getFillColor: [year],
+        opacity: controls.wetBulbOpacity
+      }
+    })
+  }, [
+    isLayerActive("wet_bulb"),
+    controls.projectionYear,
+    controls.wetBulbOpacity
+  ])
+
   // Megaregion Labels GeoJSON (for Mapbox symbol layers)
   const megaregionLabelsGeoJSON = useMemo(() => {
     if (!isLayerActive("megaregion_timeseries")) return null
@@ -1431,8 +1555,9 @@ export function DeckGLMap({
     urbanHeatTileLayer,            // 7. Urban Heat Island (Heat Map)
     urbanExpansionLayer,           // 8. Urban Expansion (if present)
     temperatureHeatmapLayer,       // 9. Temperature Heatmap (if present)
-    megaregionCirclesLayer,        // 10. Metro Data Statistics population bubbles (conditional)
-    megaregionCenterDotsLayer,     // 11. Metro center dots (always on top for tooltips)
+    wetBulbDangerZoneLayer,        // 10. Wet Bulb Temperature Danger Zones
+    megaregionCirclesLayer,        // 11. Metro Data Statistics population bubbles (conditional)
+    megaregionCenterDotsLayer,     // 12. Metro center dots (always on top for tooltips)
   ].filter(Boolean)
 
   console.log('🗺️ DeckGL Layers:', {
@@ -1484,6 +1609,7 @@ export function DeckGLMap({
       {isContainerReady ? (
         <>
           <Map
+            key="climate-studio-map" // Stable key prevents remounting on theme/view changes
             ref={mapRef}
             {...viewState}
             onMove={(evt) => onViewStateChange({ viewState: evt.viewState })}

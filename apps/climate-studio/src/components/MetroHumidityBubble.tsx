@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface MetroHumidityBubbleProps {
@@ -21,6 +21,9 @@ interface MetroHumidityBubbleProps {
   onClose: () => void;
   onHover?: () => void;
   onHoverEnd?: () => void;
+  // Active state management
+  isActive?: boolean;
+  onClick?: () => void;
 }
 
 export const MetroHumidityBubble: React.FC<MetroHumidityBubbleProps> = ({
@@ -38,23 +41,55 @@ export const MetroHumidityBubble: React.FC<MetroHumidityBubbleProps> = ({
   onClose,
   onHover,
   onHoverEnd,
+  isActive: isActiveProp,
+  onClick,
 }) => {
-  const [isHovered, setIsHovered] = useState(false);
+  const [internalIsActive, setInternalIsActive] = useState(false);
   const { theme } = useTheme();
   const isDark = theme === 'dark';
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-    onHover?.();
+  // Use prop if provided, otherwise use internal state
+  const isActive = isActiveProp !== undefined ? isActiveProp : internalIsActive;
+
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onClick) {
+      onClick();
+    } else {
+      // Fallback to internal state management
+      const newActiveState = !internalIsActive;
+      setInternalIsActive(newActiveState);
+      if (newActiveState) {
+        onHover?.();
+      } else {
+        onHoverEnd?.();
+      }
+    }
   };
 
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    onHoverEnd?.();
-  };
+  // Handle clicks outside to deactivate (only if using internal state)
+  useEffect(() => {
+    if (isActiveProp !== undefined) return; // Don't handle if parent manages state
 
-  // Styles object
-  const styles = {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setInternalIsActive(false);
+        onHoverEnd?.();
+      }
+    };
+
+    if (internalIsActive) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [internalIsActive, isActiveProp, onHoverEnd]);
+
+  // Styles object - recompute when isHovered changes
+  const styles = useMemo(() => ({
     container: {
       position: 'relative' as const,
       width: `${dotSize}px`,
@@ -81,10 +116,10 @@ export const MetroHumidityBubble: React.FC<MetroHumidityBubbleProps> = ({
       visibility: (visible ? 'visible' : 'hidden') as const,
       transition: 'opacity 0.2s ease, visibility 0.2s ease',
       pointerEvents: 'none' as const,
-      zIndex: 100,
+      zIndex: isActive ? 1000 : 100, // Higher z-index when active to bring to top
     },
     tooltip: {
-      backgroundColor: isDark ? 'rgba(16, 23, 40, 0.5)' : 'rgba(255, 255, 255, 0.5)',
+      backgroundColor: isDark ? 'rgba(16, 23, 40, 0.85)' : 'rgba(255, 255, 255, 0.85)',
       backdropFilter: 'blur(2px)',
       WebkitBackdropFilter: 'blur(2px)',
       borderRadius: '8px',
@@ -105,7 +140,7 @@ export const MetroHumidityBubble: React.FC<MetroHumidityBubbleProps> = ({
       height: 0,
       borderLeft: '4.76px solid transparent',
       borderRight: '4.76px solid transparent',
-      borderTop: isDark ? '5.25px solid rgba(16, 23, 40, 0.5)' : '5.25px solid rgba(255, 255, 255, 0.5)',
+      borderTop: isDark ? '5.25px solid rgba(16, 23, 40, 0.85)' : '5.25px solid rgba(255, 255, 255, 0.85)',
     },
     header: {
       borderRadius: '4px',
@@ -205,17 +240,16 @@ export const MetroHumidityBubble: React.FC<MetroHumidityBubbleProps> = ({
       zIndex: 10,
       pointerEvents: 'auto' as const,
     },
-  };
+  }), [isActive, visible, dotSize, isDark]);
 
   return (
-    <div style={styles.container}>
+    <div ref={containerRef} style={styles.container}>
       {/* Tooltip - Always show container, but only show sections if checkboxes are on */}
       {visible && (
         <div style={styles.tooltipContainer}>
           <div
             style={styles.tooltip}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onClick={handleClick}
           >
             {/* Header: City and Year - Always visible */}
             <div style={styles.header}>
@@ -242,6 +276,13 @@ export const MetroHumidityBubble: React.FC<MetroHumidityBubbleProps> = ({
                     <div style={styles.label}># Wet Bulbs</div>
                     <div style={styles.section2ValueRow}>
                       <span style={styles.valueBold}>{wetBulbEvents}</span>
+                    </div>
+                  </div>
+                  {/* 100°+ Days */}
+                  <div style={styles.section2Item}>
+                    <div style={styles.label}>100°+ Days</div>
+                    <div style={styles.section2ValueRow}>
+                      <span style={styles.valueBold}>{daysOver100}</span>
                     </div>
                   </div>
                 </div>
