@@ -66,7 +66,7 @@ export function MetroTemperaturePopup({ metroName, visible, onClose }: MetroTemp
     }
 
     fetchData()
-  }, [metroName, scenario, visible])
+  }, [metroName, scenario, visible, currentYear])
 
   if (!visible) return null
 
@@ -116,6 +116,8 @@ export function MetroTemperaturePopup({ metroName, visible, onClose }: MetroTemp
     <>
       <MetroTooltipBubble
         metroName={metroName}
+        year={currentYear}
+        population="N/A"
         populationChange="(+25%)"
         summerTemp={`${currentData.summer_avg.toFixed(0)}°`}
         summerTempChange={`(+${summerTempChange}%)`}

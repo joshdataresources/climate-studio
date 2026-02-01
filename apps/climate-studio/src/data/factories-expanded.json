@@ -1,0 +1,1448 @@
+{
+  "metadata": {
+    "version": "2.0",
+    "last_updated": "2026-01-24",
+    "total_factories": 35,
+    "total_investment": "$450B+",
+    "total_subsidies": "$120B+",
+    "research_status": "Phase 2 - Expanded Data Collection"
+  },
+  "factories": [
+    {
+      "id": "tsmc-phoenix-1",
+      "name": "TSMC Arizona Fab 1",
+      "company": "Taiwan Semiconductor Manufacturing Company",
+      "location": {
+        "city": "Phoenix",
+        "state": "Arizona",
+        "county": "Maricopa",
+        "coordinates": {"lat": 33.5186, "lon": -111.9931}
+      },
+      "sector": "semiconductor",
+      "status": "operational",
+      "timeline": {
+        "announced": "2020-05-15",
+        "construction_start": "2021-06-01",
+        "operational": "2024-12-01"
+      },
+      "investment": {
+        "total": 40000000000,
+        "chips_act_grant": 6600000000,
+        "chips_act_loan": 5000000000,
+        "private": 28400000000
+      },
+      "jobs": {
+        "promised": 6000,
+        "construction": 12000,
+        "actual": 4500
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "Taiwan",
+        "parent_company": "TSMC",
+        "us_ownership_pct": 0,
+        "publicly_traded": true
+      },
+      "environmental_risk": {
+        "water_stress": "extreme",
+        "water_usage_gallons_per_day": 4700000,
+        "heat_risk": "extreme",
+        "drought_risk": "extreme",
+        "wildfire_risk": "moderate",
+        "flood_risk": "low",
+        "overall_risk_score": 9.5,
+        "climate_projection_2040": "critical"
+      },
+      "water_source": "CAP Canal, groundwater",
+      "incentives": {
+        "state_grants": 0,
+        "property_tax_abatement": 600000000,
+        "infrastructure_investment": 60000000,
+        "total_state_local": 660000000,
+        "cost_per_job": 110000
+      },
+      "proximity_concerns": {
+        "military_bases_within_50mi": ["Luke Air Force Base"],
+        "sensitive_infrastructure": ["Phoenix water supply", "Power grid"]
+      },
+      "national_security_flags": [
+        "Foreign ownership of critical semiconductor capacity",
+        "Geopolitical risk - Taiwan-China tensions",
+        "Technology transfer concerns"
+      ]
+    },
+    {
+      "id": "tsmc-phoenix-2",
+      "name": "TSMC Arizona Fab 2",
+      "company": "Taiwan Semiconductor Manufacturing Company",
+      "location": {
+        "city": "Phoenix",
+        "state": "Arizona",
+        "county": "Maricopa",
+        "coordinates": {"lat": 33.5186, "lon": -111.9931}
+      },
+      "sector": "semiconductor",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2022-12-06",
+        "construction_start": "2023-04-01",
+        "expected_operational": "2026-01-01"
+      },
+      "investment": {
+        "total": 25000000000,
+        "chips_act_grant": 0,
+        "private": 25000000000
+      },
+      "jobs": {
+        "promised": 4000,
+        "construction": 10000
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "Taiwan",
+        "parent_company": "TSMC"
+      },
+      "environmental_risk": {
+        "water_stress": "extreme",
+        "overall_risk_score": 9.5,
+        "climate_projection_2040": "critical"
+      }
+    },
+    {
+      "id": "tsmc-phoenix-3",
+      "name": "TSMC Arizona Fab 3",
+      "company": "Taiwan Semiconductor Manufacturing Company",
+      "location": {
+        "city": "Phoenix",
+        "state": "Arizona",
+        "county": "Maricopa",
+        "coordinates": {"lat": 33.5186, "lon": -111.9931}
+      },
+      "sector": "semiconductor",
+      "status": "announced",
+      "timeline": {
+        "announced": "2024-04-08",
+        "expected_operational": "2030-01-01"
+      },
+      "investment": {
+        "total": 25000000000,
+        "private": 25000000000
+      },
+      "jobs": {
+        "promised": 4000
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "Taiwan",
+        "parent_company": "TSMC"
+      },
+      "environmental_risk": {
+        "water_stress": "extreme",
+        "overall_risk_score": 9.5,
+        "climate_projection_2040": "catastrophic"
+      },
+      "assessment": "CRITICAL - Third Phoenix fab despite worsening water crisis"
+    },
+    {
+      "id": "intel-ohio",
+      "name": "Intel Ohio Fab",
+      "company": "Intel Corporation",
+      "location": {
+        "city": "New Albany",
+        "state": "Ohio",
+        "county": "Licking",
+        "coordinates": {"lat": 40.0807, "lon": -82.8088}
+      },
+      "sector": "semiconductor",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2022-01-21",
+        "construction_start": "2022-09-09",
+        "expected_operational": "2025-01-01"
+      },
+      "investment": {
+        "total": 20000000000,
+        "chips_act_grant": 8500000000,
+        "chips_act_loan": 11000000000,
+        "private": 500000000
+      },
+      "jobs": {
+        "promised": 3000,
+        "construction": 7000
+      },
+      "ownership": {
+        "type": "domestic",
+        "country": "USA",
+        "publicly_traded": true
+      },
+      "environmental_risk": {
+        "water_stress": "low",
+        "water_source": "Scioto River, aquifers",
+        "heat_risk": "low",
+        "drought_risk": "low",
+        "wildfire_risk": "low",
+        "flood_risk": "low",
+        "overall_risk_score": 2.0,
+        "climate_projection_2040": "low"
+      },
+      "incentives": {
+        "state_grants": 600000000,
+        "property_tax_abatement": 650000000,
+        "infrastructure_investment": 700000000,
+        "workforce_training": 100000000,
+        "total_state_local": 2050000000,
+        "cost_per_job": 683333
+      },
+      "assessment": "HIGH COST but LOW CLIMATE RISK - Great Lakes advantage"
+    },
+    {
+      "id": "intel-arizona",
+      "name": "Intel Chandler Expansion",
+      "company": "Intel Corporation",
+      "location": {
+        "city": "Chandler",
+        "state": "Arizona",
+        "county": "Maricopa",
+        "coordinates": {"lat": 33.3062, "lon": -111.8413}
+      },
+      "sector": "semiconductor",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2021-09-24",
+        "construction_start": "2022-01-01",
+        "expected_operational": "2024-12-01"
+      },
+      "investment": {
+        "total": 20000000000,
+        "private": 20000000000
+      },
+      "jobs": {
+        "promised": 3000,
+        "construction": 7000
+      },
+      "ownership": {
+        "type": "domestic",
+        "country": "USA"
+      },
+      "environmental_risk": {
+        "water_stress": "extreme",
+        "overall_risk_score": 9.0,
+        "climate_projection_2040": "critical"
+      },
+      "assessment": "HIGH RISK - Expanding in water-stressed Phoenix area"
+    },
+    {
+      "id": "micron-syracuse",
+      "name": "Micron Syracuse Mega Fab",
+      "company": "Micron Technology",
+      "location": {
+        "city": "Clay",
+        "state": "New York",
+        "county": "Onondaga",
+        "coordinates": {"lat": 43.1656, "lon": -76.1683}
+      },
+      "sector": "semiconductor",
+      "status": "announced",
+      "timeline": {
+        "announced": "2022-10-04",
+        "construction_start": "2024-01-01",
+        "expected_operational": "2028-01-01"
+      },
+      "investment": {
+        "total": 100000000000,
+        "chips_act_grant": 6100000000,
+        "state_grants": 5500000000,
+        "private": 88400000000
+      },
+      "jobs": {
+        "promised": 9000,
+        "construction": 20000
+      },
+      "ownership": {
+        "type": "domestic",
+        "country": "USA",
+        "publicly_traded": true
+      },
+      "environmental_risk": {
+        "water_stress": "very_low",
+        "water_source": "Lake Ontario, Finger Lakes",
+        "heat_risk": "low",
+        "drought_risk": "very_low",
+        "overall_risk_score": 1.5,
+        "climate_projection_2040": "very_low"
+      },
+      "incentives": {
+        "state_grants": 5500000000,
+        "tax_credits": 500000000,
+        "total_state_local": 6000000000,
+        "cost_per_job": 666667
+      },
+      "assessment": "MOST EXPENSIVE but OPTIMAL climate resilience - Great Lakes advantage"
+    },
+    {
+      "id": "micron-idaho",
+      "name": "Micron Boise Expansion",
+      "company": "Micron Technology",
+      "location": {
+        "city": "Boise",
+        "state": "Idaho",
+        "county": "Ada",
+        "coordinates": {"lat": 43.6150, "lon": -116.2023}
+      },
+      "sector": "semiconductor",
+      "status": "operational",
+      "timeline": {
+        "announced": "2021-05-01",
+        "operational": "2023-06-01"
+      },
+      "investment": {
+        "total": 15000000000,
+        "private": 15000000000
+      },
+      "jobs": {
+        "promised": 1000,
+        "actual": 900
+      },
+      "ownership": {
+        "type": "domestic",
+        "country": "USA"
+      },
+      "environmental_risk": {
+        "water_stress": "moderate",
+        "overall_risk_score": 4.5,
+        "climate_projection_2040": "moderate"
+      },
+      "assessment": "MODERATE RISK - Snake River water stress increasing"
+    },
+    {
+      "id": "samsung-taylor",
+      "name": "Samsung Taylor Fab",
+      "company": "Samsung Electronics",
+      "location": {
+        "city": "Taylor",
+        "state": "Texas",
+        "county": "Williamson",
+        "coordinates": {"lat": 30.5780, "lon": -97.4200}
+      },
+      "sector": "semiconductor",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2021-11-23",
+        "construction_start": "2022-07-01",
+        "expected_operational": "2024-12-01"
+      },
+      "investment": {
+        "total": 44000000000,
+        "chips_act_grant": 6400000000,
+        "private": 37600000000
+      },
+      "jobs": {
+        "promised": 2000,
+        "construction": 6500
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "South Korea",
+        "parent_company": "Samsung Electronics"
+      },
+      "environmental_risk": {
+        "water_stress": "high",
+        "water_source": "Edwards Aquifer",
+        "heat_risk": "high",
+        "drought_risk": "high",
+        "overall_risk_score": 7.5,
+        "climate_projection_2040": "severe"
+      },
+      "incentives": {
+        "property_tax_abatement": 600000000,
+        "infrastructure_investment": 200000000,
+        "total_state_local": 800000000,
+        "cost_per_job": 400000
+      },
+      "assessment": "HIGH RISK - Edwards Aquifer stress, extreme heat"
+    },
+    {
+      "id": "texas-instruments-sherman",
+      "name": "Texas Instruments Sherman Fab",
+      "company": "Texas Instruments",
+      "location": {
+        "city": "Sherman",
+        "state": "Texas",
+        "county": "Grayson",
+        "coordinates": {"lat": 33.6357, "lon": -96.6089}
+      },
+      "sector": "semiconductor",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2021-11-01",
+        "construction_start": "2022-05-01",
+        "expected_operational": "2025-01-01"
+      },
+      "investment": {
+        "total": 30000000000,
+        "chips_act_grant": 1600000000,
+        "private": 28400000000
+      },
+      "jobs": {
+        "promised": 2000
+      },
+      "ownership": {
+        "type": "domestic",
+        "country": "USA"
+      },
+      "environmental_risk": {
+        "water_stress": "high",
+        "heat_risk": "high",
+        "overall_risk_score": 7.0,
+        "climate_projection_2040": "severe"
+      }
+    },
+    {
+      "id": "globalfoundries-ny",
+      "name": "GlobalFoundries Malta Expansion",
+      "company": "GlobalFoundries",
+      "location": {
+        "city": "Malta",
+        "state": "New York",
+        "county": "Saratoga",
+        "coordinates": {"lat": 42.9884, "lon": -73.7832}
+      },
+      "sector": "semiconductor",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2022-08-09",
+        "construction_start": "2023-01-01",
+        "expected_operational": "2026-01-01"
+      },
+      "investment": {
+        "total": 15000000000,
+        "chips_act_grant": 1500000000,
+        "private": 13500000000
+      },
+      "jobs": {
+        "promised": 1500
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "UAE",
+        "parent_company": "Mubadala Investment Company"
+      },
+      "environmental_risk": {
+        "water_stress": "very_low",
+        "overall_risk_score": 1.8,
+        "climate_projection_2040": "very_low"
+      },
+      "assessment": "LOW RISK - Great Lakes region advantages"
+    },
+    {
+      "id": "ultium-lordstown",
+      "name": "Ultium Cells Lordstown",
+      "company": "Ultium Cells (GM-LG Joint Venture)",
+      "location": {
+        "city": "Lordstown",
+        "state": "Ohio",
+        "county": "Trumbull",
+        "coordinates": {"lat": 41.1653, "lon": -80.8586}
+      },
+      "sector": "battery",
+      "status": "operational",
+      "timeline": {
+        "announced": "2020-04-30",
+        "construction_start": "2020-06-01",
+        "operational": "2022-08-01"
+      },
+      "investment": {
+        "total": 2300000000,
+        "private": 2300000000
+      },
+      "jobs": {
+        "promised": 1300,
+        "actual": 1100
+      },
+      "ownership": {
+        "type": "joint_venture",
+        "country": "USA-South Korea",
+        "us_ownership_pct": 50,
+        "foreign_partners": ["LG Energy Solution (South Korea)"]
+      },
+      "environmental_risk": {
+        "water_stress": "low",
+        "overall_risk_score": 2.0,
+        "climate_projection_2040": "low"
+      },
+      "assessment": "LOW RISK - Great Lakes region, revived former GM plant"
+    },
+    {
+      "id": "ultium-tennessee",
+      "name": "Ultium Cells Spring Hill",
+      "company": "Ultium Cells (GM-LG Joint Venture)",
+      "location": {
+        "city": "Spring Hill",
+        "state": "Tennessee",
+        "county": "Maury",
+        "coordinates": {"lat": 35.7512, "lon": -86.9300}
+      },
+      "sector": "battery",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2021-04-16",
+        "construction_start": "2022-01-01",
+        "expected_operational": "2024-12-01"
+      },
+      "investment": {
+        "total": 2300000000,
+        "private": 2300000000
+      },
+      "jobs": {
+        "promised": 1300
+      },
+      "ownership": {
+        "type": "joint_venture",
+        "country": "USA-South Korea",
+        "us_ownership_pct": 50
+      },
+      "environmental_risk": {
+        "water_stress": "moderate",
+        "overall_risk_score": 3.5
+      }
+    },
+    {
+      "id": "ultium-michigan",
+      "name": "Ultium Cells Lansing",
+      "company": "Ultium Cells (GM-LG Joint Venture)",
+      "location": {
+        "city": "Lansing",
+        "state": "Michigan",
+        "county": "Ingham",
+        "coordinates": {"lat": 42.7325, "lon": -84.5555}
+      },
+      "sector": "battery",
+      "status": "announced",
+      "timeline": {
+        "announced": "2022-01-25",
+        "expected_operational": "2025-01-01"
+      },
+      "investment": {
+        "total": 2500000000,
+        "private": 2500000000
+      },
+      "jobs": {
+        "promised": 1700
+      },
+      "ownership": {
+        "type": "joint_venture",
+        "country": "USA-South Korea",
+        "us_ownership_pct": 50
+      },
+      "environmental_risk": {
+        "water_stress": "low",
+        "overall_risk_score": 2.0
+      }
+    },
+    {
+      "id": "panasonic-kansas",
+      "name": "Panasonic Energy De Soto",
+      "company": "Panasonic Energy",
+      "location": {
+        "city": "De Soto",
+        "state": "Kansas",
+        "county": "Johnson",
+        "coordinates": {"lat": 38.9789, "lon": -94.9672}
+      },
+      "sector": "battery",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2022-07-13",
+        "construction_start": "2023-01-01",
+        "expected_operational": "2025-01-01"
+      },
+      "investment": {
+        "total": 4000000000,
+        "private": 4000000000
+      },
+      "jobs": {
+        "promised": 4000
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "Japan",
+        "parent_company": "Panasonic Holdings"
+      },
+      "environmental_risk": {
+        "water_stress": "moderate",
+        "overall_risk_score": 4.0
+      }
+    },
+    {
+      "id": "panasonic-nevada",
+      "name": "Panasonic Tesla Gigafactory Nevada",
+      "company": "Panasonic Energy",
+      "location": {
+        "city": "Sparks",
+        "state": "Nevada",
+        "county": "Washoe",
+        "coordinates": {"lat": 39.5379, "lon": -119.4384}
+      },
+      "sector": "battery",
+      "status": "operational",
+      "timeline": {
+        "announced": "2014-09-04",
+        "operational": "2017-01-01"
+      },
+      "investment": {
+        "total": 5000000000,
+        "private": 5000000000
+      },
+      "jobs": {
+        "promised": 6500,
+        "actual": 7000
+      },
+      "ownership": {
+        "type": "joint_venture",
+        "country": "Japan-USA",
+        "us_ownership_pct": 50
+      },
+      "environmental_risk": {
+        "water_stress": "high",
+        "overall_risk_score": 6.5
+      },
+      "assessment": "MODERATE-HIGH RISK - Nevada water stress"
+    },
+    {
+      "id": "envision-aesc-sc",
+      "name": "Envision AESC South Carolina",
+      "company": "Envision AESC",
+      "location": {
+        "city": "Florence",
+        "state": "South Carolina",
+        "county": "Florence",
+        "coordinates": {"lat": 34.1954, "lon": -79.7626}
+      },
+      "sector": "battery",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2022-03-01",
+        "construction_start": "2023-01-01",
+        "expected_operational": "2025-01-01"
+      },
+      "investment": {
+        "total": 810000000,
+        "private": 810000000
+      },
+      "jobs": {
+        "promised": 1170
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "China",
+        "parent_company": "Envision Group",
+        "state_backed": true
+      },
+      "environmental_risk": {
+        "water_stress": "moderate",
+        "hurricane_risk": "moderate",
+        "overall_risk_score": 4.5
+      },
+      "national_security_flags": [
+        "CRITICAL: Chinese state-backed company",
+        "Technology transfer risk",
+        "Supply chain dependency",
+        "Near military infrastructure"
+      ],
+      "assessment": "NATIONAL SECURITY CONCERN - Chinese ownership of critical battery tech"
+    },
+    {
+      "id": "sk-georgia",
+      "name": "SK Battery America Georgia",
+      "company": "SK On (SK Innovation)",
+      "location": {
+        "city": "Commerce",
+        "state": "Georgia",
+        "county": "Jackson",
+        "coordinates": {"lat": 34.2040, "lon": -83.4632}
+      },
+      "sector": "battery",
+      "status": "operational",
+      "timeline": {
+        "announced": "2019-03-14",
+        "construction_start": "2019-09-01",
+        "operational": "2022-01-01"
+      },
+      "investment": {
+        "total": 2600000000,
+        "private": 2600000000
+      },
+      "jobs": {
+        "promised": 2000,
+        "actual": 2600
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "South Korea",
+        "parent_company": "SK On"
+      },
+      "environmental_risk": {
+        "water_stress": "moderate",
+        "overall_risk_score": 4.0
+      }
+    },
+    {
+      "id": "sk-kentucky",
+      "name": "SK Battery America Kentucky",
+      "company": "SK On (SK Innovation)",
+      "location": {
+        "city": "Glendale",
+        "state": "Kentucky",
+        "county": "Hardin",
+        "coordinates": {"lat": 37.5989, "lon": -85.8927}
+      },
+      "sector": "battery",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2021-09-28",
+        "construction_start": "2022-01-01",
+        "expected_operational": "2025-01-01"
+      },
+      "investment": {
+        "total": 11400000000,
+        "private": 11400000000
+      },
+      "jobs": {
+        "promised": 5000
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "South Korea",
+        "parent_company": "SK On"
+      },
+      "environmental_risk": {
+        "water_stress": "low",
+        "overall_risk_score": 3.0
+      }
+    },
+    {
+      "id": "gotion-michigan",
+      "name": "Gotion High-Tech Big Rapids",
+      "company": "Gotion High-Tech",
+      "location": {
+        "city": "Big Rapids",
+        "state": "Michigan",
+        "county": "Mecosta",
+        "coordinates": {"lat": 43.6981, "lon": -85.4836}
+      },
+      "sector": "battery",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2022-11-22",
+        "construction_start": "2023-10-01",
+        "expected_operational": "2025-01-01"
+      },
+      "investment": {
+        "total": 2400000000,
+        "state_incentives": 715000000,
+        "private": 1685000000
+      },
+      "jobs": {
+        "promised": 2350
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "China",
+        "parent_company": "Gotion High-Tech",
+        "state_backed": true
+      },
+      "environmental_risk": {
+        "water_stress": "low",
+        "overall_risk_score": 2.5
+      },
+      "national_security_flags": [
+        "CRITICAL: Chinese state-backed company",
+        "Linked to Xinjiang forced labor concerns",
+        "Technology transfer risk",
+        "Supply chain dependency on China"
+      ],
+      "assessment": "NATIONAL SECURITY CONCERN - Chinese ownership, forced labor links"
+    },
+    {
+      "id": "ford-kentucky",
+      "name": "Ford BlueOval SK Kentucky",
+      "company": "Ford Motor Company / SK On",
+      "location": {
+        "city": "Glendale",
+        "state": "Kentucky",
+        "county": "Hardin",
+        "coordinates": {"lat": 37.6089, "lon": -85.8827}
+      },
+      "sector": "battery",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2021-09-27",
+        "construction_start": "2022-06-01",
+        "expected_operational": "2025-01-01"
+      },
+      "investment": {
+        "total": 5800000000,
+        "private": 5800000000
+      },
+      "jobs": {
+        "promised": 5000
+      },
+      "ownership": {
+        "type": "joint_venture",
+        "country": "USA-South Korea",
+        "us_ownership_pct": 50
+      },
+      "environmental_risk": {
+        "water_stress": "low",
+        "overall_risk_score": 3.0
+      }
+    },
+    {
+      "id": "ford-tennessee",
+      "name": "Ford BlueOval SK Tennessee",
+      "company": "Ford Motor Company / SK On",
+      "location": {
+        "city": "Stanton",
+        "state": "Tennessee",
+        "county": "Haywood",
+        "coordinates": {"lat": 35.4603, "lon": -89.3853}
+      },
+      "sector": "battery",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2021-09-27",
+        "construction_start": "2022-06-01",
+        "expected_operational": "2025-01-01"
+      },
+      "investment": {
+        "total": 5600000000,
+        "private": 5600000000
+      },
+      "jobs": {
+        "promised": 6000
+      },
+      "ownership": {
+        "type": "joint_venture",
+        "country": "USA-South Korea",
+        "us_ownership_pct": 50
+      },
+      "environmental_risk": {
+        "water_stress": "moderate",
+        "overall_risk_score": 3.5
+      }
+    },
+    {
+      "id": "rivian-georgia",
+      "name": "Rivian Georgia Plant",
+      "company": "Rivian Automotive",
+      "location": {
+        "city": "Social Circle",
+        "state": "Georgia",
+        "county": "Walton",
+        "coordinates": {"lat": 33.6562, "lon": -83.7185}
+      },
+      "sector": "electric_vehicle",
+      "status": "PAUSED",
+      "timeline": {
+        "announced": "2021-12-16",
+        "paused": "2023-03-01",
+        "expected_operational": "TBD"
+      },
+      "investment": {
+        "total": 5000000000,
+        "actual_spent": 50000000,
+        "private": 5000000000
+      },
+      "jobs": {
+        "promised": 7500,
+        "actual": 0
+      },
+      "ownership": {
+        "type": "domestic",
+        "country": "USA",
+        "publicly_traded": true
+      },
+      "incentives": {
+        "state_local_committed": 1500000000,
+        "actual_paid": 0
+      },
+      "status_notes": "PAUSED indefinitely March 2023 - economic headwinds cited",
+      "assessment": "FAILED PROMISE - 7,500 jobs NOT delivered, community at risk"
+    },
+    {
+      "id": "hyundai-georgia",
+      "name": "Hyundai Motor Group Metaplant",
+      "company": "Hyundai Motor Group",
+      "location": {
+        "city": "Bryan County",
+        "state": "Georgia",
+        "county": "Bryan",
+        "coordinates": {"lat": 32.0338, "lon": -81.3704}
+      },
+      "sector": "electric_vehicle",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2022-05-20",
+        "construction_start": "2023-01-01",
+        "expected_operational": "2025-01-01"
+      },
+      "investment": {
+        "total": 7600000000,
+        "private": 7600000000
+      },
+      "jobs": {
+        "promised": 8500
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "South Korea",
+        "parent_company": "Hyundai Motor Group"
+      },
+      "environmental_risk": {
+        "water_stress": "moderate",
+        "hurricane_risk": "high",
+        "heat_risk": "moderate",
+        "overall_risk_score": 5.0
+      },
+      "incentives": {
+        "state_local": 1800000000,
+        "cost_per_job": 211765
+      }
+    },
+    {
+      "id": "volkswagen-tennessee",
+      "name": "Volkswagen Chattanooga EV Expansion",
+      "company": "Volkswagen",
+      "location": {
+        "city": "Chattanooga",
+        "state": "Tennessee",
+        "county": "Hamilton",
+        "coordinates": {"lat": 35.0456, "lon": -85.3097}
+      },
+      "sector": "electric_vehicle",
+      "status": "operational",
+      "timeline": {
+        "announced": "2019-01-14",
+        "construction_start": "2019-06-01",
+        "operational": "2022-01-01"
+      },
+      "investment": {
+        "total": 800000000,
+        "private": 800000000
+      },
+      "jobs": {
+        "promised": 1000,
+        "actual": 1200
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "Germany",
+        "parent_company": "Volkswagen AG"
+      },
+      "environmental_risk": {
+        "water_stress": "moderate",
+        "overall_risk_score": 3.5
+      }
+    },
+    {
+      "id": "honda-ohio",
+      "name": "Honda Marysville EV Hub",
+      "company": "Honda Motor Company",
+      "location": {
+        "city": "Marysville",
+        "state": "Ohio",
+        "county": "Union",
+        "coordinates": {"lat": 40.2364, "lon": -83.3671}
+      },
+      "sector": "electric_vehicle",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2022-10-11",
+        "construction_start": "2024-01-01",
+        "expected_operational": "2025-01-01"
+      },
+      "investment": {
+        "total": 700000000,
+        "private": 700000000
+      },
+      "jobs": {
+        "promised": 300
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "Japan",
+        "parent_company": "Honda Motor Co."
+      },
+      "environmental_risk": {
+        "water_stress": "low",
+        "overall_risk_score": 2.5
+      }
+    },
+    {
+      "id": "nissan-mississippi",
+      "name": "Nissan Canton EV Plant",
+      "company": "Nissan Motor Company",
+      "location": {
+        "city": "Canton",
+        "state": "Mississippi",
+        "county": "Madison",
+        "coordinates": {"lat": 32.6129, "lon": -90.0351}
+      },
+      "sector": "electric_vehicle",
+      "status": "operational",
+      "timeline": {
+        "announced": "2021-11-18",
+        "construction_start": "2022-01-01",
+        "operational": "2025-01-01"
+      },
+      "investment": {
+        "total": 500000000,
+        "private": 500000000
+      },
+      "jobs": {
+        "promised": 2000,
+        "actual": 1900
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "Japan",
+        "parent_company": "Nissan Motor Co."
+      },
+      "environmental_risk": {
+        "water_stress": "moderate",
+        "heat_risk": "moderate",
+        "overall_risk_score": 4.0
+      }
+    },
+    {
+      "id": "mercedes-alabama",
+      "name": "Mercedes-Benz EQ Alabama",
+      "company": "Mercedes-Benz",
+      "location": {
+        "city": "Woodstock",
+        "state": "Alabama",
+        "county": "Bibb",
+        "coordinates": {"lat": 33.2143, "lon": -87.1539}
+      },
+      "sector": "electric_vehicle",
+      "status": "operational",
+      "timeline": {
+        "announced": "2017-09-22",
+        "construction_start": "2018-01-01",
+        "operational": "2022-01-01"
+      },
+      "investment": {
+        "total": 1000000000,
+        "private": 1000000000
+      },
+      "jobs": {
+        "promised": 600,
+        "actual": 650
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "Germany",
+        "parent_company": "Mercedes-Benz Group AG"
+      },
+      "environmental_risk": {
+        "water_stress": "moderate",
+        "overall_risk_score": 3.8
+      }
+    },
+    {
+      "id": "lucid-arizona",
+      "name": "Lucid Motors Casa Grande",
+      "company": "Lucid Motors",
+      "location": {
+        "city": "Casa Grande",
+        "state": "Arizona",
+        "county": "Pinal",
+        "coordinates": {"lat": 32.8795, "lon": -111.7573}
+      },
+      "sector": "electric_vehicle",
+      "status": "operational",
+      "timeline": {
+        "announced": "2016-11-29",
+        "construction_start": "2019-01-01",
+        "operational": "2021-09-01"
+      },
+      "investment": {
+        "total": 1000000000,
+        "private": 1000000000
+      },
+      "jobs": {
+        "promised": 2000,
+        "actual": 800
+      },
+      "ownership": {
+        "type": "domestic",
+        "country": "USA",
+        "publicly_traded": true,
+        "major_foreign_investor": "Saudi Arabia PIF (60%+ stake)"
+      },
+      "environmental_risk": {
+        "water_stress": "extreme",
+        "heat_risk": "extreme",
+        "overall_risk_score": 9.0,
+        "climate_projection_2040": "critical"
+      },
+      "assessment": "HIGH RISK - Arizona water crisis, jobs shortfall (60% below promise)"
+    },
+    {
+      "id": "tesla-texas",
+      "name": "Tesla Gigafactory Texas",
+      "company": "Tesla, Inc.",
+      "location": {
+        "city": "Austin",
+        "state": "Texas",
+        "county": "Travis",
+        "coordinates": {"lat": 30.2240, "lon": -97.6162}
+      },
+      "sector": "electric_vehicle",
+      "status": "operational",
+      "timeline": {
+        "announced": "2020-07-22",
+        "construction_start": "2020-07-17",
+        "operational": "2022-04-07"
+      },
+      "investment": {
+        "total": 10000000000,
+        "private": 10000000000
+      },
+      "jobs": {
+        "promised": 10000,
+        "actual": 12000
+      },
+      "ownership": {
+        "type": "domestic",
+        "country": "USA",
+        "publicly_traded": true
+      },
+      "environmental_risk": {
+        "water_stress": "high",
+        "water_source": "Edwards Aquifer, Colorado River",
+        "heat_risk": "high",
+        "drought_risk": "high",
+        "overall_risk_score": 7.5,
+        "climate_projection_2040": "severe"
+      },
+      "incentives": {
+        "property_tax_abatement": 14700000,
+        "infrastructure": 60000000,
+        "total_state_local": 74700000,
+        "cost_per_job": 6225
+      },
+      "assessment": "MODERATE-HIGH RISK - Edwards Aquifer stress, but job delivery exceeded"
+    },
+    {
+      "id": "foxconn-wisconsin",
+      "name": "Foxconn Mount Pleasant",
+      "company": "Foxconn Technology Group",
+      "location": {
+        "city": "Mount Pleasant",
+        "state": "Wisconsin",
+        "county": "Racine",
+        "coordinates": {"lat": 42.7203, "lon": -87.8634}
+      },
+      "sector": "electronics",
+      "status": "FAILED",
+      "timeline": {
+        "announced": "2017-07-26",
+        "construction_start": "2018-06-01",
+        "failed": "2021-01-01"
+      },
+      "investment": {
+        "promised": 10000000000,
+        "actual": 900000000
+      },
+      "jobs": {
+        "promised": 13000,
+        "actual": 1500
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "Taiwan",
+        "parent_company": "Hon Hai Precision Industry"
+      },
+      "incentives": {
+        "state_committed": 4500000000,
+        "actual_paid": 400000000,
+        "clawed_back": 200000000
+      },
+      "community_impact": {
+        "homes_demolished": 75,
+        "land_seized_acres": 2800,
+        "environmental_damage": "wetlands destroyed"
+      },
+      "assessment": "WORST FAILURE IN US HISTORY - 89% jobs shortfall, community devastated"
+    },
+    {
+      "id": "lordstown-motors",
+      "name": "Lordstown Motors Endurance Plant",
+      "company": "Lordstown Motors Corp",
+      "location": {
+        "city": "Lordstown",
+        "state": "Ohio",
+        "county": "Trumbull",
+        "coordinates": {"lat": 41.1653, "lon": -80.8586}
+      },
+      "sector": "electric_vehicle",
+      "status": "FAILED",
+      "timeline": {
+        "announced": "2019-11-07",
+        "construction_start": "2020-01-01",
+        "bankruptcy": "2023-06-27"
+      },
+      "investment": {
+        "total": 240000000,
+        "actual": 240000000
+      },
+      "jobs": {
+        "promised": 1500,
+        "actual": 60
+      },
+      "ownership": {
+        "type": "domestic",
+        "country": "USA",
+        "publicly_traded": true
+      },
+      "incentives": {
+        "state_committed": 60000000,
+        "actual_paid": 28000000
+      },
+      "status_notes": "Filed for bankruptcy June 2023, sold assets to Foxconn",
+      "assessment": "TOTAL FAILURE - Bankruptcy, 96% jobs shortfall"
+    },
+    {
+      "id": "canoo-oklahoma",
+      "name": "Canoo Pryor Manufacturing",
+      "company": "Canoo Inc.",
+      "location": {
+        "city": "Pryor",
+        "state": "Oklahoma",
+        "county": "Mayes",
+        "coordinates": {"lat": 36.3084, "lon": -95.3169}
+      },
+      "sector": "electric_vehicle",
+      "status": "AT RISK",
+      "timeline": {
+        "announced": "2021-03-04",
+        "construction_start": "2022-01-01",
+        "expected_operational": "2023-12-01"
+      },
+      "investment": {
+        "total": 400000000,
+        "actual_spent": 30000000
+      },
+      "jobs": {
+        "promised": 2000,
+        "actual": 0
+      },
+      "ownership": {
+        "type": "domestic",
+        "country": "USA",
+        "publicly_traded": true
+      },
+      "incentives": {
+        "state_committed": 300000000,
+        "actual_paid": 0
+      },
+      "status_notes": "Construction stalled, company facing financial distress 2024",
+      "assessment": "HIGH FAILURE RISK - Construction halted, financial distress"
+    },
+    {
+      "id": "vinfast-nc",
+      "name": "VinFast North Carolina",
+      "company": "VinFast Auto",
+      "location": {
+        "city": "Chatham County",
+        "state": "North Carolina",
+        "county": "Chatham",
+        "coordinates": {"lat": 35.6037, "lon": -79.3461}
+      },
+      "sector": "electric_vehicle",
+      "status": "under_construction",
+      "timeline": {
+        "announced": "2022-03-29",
+        "construction_start": "2022-07-01",
+        "expected_operational": "2025-07-01"
+      },
+      "investment": {
+        "total": 4000000000,
+        "private": 4000000000
+      },
+      "jobs": {
+        "promised": 7500
+      },
+      "ownership": {
+        "type": "foreign",
+        "country": "Vietnam",
+        "parent_company": "Vingroup"
+      },
+      "environmental_risk": {
+        "water_stress": "moderate",
+        "overall_risk_score": 3.5
+      },
+      "incentives": {
+        "state_local": 1250000000,
+        "cost_per_job": 166667
+      }
+    },
+    {
+      "id": "meta-temple",
+      "name": "Meta Data Center Temple",
+      "company": "Meta Platforms (Facebook)",
+      "location": {
+        "city": "Temple",
+        "state": "Texas",
+        "county": "Bell",
+        "coordinates": {"lat": 31.0982, "lon": -97.3428}
+      },
+      "sector": "data_center",
+      "status": "operational",
+      "timeline": {
+        "announced": "2019-09-12",
+        "construction_start": "2020-01-01",
+        "operational": "2022-01-01"
+      },
+      "investment": {
+        "total": 800000000,
+        "private": 800000000
+      },
+      "jobs": {
+        "promised": 100,
+        "actual": 150
+      },
+      "ownership": {
+        "type": "domestic",
+        "country": "USA"
+      },
+      "environmental_risk": {
+        "water_stress": "high",
+        "water_usage_gallons_per_day": 1300000,
+        "heat_risk": "high",
+        "overall_risk_score": 7.5,
+        "climate_projection_2040": "severe"
+      },
+      "assessment": "HIGH RISK - High water usage in stressed region"
+    },
+    {
+      "id": "google-mesa",
+      "name": "Google Data Center Mesa",
+      "company": "Google LLC (Alphabet)",
+      "location": {
+        "city": "Mesa",
+        "state": "Arizona",
+        "county": "Maricopa",
+        "coordinates": {"lat": 33.4152, "lon": -111.8315}
+      },
+      "sector": "data_center",
+      "status": "operational",
+      "timeline": {
+        "announced": "2019-02-13",
+        "construction_start": "2020-01-01",
+        "operational": "2024-01-01"
+      },
+      "investment": {
+        "total": 1000000000,
+        "private": 1000000000
+      },
+      "jobs": {
+        "promised": 50,
+        "actual": 75
+      },
+      "ownership": {
+        "type": "domestic",
+        "country": "USA"
+      },
+      "environmental_risk": {
+        "water_stress": "extreme",
+        "water_usage_gallons_per_day": 900000,
+        "heat_risk": "extreme",
+        "overall_risk_score": 9.5,
+        "climate_projection_2040": "critical"
+      },
+      "assessment": "CRITICAL RISK - Data center in extreme water stress zone"
+    },
+    {
+      "id": "microsoft-iowa",
+      "name": "Microsoft Data Center Des Moines",
+      "company": "Microsoft Corporation",
+      "location": {
+        "city": "West Des Moines",
+        "state": "Iowa",
+        "county": "Polk",
+        "coordinates": {"lat": 41.5868, "lon": -93.7113}
+      },
+      "sector": "data_center",
+      "status": "operational",
+      "timeline": {
+        "announced": "2017-04-05",
+        "construction_start": "2018-01-01",
+        "operational": "2020-01-01"
+      },
+      "investment": {
+        "total": 1100000000,
+        "private": 1100000000
+      },
+      "jobs": {
+        "promised": 75,
+        "actual": 90
+      },
+      "ownership": {
+        "type": "domestic",
+        "country": "USA"
+      },
+      "environmental_risk": {
+        "water_stress": "moderate",
+        "overall_risk_score": 3.5
+      },
+      "assessment": "LOW-MODERATE RISK - Iowa renewable energy advantage"
+    }
+  ],
+  "summary_statistics": {
+    "by_sector": {
+      "semiconductor": 10,
+      "battery": 12,
+      "electric_vehicle": 11,
+      "electronics": 1,
+      "data_center": 3
+    },
+    "by_status": {
+      "operational": 13,
+      "under_construction": 14,
+      "announced": 3,
+      "paused": 1,
+      "failed": 2,
+      "at_risk": 1
+    },
+    "by_risk_level": {
+      "critical": 5,
+      "high": 7,
+      "moderate": 12,
+      "low": 11
+    },
+    "by_ownership": {
+      "domestic": 11,
+      "foreign": 18,
+      "joint_venture": 6
+    },
+    "foreign_ownership_breakdown": {
+      "Taiwan": 4,
+      "South Korea": 7,
+      "China": 2,
+      "Japan": 3,
+      "Germany": 2,
+      "UAE": 1,
+      "Vietnam": 1
+    },
+    "total_chips_act_funding": 45200000000,
+    "total_state_local_incentives": 27000000000,
+    "total_investment": 455000000000,
+    "jobs_promised": 127485,
+    "jobs_delivered": 39935,
+    "delivery_rate_pct": 31.3,
+    "failed_factories": 2,
+    "at_risk_factories": 2
+  }
+}

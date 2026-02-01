@@ -12,18 +12,17 @@ import { useClimate } from '@climate-studio/core'
 import { climateLayers } from '@climate-studio/core/config'
 import { useClimateLayerData } from '../hooks/useClimateLayerData'
 import { GroundwaterDetailsPanel, SelectedAquifer } from './panels/GroundwaterDetailsPanel'
+import { SelectedFactory, FactoryDetailsPanel } from './panels/FactoryDetailsPanel'
+import { SearchAndViewsPanel } from './panels/SearchAndViewsPanel'
+import { ClimateProjectionsWidget } from './ClimateProjectionsWidget'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Slider } from './ui/slider'
 import { AccordionItem } from './ui/accordion'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { Search, Loader2, MapPin, Save, Bookmark, GripVertical, MoreHorizontal, Trash2, Pencil, Waves, Droplets, CloudRain } from 'lucide-react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from './ui/dropdown-menu'
+import { Waves, Droplets, CloudRain, Factory, MapPin, BarChart3, Mountain, TrendingUp, Loader2 } from 'lucide-react'
+import { useLayer } from '../contexts/LayerContext'
+import { shouldShowClimateWidget } from '../config/layerDefinitions'
 import {
   DndContext,
   closestCenter,
@@ -31,14 +30,14 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-  DragEndEvent,
+  DragEndEvent
 } from '@dnd-kit/core'
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
-  useSortable,
   verticalListSortingStrategy,
+  useSortable
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
@@ -48,19 +47,22 @@ import aquifersData from '../data/aquifers.json'
 import riversData from '../data/rivers-with-depletion.json'
 // Import lakes data with water level projections
 import lakesData from '../data/lakes.json'
+// Import factory data with environmental impact information
+import factoriesExpandedData from '../data/factories-expanded.json'
 // Import metro temperature data with projections (same as Climate view)
 import metroTemperatureData from '../data/metro_temperature_projections.json'
 // Import wet bulb projections for high-risk cities
 import wetBulbProjectionsData from '../data/wet_bulb_projections.json'
 // Import expanded wet bulb projections with more cities
 import expandedWetBulbData from '../data/expanded_wet_bulb_projections.json'
-// Import megaregion data for Metro Data Statistics layer
+// Import megaregion data for Metro Population Change layer
 import megaregionData from '../data/megaregion-data.json'
 // Removed aqueductsData import - using canal-lines layer only (no dashed lines)
 // Import dam infrastructure data
 import damsData from '../data/dams.json'
 // Import enhanced water infrastructure (impacted rivers, aqueducts, connections)
 import enhancedInfrastructureData from '../data/enhanced-water-infrastructure.json'
+// Import metro service areas
 // Import water service area cities
 import serviceAreasData from '../data/water-service-areas.json'
 
@@ -149,14 +151,14 @@ function getWetBulbDangerColor(wetBulbEvents: number, humidTemp: number): string
   return '#991b1b' // Very dark red - catastrophic
 }
 
-// Helper: Calculate circle radius based on population (from Metro Data Statistics)
+// Helper: Calculate circle radius based on population (from Metro Population Change)
 function populationToRadius(population: number): number {
   const scaleFactor = 0.015
   const baseRadius = Math.sqrt(population) * scaleFactor
   return Math.max(baseRadius, 30) // Minimum 30km radius for visibility
 }
 
-// Helper: Determine circle color based on population growth (from Metro Data Statistics)
+// Helper: Determine circle color based on population growth (from Metro Population Change)
 function getGrowthColor(currentPop: number, previousPop: number): string {
   if (!previousPop || previousPop === 0) return '#888888' // Gray for no data
 
@@ -224,31 +226,65 @@ function getVolumeForYear(projections: Record<string, number> | undefined, year:
 // Orange (Stressed): 75% - 90%
 // Red (Critical): < 75%
 function getDepletionColor(properties: any, projectionYear: number = 2025): string {
+  // Handle volume_data structure from aquifer-projections.json
+  const volumeData = properties?.volume_data
+  if (volumeData) {
+    const currentVol = volumeData.current_vol_gallons
+    const depletionRate = volumeData.depletion_rate_yr
+
+    if (currentVol && depletionRate) {
+      // Calculate years from baseline (assume current is ~2025)
+      const yearsSince2025 = projectionYear - 2025
+      const estimatedVolume = currentVol - (depletionRate * yearsSince2025)
+      const percentageOfBaseline = (estimatedVolume / currentVol) * 100
+
+      if (percentageOfBaseline >= 98) return '#22c55e' // Green - Stable
+      if (percentageOfBaseline >= 90) return '#3b82f6' // Blue - Moderate
+      if (percentageOfBaseline >= 75) return '#f97316' // Orange - Stressed
+      return '#ef4444' // Red - Critical
+    }
+  }
+
+  // Fallback to old structure
   const baseline = properties?.volume_gallons_2025 || properties?.projections?.['2025']
   const projections = properties?.projections
 
   if (!baseline || !projections) {
+    console.warn('⚠️ No baseline/projections for aquifer:', properties?.name)
     return '#6366f1' // Default purple for unknown
   }
 
   const currentVolume = getVolumeForYear(projections, projectionYear)
   if (currentVolume === null) {
+    console.warn('⚠️ getVolumeForYear returned null for year:', projectionYear, 'aquifer:', properties?.name)
     return '#6366f1' // Default purple for unknown
   }
 
   const percentageOfBaseline = (currentVolume / baseline) * 100
 
+  let color
   if (percentageOfBaseline >= 98) {
-    return '#22c55e' // Green - Stable
-  }
-  if (percentageOfBaseline >= 90) {
-    return '#3b82f6' // Blue - Moderate
-  }
-  if (percentageOfBaseline >= 75) {
-    return '#f97316' // Orange - Stressed
+    color = '#22c55e' // Green - Stable
+  } else if (percentageOfBaseline >= 90) {
+    color = '#3b82f6' // Blue - Moderate
+  } else if (percentageOfBaseline >= 75) {
+    color = '#f97316' // Orange - Stressed
+  } else {
+    color = '#ef4444' // Red - Critical
   }
 
-  return '#ef4444' // Red - Critical
+  // Debug first aquifer only
+  if (properties?.name?.includes('High Plains')) {
+    console.log('🎨 High Plains color calc:', {
+      year: projectionYear,
+      baseline,
+      currentVolume,
+      percentage: percentageOfBaseline.toFixed(1) + '%',
+      color
+    })
+  }
+
+  return color
 }
 
 // Get GRACE depletion color based on cm/year trend
@@ -308,6 +344,31 @@ function getRiverDepletionPercentage(properties: any, projectionYear: number): n
 
 // Get depletion status label and severity
 function getDepletionStatus(properties: any, projectionYear: number): { label: string; severity: string; percentage: number } {
+  // Handle volume_data structure from aquifer-projections.json
+  const volumeData = properties?.volume_data
+  if (volumeData) {
+    const currentVol = volumeData.current_vol_gallons
+    const depletionRate = volumeData.depletion_rate_yr
+
+    if (currentVol && depletionRate) {
+      const yearsSince2025 = projectionYear - 2025
+      const estimatedVolume = currentVol - (depletionRate * yearsSince2025)
+      const percentage = (estimatedVolume / currentVol) * 100
+
+      if (percentage >= 98) {
+        return { label: 'Stable', severity: 'stable', percentage }
+      }
+      if (percentage >= 90) {
+        return { label: 'Moderate', severity: 'moderate', percentage }
+      }
+      if (percentage >= 75) {
+        return { label: 'Stressed', severity: 'stressed', percentage }
+      }
+      return { label: 'Critical', severity: 'critical', percentage }
+    }
+  }
+
+  // Fallback to old structure
   const baseline = properties?.volume_gallons_2025 || properties?.projections?.['2025']
   const projections = properties?.projections
 
@@ -530,12 +591,17 @@ export default function WaterAccessView() {
   const [selectedAquifer, setSelectedAquifer] = useState<SelectedAquifer | null>(null)
   const [selectedFeatureId, setSelectedFeatureId] = useState<string | number | null>(null)
   const [selectedMetroCity, setSelectedMetroCity] = useState<string | null>(null)
+  // Factory state
+  const [selectedFactory, setSelectedFactory] = useState<SelectedFactory | null>(null)
 
   // Use theme context for map style
   const { theme } = useTheme()
 
   // Use sidebar context for hiding/showing panels
   const { panelsCollapsed } = useSidebar()
+
+  // Use layer context for climate widget
+  const { getEnabledLayersForView } = useLayer()
 
   // Use shared map context for search and viewport
   const {
@@ -567,30 +633,37 @@ export default function WaterAccessView() {
   const [editingViewName, setEditingViewName] = useState('')
 
   // Water access layer toggles
-  const [showRiversLayer, setShowRiversLayer] = useState(true)
-  const [showCanalsLayer, setShowCanalsLayer] = useState(true)
-  const [showAquifersLayer, setShowAquifersLayer] = useState(true) // Default ON
-  const [showDamsLayer, setShowDamsLayer] = useState(true) // Default ON
-  const [showServiceAreasLayer, setShowServiceAreasLayer] = useState(true) // Default ON
-  const [showMetroHumidityLayer, setShowMetroHumidityLayer] = useState(true) // Default ON
-  const [showGroundwaterLayer, setShowGroundwaterLayer] = useState(true) // Default ON
+  const [showRiversLayer, setShowRiversLayer] = useState(false)
+  const [showCanalsLayer, setShowCanalsLayer] = useState(false)
+  const [showAquifersLayer, setShowAquifersLayer] = useState(false)
+  const [showDamsLayer, setShowDamsLayer] = useState(false)
+  const [showMetroHumidityLayer, setShowMetroHumidityLayer] = useState(false)
+  const [showGroundwaterLayer, setShowGroundwaterLayer] = useState(false)
+  const [showFactoriesLayer, setShowFactoriesLayer] = useState(false)
+  const [showSeaLevelRiseLayer, setShowSeaLevelRiseLayer] = useState(false)
+  const [seaLevelRiseFeet, setSeaLevelRiseFeet] = useState(3)
   const [showHumidityWetBulb, setShowHumidityWetBulb] = useState(true)
-  const [showTempHumidity, setShowTempHumidity] = useState(false) // Disabled - fields don't exist in data
-  const [showMetroDataStatistics, setShowMetroDataStatistics] = useState(true) // Test: Metro Data Statistics layer
+  const [showTempHumidity, setShowTempHumidity] = useState(true)
+  const [showAverageTemperatures, setShowAverageTemperatures] = useState(false)
+  const [showMetroDataStatistics, setShowMetroDataStatistics] = useState(false)
+  const [showTopographicRelief, setShowTopographicRelief] = useState(true) // Default ON at 20% opacity
   const [activeBubbleIndex, setActiveBubbleIndex] = useState<number | null>(null) // Track which bubble is active
 
   // Climate context for precipitation & drought layer
-  const { toggleLayer, isLayerActive, controls, setDroughtMetric, setDroughtOpacity, setWetBulbOpacity } = useClimate()
+  const { toggleLayer, isLayerActive, controls, setDroughtMetric, setDroughtOpacity, setWetBulbOpacity, setProjectionOpacity } = useClimate()
   const precipitationDroughtLayer = climateLayers.find(l => l.id === 'precipitation_drought')
   const isPrecipitationDroughtActive = isLayerActive('precipitation_drought')
   const wetBulbLayer = climateLayers.find(l => l.id === 'wet_bulb')
   const isWetBulbActive = isLayerActive('wet_bulb')
+  const temperatureProjectionLayer = climateLayers.find(l => l.id === 'temperature_projection')
   const [aquiferOpacity, setAquiferOpacity] = useState(0.25)
   const [riverOpacity, setRiverOpacity] = useState(1.0) // Default full opacity for rivers
+  const [metroDataOpacity, setMetroDataOpacity] = useState(0.6)
+  const [topoReliefIntensity, setTopoReliefIntensity] = useState(0.2) // Default 20% intensity
 
   // Get map bounds for layer data fetching
   const [mapBounds, setMapBounds] = useState<{ north: number; south: number; east: number; west: number; zoom?: number } | null>(null)
-  const { layers: layerStates } = useClimateLayerData(mapBounds)
+  const { layers: layerStates, refreshLayer } = useClimateLayerData(mapBounds)
   const precipitationDroughtData = layerStates.precipitation_drought?.data
   const precipitationDroughtStatus = layerStates.precipitation_drought?.status
   const wetBulbData = layerStates.wet_bulb?.data
@@ -627,6 +700,11 @@ export default function WaterAccessView() {
 
     fetchGRACETileUrl()
   }, [])
+
+  // Get temperature projection data from climate context
+  const isTemperatureProjectionActive = isLayerActive('temperature_projection')
+  const temperatureProjectionData = layerStates.temperature_projection?.data
+  const temperatureProjectionStatus = layerStates.temperature_projection?.status
 
   // Merge aquifer data with projection-based colors (GRACE shown via tiles)
   const enhanceAquiferData = useCallback((baseData: GeoJSON.FeatureCollection): GeoJSON.FeatureCollection => {
@@ -667,15 +745,20 @@ export default function WaterAccessView() {
       }
 
       // Use projection-based color
-      const fillColor = getDepletionColor(mergedProperties, projectionYear)
+      const fillColor = getDepletionColor(mergedProperties, controls.projectionYear)
 
       // Get current volume for the selected year
-      const currentVolume = localAquiferData?.projections
-        ? getVolumeForYear(localAquiferData.projections, projectionYear)
-        : null
+      let currentVolume = null
+      if (mergedProperties?.volume_data) {
+        const volumeData = mergedProperties.volume_data
+        const yearsSince2025 = controls.projectionYear - 2025
+        currentVolume = volumeData.current_vol_gallons - (volumeData.depletion_rate_yr * yearsSince2025)
+      } else if (localAquiferData?.projections) {
+        currentVolume = getVolumeForYear(localAquiferData.projections, controls.projectionYear)
+      }
 
       // Get depletion status
-      const depletionStatus = getDepletionStatus(mergedProperties, projectionYear)
+      const depletionStatus = getDepletionStatus(mergedProperties, controls.projectionYear)
 
       return {
         ...feature,
@@ -696,12 +779,17 @@ export default function WaterAccessView() {
     localFeaturesMap.forEach((localFeature, nameLower) => {
       if (!matchedLocalAquifers.has(nameLower) && localFeature.geometry) {
         const properties = localFeature.properties
-        const fillColor = getDepletionColor(properties, projectionYear)
+        const fillColor = getDepletionColor(properties, controls.projectionYear)
 
-        const currentVolume = properties?.projections
-          ? getVolumeForYear(properties.projections, projectionYear)
-          : null
-        const depletionStatus = getDepletionStatus(properties, projectionYear)
+        let currentVolume = null
+        if (properties?.volume_data) {
+          const volumeData = properties.volume_data
+          const yearsSince2025 = controls.projectionYear - 2025
+          currentVolume = volumeData.current_vol_gallons - (volumeData.depletion_rate_yr * yearsSince2025)
+        } else if (properties?.projections) {
+          currentVolume = getVolumeForYear(properties.projections, controls.projectionYear)
+        }
+        const depletionStatus = getDepletionStatus(properties, controls.projectionYear)
 
         enhancedFeatures.push({
           type: 'Feature',
@@ -724,7 +812,7 @@ export default function WaterAccessView() {
       type: 'FeatureCollection',
       features: enhancedFeatures
     }
-  }, [projectionYear])
+  }, [controls.projectionYear])
 
   // Fetch aquifer data for visible map bounds
   const fetchAquiferData = useCallback(async (bounds?: { north: number; south: number; east: number; west: number }) => {
@@ -1081,7 +1169,8 @@ export default function WaterAccessView() {
         console.log('📦 Adding canals source...')
         map.addSource('canals', {
           type: 'geojson',
-          data: canals
+          data: canals,
+          lineMetrics: true  // Enable line-progress for gradient support
         })
       }
 
@@ -1114,9 +1203,21 @@ export default function WaterAccessView() {
             'line-cap': 'round'
           },
           paint: {
-            'line-color': '#06b6d4', // Cyan for canals (professional engineered waterways)
-            'line-width': 3,
-            'line-opacity': 0.9
+            // Apply gradient to ALL canal lines using line-gradient (requires lineMetrics: true)
+            'line-gradient': [
+              'interpolate',
+              ['linear'],
+              ['line-progress'],
+              0, '#0066FF',     // Start - Blue
+              0.2, '#00AAFF',
+              0.35, '#00FFCC',  // Cyan
+              0.5, '#FFFF00',   // Middle - Yellow
+              0.65, '#FFD700',  // Gold
+              0.8, '#FF9900',   // Orange
+              1, '#FF0000'      // End - Red
+            ],
+            'line-width': 5,
+            'line-opacity': 1.0
           }
         }, beforeId)
       }
@@ -1181,68 +1282,6 @@ export default function WaterAccessView() {
             'text-halo-width': 1.5
           },
           minzoom: 6
-        })
-      }
-
-      // Add water service areas (cities served by infrastructure)
-      if (!map.getSource('service-areas')) {
-        console.log('📦 Adding service-areas source...')
-        map.addSource('service-areas', {
-          type: 'geojson',
-          data: serviceAreasData as any
-        })
-      }
-
-      if (!map.getLayer('service-areas-circles')) {
-        console.log('🎨 Adding service-areas layer...')
-        map.addLayer({
-          id: 'service-areas-circles',
-          type: 'circle',
-          source: 'service-areas',
-          paint: {
-            'circle-radius': [
-              'interpolate',
-              ['linear'],
-              ['get', 'population'],
-              50000, 4,
-              500000, 8,
-              2000000, 12,
-              4000000, 16
-            ],
-            'circle-color': [
-              'match',
-              ['get', 'dependency'],
-              'extreme', '#dc2626',    // Red - extreme dependency
-              'high', '#f59e0b',       // Orange - high dependency
-              'moderate', '#fbbf24',   // Yellow - moderate
-              '#3b82f6'                // Blue - low dependency
-            ],
-            'circle-stroke-width': 2,
-            'circle-stroke-color': '#ffffff',
-            'circle-opacity': 0.7
-          }
-        }, beforeId)
-      }
-
-      if (!map.getLayer('service-areas-labels')) {
-        console.log('🎨 Adding service-areas labels layer...')
-        map.addLayer({
-          id: 'service-areas-labels',
-          type: 'symbol',
-          source: 'service-areas',
-          layout: {
-            'text-field': ['get', 'city'],
-            'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
-            'text-size': 10,
-            'text-offset': [0, 1.2],
-            'text-anchor': 'top'
-          },
-          paint: {
-            'text-color': '#374151',
-            'text-halo-color': '#ffffff',
-            'text-halo-width': 1
-          },
-          minzoom: 5
         })
       }
 
@@ -1991,6 +2030,9 @@ export default function WaterAccessView() {
         }
       }
 
+      // Close factory panel when opening aquifer panel
+      setSelectedFactory(null)
+
       // Set selected aquifer for details panel with new data structure
       setSelectedAquifer({
         name: properties.name || properties.displayName || properties.AQ_NAME || 'Unknown Aquifer',
@@ -2219,11 +2261,21 @@ export default function WaterAccessView() {
 
   // Update map data when aquifer data or projection year changes
   useEffect(() => {
+    console.log('🔄 Aquifer update useEffect triggered:', {
+      hasMap: !!mapRef.current,
+      mapLoaded,
+      hasAquiferData: !!aquiferData,
+      featureCount: aquiferData?.features?.length,
+      projectionYear: controls.projectionYear
+    })
+
     if (!mapRef.current || !mapLoaded) return
 
     const map = mapRef.current
 
     if (aquiferData && aquiferData.features && aquiferData.features.length > 0) {
+      console.log('🎨 Re-enhancing aquifer data for year:', controls.projectionYear)
+
       // Re-enhance data with current projection year
       const enhancedData = enhanceAquiferData(aquiferData)
 
@@ -2234,12 +2286,13 @@ export default function WaterAccessView() {
           map.removeFeatureState({ source: 'aquifers' })
           source.setData(enhancedData)
 
-          console.log('✅ Updated aquifer source with', enhancedData.features.length, 'features')
+          console.log('✅ Updated aquifer source with', enhancedData.features.length, 'features for year', controls.projectionYear)
           if (enhancedData.features.length > 0) {
             console.log('📍 Sample feature:', {
               id: enhancedData.features[0].id,
               name: enhancedData.features[0].properties?.name,
               fillColor: enhancedData.features[0].properties?.fillColor,
+              depletionStatus: enhancedData.features[0].properties?.depletionStatus,
               hasGeometry: !!enhancedData.features[0].geometry
             })
           }
@@ -2257,7 +2310,7 @@ export default function WaterAccessView() {
         console.warn('⚠️ Aquifer source not found when trying to update data')
       }
     }
-  }, [aquiferData, mapLoaded, projectionYear, enhanceAquiferData])
+  }, [aquiferData, mapLoaded, controls.projectionYear, enhanceAquiferData])
 
   // Toggle river layers visibility and opacity
   useEffect(() => {
@@ -2295,12 +2348,12 @@ export default function WaterAccessView() {
     })
   }, [showCanalsLayer, mapLoaded])
 
-  // Toggle aquifer layers visibility (requires both showAquifersLayer AND showGroundwaterLayer)
+  // Toggle aquifer layers visibility (independent layer)
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return
 
     const map = mapRef.current
-    const visibility = (showAquifersLayer && showGroundwaterLayer) ? 'visible' : 'none'
+    const visibility = showAquifersLayer ? 'visible' : 'none'
 
     const aquiferLayerIds = ['aquifer-fill', 'aquifer-outline', 'aquifer-hover']
 
@@ -2309,7 +2362,7 @@ export default function WaterAccessView() {
         map.setLayoutProperty(layerId, 'visibility', visibility)
       }
     })
-  }, [showAquifersLayer, showGroundwaterLayer, mapLoaded])
+  }, [showAquifersLayer, mapLoaded])
 
   // Toggle dams layer visibility
   useEffect(() => {
@@ -2327,21 +2380,74 @@ export default function WaterAccessView() {
     })
   }, [showDamsLayer, mapLoaded])
 
-  // Toggle service areas layer visibility
+  // Manage Sea Level Rise layer (raster tiles from NOAA)
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return
 
     const map = mapRef.current
-    const visibility = showServiceAreasLayer ? 'visible' : 'none'
+    const sourceId = 'sea-level-rise-tiles'
+    const layerId = 'sea-level-rise-layer'
 
-    const serviceAreaLayerIds = ['service-areas-circles', 'service-areas-labels']
+    if (showSeaLevelRiseLayer) {
+      // Construct tile URL using the working NOAA tile endpoint
+      const tileUrl = `${API_BASE}/api/tiles/noaa-slr/${seaLevelRiseFeet}/{z}/{x}/{y}.png`
 
-    serviceAreaLayerIds.forEach(layerId => {
-      if (map.getLayer(layerId)) {
-        map.setLayoutProperty(layerId, 'visibility', visibility)
+      console.log(`🌊 Adding sea level rise layer: ${seaLevelRiseFeet}ft`)
+
+      // Add or update raster source
+      if (!map.getSource(sourceId)) {
+        map.addSource(sourceId, {
+          type: 'raster',
+          tiles: [tileUrl],
+          tileSize: 256
+        })
+      } else {
+        // Update source if tile URL changed (when projection year changes)
+        const source = map.getSource(sourceId) as any
+        if (source && source.tiles && source.tiles[0] !== tileUrl) {
+          source.setTiles([tileUrl])
+        }
       }
-    })
-  }, [showServiceAreasLayer, mapLoaded])
+
+      // Add raster layer if it doesn't exist
+      if (!map.getLayer(layerId)) {
+        console.log('🎨 Adding sea level rise raster layer...')
+        // Add sea level layer below other data layers but above basemap
+        // Insert before precipitation layer if it exists
+        let beforeId: string | undefined = 'precipitation-drought-layer'
+        if (!map.getLayer(beforeId)) {
+          beforeId = 'aquifer-fill' // Fallback to aquifer layer
+        }
+        if (!map.getLayer(beforeId)) {
+          beforeId = undefined // Let it render on top if no reference layer exists
+        }
+
+        map.addLayer({
+          id: layerId,
+          type: 'raster',
+          source: sourceId,
+          paint: {
+            'raster-opacity': 0.7
+          }
+        }, beforeId)
+      } else {
+        // Update opacity if layer exists
+        map.setPaintProperty(layerId, 'raster-opacity', 0.7)
+      }
+    } else {
+      // Remove layer and source when disabled
+      try {
+        if (map.getLayer(layerId)) {
+          map.removeLayer(layerId)
+        }
+        if (map.getSource(sourceId)) {
+          map.removeSource(sourceId)
+        }
+      } catch (error) {
+        console.log('Map already removed during sea level layer cleanup')
+      }
+    }
+  }, [showSeaLevelRiseLayer, seaLevelRiseFeet, controls.projectionYear, mapLoaded])
 
   // Manage GRACE groundwater tile layer
   useEffect(() => {
@@ -2418,6 +2524,111 @@ export default function WaterAccessView() {
     }
   }, [showGRACELayer, showGroundwaterLayer, graceTileUrl, mapLoaded, graceOpacity])
 
+  // Add/remove temperature projection layer based on climate context toggle
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return
+
+    const map = mapRef.current
+    const data = temperatureProjectionData as any
+
+    // Add temperature raster source and layer if enabled
+    if (isTemperatureProjectionActive) {
+      // Wait for data to be available
+      if (!data || !data.tile_url) {
+        console.log('⏳ Waiting for temperature projection data to load...')
+
+        // Backstop: Auto-refresh data if not loaded after 5 seconds
+        const retryTimer = setTimeout(() => {
+          console.log('🔄 Temperature data not loaded after 5s, triggering background refresh...')
+          refreshLayer('temperature_projection')
+        }, 5000)
+
+        return () => clearTimeout(retryTimer)
+      }
+
+      const tileUrl = data.tile_url
+
+      if (!map.getSource('temperature-tiles')) {
+        console.log('🌡️ Adding temperature projection tile source...')
+        map.addSource('temperature-tiles', {
+          type: 'raster',
+          tiles: [tileUrl],
+          tileSize: 256
+        })
+      }
+
+      if (!map.getLayer('temperature-layer')) {
+        console.log('🎨 Adding temperature projection raster layer...')
+        // Add temperature layer on top of other data layers but below labels
+        // Should be above aquifers/rivers but below factories/labels
+        let beforeId: string | undefined = 'factory-points'
+
+        // If factory layer doesn't exist, try labels
+        if (!map.getLayer(beforeId)) {
+          const labelLayerIds = ['waterway-label', 'place-labels', 'poi-label', 'road-label']
+          for (const layerId of labelLayerIds) {
+            if (map.getLayer(layerId)) {
+              beforeId = layerId
+              break
+            }
+          }
+        }
+
+        map.addLayer({
+          id: 'temperature-layer',
+          type: 'raster',
+          source: 'temperature-tiles',
+          paint: {
+            'raster-opacity': controls.projectionOpacity ?? 0.6,
+            'raster-fade-duration': 300
+          }
+        }, beforeId)
+        console.log(`✅ Temperature layer added with opacity ${controls.projectionOpacity} before ${beforeId || 'top'}`)
+      } else {
+        // Update opacity and make visible
+        map.setPaintProperty('temperature-layer', 'raster-opacity', controls.projectionOpacity ?? 0.6)
+        map.setLayoutProperty('temperature-layer', 'visibility', 'visible')
+      }
+    } else {
+      // Hide the layer if it exists
+      if (map.getLayer('temperature-layer')) {
+        map.setLayoutProperty('temperature-layer', 'visibility', 'none')
+      }
+    }
+
+    return () => {
+      // Cleanup on unmount
+      if (!map || map._removed) return
+
+      try {
+        if (map.getLayer('temperature-layer')) {
+          map.removeLayer('temperature-layer')
+        }
+        if (map.getSource('temperature-tiles')) {
+          map.removeSource('temperature-tiles')
+        }
+      } catch (error) {
+        console.log('Map already removed during temperature layer cleanup')
+      }
+    }
+  }, [isTemperatureProjectionActive, temperatureProjectionData, mapLoaded, controls.projectionOpacity])
+
+  // Backstop: Monitor temperature projection status and retry on prolonged loading/error
+  useEffect(() => {
+    if (!isTemperatureProjectionActive) return
+    if (temperatureProjectionData && (temperatureProjectionData as any).tile_url) return // Data already loaded
+
+    // Set up retry timer if stuck in loading or error state
+    const statusCheckTimer = setTimeout(() => {
+      if (temperatureProjectionStatus === 'loading' || temperatureProjectionStatus === 'error') {
+        console.log(`🔄 Temperature projection status: ${temperatureProjectionStatus} - forcing refresh after 10s`)
+        refreshLayer('temperature_projection')
+      }
+    }, 10000) // 10 seconds
+
+    return () => clearTimeout(statusCheckTimer)
+  }, [isTemperatureProjectionActive, temperatureProjectionStatus, temperatureProjectionData, refreshLayer])
+
   // Toggle metro humidity heatmap layer visibility - SHOW heatmap for wet bulb visualization!
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return
@@ -2435,14 +2646,21 @@ export default function WaterAccessView() {
 
   // Manage Wet Bulb Temperature Danger Zone layer - uses local expanded data
   useEffect(() => {
+    console.log(`🔄 WET BULB EFFECT TRIGGERED - Year: ${controls.projectionYear}, Active: ${isWetBulbActive}, Loaded: ${mapLoaded}`)
+
     if (!mapRef.current || !mapLoaded) return
 
     const map = mapRef.current
+    if (!map || map._removed) return // Safety check
+
     const sourceId = 'wet-bulb-danger-zones'
     const layerId = 'wet-bulb-layer'
 
-    // Helper to create circle polygon from center point
-    const createCirclePolygon = (lng: number, lat: number, radiusKm: number, numPoints: number = 64): number[][] => {
+    try {
+      // Only process and add data when layer is active
+      if (isWetBulbActive) {
+      // Helper to create circle polygon from center point
+      const createCirclePolygon = (lng: number, lat: number, radiusKm: number, numPoints: number = 64): number[][] => {
       const coords: number[][] = []
       const earthRadiusKm = 6371
       for (let i = 0; i <= numPoints; i++) {
@@ -2456,6 +2674,11 @@ export default function WaterAccessView() {
 
     // Helper to interpolate between projection years
     const interpolateProjection = (projections: Record<string, any>, targetYear: number) => {
+      if (!projections || Object.keys(projections).length === 0) {
+        console.warn('No projections data available')
+        return null
+      }
+
       const years = Object.keys(projections).map(Number).sort((a, b) => a - b)
       let lowerYear = years[0]
       let upperYear = years[years.length - 1]
@@ -2472,15 +2695,20 @@ export default function WaterAccessView() {
       const lower = projections[lowerYear.toString()]
       const upper = projections[upperYear.toString()]
 
+      if (!lower || !upper) {
+        console.warn(`Missing projection data for years ${lowerYear} or ${upperYear}`)
+        return lower || upper || projections[years[0].toString()]
+      }
+
       return {
-        avg_summer_humidity: Math.round(lower.avg_summer_humidity + (upper.avg_summer_humidity - lower.avg_summer_humidity) * ratio),
-        peak_humidity: Math.round(lower.peak_humidity + (upper.peak_humidity - lower.peak_humidity) * ratio),
-        wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
-        days_over_95F: Math.round(lower.days_over_95F + (upper.days_over_95F - lower.days_over_95F) * ratio),
-        days_over_100F: Math.round(lower.days_over_100F + (upper.days_over_100F - lower.days_over_100F) * ratio),
-        estimated_at_risk_population: Math.round(lower.estimated_at_risk_population + (upper.estimated_at_risk_population - lower.estimated_at_risk_population) * ratio),
-        casualty_rate_percent: Math.round((lower.casualty_rate_percent + (upper.casualty_rate_percent - lower.casualty_rate_percent) * ratio) * 10) / 10,
-        extent_radius_km: Math.round(lower.extent_radius_km + (upper.extent_radius_km - lower.extent_radius_km) * ratio)
+        avg_summer_humidity: Math.round((lower.avg_summer_humidity || 0) + ((upper.avg_summer_humidity || 0) - (lower.avg_summer_humidity || 0)) * ratio),
+        peak_humidity: Math.round((lower.peak_humidity || 0) + ((upper.peak_humidity || 0) - (lower.peak_humidity || 0)) * ratio),
+        wet_bulb_events: Math.round((lower.wet_bulb_events || 0) + ((upper.wet_bulb_events || 0) - (lower.wet_bulb_events || 0)) * ratio),
+        days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
+        days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
+        estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
+        casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
+        extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
       }
     }
 
@@ -2533,13 +2761,17 @@ export default function WaterAccessView() {
     const features = Object.entries(wetBulbDataTyped)
       .map(([cityKey, cityData]) => {
         const { lat, lon, name, projections, metro_population_2024, baseline_humidity } = cityData
-        const projection = interpolateProjection(projections, projectionYear)
+        const projection = interpolateProjection(projections, controls.projectionYear)
+
+        // Skip if no projection data
+        if (!projection) return null
 
         const radiusKm = getRadiusFromDanger(projection.wet_bulb_events, metro_population_2024)
         const color = getDangerColor(projection.wet_bulb_events, projection.peak_humidity)
         const opacity = getDangerOpacity(projection.wet_bulb_events, projection.peak_humidity)
 
-        if (projection.wet_bulb_events === 0 && projectionYear < 2035) return null
+        // Show all cities for debugging
+        // if (projection.wet_bulb_events === 0 && controls.projectionYear < 2035) return null
 
         return {
           type: 'Feature' as const,
@@ -2571,50 +2803,73 @@ export default function WaterAccessView() {
       features
     }
 
-    console.log(`🌡️ Wet Bulb Danger Zones: ${features.length} cities for year ${projectionYear}`)
+    console.log(`🌡️ Wet Bulb Danger Zones: ${features.length} cities for year ${controls.projectionYear}`)
+    console.log(`🔍 Wet Bulb Active: ${isWetBulbActive}, Opacity: ${controls.wetBulbOpacity}`)
 
-    // Add or update source
-    if (!map.getSource(sourceId)) {
-      console.log('📦 Adding Wet Bulb danger zones source...')
-      map.addSource(sourceId, {
-        type: 'geojson',
-        data: geojsonData as any
+    // Debug: Show Miami specifically to verify interpolation
+    const miamiFeature = features.find(f => f.properties.name === 'Miami, FL')
+    if (miamiFeature) {
+      console.log(`🔥 MIAMI DEBUG - Year ${controls.projectionYear}:`, {
+        events: miamiFeature.properties.wet_bulb_events,
+        radius_km: miamiFeature.properties.radius_km,
+        peak_humidity: miamiFeature.properties.peak_humidity,
+        color: miamiFeature.properties.color
       })
-    } else {
-      // Update data when year changes
-      (map.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(geojsonData as any)
     }
 
-    // Add layer if needed
-    if (!map.getLayer(layerId)) {
-      console.log('🎨 Adding Wet Bulb danger zones layer...')
-      // Insert below labels but above base map
-      let beforeId: string | undefined = 'waterway-label'
-      if (!map.getLayer(beforeId)) beforeId = undefined
-      if (!beforeId && map.getLayer('river-lines-casing')) beforeId = 'river-lines-casing'
+    console.log(`📊 Sample feature:`, features[0])
+    console.log(`🗺️ GeoJSON data:`, geojsonData)
 
-      map.addLayer({
-        id: layerId,
-        type: 'fill',
-        source: sourceId,
-        paint: {
-          'fill-color': ['get', 'color'],
-          // Per-feature opacity multiplied by global slider control
-          'fill-opacity': ['*', ['get', 'opacity'], controls.wetBulbOpacity || 0.8]
-        }
-      }, beforeId)
-    } else {
-      // Update opacity
-      map.setPaintProperty(layerId, 'fill-opacity', ['*', ['get', 'opacity'], controls.wetBulbOpacity || 0.8])
-    }
-
-    // Toggle visibility based on active state
-    const visibility = isWetBulbActive ? 'visible' : 'none'
+    // FORCE REBUILD: Remove existing layer and source to ensure clean update
     if (map.getLayer(layerId)) {
-      map.setLayoutProperty(layerId, 'visibility', visibility)
+      console.log('🗑️ Removing existing layer for rebuild...')
+      map.removeLayer(layerId)
+    }
+    if (map.getSource(sourceId)) {
+      console.log('🗑️ Removing existing source for rebuild...')
+      map.removeSource(sourceId)
     }
 
-  }, [mapLoaded, isWetBulbActive, controls.wetBulbOpacity, projectionYear])
+    // Add fresh source with new data
+    console.log(`📦 Adding Wet Bulb source with data for year ${controls.projectionYear}...`)
+    map.addSource(sourceId, {
+      type: 'geojson',
+      data: geojsonData as any
+    })
+
+    // Add fresh layer
+    console.log('🎨 Adding Wet Bulb danger zones layer...')
+    // Insert below labels but above base map
+    let beforeId: string | undefined = 'waterway-label'
+    if (!map.getLayer(beforeId)) beforeId = undefined
+    if (!beforeId && map.getLayer('river-lines-casing')) beforeId = 'river-lines-casing'
+
+    const layerConfig = {
+      id: layerId,
+      type: 'fill' as const,
+      source: sourceId,
+      paint: {
+        'fill-color': ['get', 'color'],
+        // Per-feature opacity multiplied by global slider control
+        'fill-opacity': ['*', ['get', 'opacity'], controls.wetBulbOpacity || 0.8]
+      }
+    }
+    console.log('🎨 Adding layer with config:', layerConfig)
+    map.addLayer(layerConfig, beforeId)
+    console.log(`✅ Wet Bulb layer added before: ${beforeId || 'top'}`)
+      } // End of isWetBulbActive check
+
+      // Toggle visibility based on active state
+      const visibility = isWetBulbActive ? 'visible' : 'none'
+      if (map.getLayer(layerId)) {
+        map.setLayoutProperty(layerId, 'visibility', visibility)
+        console.log(`👁️ Wet Bulb layer visibility set to: ${visibility}`)
+      }
+    } catch (error) {
+      console.error('❌ Error updating Wet Bulb layer:', error)
+    }
+
+  }, [mapLoaded, isWetBulbActive, controls.wetBulbOpacity, controls.projectionYear])
 
   // Update metro humidity circles when projection year changes - DISABLED (using React markers instead)
   // This useEffect is kept for reference but no longer active since we use React markers
@@ -2780,10 +3035,92 @@ export default function WaterAccessView() {
       }
     }
 
+      // Helper to get temperature data for a city and year
+      const getTemperatureData = (cityName: string, year: number) => {
+        // Find city in temperature data (case-insensitive, handle variations)
+        const normalizedCity = cityName.toLowerCase().trim()
+
+        // Try exact match first, then partial match
+        const tempCity = Object.values(metroTemperatureData).find((city: any) => {
+          const tempCityName = city.name.toLowerCase().trim()
+
+          // Exact match
+          if (tempCityName === normalizedCity) return true
+
+          // Handle "City, ST" format - extract just the city name
+          const cityBase = normalizedCity.split(',')[0].trim()
+          const tempCityBase = tempCityName.split(',')[0].trim()
+
+          // Match on base city name
+          if (cityBase === tempCityBase) return true
+
+          // Partial matching as fallback
+          if (tempCityName.includes(cityBase) || cityBase.includes(tempCityBase)) return true
+
+          return false
+        }) as any
+
+        if (!tempCity?.projections) {
+          console.warn(`⚠️ No temperature data found for "${cityName}"`)
+          return null
+        }
+
+        // Map scenario names: RCP to SSP
+        // rcp26 -> ssp126, rcp45 -> ssp245, rcp60 -> ssp370, rcp85 -> ssp585
+        let mappedScenario = controls.scenario
+        if (controls.scenario === 'rcp26') mappedScenario = 'ssp126'
+        else if (controls.scenario === 'rcp45') mappedScenario = 'ssp245'
+        else if (controls.scenario === 'rcp60') mappedScenario = 'ssp370'
+        else if (controls.scenario === 'rcp85') mappedScenario = 'ssp585'
+
+        // Try the mapped scenario, fall back to ssp245 (moderate) as default
+        const scenarioData = tempCity.projections[mappedScenario] || tempCity.projections['ssp245']
+
+        if (!scenarioData) {
+          console.warn(`⚠️ No temperature data for "${cityName}" in scenario ${mappedScenario}`)
+          return null
+        }
+
+        // Find closest decade
+        const decades = Object.keys(scenarioData).map(Number).sort((a, b) => a - b)
+
+        if (decades.length === 0) {
+          console.warn(`⚠️ No decade data for "${cityName}" in scenario ${mappedScenario}`)
+          return null
+        }
+
+        const closestDecade = decades.reduce((prev, curr) =>
+          Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
+        )
+
+        const decadeData = scenarioData[closestDecade]
+
+        if (!decadeData) {
+          console.warn(`⚠️ No data for decade ${closestDecade} for "${cityName}"`)
+          return null
+        }
+
+        return decadeData
+      }
+
       // Create markers for each metro city
       ; (metroHumidityData as any).features.forEach((feature: any) => {
         const { city, lat, lng, humidity_projections } = feature.properties
         const humidityData = getHumidityDataForYear(humidity_projections, projectionYear)
+        const tempData = getTemperatureData(city, projectionYear)
+
+        // Debug: Log temperature data for first city
+        if (city === 'Phoenix' || city === 'Phoenix, AZ') {
+          console.log('🌡️ Phoenix Temperature Data:', {
+            city,
+            projectionYear,
+            scenario: controls.scenario,
+            tempData,
+            showAverageTemperatures,
+            summerAvg: tempData?.summer_avg ? `${tempData.summer_avg.toFixed(1)}°F` : undefined,
+            winterAvg: tempData?.winter_avg ? `${tempData.winter_avg.toFixed(1)}°F` : undefined
+          })
+        }
 
         // Create marker element
         const el = document.createElement('div')
@@ -2803,6 +3140,9 @@ export default function WaterAccessView() {
             visible={true}
             showHumidityWetBulb={showHumidityWetBulb}
             showTempHumidity={showTempHumidity}
+            showAverageTemperatures={showAverageTemperatures}
+            summerAvg={tempData?.summer_avg ? `${tempData.summer_avg.toFixed(1)}°F` : undefined}
+            winterAvg={tempData?.winter_avg ? `${tempData.winter_avg.toFixed(1)}°F` : undefined}
             onClose={() => { }}
           />
         )
@@ -2825,7 +3165,311 @@ export default function WaterAccessView() {
       })
       metroMarkersRef.current = []
     }
-  }, [showMetroHumidityLayer, projectionYear, showHumidityWetBulb, showTempHumidity, mapLoaded, theme])
+  }, [showMetroHumidityLayer, projectionYear, showHumidityWetBulb, showTempHumidity, showAverageTemperatures, mapLoaded, theme, controls.scenario])
+
+  // Factories Layer - Map Visualization
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded || !showFactoriesLayer) {
+      // Remove factory layers if they exist
+      if (mapRef.current && mapLoaded) {
+        const map = mapRef.current
+        if (map.getLayer('factory-circles')) map.removeLayer('factory-circles')
+        if (map.getLayer('factory-labels')) map.removeLayer('factory-labels')
+        if (map.getSource('factories')) map.removeSource('factories')
+      }
+      return
+    }
+
+    const map = mapRef.current
+
+    // Transform factory data to GeoJSON
+    const geojson: GeoJSON.FeatureCollection = {
+      type: 'FeatureCollection',
+      features: factoriesExpandedData.factories.map(factory => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [
+            factory.location.coordinates.lon,
+            factory.location.coordinates.lat
+          ]
+        },
+        properties: {
+          id: factory.id,
+          name: factory.name,
+          company: factory.company,
+          risk_score: factory.environmental_risk?.overall_risk_score || 5,
+          total_investment: factory.investment?.total || 1000000000,
+          status: factory.status,
+          type: factory.type
+        }
+      }))
+    }
+
+    // Add source
+    if (!map.getSource('factories')) {
+      map.addSource('factories', {
+        type: 'geojson',
+        data: geojson
+      })
+    }
+
+    // Add circle layer for factories
+    if (!map.getLayer('factory-circles')) {
+      map.addLayer({
+        id: 'factory-circles',
+        type: 'circle',
+        source: 'factories',
+        paint: {
+          'circle-radius': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            4, 4,
+            8, 8,
+            12, 12
+          ],
+          'circle-color': [
+            'interpolate',
+            ['linear'],
+            ['get', 'risk_score'],
+            0, '#10b981',
+            3, '#eab308',
+            5, '#f97316',
+            7, '#ef4444',
+            10, '#dc2626'
+          ],
+          'circle-opacity': 0.8,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-opacity': 0.9
+        }
+      })
+
+      // Add labels layer
+      map.addLayer({
+        id: 'factory-labels',
+        type: 'symbol',
+        source: 'factories',
+        layout: {
+          'text-field': ['get', 'name'],
+          'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+          'text-size': 11,
+          'text-offset': [0, 1.5],
+          'text-anchor': 'top',
+          'text-max-width': 12
+        },
+        paint: {
+          'text-color': '#ffffff',
+          'text-halo-color': 'rgba(0, 0, 0, 0.8)',
+          'text-halo-width': 1.5
+        },
+        minzoom: 6
+      })
+
+      // Add click handler for factory details
+      map.on('click', 'factory-circles', (e) => {
+        if (!e.features || e.features.length === 0) return
+
+        const feature = e.features[0]
+        const props = feature.properties
+
+        // Find the full factory data
+        const fullFactory = factoriesExpandedData.factories.find(f => f.id === props?.id)
+        if (!fullFactory) return
+
+        // Close aquifer panel when opening factory panel
+        setSelectedAquifer(null)
+        setSelectedFeatureId(null)
+
+        setSelectedFactory({
+          name: fullFactory.name,
+          company: fullFactory.company,
+          city: fullFactory.location.city,
+          state: fullFactory.location.state,
+          type: fullFactory.sector || fullFactory.type,
+          investment: fullFactory.investment?.total,
+          employees: fullFactory.jobs?.promised || fullFactory.jobs?.actual,
+          yearEstablished: fullFactory.timeline?.announced ? new Date(fullFactory.timeline.announced).getFullYear() : undefined,
+          facilities: fullFactory.facilities,
+          waterUsage: fullFactory.environmental_risk ? {
+            daily_gallons: fullFactory.environmental_risk.water_usage_gallons_per_day,
+            description: `Water source: ${fullFactory.water_source || 'Unknown'}`
+          } : undefined,
+          environmental: fullFactory.environmental_risk ? {
+            stress_type: `${fullFactory.environmental_risk.water_stress || 'Unknown'} Water Stress`,
+            severity: fullFactory.environmental_risk.overall_risk_score >= 8 ? 'critical' :
+                      fullFactory.environmental_risk.overall_risk_score >= 6 ? 'stressed' :
+                      fullFactory.environmental_risk.overall_risk_score >= 4 ? 'moderate' : 'stable',
+            drought_duration: fullFactory.environmental_risk.drought_risk === 'extreme' ? 5 : undefined,
+            impact_description: `Climate Risk Score: ${fullFactory.environmental_risk.overall_risk_score}/10. Heat Risk: ${fullFactory.environmental_risk.heat_risk}, Drought Risk: ${fullFactory.environmental_risk.drought_risk}, Wildfire Risk: ${fullFactory.environmental_risk.wildfire_risk}.`
+          } : undefined
+        })
+      })
+
+      // Change cursor on hover
+      map.on('mouseenter', 'factory-circles', () => {
+        map.getCanvas().style.cursor = 'pointer'
+      })
+      map.on('mouseleave', 'factory-circles', () => {
+        map.getCanvas().style.cursor = ''
+      })
+    }
+
+    console.log('✅ Factory layer added successfully')
+
+    return () => {
+      if (map.getLayer('factory-circles')) map.removeLayer('factory-circles')
+      if (map.getLayer('factory-labels')) map.removeLayer('factory-labels')
+      if (map.getSource('factories')) map.removeSource('factories')
+    }
+  }, [mapLoaded, showFactoriesLayer])
+
+  // Handle Metro Population Change layer rendering
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded || !showMetroDataStatistics) return
+
+    const map = mapRef.current
+
+    // Remove existing layers/source if present
+    if (map.getLayer('metro-circles')) map.removeLayer('metro-circles')
+    if (map.getLayer('metro-labels')) map.removeLayer('metro-labels')
+    if (map.getSource('metro-data')) map.removeSource('metro-data')
+
+    const data = megaregionData as { metros: Array<{ name: string; lat: number; lon: number; climate_risk: string; populations: Record<string, number> }> }
+
+    if (!data || !data.metros || data.metros.length === 0) {
+      console.log('⚠️ No metro data available')
+      return
+    }
+
+    // Use 2025 population for current display
+    const currentYear = '2025'
+
+    // Create GeoJSON for metro regions
+    const geoJson = {
+      type: 'FeatureCollection' as const,
+      features: data.metros.map((metro) => {
+        const currentPop = metro.populations[currentYear] || 0
+        const futurePop = metro.populations['2035'] || 0
+        const growthRate = currentPop > 0 ? ((futurePop - currentPop) / currentPop) : 0
+
+        return {
+          type: 'Feature' as const,
+          geometry: {
+            type: 'Point' as const,
+            coordinates: [metro.lon, metro.lat]
+          },
+          properties: {
+            name: metro.name,
+            population: currentPop,
+            growth: growthRate,
+            climate_risk: metro.climate_risk
+          }
+        }
+      })
+    }
+
+    // Add source
+    map.addSource('metro-data', {
+      type: 'geojson',
+      data: geoJson
+    })
+
+    // Add circles layer
+    map.addLayer({
+      id: 'metro-circles',
+      type: 'circle',
+      source: 'metro-data',
+      paint: {
+        'circle-radius': [
+          'interpolate',
+          ['linear'],
+          ['get', 'population'],
+          1000000, 15,
+          5000000, 25,
+          10000000, 35,
+          20000000, 50
+        ],
+        'circle-color': [
+          'case',
+          ['>', ['get', 'growth'], 0.2], '#22c55e',  // High growth (green)
+          ['>', ['get', 'growth'], 0.1], '#3b82f6',  // Moderate growth (blue)
+          ['>', ['get', 'growth'], 0], '#fbbf24',    // Low growth (yellow)
+          '#ef4444'  // Declining (red)
+        ],
+        'circle-opacity': 0.6,
+        'circle-stroke-width': 2,
+        'circle-stroke-color': '#ffffff'
+      }
+    })
+
+    // Add labels layer
+    map.addLayer({
+      id: 'metro-labels',
+      type: 'symbol',
+      source: 'metro-data',
+      layout: {
+        'text-field': ['get', 'name'],
+        'text-size': 11,
+        'text-offset': [0, 0],
+        'text-anchor': 'center'
+      },
+      paint: {
+        'text-color': '#ffffff',
+        'text-halo-color': '#000000',
+        'text-halo-width': 1
+      }
+    })
+
+    console.log('✅ Metro Population Change layer added successfully')
+
+    return () => {
+      if (map.getLayer('metro-circles')) map.removeLayer('metro-circles')
+      if (map.getLayer('metro-labels')) map.removeLayer('metro-labels')
+      if (map.getSource('metro-data')) map.removeSource('metro-data')
+    }
+  }, [mapLoaded, showMetroDataStatistics])
+
+  // Handle Topographic Relief layer rendering
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded || !showTopographicRelief) return
+
+    const map = mapRef.current
+
+    // Remove existing layers if present
+    if (map.getLayer('hillshade')) map.removeLayer('hillshade')
+    if (map.getLayer('contours')) map.removeLayer('contours')
+    if (map.getSource('mapbox-dem')) map.removeSource('mapbox-dem')
+
+    // Add DEM source for hillshading
+    map.addSource('mapbox-dem', {
+      type: 'raster-dem',
+      url: 'mapbox://mapbox.terrain-rgb',
+      tileSize: 512,
+      maxzoom: 14
+    })
+
+    // Add hillshade layer
+    map.addLayer({
+      id: 'hillshade',
+      type: 'hillshade',
+      source: 'mapbox-dem',
+      paint: {
+        'hillshade-exaggeration': 0.5,
+        'hillshade-shadow-color': '#000000',
+        'hillshade-illumination-direction': 315
+      }
+    })
+
+    console.log('✅ Topographic Relief layer added successfully')
+
+    return () => {
+      if (map.getLayer('hillshade')) map.removeLayer('hillshade')
+      if (map.getLayer('contours')) map.removeLayer('contours')
+      if (map.getSource('mapbox-dem')) map.removeSource('mapbox-dem')
+    }
+  }, [mapLoaded, showTopographicRelief])
 
   // Handle Precipitation & Drought layer rendering
   useEffect(() => {
@@ -2836,7 +3480,20 @@ export default function WaterAccessView() {
     const layerId = 'precipitation-drought-layer'
 
     // Check if layer should be visible
-    if (isPrecipitationDroughtActive && precipitationDroughtData && typeof precipitationDroughtData === 'object' && 'tile_url' in precipitationDroughtData) {
+    if (isPrecipitationDroughtActive) {
+      // Wait for data to be available
+      if (!precipitationDroughtData || typeof precipitationDroughtData !== 'object' || !('tile_url' in precipitationDroughtData)) {
+        console.log('⏳ Waiting for precipitation-drought data to load...')
+
+        // Backstop: Auto-refresh data if not loaded after 5 seconds
+        const retryTimer = setTimeout(() => {
+          console.log('🔄 Precipitation data not loaded after 5s, triggering background refresh...')
+          refreshLayer('precipitation_drought')
+        }, 5000)
+
+        return () => clearTimeout(retryTimer)
+      }
+
       const tileUrl = precipitationDroughtData.tile_url
 
       // Add or update source
@@ -2918,6 +3575,22 @@ export default function WaterAccessView() {
     }
   }, [isPrecipitationDroughtActive, precipitationDroughtData, mapLoaded, controls.droughtOpacity])
 
+  // Backstop: Monitor precipitation drought status and retry on prolonged loading/error
+  useEffect(() => {
+    if (!isPrecipitationDroughtActive) return
+    if (precipitationDroughtData && typeof precipitationDroughtData === 'object' && 'tile_url' in precipitationDroughtData) return // Data already loaded
+
+    // Set up retry timer if stuck in loading or error state
+    const statusCheckTimer = setTimeout(() => {
+      if (precipitationDroughtStatus === 'loading' || precipitationDroughtStatus === 'error') {
+        console.log(`🔄 Precipitation drought status: ${precipitationDroughtStatus} - forcing refresh after 10s`)
+        refreshLayer('precipitation_drought')
+      }
+    }, 10000) // 10 seconds
+
+    return () => clearTimeout(statusCheckTimer)
+  }, [isPrecipitationDroughtActive, precipitationDroughtStatus, precipitationDroughtData, refreshLayer])
+
   // Update aquifer opacity (solid fill)
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return
@@ -2937,6 +3610,23 @@ export default function WaterAccessView() {
     }
   }, [aquiferOpacity, mapLoaded])
 
+  // Update Metro Population Change opacity
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return
+    const map = mapRef.current
+    if (map.getLayer('metro-circles')) {
+      map.setPaintProperty('metro-circles', 'circle-opacity', metroDataOpacity)
+    }
+  }, [metroDataOpacity, mapLoaded])
+
+  // Update Topographic Relief intensity
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return
+    const map = mapRef.current
+    if (map.getLayer('hillshade')) {
+      map.setPaintProperty('hillshade', 'hillshade-exaggeration', topoReliefIntensity)
+    }
+  }, [topoReliefIntensity, mapLoaded])
 
   // Search form handler
   const handleSearchSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
@@ -3072,142 +3762,21 @@ export default function WaterAccessView() {
 
       {/* Left Sidebar - Search & Views */}
       {!panelsCollapsed && (
-        <aside className="absolute left-[92px] top-4 z-[1000] flex h-[calc(100%-32px)] w-[360px] flex-col pointer-events-none">
-          <div className="flex-1 overflow-y-auto space-y-4 pointer-events-auto">
-            <div className="widget-container">
-              <form className="flex gap-2" onSubmit={handleSearchSubmit}>
-                <div className="relative flex-1">
-                  <Input
-                    value={searchTerm}
-                    onChange={e => setSearchTerm(e.target.value)}
-                    placeholder="Search for a city, state, or country"
-                    className="pr-10"
-                  />
-                  <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                </div>
-                <Button
-                  type="submit"
-                  variant="secondary"
-                  disabled={isSearching}
-                >
-                  {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
-                </Button>
-              </form>
-
-              {searchResults.length > 0 && (
-                <div className="mt-3 space-y-2 border-t border-border/60 pt-3">
-                  <div className="text-xs font-semibold uppercase text-muted-foreground">Search results</div>
-                  <ul className="space-y-2">
-                    {searchResults.map(result => (
-                      <li key={`${result.lat}-${result.lon}`}>
-                        <button
-                          onClick={() => moveToResult(result)}
-                          className="flex w-full items-start gap-2 rounded-md border border-transparent p-2 text-left text-sm hover:border-border hover:bg-background/80"
-                        >
-                          <MapPin className="mt-0.5 h-4 w-4 text-blue-500" />
-                          <span>{result.display_name}</span>
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Saved Views Section */}
-              <div className="mt-3 space-y-2 border-t border-border/60 pt-3">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold">Views</h3>
-                  <Button
-                    size="sm"
-                    variant="text"
-                    className="h-6 px-2 text-xs"
-                    onClick={() => setShowSaveDialog(true)}
-                  >
-                    <Save className="h-3 w-3 mr-1" />
-                    New View
-                  </Button>
-                </div>
-
-                {savedViews.length === 0 && !showSaveDialog ? (
-                  <p className="text-xs text-muted-foreground py-4">
-                    No saved views. Click "New View" to save.
-                  </p>
-                ) : (
-                  <div className="rounded-md bg-[var(--cs-surface-elevated)] p-2">
-                    <DndContext
-                      sensors={sensors}
-                      collisionDetection={closestCenter}
-                      onDragEnd={handleDragEnd}
-                    >
-                      <SortableContext
-                        items={savedViews.map(v => v.id)}
-                        strategy={verticalListSortingStrategy}
-                      >
-                        <ul className="space-y-1">
-                          {savedViews.map(view => (
-                            <SortableViewItem
-                              key={view.id}
-                              view={view}
-                              loadSavedView={loadSavedView}
-                              deleteSavedView={deleteSavedView}
-                              editSavedView={editSavedView}
-                              editingViewId={editingViewId}
-                              editingViewName={editingViewName}
-                              setEditingViewName={setEditingViewName}
-                              saveEditedViewName={saveEditedViewName}
-                              cancelEdit={cancelEdit}
-                            />
-                          ))}
-
-                          {showSaveDialog && (
-                            <li className="flex items-center gap-2 p-2 rounded-md border border-border/60 bg-background/50">
-                              <Input
-                                value={newViewName}
-                                onChange={e => setNewViewName(e.target.value)}
-                                placeholder="Enter view name..."
-                                className="h-8 text-sm flex-1 border-none bg-transparent px-2"
-                                onKeyDown={e => {
-                                  if (e.key === 'Enter') handleSaveCurrentView()
-                                  if (e.key === 'Escape') {
-                                    setShowSaveDialog(false)
-                                    setNewViewName('')
-                                  }
-                                }}
-                                autoFocus
-                              />
-                              <Button
-                                size="sm"
-                                className="h-8 w-8 p-0 bg-blue-500 hover:bg-blue-600"
-                                onClick={handleSaveCurrentView}
-                              >
-                                <Save className="h-3.5 w-3.5 text-white" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-8 w-8 p-0"
-                                onClick={() => {
-                                  setShowSaveDialog(false)
-                                  setNewViewName('')
-                                }}
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </li>
-                          )}
-                        </ul>
-                      </SortableContext>
-                    </DndContext>
-                  </div>
-                )}
-              </div>
-            </div>
+        <aside className="absolute left-[92px] top-4 z-[1000] flex h-[calc(100vh-32px)] w-[360px] flex-col gap-4 pointer-events-none">
+          <div className="pointer-events-auto flex-shrink-0">
+            <SearchAndViewsPanel
+              viewType="waterAccess"
+              searchPlaceholder="Search for a city, state, or country"
+              activeLayerIds={[]}
+              controls={controls}
+            />
+          </div>
 
             {/* Water Access Layers Panel */}
-            <div className="widget-container">
-              <h3 className="text-sm font-semibold mb-3">Water Access Layers</h3>
-              <div className="space-y-3">
-                {/* Metro Temperature & Humidity Layer */}
+            <div className="widget-container flex flex-col flex-1 min-h-0 pointer-events-auto overflow-hidden">
+              <h3 className="text-sm font-semibold mb-3 flex-shrink-0">Climate Suite</h3>
+              <div className="space-y-3 overflow-y-auto pr-2 flex-1 pb-3 rounded-b-lg">
+                {/* Metro Weather Layer */}
                 <label
                   className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showMetroHumidityLayer
                     ? "border border-blue-500/60 bg-blue-500/10"
@@ -3225,7 +3794,7 @@ export default function WaterAccessView() {
                   />
                   <div className="space-y-1 flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-medium">Metro Temperature & Humidity</h4>
+                      <h4 className="text-sm font-medium">Metro Weather</h4>
                       <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
                         <MapPin className="h-4 w-4" />
                       </span>
@@ -3236,6 +3805,34 @@ export default function WaterAccessView() {
                   </div>
                 </label>
 
+                {/* Metro Population Change Layer */}
+                <label
+                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showMetroDataStatistics
+                    ? "border border-blue-500/60 bg-blue-500/10"
+                    : ""
+                    }`}
+                  style={!showMetroDataStatistics ? {
+                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
+                  } : undefined}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
+                    checked={showMetroDataStatistics}
+                    onChange={() => setShowMetroDataStatistics(!showMetroDataStatistics)}
+                  />
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-sm font-medium">Metro Population Change</h4>
+                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
+                        <BarChart3 className="h-4 w-4" />
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/80 truncate">
+                      Source: <span className="font-medium text-foreground">NOAA Regional Climate Centers</span>
+                    </p>
+                  </div>
+                </label>
 
                 {/* Rivers Layer */}
                 <label
@@ -3328,34 +3925,59 @@ export default function WaterAccessView() {
                   </div>
                 </label>
 
-                {/* Metro Service Areas Layer */}
+                {/* Sea Level Rise Layer */}
                 <label
-                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showServiceAreasLayer
+                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showSeaLevelRiseLayer
                     ? "border border-blue-500/60 bg-blue-500/10"
                     : ""
                     }`}
-                  style={!showServiceAreasLayer ? {
+                  style={!showSeaLevelRiseLayer ? {
                     backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
                   } : undefined}
                 >
                   <input
                     type="checkbox"
                     className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                    checked={showServiceAreasLayer}
-                    onChange={() => setShowServiceAreasLayer(!showServiceAreasLayer)}
+                    checked={showSeaLevelRiseLayer}
+                    onChange={() => setShowSeaLevelRiseLayer(!showSeaLevelRiseLayer)}
                   />
                   <div className="space-y-1 flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-medium">Metro Service Areas</h4>
+                      <h4 className="text-sm font-medium">Sea Level Rise</h4>
                       <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                        <MapPin className="h-4 w-4" />
+                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M3 10h18v2H3v-2zm0 4h18v2H3v-2zm0 4h18v2H3v-2z" />
+                        </svg>
                       </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground/80 truncate">
-                      Source: <span className="font-medium text-foreground">Municipal Water Agencies</span>
+                      Source: <span className="font-medium text-foreground">NOAA Sea Level Rise</span>
                     </p>
                   </div>
                 </label>
+
+                {/* Sea Level Rise Controls */}
+                {showSeaLevelRiseLayer && (
+                  <div className="ml-7 space-y-2 rounded-lg p-3" style={{
+                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
+                  }}>
+                    <label className="text-xs font-medium text-foreground">
+                      Sea Level Rise: {seaLevelRiseFeet} feet
+                    </label>
+                    <Slider
+                      value={[seaLevelRiseFeet]}
+                      onValueChange={(value) => setSeaLevelRiseFeet(value[0])}
+                      min={1}
+                      max={10}
+                      step={1}
+                      className="w-full"
+                    />
+                    <div className="flex justify-between text-[10px] text-muted-foreground">
+                      <span>1 ft</span>
+                      <span>10 ft</span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Groundwater Layer */}
                 <label
@@ -3375,15 +3997,42 @@ export default function WaterAccessView() {
                   />
                   <div className="space-y-1 flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-medium">Groundwater</h4>
+                      <h4 className="text-sm font-medium">GRACE Groundwater</h4>
                       <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z" />
-                        </svg>
+                        <TrendingUp className="h-4 w-4" />
                       </span>
                     </div>
                     <p className="text-[11px] text-muted-foreground/80 truncate">
-                      Source: <span className="font-medium text-foreground">NASA GRACE / USGS</span>
+                      Source: <span className="font-medium text-foreground">NASA GRACE Satellite</span>
+                    </p>
+                  </div>
+                </label>
+
+                {/* Aquifers Layer */}
+                <label
+                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showAquifersLayer
+                    ? "border border-blue-500/60 bg-blue-500/10"
+                    : ""
+                    }`}
+                  style={!showAquifersLayer ? {
+                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
+                  } : undefined}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
+                    checked={showAquifersLayer}
+                    onChange={() => setShowAquifersLayer(!showAquifersLayer)}
+                  />
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-sm font-medium">Aquifers</h4>
+                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
+                        <Droplets className="h-4 w-4" />
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/80 truncate">
+                      Source: <span className="font-medium text-foreground">USGS Principal Aquifers</span>
                     </p>
                   </div>
                 </label>
@@ -3450,61 +4099,113 @@ export default function WaterAccessView() {
                   </label>
                 )}
 
+                {/* Future Temperature Anomaly Layer */}
+                {temperatureProjectionLayer && (
+                  <label
+                    className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${isTemperatureProjectionActive
+                      ? "border border-blue-500/60 bg-blue-500/10"
+                      : ""
+                      }`}
+                    style={!isTemperatureProjectionActive ? {
+                      backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
+                    } : undefined}
+                  >
+                    <input
+                      type="checkbox"
+                      className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
+                      checked={isTemperatureProjectionActive}
+                      onChange={() => toggleLayer('temperature_projection')}
+                    />
+                    <div className="space-y-1 flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-medium">{temperatureProjectionLayer.title}</h4>
+                        <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
+                          <CloudRain className="h-4 w-4" />
+                        </span>
+                      </div>
+                      <p className="text-[11px] text-muted-foreground/80 truncate">
+                        Source: <span className="font-medium text-foreground">{temperatureProjectionLayer.source.name}</span>
+                      </p>
+                    </div>
+                  </label>
+                )}
+
+                {/* Factories Layer */}
+                <label
+                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${
+                    showFactoriesLayer
+                      ? "border border-blue-500/60 bg-blue-500/10"
+                      : ""
+                  }`}
+                  style={!showFactoriesLayer ? {
+                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
+                  } : undefined}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
+                    checked={showFactoriesLayer}
+                    onChange={() => setShowFactoriesLayer(!showFactoriesLayer)}
+                  />
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-sm font-medium">Factories</h4>
+                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
+                        <Factory className="h-4 w-4" />
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/80 truncate">
+                      Source: <span className="font-medium text-foreground">CHIPS Act, DOE</span>
+                    </p>
+                  </div>
+                </label>
+
+                {/* Topographic Relief Layer */}
+                <label
+                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showTopographicRelief
+                    ? "border border-blue-500/60 bg-blue-500/10"
+                    : ""
+                    }`}
+                  style={!showTopographicRelief ? {
+                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
+                  } : undefined}
+                >
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
+                    checked={showTopographicRelief}
+                    onChange={() => setShowTopographicRelief(!showTopographicRelief)}
+                  />
+                  <div className="space-y-1 flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-sm font-medium">Topographic Relief</h4>
+                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
+                        <Mountain className="h-4 w-4" />
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground/80 truncate">
+                      Source: <span className="font-medium text-foreground">USGS National Elevation Dataset</span>
+                    </p>
+                  </div>
+                </label>
+
               </div>
             </div>
-          </div>
         </aside>
       )}
 
-      {/* Right Sidebar - Projection Year & Details */}
-      {!panelsCollapsed && (
-        <div className="absolute top-4 right-4 z-[1000] w-80 h-[calc(100vh-32px)] pointer-events-auto overflow-y-auto">
-          <div className="space-y-4 pr-4">
-          {/* Projection Year Widget */}
-          <div className="widget-container">
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: 16
-            }}>
-              <h3 className="text-sm font-medium text-foreground">
-                Projection Year
-              </h3>
-              <span style={{
-                fontSize: 18,
-                fontWeight: 700,
-                color: '#3b82f6'
-              }}>
-                {projectionYear}
-              </span>
-            </div>
+      {/* Right Sidebar - Climate Projections Widget & Layer Controls */}
+      {!panelsCollapsed && (() => {
+        // Check if Climate Projections widget should be shown
+        const enabledLayers = getEnabledLayersForView('waterAccess')
+        const enabledLayerIds = enabledLayers.map(l => l.id)
+        const showClimateWidget = shouldShowClimateWidget(enabledLayerIds)
 
-            {/* Slider */}
-            <div className="space-y-2">
-              <Slider
-                value={[projectionYear]}
-                min={2025}
-                max={2125}
-                step={1}
-                onValueChange={(value) => setProjectionYear(value[0])}
-              />
-            </div>
-
-            {/* Gradient Legend */}
-            <div className="space-y-1 mt-3">
-              <div className="h-3 w-full rounded-full" style={{
-                background: 'linear-gradient(to right, #22c55e 0%, #3b82f6 33%, #f97316 66%, #ef4444 100%)'
-              }} />
-              <div className="flex justify-between text-[10px] text-muted-foreground">
-                <span>2025</span>
-                <span>2050</span>
-                <span>2075</span>
-                <span>2100</span>
-                <span>2125</span>
-              </div>
-            </div>
-          </div>
+        return (
+          <div className="absolute top-4 right-4 z-[1000] w-80 h-[calc(100vh-32px)] pointer-events-auto overflow-y-auto">
+            <div className="space-y-4 pr-4">
+              {/* Climate Projections Widget - Always visible */}
+              <ClimateProjectionsWidget />
 
           {/* Rivers Flow Status Widget - Shows when Rivers layer is active */}
           {showRiversLayer && (
@@ -3546,33 +4247,170 @@ export default function WaterAccessView() {
             </AccordionItem>
           )}
 
-          {/* Metro Humidity Controls - Shows when layer is active */}
+          {/* Metro Weather Controls - Shows when layer is active */}
           {showMetroHumidityLayer && (
-            <AccordionItem title="Metro Humidity" icon={<Droplets className="h-4 w-4" />}>
-              {/* Wet Bulb Danger Zone Legend */}
-              <div>
-                <h4 className="text-xs font-semibold text-muted-foreground mb-2">Wet Bulb Danger Zones</h4>
-                <p className="text-xs text-muted-foreground mb-2">Circle size = geographic extent of danger zone</p>
-                <div className="space-y-1.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#fbbf24' }}></div>
-                    <span className="text-xs text-foreground">Low Risk (2-10 events/year)</span>
+            <AccordionItem title="Metro Weather" icon={<Droplets className="h-4 w-4" />}>
+              {/* Bubble Data Toggles */}
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-blue-500"
+                    checked={showHumidityWetBulb}
+                    onChange={() => setShowHumidityWetBulb(!showHumidityWetBulb)}
+                  />
+                  <span className="text-xs text-foreground">Humidity & Wet Bulb Events</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-blue-500"
+                    checked={showTempHumidity}
+                    onChange={() => setShowTempHumidity(!showTempHumidity)}
+                  />
+                  <span className="text-xs text-foreground">Temperature & Humidity</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 accent-blue-500"
+                    checked={showAverageTemperatures}
+                    onChange={() => setShowAverageTemperatures(!showAverageTemperatures)}
+                  />
+                  <span className="text-xs text-foreground">Average Temperature</span>
+                </label>
+              </div>
+            </AccordionItem>
+          )}
+
+          {/* Metro Population Change Widget */}
+          {showMetroDataStatistics && (
+            <AccordionItem title="Metro Population Change" icon={<BarChart3 className="h-4 w-4" />}>
+              {/* Opacity Slider */}
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                  <span className="text-xs font-medium">{Math.round(metroDataOpacity * 100)}%</span>
+                </div>
+                <Slider
+                  value={[Math.round(metroDataOpacity * 100)]}
+                  min={10}
+                  max={100}
+                  step={5}
+                  onValueChange={(value) => {
+                    setMetroDataOpacity(value[0] / 100)
+                  }}
+                />
+              </div>
+
+              {/* Legend */}
+              <div className="space-y-1.5">
+                <h4 className="text-xs font-semibold text-muted-foreground mb-2">Population Growth</h4>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
+                  <span className="text-xs text-foreground">High Growth (20%+)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#3b82f6' }}></div>
+                  <span className="text-xs text-foreground">Moderate Growth (10-20%)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#fbbf24' }}></div>
+                  <span className="text-xs text-foreground">Low Growth (0-10%)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ef4444' }}></div>
+                  <span className="text-xs text-foreground">Declining</span>
+                </div>
+                <p className="text-[11px] text-muted-foreground mt-2">Circle size represents population</p>
+              </div>
+            </AccordionItem>
+          )}
+
+          {/* Topographic Relief Widget */}
+          {showTopographicRelief && (
+            <AccordionItem title="Topographic Relief" icon={<Mountain className="h-4 w-4" />}>
+              {/* Opacity Slider */}
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-muted-foreground">Hillshade Intensity</label>
+                  <span className="text-xs font-medium">{Math.round(topoReliefIntensity * 100)}%</span>
+                </div>
+                <Slider
+                  value={[Math.round(topoReliefIntensity * 100)]}
+                  min={10}
+                  max={100}
+                  step={5}
+                  onValueChange={(value) => {
+                    setTopoReliefIntensity(value[0] / 100)
+                  }}
+                />
+              </div>
+
+              {/* Legend */}
+              <div className="space-y-1.5">
+                <h4 className="text-xs font-semibold text-muted-foreground mb-2">Elevation Relief</h4>
+                <p className="text-xs text-foreground/80">Hillshade visualization showing terrain elevation and slopes</p>
+                <div className="space-y-1 mt-2">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-muted-foreground">Light areas:</span>
+                    <span className="text-foreground">High elevation / slopes facing sun</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#f97316' }}></div>
-                    <span className="text-xs text-foreground">Moderate Risk (11-30 events)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ef4444' }}></div>
-                    <span className="text-xs text-foreground">High Risk (31-50 events)</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#991b1b' }}></div>
-                    <span className="text-xs text-foreground">Extreme Risk (50+ events)</span>
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-muted-foreground">Dark areas:</span>
+                    <span className="text-foreground">Low elevation / shaded slopes</span>
                   </div>
                 </div>
               </div>
             </AccordionItem>
+          )}
+
+          {/* Factories Panel */}
+          {showFactoriesLayer && (
+            <div className="widget-container">
+              <h3 className="text-sm font-semibold mb-3">Factory Filters</h3>
+
+              {/* Status Filters */}
+              <div className="mb-4">
+                <h4 className="text-xs font-medium mb-2 text-muted-foreground">Status</h4>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="accent-blue-500" defaultChecked />
+                    <span className="text-sm">Operational</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="accent-blue-500" defaultChecked />
+                    <span className="text-sm">Under Construction</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" className="accent-blue-500" defaultChecked />
+                    <span className="text-sm">Planned</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Climate Risk Filters */}
+              <div>
+                <h4 className="text-xs font-medium mb-2 text-muted-foreground">Climate Risk</h4>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <input type="checkbox" className="accent-blue-500" defaultChecked />
+                    <span className="text-sm">Low (0-3)</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <input type="checkbox" className="accent-blue-500" defaultChecked />
+                    <span className="text-sm">Medium (4-6)</span>
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                    <input type="checkbox" className="accent-blue-500" defaultChecked />
+                    <span className="text-sm">High (7-10)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
           )}
 
           {/* Wet Bulb Temperature Widget */}
@@ -3687,49 +4525,161 @@ export default function WaterAccessView() {
                   </div>
                 )}
               </div>
+            </AccordionItem>
+          )}
 
-              {/* Aquifers Section */}
-              <div className="space-y-3">
-                <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg ${showAquifersLayer
-                  ? 'border-[1px] border-blue-500 bg-blue-500/5'
-                  : 'border-0 bg-white'
-                  }`}>
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 accent-blue-500"
-                    checked={showAquifersLayer}
-                    onChange={() => setShowAquifersLayer(!showAquifersLayer)}
-                  />
-                  <span className="text-sm font-medium text-foreground">Aquifers</span>
-                </label>
+          {/* Aquifers Widget - Shows when layer is active */}
+          {showAquifersLayer && (
+            <AccordionItem title="Aquifers" icon={<Droplets className="h-4 w-4" />}>
+              {/* Opacity Slider */}
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                  <span className="text-xs font-medium">{Math.round(aquiferOpacity * 100)}%</span>
+                </div>
+                <Slider
+                  value={[Math.round(aquiferOpacity * 100)]}
+                  min={10}
+                  max={100}
+                  step={5}
+                  onValueChange={(value) => {
+                    setAquiferOpacity(value[0] / 100)
+                  }}
+                />
+              </div>
 
-                {showAquifersLayer && (
-                  <div className="ml-1 space-y-2">
-                    <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
-                    <Slider
-                      min={0}
-                      max={1}
-                      step={0.05}
-                      value={[aquiferOpacity]}
-                      onValueChange={(value) => setAquiferOpacity(value[0])}
-                      className="mb-2"
-                    />
+              {/* Aquifer Health Legend */}
+              <div className="space-y-1.5">
+                <h4 className="text-xs font-semibold text-muted-foreground mb-2">Aquifer Health Status</h4>
+                <div className="h-3 w-full rounded" style={{
+                  background: 'linear-gradient(to right, #22c55e 0%, #3b82f6 25%, #94a3b8 50%, #f97316 75%, #ef4444 100%)'
+                }} />
+                <div className="flex justify-between text-[9px] text-muted-foreground">
+                  <span>Healthy</span>
+                  <span>Mending</span>
+                  <span>Stressed</span>
+                  <span>Depleting</span>
+                  <span>Unknown</span>
+                </div>
+              </div>
+            </AccordionItem>
+          )}
 
-                    {/* Aquifer Health Legend */}
-                    <div className="mt-4 space-y-1.5">
-                      <div className="h-3 w-full rounded" style={{
-                        background: 'linear-gradient(to right, #22c55e 0%, #3b82f6 25%, #94a3b8 50%, #f97316 75%, #ef4444 100%)'
-                      }} />
-                      <div className="flex justify-between text-[9px] text-muted-foreground">
-                        <span>Healthy</span>
-                        <span>Mending</span>
-                        <span>Stressed</span>
-                        <span>Depleting</span>
-                        <span>Unknown</span>
-                      </div>
-                    </div>
+          {/* GRACE Groundwater Widget - Shows when layer is active */}
+          {showGroundwaterLayer && (
+            <AccordionItem title="GRACE Groundwater" icon={<TrendingUp className="h-4 w-4" />}>
+              {/* Description */}
+              <div className="mb-4 p-3 rounded-lg bg-blue-50/50 dark:bg-blue-900/10">
+                <p className="text-xs text-muted-foreground">
+                  NASA GRACE satellite measurements showing groundwater storage changes (2002-2024)
+                </p>
+              </div>
+
+              {/* Depletion Status Legend */}
+              <div className="space-y-1.5">
+                <h4 className="text-xs font-semibold text-muted-foreground mb-2">Groundwater Trend</h4>
+                <div className="h-3 w-full rounded" style={{
+                  background: 'linear-gradient(to right, #b2182b 0%, #ef8a62 20%, #fddbc7 40%, #f7f7f7 50%, #d1e5f0 60%, #67a9cf 80%, #2166ac 100%)'
+                }} />
+                <div className="flex justify-between text-[9px] text-muted-foreground">
+                  <span>-20cm</span>
+                  <span>Depletion</span>
+                  <span>0</span>
+                  <span>Recharge</span>
+                  <span>+20cm</span>
+                </div>
+              </div>
+
+              <div className="mt-3 text-[10px] text-muted-foreground italic">
+                Change vs. 2004-2009 baseline
+              </div>
+            </AccordionItem>
+          )}
+
+          {/* Temperature Projection Controls - Only shows when layer is active */}
+          {isTemperatureProjectionActive && (
+            <AccordionItem title="Future Temperature Anomaly" icon={<CloudRain className="h-4 w-4" />}>
+              {/* Status Indicator */}
+              {temperatureProjectionStatus === 'loading' && (
+                <div className="space-y-2 rounded-md border border-orange-500/30 bg-orange-500/10 p-3 mb-3">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
+                    <p className="text-xs text-foreground">Loading temperature data...</p>
                   </div>
-                )}
+                </div>
+              )}
+
+              {temperatureProjectionStatus === 'success' && (
+                <div className="space-y-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-green-500" />
+                    <p className="text-xs text-green-600 font-medium">✓ Real NASA climate data (Earth Engine)</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Temperature Mode Toggle */}
+              <div className="space-y-2 mb-4">
+                <div className="text-xs font-semibold text-foreground mb-2">Temperature Display</div>
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="temperatureMode"
+                      value="anomaly"
+                      checked={controls.temperatureMode === 'anomaly'}
+                      onChange={() => {}}
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm text-foreground">Temperature Anomaly (Change)</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="temperatureMode"
+                      value="actual"
+                      checked={controls.temperatureMode === 'actual'}
+                      onChange={() => {}}
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm text-foreground">Actual Temperature</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Opacity Control */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-foreground">Layer Opacity</label>
+                  <span className="text-xs text-muted-foreground">{Math.round((controls.projectionOpacity ?? 0.6) * 100)}%</span>
+                </div>
+                <Slider
+                  min={0}
+                  max={1}
+                  step={0.05}
+                  value={[controls.projectionOpacity ?? 0.6]}
+                  onValueChange={(value) => setProjectionOpacity(value[0])}
+                />
+              </div>
+
+              {/* Temperature Legend */}
+              <div className="mt-4 space-y-2">
+                <div className="text-xs font-semibold text-foreground">
+                  {controls.temperatureMode === 'anomaly' ? 'Temperature Anomaly' : 'Temperature'}
+                </div>
+                <div className="h-3 w-full rounded" style={{
+                  background: 'linear-gradient(to right, #0571b0 0%, #92c5de 25%, #ffffbf 50%, #f4a582 75%, #ca0020 100%)'
+                }} />
+                <div className="flex justify-between text-[9px] text-muted-foreground">
+                  <span>0°</span>
+                  <span>1°</span>
+                  <span>2°</span>
+                  <span>3°</span>
+                  <span>4°</span>
+                  <span>5°</span>
+                  <span>6°</span>
+                  <span>8°+</span>
+                </div>
               </div>
             </AccordionItem>
           )}
@@ -3931,9 +4881,10 @@ export default function WaterAccessView() {
             )
           })()}
 
+            </div>
           </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* Groundwater Details Panel - Bottom Center */}
       {selectedAquifer && (
@@ -3946,7 +4897,17 @@ export default function WaterAccessView() {
         </div>
       )}
 
-      {/* Metro Humidity Tooltip (like Metro Data Statistics) */}
+      {/* Factory Details Panel - Bottom Center */}
+      {selectedFactory && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto" style={{ width: '640px' }}>
+          <FactoryDetailsPanel
+            selectedFactory={selectedFactory}
+            onClose={() => setSelectedFactory(null)}
+          />
+        </div>
+      )}
+
+      {/* Metro Humidity Tooltip (like Metro Population Change) */}
       {metroHoverInfo && metroHoverInfo.cityName && metroHoverInfo.humidityData && (
         <div
           className="absolute z-10 pointer-events-none bg-white rounded-lg shadow-lg border border-gray-200"
@@ -4033,7 +4994,7 @@ export default function WaterAccessView() {
         </div>
       )}
 
-      {/* Metro Data Statistics Tooltip (TEST - from Climate screen) */}
+      {/* Metro Population Change Tooltip (TEST - from Climate screen) */}
       {megaregionHoverInfo && megaregionHoverInfo.metroName && megaregionHoverInfo.metroPopulation && (
         <div
           className="absolute z-10 pointer-events-none bg-card/95 backdrop-blur-lg border border-border/60 rounded-lg shadow-lg px-2.5 py-1.5 text-xs"
@@ -4060,7 +5021,7 @@ export default function WaterAccessView() {
         </div>
       )}
 
-      {/* Metro Humidity React Overlay - Render MetroHumidityBubble components using map projection */}
+      {/* Metro Weather React Overlay - Render MetroHumidityBubble components using map projection */}
       {showMetroHumidityLayer && mapRef.current && mapLoaded && (
         <div
           onClick={(e) => {
@@ -4110,6 +5071,45 @@ export default function WaterAccessView() {
 
             const humidityData = getHumidityDataForYear(humidity_projections, projectionYear)
 
+            // Get temperature data for this city
+            const getTempDataForCity = (cityName: string, year: number) => {
+              const normalizedCity = cityName.toLowerCase().trim()
+
+              const tempCity = Object.values(metroTemperatureData).find((city: any) => {
+                const tempCityName = city.name.toLowerCase().trim()
+                if (tempCityName === normalizedCity) return true
+
+                const cityBase = normalizedCity.split(',')[0].trim()
+                const tempCityBase = tempCityName.split(',')[0].trim()
+                if (cityBase === tempCityBase) return true
+                if (tempCityName.includes(cityBase) || cityBase.includes(tempCityBase)) return true
+
+                return false
+              }) as any
+
+              if (!tempCity?.projections) return null
+
+              let mappedScenario = controls.scenario
+              if (controls.scenario === 'rcp26') mappedScenario = 'ssp126'
+              else if (controls.scenario === 'rcp45') mappedScenario = 'ssp245'
+              else if (controls.scenario === 'rcp60') mappedScenario = 'ssp370'
+              else if (controls.scenario === 'rcp85') mappedScenario = 'ssp585'
+
+              const scenarioData = tempCity.projections[mappedScenario] || tempCity.projections['ssp245']
+              if (!scenarioData) return null
+
+              const decades = Object.keys(scenarioData).map(Number).sort((a, b) => a - b)
+              if (decades.length === 0) return null
+
+              const closestDecade = decades.reduce((prev, curr) =>
+                Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
+              )
+
+              return scenarioData[closestDecade]
+            }
+
+            const tempData = getTempDataForCity(city, projectionYear)
+
             // Convert lat/lng to screen coordinates
             const point = mapRef.current!.project([lng, lat])
 
@@ -4137,6 +5137,9 @@ export default function WaterAccessView() {
                   visible={true}
                   showHumidityWetBulb={showHumidityWetBulb}
                   showTempHumidity={showTempHumidity}
+                  showAverageTemperatures={showAverageTemperatures}
+                  summerAvg={tempData?.summer_avg ? `${tempData.summer_avg.toFixed(1)}°F` : undefined}
+                  winterAvg={tempData?.winter_avg ? `${tempData.winter_avg.toFixed(1)}°F` : undefined}
                   onClose={() => { }}
                   isActive={isActive}
                   onClick={() => {

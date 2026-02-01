@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//Users/joshuabutler/Documents/github-project/sustainable-urban-studio/**)",
+      "Bash(npm run dev:*)",
+      "Bash(python3:*)",
+      "Bash(PORT=5001 python3:*)",
+      "Bash(lsof:*)",
+      "Bash(xargs kill:*)",
+      "Bash(pkill:*)",
+      "Bash(earthengine authenticate:*)",
+      "Read(//Users/joshuabutler/.config/earthengine/**)",
+      "Bash(PORT=5001 EARTHENGINE_PROJECT=josh-geo-the-second python3 climate_server.py)",
+      "WebSearch",
+      "Bash(pip3 install:*)",
+      "Bash(env)",
+      "Read(//Users/joshuabutler/.aws/**)",
+      "Bash(cat:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(curl -s \"http://localhost:5001/api/climate/temperature-projection?north=41&south=40&east=-73&west=-74&year=2050&scenario=rcp45&resolution=7\")",
+      "Bash(curl -s \"http://localhost:5001/api/climate/temperature-projection?north=41&south=40&east=-73&west=-74&year=2050&scenario=rcp45&resolution=8\")",
+      "Bash(curl -s \"http://localhost:5001/api/climate/temperature-projection?north=70&south=25&east=-65&west=-125&year=2050&scenario=rcp45&resolution=4\")",
+      "Bash(curl -s \"http://localhost:5001/api/climate/temperature-projection?north=42&south=39&east=-72&west=-75&year=2050&scenario=rcp45&resolution=7\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
