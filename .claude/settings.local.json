@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run dev)",
+      "Bash(curl:*)",
+      "Bash(lsof:*)",
+      "Bash(find:*)",
+      "Read(//private/tmp/**)",
+      "Bash(npm run build)",
+      "Bash(npm run lint)",
+      "Bash(npx tsc:*)",
+      "Bash(python3:*)",
+      "Bash(kill:*)",
+      "Bash(cat:*)",
+      "Bash(pkill:*)",
+      "Bash(xargs kill:*)",
+      "Bash(git -C /Users/joshuabutler/Documents/github-project/climate-suite diff apps/climate-studio/src/index.ts)",
+      "Bash(git -C /Users/joshuabutler/Documents/github-project/climate-suite diff apps/climate-studio/src/index.tsx)",
+      "Bash(rm:*)",
+      "Bash(npm run:*)",
+      "Bash(ls:*)",
+      "Bash(./run_temperature_extraction.sh:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

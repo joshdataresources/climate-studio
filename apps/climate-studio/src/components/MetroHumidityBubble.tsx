@@ -18,6 +18,9 @@ interface MetroHumidityBubbleProps {
   visible: boolean;
   showHumidityWetBulb?: boolean;  // Show humidity & wet bulb section
   showTempHumidity?: boolean; // Show temperature & humidity section
+  showAverageTemperatures?: boolean; // Show average summer/winter temperatures
+  summerAvg?: string; // Summer average temperature (e.g., "85.2°F")
+  winterAvg?: string; // Winter average temperature (e.g., "42.1°F")
   onClose: () => void;
   onHover?: () => void;
   onHoverEnd?: () => void;
@@ -38,6 +41,9 @@ export const MetroHumidityBubble: React.FC<MetroHumidityBubbleProps> = ({
   visible,
   showHumidityWetBulb = true,
   showTempHumidity = true,
+  showAverageTemperatures = false,
+  summerAvg,
+  winterAvg,
   onClose,
   onHover,
   onHoverEnd,
@@ -278,13 +284,6 @@ export const MetroHumidityBubble: React.FC<MetroHumidityBubbleProps> = ({
                       <span style={styles.valueBold}>{wetBulbEvents}</span>
                     </div>
                   </div>
-                  {/* 100°+ Days */}
-                  <div style={styles.section2Item}>
-                    <div style={styles.label}>100°+ Days</div>
-                    <div style={styles.section2ValueRow}>
-                      <span style={styles.valueBold}>{daysOver100}</span>
-                    </div>
-                  </div>
                 </div>
               </div>
             )}
@@ -306,6 +305,29 @@ export const MetroHumidityBubble: React.FC<MetroHumidityBubbleProps> = ({
                     <div style={styles.label}>100°+ Days</div>
                     <div style={styles.section2ValueRow}>
                       <span style={styles.valueBold}>{daysOver100}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Section 3: Average Temperatures - Only show if showAverageTemperatures is true */}
+            {showAverageTemperatures && summerAvg && winterAvg && (
+              <div style={styles.section}>
+                <div style={styles.sectionHeader}>Average Temperatures</div>
+                <div style={styles.section2Grid}>
+                  {/* Summer Average */}
+                  <div style={styles.section2Item}>
+                    <div style={styles.label}>Summer Avg</div>
+                    <div style={styles.section2ValueRow}>
+                      <span style={styles.valueBold}>{summerAvg}</span>
+                    </div>
+                  </div>
+                  {/* Winter Average */}
+                  <div style={styles.section2Item}>
+                    <div style={styles.label}>Winter Avg</div>
+                    <div style={styles.section2ValueRow}>
+                      <span style={styles.valueBold}>{winterAvg}</span>
                     </div>
                   </div>
                 </div>

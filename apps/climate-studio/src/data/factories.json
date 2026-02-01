@@ -1,0 +1,333 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-112.074, 33.645]
+      },
+      "properties": {
+        "id": "tsmc-phoenix-1",
+        "name": "TSMC North Phoenix",
+        "company": "Taiwan Semiconductor Manufacturing Company",
+        "city": "Phoenix",
+        "state": "Arizona",
+        "type": "Semiconductor Manufacturing",
+        "investment": 165000000000,
+        "employees": 12000,
+        "yearEstablished": 2024,
+        "facilities": "Six fabrication plants (fabs)",
+        "waterUsage": {
+          "annual_acre_feet": 40000,
+          "daily_gallons": 13000000,
+          "recycling_rate": 0.65,
+          "target_recycling_rate": 0.9,
+          "description": "10,000-40,000 acre-feet annually"
+        },
+        "environmental": {
+          "stress_type": "Critical Water Stress",
+          "severity": "critical",
+          "drought_duration": 30,
+          "aquifer_status": "Depleted - housing development limits in place",
+          "air_quality_rank": 5,
+          "air_pollutants": ["Ozone", "Particulate Matter"],
+          "chemical_waste": true,
+          "impact_description": "Extreme drought since 1994. Even with 90% water recycling, requires 100% new water every 10 days. Phoenix lacks reliable long-term water supply."
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-112.30, 33.31]
+      },
+      "properties": {
+        "id": "nestle-glendale",
+        "name": "Nestlé Beverage Factory",
+        "company": "Nestlé USA",
+        "city": "Glendale",
+        "state": "Arizona",
+        "type": "Food & Beverage Manufacturing",
+        "investment": 675000000,
+        "employees": 350,
+        "yearEstablished": 2025,
+        "facilities": "630,000 sq ft factory and distribution center",
+        "waterUsage": {
+          "annual_acre_feet": 8000,
+          "daily_gallons": 2600000,
+          "recycling_rate": 0.3,
+          "description": "High water usage for beverage production"
+        },
+        "environmental": {
+          "stress_type": "Severe Water Stress",
+          "severity": "stressed",
+          "drought_duration": 30,
+          "aquifer_status": "Depleted",
+          "impact_description": "Large beverage facility in drought region with limited water recycling capacity."
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-111.75, 33.24]
+      },
+      "properties": {
+        "id": "lg-queen-creek",
+        "name": "LG Energy Solution Battery Plant",
+        "company": "LG Energy Solution",
+        "city": "Queen Creek",
+        "state": "Arizona",
+        "type": "Battery Manufacturing",
+        "investment": 500000000,
+        "employees": 1500,
+        "yearEstablished": 2026,
+        "facilities": "Battery cell production facility",
+        "waterUsage": {
+          "annual_acre_feet": 3000,
+          "daily_gallons": 980000,
+          "recycling_rate": 0.5,
+          "description": "Moderate water usage with chemical processing"
+        },
+        "environmental": {
+          "stress_type": "Water Stress",
+          "severity": "stressed",
+          "drought_duration": 30,
+          "aquifer_status": "Depleted",
+          "chemical_waste": true,
+          "impact_description": "Battery manufacturing with chemical waste in drought-stressed region."
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-111.84, 33.31]
+      },
+      "properties": {
+        "id": "amkor-peoria",
+        "name": "Amkor Technology Peoria",
+        "company": "Amkor Technology",
+        "city": "Peoria",
+        "state": "Arizona",
+        "type": "Semiconductor Packaging",
+        "investment": 2000000000,
+        "employees": 2000,
+        "yearEstablished": 2025,
+        "facilities": "Chip packaging and testing facility",
+        "waterUsage": {
+          "annual_acre_feet": 5000,
+          "daily_gallons": 1630000,
+          "recycling_rate": 0.7,
+          "description": "Chip packaging requires water for cooling"
+        },
+        "environmental": {
+          "stress_type": "Water Stress",
+          "severity": "stressed",
+          "drought_duration": 30,
+          "aquifer_status": "Depleted",
+          "chemical_waste": true,
+          "impact_description": "Semiconductor packaging in Phoenix drought zone."
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-97.13, 33.63]
+      },
+      "properties": {
+        "id": "ti-sherman",
+        "name": "Texas Instruments Sherman",
+        "company": "Texas Instruments",
+        "city": "Sherman",
+        "state": "Texas",
+        "type": "Semiconductor Manufacturing",
+        "investment": 5000000000,
+        "employees": 3000,
+        "yearEstablished": 2022,
+        "facilities": "300mm wafer fabrication facility",
+        "waterUsage": {
+          "annual_acre_feet": 14700,
+          "daily_gallons": 4800000,
+          "recycling_rate": 0.6,
+          "description": "Equivalent to city of 60,000 people"
+        },
+        "environmental": {
+          "stress_type": "Aquifer Depletion",
+          "severity": "critical",
+          "aquifer_name": "Carrizo-Wilcox Aquifer",
+          "aquifer_depletion": "150+ feet",
+          "impact_description": "Drawing from Carrizo-Wilcox Aquifer (Milam County) - water table has dropped 150+ feet over recent decades."
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-97.42, 30.62]
+      },
+      "properties": {
+        "id": "samsung-taylor",
+        "name": "Samsung Taylor Fab",
+        "company": "Samsung",
+        "city": "Taylor",
+        "state": "Texas",
+        "type": "Semiconductor Manufacturing",
+        "investment": 17000000000,
+        "employees": 2000,
+        "yearEstablished": 2024,
+        "facilities": "Advanced semiconductor fabrication facility",
+        "waterUsage": {
+          "annual_acre_feet": 14700,
+          "daily_gallons": 4800000,
+          "recycling_rate": 0.65,
+          "description": "Equivalent to city of 60,000 people"
+        },
+        "environmental": {
+          "stress_type": "Aquifer Depletion",
+          "severity": "critical",
+          "aquifer_name": "Carrizo-Wilcox Aquifer",
+          "aquifer_depletion": "150+ feet",
+          "impact_description": "Major draw from severely depleted Carrizo-Wilcox Aquifer."
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-96.51, 32.95]
+      },
+      "properties": {
+        "id": "t1-wilmer",
+        "name": "T1 Energy G1 Dallas",
+        "company": "T1 Energy",
+        "city": "Wilmer",
+        "state": "Texas",
+        "type": "Solar Panel Manufacturing",
+        "investment": 400000000,
+        "employees": 1200,
+        "yearEstablished": 2024,
+        "facilities": "Produces 20,000 solar panels daily",
+        "waterUsage": {
+          "annual_acre_feet": 2000,
+          "daily_gallons": 650000,
+          "recycling_rate": 0.4,
+          "description": "Moderate water use for solar manufacturing"
+        },
+        "environmental": {
+          "stress_type": "Moderate Impact",
+          "severity": "moderate",
+          "impact_description": "Solar manufacturing with moderate environmental footprint."
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.36, 29.76]
+      },
+      "properties": {
+        "id": "inventec-houston",
+        "name": "Inventec Houston Plant",
+        "company": "Inventec",
+        "city": "Houston",
+        "state": "Texas",
+        "type": "Electronics Manufacturing",
+        "investment": 250000000,
+        "employees": 2300,
+        "yearEstablished": 2024,
+        "facilities": "AI and electronics manufacturing",
+        "waterUsage": {
+          "annual_acre_feet": 1500,
+          "daily_gallons": 490000,
+          "recycling_rate": 0.5,
+          "description": "Electronics assembly with cooling requirements"
+        },
+        "environmental": {
+          "stress_type": "Critical Air Pollution",
+          "severity": "critical",
+          "air_quality": "Worst in country",
+          "pollutants": ["PM2.5", "PM10", "VOCs", "Sulfate"],
+          "health_impact": "1,314 lives shortened (2016 data)",
+          "environmental_justice": true,
+          "impact_description": "Located in Houston Ship Channel area - worst air quality in country. Predominantly Black/brown communities face disproportionate health risks from petrochemical complex."
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-95.51, 29.76]
+      },
+      "properties": {
+        "id": "lily-harris",
+        "name": "Lily Technology Harris County",
+        "company": "Lily Technology",
+        "city": "Harris County",
+        "state": "Texas",
+        "type": "Technology Manufacturing",
+        "investment": 6500000000,
+        "employees": 600,
+        "yearEstablished": 2025,
+        "facilities": "1 million sq ft manufacturing facility",
+        "waterUsage": {
+          "annual_acre_feet": 3000,
+          "daily_gallons": 980000,
+          "recycling_rate": 0.55,
+          "description": "Large-scale tech manufacturing"
+        },
+        "environmental": {
+          "stress_type": "Critical Air Pollution",
+          "severity": "critical",
+          "air_quality": "Worst in country",
+          "pollutants": ["PM2.5", "PM10", "VOCs", "Sulfate"],
+          "health_impact": "1,314 lives shortened (2016 data)",
+          "environmental_justice": true,
+          "impact_description": "Houston Ship Channel petrochemical complex area with severe air quality issues affecting predominantly minority communities."
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-111.65, 32.88]
+      },
+      "properties": {
+        "id": "pg-coolidge",
+        "name": "Procter & Gamble Coolidge",
+        "company": "Procter & Gamble",
+        "city": "Coolidge",
+        "state": "Arizona",
+        "type": "Consumer Products Manufacturing",
+        "investment": 500000000,
+        "employees": 500,
+        "yearEstablished": 2025,
+        "facilities": "427-acre fabric care manufacturing plant",
+        "waterUsage": {
+          "annual_acre_feet": 6000,
+          "daily_gallons": 1960000,
+          "recycling_rate": 0.4,
+          "description": "High water usage for fabric care products"
+        },
+        "environmental": {
+          "stress_type": "Water Stress",
+          "severity": "stressed",
+          "drought_duration": 30,
+          "aquifer_status": "Depleted",
+          "impact_description": "Large fabric care facility with high water demands in drought region."
+        }
+      }
+    }
+  ]
+}
