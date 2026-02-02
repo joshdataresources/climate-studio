@@ -2,6 +2,7 @@ import React, { useCallback, useMemo, useRef, useState } from "react"
 import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { LayerControlsPanel, LayerPanel } from "../layer-panel"
+import { LayerPalette } from "../LayerPalette"
 import { useClimateLayerData } from "../../hooks/useClimateLayerData"
 import { LatLngBoundsLiteral } from "../../types/geography"
 import { Loader2, MapPin, Search, Save, Bookmark, GripVertical, MoreHorizontal, Trash2, Pencil } from "lucide-react"
@@ -399,10 +400,8 @@ export function ClimateStudioPanels({ mapBounds, viewport, onViewportChange }: C
         </div>
       </div>
 
-      {/* Layer Panel */}
-      <section className="widget-container widget-container-no-padding">
-        <LayerPanel layerStates={layerStates} />
-      </section>
+      {/* Layer Palette */}
+      <LayerPalette />
     </>
   )
 }

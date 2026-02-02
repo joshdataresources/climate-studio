@@ -587,7 +587,6 @@ export default function WaterAccessView() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [aquiferCount, setAquiferCount] = useState(0)
-  const [projectionYear, setProjectionYear] = useState(2025)
   const [selectedAquifer, setSelectedAquifer] = useState<SelectedAquifer | null>(null)
   const [selectedFeatureId, setSelectedFeatureId] = useState<string | number | null>(null)
   const [selectedMetroCity, setSelectedMetroCity] = useState<string | null>(null)
@@ -637,7 +636,7 @@ export default function WaterAccessView() {
   const [showCanalsLayer, setShowCanalsLayer] = useState(false)
   const [showAquifersLayer, setShowAquifersLayer] = useState(false)
   const [showDamsLayer, setShowDamsLayer] = useState(false)
-  const [showMetroHumidityLayer, setShowMetroHumidityLayer] = useState(false)
+  const [showMetroHumidityLayer, setShowMetroHumidityLayer] = useState(true)
   const [showGroundwaterLayer, setShowGroundwaterLayer] = useState(false)
   const [showFactoriesLayer, setShowFactoriesLayer] = useState(false)
   const [showSeaLevelRiseLayer, setShowSeaLevelRiseLayer] = useState(false)
@@ -651,6 +650,11 @@ export default function WaterAccessView() {
 
   // Climate context for precipitation & drought layer
   const { toggleLayer, isLayerActive, controls, setDroughtMetric, setDroughtOpacity, setWetBulbOpacity, setProjectionOpacity } = useClimate()
+
+  // Use projectionYear from climate context (slider) instead of local state
+  // This ensures Metro Weather popovers update when the user moves the year slider
+  const projectionYear = controls.projectionYear ?? 2050
+
   const precipitationDroughtLayer = climateLayers.find(l => l.id === 'precipitation_drought')
   const isPrecipitationDroughtActive = isLayerActive('precipitation_drought')
   const wetBulbLayer = climateLayers.find(l => l.id === 'wet_bulb')
