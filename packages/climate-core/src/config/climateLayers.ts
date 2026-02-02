@@ -242,7 +242,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
       name: 'NASA NEX-GDDP-CMIP6',
       url: 'https://www.nccs.nasa.gov/services/data-collections'
     },
-    defaultActive: false,
+    defaultActive: true,
     controls: ['temperatureMode', 'projectionOpacity'],
     fetch: {
       method: 'GET',
@@ -325,7 +325,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
       name: 'Google Earth Engine (SRTM/Copernicus DEM)',
       url: 'https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_DEM_GLO30'
     },
-    defaultActive: false,
+    defaultActive: true,
     controls: ['reliefStyle', 'reliefOpacity'],
     fetch: {
       method: 'GET',
@@ -364,7 +364,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
       name: 'NASA NEX-GDDP-CMIP6',
       url: 'https://www.nccs.nasa.gov/services/data-collections/land-based-products/nex-gddp-cmip6'
     },
-    defaultActive: false,
+    defaultActive: true,
     controls: ['projectionYear', 'scenario', 'wetBulbOpacity'],
     fetch: {
       method: 'GET',
