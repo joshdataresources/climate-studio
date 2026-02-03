@@ -152,12 +152,10 @@
   border-radius: var(--widget-border-radius);
   border: 1px solid var(--widget-border);
   background: var(--widget-bg);
-  backdrop-filter: var(--widget-backdrop-blur);
   -webkit-backdrop-filter: var(--widget-backdrop-blur);
+  backdrop-filter: var(--widget-backdrop-blur);
   padding: var(--widget-padding);
   box-shadow: var(--widget-box-shadow);
-  /* GPU acceleration for better performance and compatibility */
-  will-change: backdrop-filter;
   transform: translateZ(0);
   /* Smooth transitions for interactive states */
   transition:
@@ -427,6 +425,7 @@ button[role="combobox"][aria-expanded="true"] {
   border-radius: var(--button-border-radius) !important;
   border: 1px solid var(--button-border) !important;
   background: var(--button-bg) !important;
+  -webkit-backdrop-filter: var(--widget-backdrop-blur);
   backdrop-filter: var(--widget-backdrop-blur);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
   overflow: hidden;
