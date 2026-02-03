@@ -20,7 +20,8 @@ import { Input } from './ui/input'
 import { Slider } from './ui/slider'
 import { AccordionItem } from './ui/accordion'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
-import { Waves, Droplets, CloudRain, Factory, MapPin, BarChart3, Mountain, TrendingUp, Loader2 } from 'lucide-react'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
+import { Waves, Droplets, CloudRain, Factory, MapPin, BarChart3, Mountain, TrendingUp, Loader2, GripVertical, X, Layers, ChevronDown, Save, Trash2, Bookmark, MoreHorizontal, Pencil } from 'lucide-react'
 import { useLayer } from '../contexts/LayerContext'
 import { shouldShowClimateWidget } from '../config/layerDefinitions'
 import {
@@ -562,6 +563,7 @@ export default function WaterAccessView() {
   const isMountedRef = useRef(true)
   const selectedFeatureIdRef = useRef<string | number | null>(null) // Ref to track selection in event handlers
   const aquiferDataRef = useRef<GeoJSON.FeatureCollection | null>(null) // Ref to persist aquifer data across style changes
+  const manageLayersDropdownRef = useRef<HTMLDivElement>(null)
   const metroMarkersRef = useRef<Array<{ marker: mapboxgl.Marker; root: Root }>>([]) // Store metro humidity markers and React roots
   const [, forceUpdate] = useState(0) // Force re-render when map moves to update marker positions
   const [metroHoverInfo, setMetroHoverInfo] = useState<{
@@ -636,7 +638,7 @@ export default function WaterAccessView() {
   const [showCanalsLayer, setShowCanalsLayer] = useState(false)
   const [showAquifersLayer, setShowAquifersLayer] = useState(false)
   const [showDamsLayer, setShowDamsLayer] = useState(false)
-  const [showMetroHumidityLayer, setShowMetroHumidityLayer] = useState(true)
+  const [showMetroHumidityLayer, setShowMetroHumidityLayer] = useState(true) // Default ON
   const [showGroundwaterLayer, setShowGroundwaterLayer] = useState(false)
   const [showFactoriesLayer, setShowFactoriesLayer] = useState(false)
   const [showSeaLevelRiseLayer, setShowSeaLevelRiseLayer] = useState(false)
@@ -647,6 +649,40 @@ export default function WaterAccessView() {
   const [showMetroDataStatistics, setShowMetroDataStatistics] = useState(false)
   const [showTopographicRelief, setShowTopographicRelief] = useState(true) // Default ON at 20% opacity
   const [activeBubbleIndex, setActiveBubbleIndex] = useState<number | null>(null) // Track which bubble is active
+
+  // Climate Suite panel controls
+  const [showManageLayersDropdown, setShowManageLayersDropdown] = useState(false)
+  const [showSourceInfo, setShowSourceInfo] = useState(true)
+  const [selectAllLayers, setSelectAllLayers] = useState(false)
+
+  // Close Manage Layers dropdown when clicking outside
+  useEffect(() => {
+    if (!showManageLayersDropdown) return
+    const handleClickOutside = (e: MouseEvent) => {
+      if (manageLayersDropdownRef.current && !manageLayersDropdownRef.current.contains(e.target as Node)) {
+        setShowManageLayersDropdown(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showManageLayersDropdown])
+
+  // Which layers are IN the widget (visible in the list) - separate from whether they're active
+  const [layersInWidget, setLayersInWidget] = useState({
+    metroWeather: true,
+    metroPopulation: false,
+    rivers: false,
+    canals: false,
+    dams: false,
+    seaLevel: false,
+    groundwater: false,
+    aquifers: false,
+    precipitation: false,
+    wetBulb: true,
+    temperature: true,
+    factories: false,
+    topographic: true
+  })
 
   // Climate context for precipitation & drought layer
   const { toggleLayer, isLayerActive, controls, setDroughtMetric, setDroughtOpacity, setWetBulbOpacity, setProjectionOpacity } = useClimate()
@@ -677,6 +713,93 @@ export default function WaterAccessView() {
   useEffect(() => {
     selectedFeatureIdRef.current = selectedFeatureId
   }, [selectedFeatureId])
+
+  // Initialize default climate layers on mount (run only once)
+  useEffect(() => {
+    // Enable Wet Bulb Temperature and Future Temperature Anomaly by default
+    const timer = setTimeout(() => {
+      if (!isLayerActive('wet_bulb')) {
+        toggleLayer('wet_bulb')
+      }
+      if (!isLayerActive('temperature_projection')) {
+        toggleLayer('temperature_projection')
+      }
+    }, 100)
+
+    return () => clearTimeout(timer)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Auto-disable layers when removed from widget
+  useEffect(() => {
+    // Metro Weather
+    if (!layersInWidget.metroWeather && showMetroHumidityLayer) {
+      setShowMetroHumidityLayer(false)
+    }
+    // Metro Population
+    if (!layersInWidget.metroPopulation && showMetroDataStatistics) {
+      setShowMetroDataStatistics(false)
+    }
+    // Rivers
+    if (!layersInWidget.rivers && showRiversLayer) {
+      setShowRiversLayer(false)
+    }
+    // Canals
+    if (!layersInWidget.canals && showCanalsLayer) {
+      setShowCanalsLayer(false)
+    }
+    // Dams
+    if (!layersInWidget.dams && showDamsLayer) {
+      setShowDamsLayer(false)
+    }
+    // Sea Level Rise
+    if (!layersInWidget.seaLevel && showSeaLevelRiseLayer) {
+      setShowSeaLevelRiseLayer(false)
+    }
+    // Groundwater
+    if (!layersInWidget.groundwater && showGroundwaterLayer) {
+      setShowGroundwaterLayer(false)
+    }
+    // Aquifers
+    if (!layersInWidget.aquifers && showAquifersLayer) {
+      setShowAquifersLayer(false)
+    }
+    // Factories
+    if (!layersInWidget.factories && showFactoriesLayer) {
+      setShowFactoriesLayer(false)
+    }
+    // Topographic Relief
+    if (!layersInWidget.topographic && showTopographicRelief) {
+      setShowTopographicRelief(false)
+    }
+    // Precipitation & Drought
+    if (!layersInWidget.precipitation && isPrecipitationDroughtActive) {
+      toggleLayer('precipitation_drought')
+    }
+    // Wet Bulb Temperature
+    if (!layersInWidget.wetBulb && isWetBulbActive) {
+      toggleLayer('wet_bulb')
+    }
+    // Future Temperature Anomaly
+    if (!layersInWidget.temperature && isTemperatureProjectionActive) {
+      toggleLayer('temperature_projection')
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    layersInWidget.metroWeather,
+    layersInWidget.metroPopulation,
+    layersInWidget.rivers,
+    layersInWidget.canals,
+    layersInWidget.dams,
+    layersInWidget.seaLevel,
+    layersInWidget.groundwater,
+    layersInWidget.aquifers,
+    layersInWidget.factories,
+    layersInWidget.topographic,
+    layersInWidget.precipitation,
+    layersInWidget.wetBulb,
+    layersInWidget.temperature
+  ])
 
   // GRACE tile layer state
   const [graceTileUrl, setGraceTileUrl] = useState<string | null>(null)
@@ -2416,16 +2539,6 @@ export default function WaterAccessView() {
       // Add raster layer if it doesn't exist
       if (!map.getLayer(layerId)) {
         console.log('🎨 Adding sea level rise raster layer...')
-        // Add sea level layer below other data layers but above basemap
-        // Insert before precipitation layer if it exists
-        let beforeId: string | undefined = 'precipitation-drought-layer'
-        if (!map.getLayer(beforeId)) {
-          beforeId = 'aquifer-fill' // Fallback to aquifer layer
-        }
-        if (!map.getLayer(beforeId)) {
-          beforeId = undefined // Let it render on top if no reference layer exists
-        }
-
         map.addLayer({
           id: layerId,
           type: 'raster',
@@ -2433,7 +2546,8 @@ export default function WaterAccessView() {
           paint: {
             'raster-opacity': 0.7
           }
-        }, beforeId)
+        })
+        console.log('✅ Sea level rise layer added successfully')
       } else {
         // Update opacity if layer exists
         map.setPaintProperty(layerId, 'raster-opacity', 0.7)
@@ -2663,204 +2777,204 @@ export default function WaterAccessView() {
     try {
       // Only process and add data when layer is active
       if (isWetBulbActive) {
-      // Helper to create circle polygon from center point
-      const createCirclePolygon = (lng: number, lat: number, radiusKm: number, numPoints: number = 64): number[][] => {
-      const coords: number[][] = []
-      const earthRadiusKm = 6371
-      for (let i = 0; i <= numPoints; i++) {
-        const angle = (i / numPoints) * 2 * Math.PI
-        const latOffset = (radiusKm / earthRadiusKm) * (180 / Math.PI)
-        const lngOffset = (radiusKm / earthRadiusKm) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180)
-        coords.push([lng + lngOffset * Math.cos(angle), lat + latOffset * Math.sin(angle)])
-      }
-      return coords
-    }
+        // Helper to create circle polygon from center point
+        const createCirclePolygon = (lng: number, lat: number, radiusKm: number, numPoints: number = 64): number[][] => {
+          const coords: number[][] = []
+          const earthRadiusKm = 6371
+          for (let i = 0; i <= numPoints; i++) {
+            const angle = (i / numPoints) * 2 * Math.PI
+            const latOffset = (radiusKm / earthRadiusKm) * (180 / Math.PI)
+            const lngOffset = (radiusKm / earthRadiusKm) * (180 / Math.PI) / Math.cos(lat * Math.PI / 180)
+            coords.push([lng + lngOffset * Math.cos(angle), lat + latOffset * Math.sin(angle)])
+          }
+          return coords
+        }
 
-    // Helper to interpolate between projection years
-    const interpolateProjection = (projections: Record<string, any>, targetYear: number) => {
-      if (!projections || Object.keys(projections).length === 0) {
-        console.warn('No projections data available')
-        return null
-      }
+        // Helper to interpolate between projection years
+        const interpolateProjection = (projections: Record<string, any>, targetYear: number) => {
+          if (!projections || Object.keys(projections).length === 0) {
+            console.warn('No projections data available')
+            return null
+          }
 
-      const years = Object.keys(projections).map(Number).sort((a, b) => a - b)
-      let lowerYear = years[0]
-      let upperYear = years[years.length - 1]
+          const years = Object.keys(projections).map(Number).sort((a, b) => a - b)
+          let lowerYear = years[0]
+          let upperYear = years[years.length - 1]
 
-      for (const year of years) {
-        if (year <= targetYear) lowerYear = year
-        if (year >= targetYear && upperYear === years[years.length - 1]) upperYear = year
-      }
+          for (const year of years) {
+            if (year <= targetYear) lowerYear = year
+            if (year >= targetYear && upperYear === years[years.length - 1]) upperYear = year
+          }
 
-      if (lowerYear === upperYear || targetYear <= lowerYear) return projections[lowerYear.toString()]
-      if (targetYear >= upperYear) return projections[upperYear.toString()]
+          if (lowerYear === upperYear || targetYear <= lowerYear) return projections[lowerYear.toString()]
+          if (targetYear >= upperYear) return projections[upperYear.toString()]
 
-      const ratio = (targetYear - lowerYear) / (upperYear - lowerYear)
-      const lower = projections[lowerYear.toString()]
-      const upper = projections[upperYear.toString()]
+          const ratio = (targetYear - lowerYear) / (upperYear - lowerYear)
+          const lower = projections[lowerYear.toString()]
+          const upper = projections[upperYear.toString()]
 
-      if (!lower || !upper) {
-        console.warn(`Missing projection data for years ${lowerYear} or ${upperYear}`)
-        return lower || upper || projections[years[0].toString()]
-      }
+          if (!lower || !upper) {
+            console.warn(`Missing projection data for years ${lowerYear} or ${upperYear}`)
+            return lower || upper || projections[years[0].toString()]
+          }
 
-      return {
-        avg_summer_humidity: Math.round((lower.avg_summer_humidity || 0) + ((upper.avg_summer_humidity || 0) - (lower.avg_summer_humidity || 0)) * ratio),
-        peak_humidity: Math.round((lower.peak_humidity || 0) + ((upper.peak_humidity || 0) - (lower.peak_humidity || 0)) * ratio),
-        wet_bulb_events: Math.round((lower.wet_bulb_events || 0) + ((upper.wet_bulb_events || 0) - (lower.wet_bulb_events || 0)) * ratio),
-        days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
-        days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
-        estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
-        casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
-        extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
-      }
-    }
-
-    // COLOR based on danger level (combines frequency and humidity intensity)
-    const getDangerColor = (wetBulbEvents: number, peakHumidity: number): string => {
-      const dangerScore = wetBulbEvents * (peakHumidity / 70)
-      if (dangerScore < 5) return '#93c5fd'   // Light blue - minimal risk
-      if (dangerScore < 15) return '#fde047'  // Yellow - low risk
-      if (dangerScore < 30) return '#fbbf24'  // Amber - moderate
-      if (dangerScore < 50) return '#fb923c'  // Orange - elevated
-      if (dangerScore < 80) return '#ef4444'  // Red - high risk
-      return '#991b1b' // Dark red - extreme danger
-    }
-
-    // OPACITY based on danger level - faint for low risk, solid for high risk
-    const getDangerOpacity = (wetBulbEvents: number, peakHumidity: number): number => {
-      const dangerScore = wetBulbEvents * (peakHumidity / 70)
-      if (dangerScore < 5) return 0.15
-      if (dangerScore < 15) return 0.25
-      if (dangerScore < 30) return 0.4
-      if (dangerScore < 50) return 0.55
-      if (dangerScore < 80) return 0.7
-      return 0.85
-    }
-
-    // SIZE based on events and population
-    const getRadiusFromDanger = (wetBulbEvents: number, metroPop: number): number => {
-      let baseRadius = 20
-      if (wetBulbEvents <= 3) baseRadius = 25
-      else if (wetBulbEvents <= 10) baseRadius = 35
-      else if (wetBulbEvents <= 25) baseRadius = 50
-      else if (wetBulbEvents <= 50) baseRadius = 70
-      else if (wetBulbEvents <= 75) baseRadius = 95
-      else baseRadius = 120
-      const popFactor = Math.min(1.3, 0.8 + (metroPop / 10000000))
-      return Math.round(baseRadius * popFactor)
-    }
-
-    // Generate GeoJSON features from expanded wet bulb data
-    const wetBulbDataTyped = expandedWetBulbData as Record<string, {
-      name: string
-      lat: number
-      lon: number
-      population_2024: number
-      metro_population_2024: number
-      baseline_humidity: number
-      projections: Record<string, any>
-    }>
-
-    const features = Object.entries(wetBulbDataTyped)
-      .map(([cityKey, cityData]) => {
-        const { lat, lon, name, projections, metro_population_2024, baseline_humidity } = cityData
-        const projection = interpolateProjection(projections, controls.projectionYear)
-
-        // Skip if no projection data
-        if (!projection) return null
-
-        const radiusKm = getRadiusFromDanger(projection.wet_bulb_events, metro_population_2024)
-        const color = getDangerColor(projection.wet_bulb_events, projection.peak_humidity)
-        const opacity = getDangerOpacity(projection.wet_bulb_events, projection.peak_humidity)
-
-        // Show all cities for debugging
-        // if (projection.wet_bulb_events === 0 && controls.projectionYear < 2035) return null
-
-        return {
-          type: 'Feature' as const,
-          geometry: {
-            type: 'Polygon' as const,
-            coordinates: [createCirclePolygon(lon, lat, radiusKm)]
-          },
-          properties: {
-            name,
-            cityKey,
-            wet_bulb_events: projection.wet_bulb_events,
-            peak_humidity: projection.peak_humidity,
-            avg_summer_humidity: projection.avg_summer_humidity,
-            days_over_95F: projection.days_over_95F,
-            days_over_100F: projection.days_over_100F,
-            at_risk_population: projection.estimated_at_risk_population,
-            radius_km: radiusKm,
-            metro_population: metro_population_2024,
-            baseline_humidity,
-            color,
-            opacity
+          return {
+            avg_summer_humidity: Math.round((lower.avg_summer_humidity || 0) + ((upper.avg_summer_humidity || 0) - (lower.avg_summer_humidity || 0)) * ratio),
+            peak_humidity: Math.round((lower.peak_humidity || 0) + ((upper.peak_humidity || 0) - (lower.peak_humidity || 0)) * ratio),
+            wet_bulb_events: Math.round((lower.wet_bulb_events || 0) + ((upper.wet_bulb_events || 0) - (lower.wet_bulb_events || 0)) * ratio),
+            days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
+            days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
+            estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
+            casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
+            extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
           }
         }
-      })
-      .filter((f): f is NonNullable<typeof f> => f !== null)
 
-    const geojsonData: GeoJSON.FeatureCollection = {
-      type: 'FeatureCollection',
-      features
-    }
+        // COLOR based on danger level (combines frequency and humidity intensity)
+        const getDangerColor = (wetBulbEvents: number, peakHumidity: number): string => {
+          const dangerScore = wetBulbEvents * (peakHumidity / 70)
+          if (dangerScore < 5) return '#93c5fd'   // Light blue - minimal risk
+          if (dangerScore < 15) return '#fde047'  // Yellow - low risk
+          if (dangerScore < 30) return '#fbbf24'  // Amber - moderate
+          if (dangerScore < 50) return '#fb923c'  // Orange - elevated
+          if (dangerScore < 80) return '#ef4444'  // Red - high risk
+          return '#991b1b' // Dark red - extreme danger
+        }
 
-    console.log(`🌡️ Wet Bulb Danger Zones: ${features.length} cities for year ${controls.projectionYear}`)
-    console.log(`🔍 Wet Bulb Active: ${isWetBulbActive}, Opacity: ${controls.wetBulbOpacity}`)
+        // OPACITY based on danger level - faint for low risk, solid for high risk
+        const getDangerOpacity = (wetBulbEvents: number, peakHumidity: number): number => {
+          const dangerScore = wetBulbEvents * (peakHumidity / 70)
+          if (dangerScore < 5) return 0.15
+          if (dangerScore < 15) return 0.25
+          if (dangerScore < 30) return 0.4
+          if (dangerScore < 50) return 0.55
+          if (dangerScore < 80) return 0.7
+          return 0.85
+        }
 
-    // Debug: Show Miami specifically to verify interpolation
-    const miamiFeature = features.find(f => f.properties.name === 'Miami, FL')
-    if (miamiFeature) {
-      console.log(`🔥 MIAMI DEBUG - Year ${controls.projectionYear}:`, {
-        events: miamiFeature.properties.wet_bulb_events,
-        radius_km: miamiFeature.properties.radius_km,
-        peak_humidity: miamiFeature.properties.peak_humidity,
-        color: miamiFeature.properties.color
-      })
-    }
+        // SIZE based on events and population
+        const getRadiusFromDanger = (wetBulbEvents: number, metroPop: number): number => {
+          let baseRadius = 20
+          if (wetBulbEvents <= 3) baseRadius = 25
+          else if (wetBulbEvents <= 10) baseRadius = 35
+          else if (wetBulbEvents <= 25) baseRadius = 50
+          else if (wetBulbEvents <= 50) baseRadius = 70
+          else if (wetBulbEvents <= 75) baseRadius = 95
+          else baseRadius = 120
+          const popFactor = Math.min(1.3, 0.8 + (metroPop / 10000000))
+          return Math.round(baseRadius * popFactor)
+        }
 
-    console.log(`📊 Sample feature:`, features[0])
-    console.log(`🗺️ GeoJSON data:`, geojsonData)
+        // Generate GeoJSON features from expanded wet bulb data
+        const wetBulbDataTyped = expandedWetBulbData as Record<string, {
+          name: string
+          lat: number
+          lon: number
+          population_2024: number
+          metro_population_2024: number
+          baseline_humidity: number
+          projections: Record<string, any>
+        }>
 
-    // FORCE REBUILD: Remove existing layer and source to ensure clean update
-    if (map.getLayer(layerId)) {
-      console.log('🗑️ Removing existing layer for rebuild...')
-      map.removeLayer(layerId)
-    }
-    if (map.getSource(sourceId)) {
-      console.log('🗑️ Removing existing source for rebuild...')
-      map.removeSource(sourceId)
-    }
+        const features = Object.entries(wetBulbDataTyped)
+          .map(([cityKey, cityData]) => {
+            const { lat, lon, name, projections, metro_population_2024, baseline_humidity } = cityData
+            const projection = interpolateProjection(projections, controls.projectionYear)
 
-    // Add fresh source with new data
-    console.log(`📦 Adding Wet Bulb source with data for year ${controls.projectionYear}...`)
-    map.addSource(sourceId, {
-      type: 'geojson',
-      data: geojsonData as any
-    })
+            // Skip if no projection data
+            if (!projection) return null
 
-    // Add fresh layer
-    console.log('🎨 Adding Wet Bulb danger zones layer...')
-    // Insert below labels but above base map
-    let beforeId: string | undefined = 'waterway-label'
-    if (!map.getLayer(beforeId)) beforeId = undefined
-    if (!beforeId && map.getLayer('river-lines-casing')) beforeId = 'river-lines-casing'
+            const radiusKm = getRadiusFromDanger(projection.wet_bulb_events, metro_population_2024)
+            const color = getDangerColor(projection.wet_bulb_events, projection.peak_humidity)
+            const opacity = getDangerOpacity(projection.wet_bulb_events, projection.peak_humidity)
 
-    const layerConfig = {
-      id: layerId,
-      type: 'fill' as const,
-      source: sourceId,
-      paint: {
-        'fill-color': ['get', 'color'],
-        // Per-feature opacity multiplied by global slider control
-        'fill-opacity': ['*', ['get', 'opacity'], controls.wetBulbOpacity || 0.8]
-      }
-    }
-    console.log('🎨 Adding layer with config:', layerConfig)
-    map.addLayer(layerConfig, beforeId)
-    console.log(`✅ Wet Bulb layer added before: ${beforeId || 'top'}`)
+            // Show all cities for debugging
+            // if (projection.wet_bulb_events === 0 && controls.projectionYear < 2035) return null
+
+            return {
+              type: 'Feature' as const,
+              geometry: {
+                type: 'Polygon' as const,
+                coordinates: [createCirclePolygon(lon, lat, radiusKm)]
+              },
+              properties: {
+                name,
+                cityKey,
+                wet_bulb_events: projection.wet_bulb_events,
+                peak_humidity: projection.peak_humidity,
+                avg_summer_humidity: projection.avg_summer_humidity,
+                days_over_95F: projection.days_over_95F,
+                days_over_100F: projection.days_over_100F,
+                at_risk_population: projection.estimated_at_risk_population,
+                radius_km: radiusKm,
+                metro_population: metro_population_2024,
+                baseline_humidity,
+                color,
+                opacity
+              }
+            }
+          })
+          .filter((f): f is NonNullable<typeof f> => f !== null)
+
+        const geojsonData: GeoJSON.FeatureCollection = {
+          type: 'FeatureCollection',
+          features
+        }
+
+        console.log(`🌡️ Wet Bulb Danger Zones: ${features.length} cities for year ${controls.projectionYear}`)
+        console.log(`🔍 Wet Bulb Active: ${isWetBulbActive}, Opacity: ${controls.wetBulbOpacity}`)
+
+        // Debug: Show Miami specifically to verify interpolation
+        const miamiFeature = features.find(f => f.properties.name === 'Miami, FL')
+        if (miamiFeature) {
+          console.log(`🔥 MIAMI DEBUG - Year ${controls.projectionYear}:`, {
+            events: miamiFeature.properties.wet_bulb_events,
+            radius_km: miamiFeature.properties.radius_km,
+            peak_humidity: miamiFeature.properties.peak_humidity,
+            color: miamiFeature.properties.color
+          })
+        }
+
+        console.log(`📊 Sample feature:`, features[0])
+        console.log(`🗺️ GeoJSON data:`, geojsonData)
+
+        // FORCE REBUILD: Remove existing layer and source to ensure clean update
+        if (map.getLayer(layerId)) {
+          console.log('🗑️ Removing existing layer for rebuild...')
+          map.removeLayer(layerId)
+        }
+        if (map.getSource(sourceId)) {
+          console.log('🗑️ Removing existing source for rebuild...')
+          map.removeSource(sourceId)
+        }
+
+        // Add fresh source with new data
+        console.log(`📦 Adding Wet Bulb source with data for year ${controls.projectionYear}...`)
+        map.addSource(sourceId, {
+          type: 'geojson',
+          data: geojsonData as any
+        })
+
+        // Add fresh layer
+        console.log('🎨 Adding Wet Bulb danger zones layer...')
+        // Insert below labels but above base map
+        let beforeId: string | undefined = 'waterway-label'
+        if (!map.getLayer(beforeId)) beforeId = undefined
+        if (!beforeId && map.getLayer('river-lines-casing')) beforeId = 'river-lines-casing'
+
+        const layerConfig = {
+          id: layerId,
+          type: 'fill' as const,
+          source: sourceId,
+          paint: {
+            'fill-color': ['get', 'color'],
+            // Per-feature opacity multiplied by global slider control
+            'fill-opacity': ['*', ['get', 'opacity'], controls.wetBulbOpacity || 0.8]
+          }
+        }
+        console.log('🎨 Adding layer with config:', layerConfig)
+        map.addLayer(layerConfig, beforeId)
+        console.log(`✅ Wet Bulb layer added before: ${beforeId || 'top'}`)
       } // End of isWetBulbActive check
 
       // Toggle visibility based on active state
@@ -3039,73 +3153,73 @@ export default function WaterAccessView() {
       }
     }
 
-      // Helper to get temperature data for a city and year
-      const getTemperatureData = (cityName: string, year: number) => {
-        // Find city in temperature data (case-insensitive, handle variations)
-        const normalizedCity = cityName.toLowerCase().trim()
+    // Helper to get temperature data for a city and year
+    const getTemperatureData = (cityName: string, year: number) => {
+      // Find city in temperature data (case-insensitive, handle variations)
+      const normalizedCity = cityName.toLowerCase().trim()
 
-        // Try exact match first, then partial match
-        const tempCity = Object.values(metroTemperatureData).find((city: any) => {
-          const tempCityName = city.name.toLowerCase().trim()
+      // Try exact match first, then partial match
+      const tempCity = Object.values(metroTemperatureData).find((city: any) => {
+        const tempCityName = city.name.toLowerCase().trim()
 
-          // Exact match
-          if (tempCityName === normalizedCity) return true
+        // Exact match
+        if (tempCityName === normalizedCity) return true
 
-          // Handle "City, ST" format - extract just the city name
-          const cityBase = normalizedCity.split(',')[0].trim()
-          const tempCityBase = tempCityName.split(',')[0].trim()
+        // Handle "City, ST" format - extract just the city name
+        const cityBase = normalizedCity.split(',')[0].trim()
+        const tempCityBase = tempCityName.split(',')[0].trim()
 
-          // Match on base city name
-          if (cityBase === tempCityBase) return true
+        // Match on base city name
+        if (cityBase === tempCityBase) return true
 
-          // Partial matching as fallback
-          if (tempCityName.includes(cityBase) || cityBase.includes(tempCityBase)) return true
+        // Partial matching as fallback
+        if (tempCityName.includes(cityBase) || cityBase.includes(tempCityBase)) return true
 
-          return false
-        }) as any
+        return false
+      }) as any
 
-        if (!tempCity?.projections) {
-          console.warn(`⚠️ No temperature data found for "${cityName}"`)
-          return null
-        }
-
-        // Map scenario names: RCP to SSP
-        // rcp26 -> ssp126, rcp45 -> ssp245, rcp60 -> ssp370, rcp85 -> ssp585
-        let mappedScenario = controls.scenario
-        if (controls.scenario === 'rcp26') mappedScenario = 'ssp126'
-        else if (controls.scenario === 'rcp45') mappedScenario = 'ssp245'
-        else if (controls.scenario === 'rcp60') mappedScenario = 'ssp370'
-        else if (controls.scenario === 'rcp85') mappedScenario = 'ssp585'
-
-        // Try the mapped scenario, fall back to ssp245 (moderate) as default
-        const scenarioData = tempCity.projections[mappedScenario] || tempCity.projections['ssp245']
-
-        if (!scenarioData) {
-          console.warn(`⚠️ No temperature data for "${cityName}" in scenario ${mappedScenario}`)
-          return null
-        }
-
-        // Find closest decade
-        const decades = Object.keys(scenarioData).map(Number).sort((a, b) => a - b)
-
-        if (decades.length === 0) {
-          console.warn(`⚠️ No decade data for "${cityName}" in scenario ${mappedScenario}`)
-          return null
-        }
-
-        const closestDecade = decades.reduce((prev, curr) =>
-          Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
-        )
-
-        const decadeData = scenarioData[closestDecade]
-
-        if (!decadeData) {
-          console.warn(`⚠️ No data for decade ${closestDecade} for "${cityName}"`)
-          return null
-        }
-
-        return decadeData
+      if (!tempCity?.projections) {
+        console.warn(`⚠️ No temperature data found for "${cityName}"`)
+        return null
       }
+
+      // Map scenario names: RCP to SSP
+      // rcp26 -> ssp126, rcp45 -> ssp245, rcp60 -> ssp370, rcp85 -> ssp585
+      let mappedScenario = controls.scenario
+      if (controls.scenario === 'rcp26') mappedScenario = 'ssp126'
+      else if (controls.scenario === 'rcp45') mappedScenario = 'ssp245'
+      else if (controls.scenario === 'rcp60') mappedScenario = 'ssp370'
+      else if (controls.scenario === 'rcp85') mappedScenario = 'ssp585'
+
+      // Try the mapped scenario, fall back to ssp245 (moderate) as default
+      const scenarioData = tempCity.projections[mappedScenario] || tempCity.projections['ssp245']
+
+      if (!scenarioData) {
+        console.warn(`⚠️ No temperature data for "${cityName}" in scenario ${mappedScenario}`)
+        return null
+      }
+
+      // Find closest decade
+      const decades = Object.keys(scenarioData).map(Number).sort((a, b) => a - b)
+
+      if (decades.length === 0) {
+        console.warn(`⚠️ No decade data for "${cityName}" in scenario ${mappedScenario}`)
+        return null
+      }
+
+      const closestDecade = decades.reduce((prev, curr) =>
+        Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
+      )
+
+      const decadeData = scenarioData[closestDecade]
+
+      if (!decadeData) {
+        console.warn(`⚠️ No data for decade ${closestDecade} for "${cityName}"`)
+        return null
+      }
+
+      return decadeData
+    }
 
       // Create markers for each metro city
       ; (metroHumidityData as any).features.forEach((feature: any) => {
@@ -3303,8 +3417,8 @@ export default function WaterAccessView() {
           environmental: fullFactory.environmental_risk ? {
             stress_type: `${fullFactory.environmental_risk.water_stress || 'Unknown'} Water Stress`,
             severity: fullFactory.environmental_risk.overall_risk_score >= 8 ? 'critical' :
-                      fullFactory.environmental_risk.overall_risk_score >= 6 ? 'stressed' :
-                      fullFactory.environmental_risk.overall_risk_score >= 4 ? 'moderate' : 'stable',
+              fullFactory.environmental_risk.overall_risk_score >= 6 ? 'stressed' :
+                fullFactory.environmental_risk.overall_risk_score >= 4 ? 'moderate' : 'stable',
             drought_duration: fullFactory.environmental_risk.drought_risk === 'extreme' ? 5 : undefined,
             impact_description: `Climate Risk Score: ${fullFactory.environmental_risk.overall_risk_score}/10. Heat Risk: ${fullFactory.environmental_risk.heat_risk}, Drought Risk: ${fullFactory.environmental_risk.drought_risk}, Wildfire Risk: ${fullFactory.environmental_risk.wildfire_risk}.`
           } : undefined
@@ -3776,425 +3890,553 @@ export default function WaterAccessView() {
             />
           </div>
 
-            {/* Water Access Layers Panel */}
-            <div className="widget-container flex flex-col flex-1 min-h-0 pointer-events-auto overflow-hidden">
-              <h3 className="text-sm font-semibold mb-3 flex-shrink-0">Climate Suite</h3>
-              <div className="space-y-3 overflow-y-auto pr-2 flex-1 pb-3 rounded-b-lg">
-                {/* Metro Weather Layer */}
-                <label
-                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showMetroHumidityLayer
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                    }`}
-                  style={!showMetroHumidityLayer ? {
-                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                  } : undefined}
+          {/* Water Access Layers Panel */}
+          <div className="widget-container flex flex-col flex-1 min-h-0 pointer-events-auto overflow-hidden">
+            {/* Header with Manage Layers dropdown */}
+            <div className="flex items-center justify-between mb-3 flex-shrink-0">
+              <h3 className="text-sm font-semibold">Layers</h3>
+              <div className="relative" ref={manageLayersDropdownRef}>
+                <button
+                  onClick={() => setShowManageLayersDropdown(!showManageLayersDropdown)}
+                  className="flex items-center gap-1 text-[#5a7cec] hover:text-[#4a6cd6] transition-colors bg-transparent border-none"
                 >
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                    checked={showMetroHumidityLayer}
-                    onChange={() => setShowMetroHumidityLayer(!showMetroHumidityLayer)}
-                  />
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-medium">Metro Weather</h4>
-                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                        <MapPin className="h-4 w-4" />
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground/80 truncate">
-                      Source: <span className="font-medium text-foreground">NOAA / NASA</span>
-                    </p>
-                  </div>
-                </label>
-
-                {/* Metro Population Change Layer */}
-                <label
-                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showMetroDataStatistics
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                    }`}
-                  style={!showMetroDataStatistics ? {
-                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                  } : undefined}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                    checked={showMetroDataStatistics}
-                    onChange={() => setShowMetroDataStatistics(!showMetroDataStatistics)}
-                  />
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-medium">Metro Population Change</h4>
-                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                        <BarChart3 className="h-4 w-4" />
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground/80 truncate">
-                      Source: <span className="font-medium text-foreground">NOAA Regional Climate Centers</span>
-                    </p>
-                  </div>
-                </label>
-
-                {/* Rivers Layer */}
-                <label
-                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showRiversLayer
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                    }`}
-                  style={!showRiversLayer ? {
-                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                  } : undefined}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                    checked={showRiversLayer}
-                    onChange={() => setShowRiversLayer(!showRiversLayer)}
-                  />
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-medium">River Flow Status</h4>
-                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                        <Waves className="h-4 w-4" />
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground/80 truncate">
-                      Source: <span className="font-medium text-foreground">Natural Earth / USGS</span>
-                    </p>
-                  </div>
-                </label>
-
-                {/* Canals & Aqueducts Layer */}
-                <label
-                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showCanalsLayer
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                    }`}
-                  style={!showCanalsLayer ? {
-                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                  } : undefined}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                    checked={showCanalsLayer}
-                    onChange={() => setShowCanalsLayer(!showCanalsLayer)}
-                  />
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-medium">Canals & Aqueducts</h4>
-                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M2 12h20M2 8h20M2 16h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                        </svg>
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground/80 truncate">
-                      Source: <span className="font-medium text-foreground">USBR / MWD</span>
-                    </p>
-                  </div>
-                </label>
-
-                {/* Major Dams Layer */}
-                <label
-                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showDamsLayer
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                    }`}
-                  style={!showDamsLayer ? {
-                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                  } : undefined}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                    checked={showDamsLayer}
-                    onChange={() => setShowDamsLayer(!showDamsLayer)}
-                  />
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-medium">Major Dams</h4>
-                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M2 22h20v-2H2v2zm2-18v12h16V4H4zm2 10V6h12v8H6z" />
-                        </svg>
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground/80 truncate">
-                      Source: <span className="font-medium text-foreground">USGS / USBR</span>
-                    </p>
-                  </div>
-                </label>
-
-                {/* Sea Level Rise Layer */}
-                <label
-                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showSeaLevelRiseLayer
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                    }`}
-                  style={!showSeaLevelRiseLayer ? {
-                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                  } : undefined}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                    checked={showSeaLevelRiseLayer}
-                    onChange={() => setShowSeaLevelRiseLayer(!showSeaLevelRiseLayer)}
-                  />
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-medium">Sea Level Rise</h4>
-                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M3 10h18v2H3v-2zm0 4h18v2H3v-2zm0 4h18v2H3v-2z" />
-                        </svg>
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground/80 truncate">
-                      Source: <span className="font-medium text-foreground">NOAA Sea Level Rise</span>
-                    </p>
-                  </div>
-                </label>
-
-                {/* Sea Level Rise Controls */}
-                {showSeaLevelRiseLayer && (
-                  <div className="ml-7 space-y-2 rounded-lg p-3" style={{
-                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                  }}>
-                    <label className="text-xs font-medium text-foreground">
-                      Sea Level Rise: {seaLevelRiseFeet} feet
+                  <Layers className="h-4 w-4" />
+                  <span className="text-[11px] font-semibold">Manage Layers</span>
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+                {/* Manage Layers Dropdown */}
+                {showManageLayersDropdown && (
+                  <div className="absolute top-full right-0 mt-1 w-56 rounded-lg bg-background border border-border shadow-lg z-50 p-3 space-y-3">
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.metroWeather}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, metroWeather: !layersInWidget.metroWeather })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">Metro Weather</span>
                     </label>
-                    <Slider
-                      value={[seaLevelRiseFeet]}
-                      onValueChange={(value) => setSeaLevelRiseFeet(value[0])}
-                      min={1}
-                      max={10}
-                      step={1}
-                      className="w-full"
-                    />
-                    <div className="flex justify-between text-[10px] text-muted-foreground">
-                      <span>1 ft</span>
-                      <span>10 ft</span>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.metroPopulation}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, metroPopulation: !layersInWidget.metroPopulation })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">Metro Population Change</span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.rivers}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, rivers: !layersInWidget.rivers })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">River Flow Status</span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.canals}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, canals: !layersInWidget.canals })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">Canals & Aqueducts</span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.dams}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, dams: !layersInWidget.dams })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">Major Dams</span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.seaLevel}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, seaLevel: !layersInWidget.seaLevel })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">Sea Level Rise</span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.groundwater}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, groundwater: !layersInWidget.groundwater })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">Grace Groundwater</span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.aquifers}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, aquifers: !layersInWidget.aquifers })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">Aquifers</span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.precipitation}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, precipitation: !layersInWidget.precipitation })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">Precipitation & Droughts</span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.wetBulb}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, wetBulb: !layersInWidget.wetBulb })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">Wet Bulb Temperature</span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.temperature}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, temperature: !layersInWidget.temperature })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">Future Temperature Anomaly</span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.factories}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, factories: !layersInWidget.factories })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">Factories</span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.topographic}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, topographic: !layersInWidget.topographic })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">Topographic Relief</span>
+                    </label>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Layers List with divider */}
+            <div className="border-t border-b border-border/20 flex flex-col flex-1 min-h-0 py-3 overflow-hidden">
+              <div className="space-y-2 overflow-y-auto flex-1 pb-3 rounded-b-lg">
+                {/* Metro Weather Layer */}
+                {layersInWidget.metroWeather && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showMetroHumidityLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowMetroHumidityLayer(!showMetroHumidityLayer)}>
+                    <MapPin className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">Metro Weather</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">NOAA / NASA</span>
+                        </p>
+                      )}
                     </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, metroWeather: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
                   </div>
                 )}
 
-                {/* Groundwater Layer */}
-                <label
-                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showGroundwaterLayer
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                    }`}
-                  style={!showGroundwaterLayer ? {
-                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                  } : undefined}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                    checked={showGroundwaterLayer}
-                    onChange={() => setShowGroundwaterLayer(!showGroundwaterLayer)}
-                  />
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-medium">GRACE Groundwater</h4>
-                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                        <TrendingUp className="h-4 w-4" />
-                      </span>
+                {/* Metro Population Change Layer */}
+                {layersInWidget.metroPopulation && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showMetroDataStatistics ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowMetroDataStatistics(!showMetroDataStatistics)}>
+                    <BarChart3 className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">Metro Population Change</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">NOAA Regional Climate Centers</span>
+                        </p>
+                      )}
                     </div>
-                    <p className="text-[11px] text-muted-foreground/80 truncate">
-                      Source: <span className="font-medium text-foreground">NASA GRACE Satellite</span>
-                    </p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, metroPopulation: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
                   </div>
-                </label>
+                )}
+
+                {/* Rivers Layer */}
+                {layersInWidget.rivers && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showRiversLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowRiversLayer(!showRiversLayer)}>
+                    <Waves className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">River Flow Status</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">Natural Earth / USGS</span>
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, rivers: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Canals & Aqueducts Layer */}
+                {layersInWidget.canals && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showCanalsLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowCanalsLayer(!showCanalsLayer)}>
+                    <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="none" viewBox="0 0 24 24">
+                      <path d="M2 12h20M2 8h20M2 16h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">Canals & Aqueducts</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">USBR / MWD</span>
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, canals: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Major Dams Layer */}
+                {layersInWidget.dams && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showDamsLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowDamsLayer(!showDamsLayer)}>
+                    <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M2 22h20v-2H2v2zm2-18v12h16V4H4zm2 10V6h12v8H6z" />
+                    </svg>
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">Major Dams</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">USGS / USBR</span>
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, dams: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Sea Level Rise Layer */}
+                {layersInWidget.seaLevel && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showSeaLevelRiseLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowSeaLevelRiseLayer(!showSeaLevelRiseLayer)}>
+                    <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M3 10h18v2H3v-2zm0 4h18v2H3v-2zm0 4h18v2H3v-2z" />
+                    </svg>
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">Sea Level Rise</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">NOAA Sea Level Rise</span>
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, seaLevel: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
+
+
+                {/* Groundwater Layer */}
+                {layersInWidget.groundwater && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showGroundwaterLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowGroundwaterLayer(!showGroundwaterLayer)}>
+                    <TrendingUp className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">Grace Groundwater</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">NASA GRACE</span>
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, groundwater: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
 
                 {/* Aquifers Layer */}
-                <label
-                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showAquifersLayer
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                    }`}
-                  style={!showAquifersLayer ? {
-                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                  } : undefined}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                    checked={showAquifersLayer}
-                    onChange={() => setShowAquifersLayer(!showAquifersLayer)}
-                  />
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-medium">Aquifers</h4>
-                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                        <Droplets className="h-4 w-4" />
-                      </span>
+                {layersInWidget.aquifers && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showAquifersLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowAquifersLayer(!showAquifersLayer)}>
+                    <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">Aquifers</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">USGS</span>
+                        </p>
+                      )}
                     </div>
-                    <p className="text-[11px] text-muted-foreground/80 truncate">
-                      Source: <span className="font-medium text-foreground">USGS Principal Aquifers</span>
-                    </p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, aquifers: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
                   </div>
-                </label>
+                )}
 
                 {/* Precipitation & Drought Layer */}
-                {precipitationDroughtLayer && (
-                  <label
-                    className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${isPrecipitationDroughtActive
-                      ? "border border-blue-500/60 bg-blue-500/10"
-                      : ""
-                      }`}
-                    style={!isPrecipitationDroughtActive ? {
-                      backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                    } : undefined}
-                  >
-                    <input
-                      type="checkbox"
-                      className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                      checked={isPrecipitationDroughtActive}
-                      onChange={() => toggleLayer('precipitation_drought')}
-                    />
-                    <div className="space-y-1 flex-1 min-w-0">
+                {layersInWidget.precipitation && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isPrecipitationDroughtActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleLayer('precipitation_drought')}>
+                    <CloudRain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-sm font-medium">{precipitationDroughtLayer.title}</h4>
-                        <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                          <CloudRain className="h-4 w-4" />
-                        </span>
+                        <h4 className="text-sm font-semibold">{precipitationDroughtLayer?.title}</h4>
                       </div>
-                      <p className="text-[11px] text-muted-foreground/80 truncate">
-                        Source: <span className="font-medium text-foreground">{precipitationDroughtLayer.source.name}</span>
-                      </p>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">{precipitationDroughtLayer?.source.name}</span>
+                        </p>
+                      )}
                     </div>
-                  </label>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, precipitation: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </div>
                 )}
 
                 {/* Wet Bulb Temperature Layer */}
-                {wetBulbLayer && (
-                  <label
-                    className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${isWetBulbActive
-                      ? "border border-blue-500/60 bg-blue-500/10"
-                      : ""
-                      }`}
-                    style={!isWetBulbActive ? {
-                      backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                    } : undefined}
-                  >
-                    <input
-                      type="checkbox"
-                      className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                      checked={isWetBulbActive}
-                      onChange={() => toggleLayer('wet_bulb')}
-                    />
-                    <div className="space-y-1 flex-1 min-w-0">
+                {layersInWidget.wetBulb && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isWetBulbActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleLayer('wet_bulb')}>
+                    <Droplets className="h-5 w-5 flex-shrink-0 text-blue-500" />
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-sm font-medium">{wetBulbLayer.title}</h4>
-                        <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                          <Droplets className="h-4 w-4 text-blue-500" />
-                        </span>
+                        <h4 className="text-sm font-semibold">{wetBulbLayer?.title}</h4>
                       </div>
-                      <p className="text-[11px] text-muted-foreground/80 truncate">
-                        Source: <span className="font-medium text-foreground">{wetBulbLayer.source.name}</span>
-                      </p>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">{wetBulbLayer?.source.name}</span>
+                        </p>
+                      )}
                     </div>
-                  </label>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, wetBulb: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </div>
                 )}
 
                 {/* Future Temperature Anomaly Layer */}
-                {temperatureProjectionLayer && (
-                  <label
-                    className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${isTemperatureProjectionActive
-                      ? "border border-blue-500/60 bg-blue-500/10"
-                      : ""
-                      }`}
-                    style={!isTemperatureProjectionActive ? {
-                      backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                    } : undefined}
-                  >
-                    <input
-                      type="checkbox"
-                      className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                      checked={isTemperatureProjectionActive}
-                      onChange={() => toggleLayer('temperature_projection')}
-                    />
-                    <div className="space-y-1 flex-1 min-w-0">
+                {layersInWidget.temperature && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isTemperatureProjectionActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleLayer('temperature_projection')}>
+                    <CloudRain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-sm font-medium">{temperatureProjectionLayer.title}</h4>
-                        <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                          <CloudRain className="h-4 w-4" />
-                        </span>
+                        <h4 className="text-sm font-semibold">{temperatureProjectionLayer?.title}</h4>
                       </div>
-                      <p className="text-[11px] text-muted-foreground/80 truncate">
-                        Source: <span className="font-medium text-foreground">{temperatureProjectionLayer.source.name}</span>
-                      </p>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">{temperatureProjectionLayer?.source.name}</span>
+                        </p>
+                      )}
                     </div>
-                  </label>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, temperature: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </div>
                 )}
 
                 {/* Factories Layer */}
-                <label
-                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${
-                    showFactoriesLayer
-                      ? "border border-blue-500/60 bg-blue-500/10"
-                      : ""
-                  }`}
-                  style={!showFactoriesLayer ? {
-                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                  } : undefined}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                    checked={showFactoriesLayer}
-                    onChange={() => setShowFactoriesLayer(!showFactoriesLayer)}
-                  />
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-medium">Factories</h4>
-                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                        <Factory className="h-4 w-4" />
-                      </span>
+                {layersInWidget.factories && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showFactoriesLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowFactoriesLayer(!showFactoriesLayer)}>
+                    <Factory className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">Factories</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">CHIPS Act, DOE</span>
+                        </p>
+                      )}
                     </div>
-                    <p className="text-[11px] text-muted-foreground/80 truncate">
-                      Source: <span className="font-medium text-foreground">CHIPS Act, DOE</span>
-                    </p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, factories: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
                   </div>
-                </label>
+                )}
 
                 {/* Topographic Relief Layer */}
-                <label
-                  className={`flex cursor-pointer gap-3 rounded-lg p-3 transition-colors ${showTopographicRelief
-                    ? "border border-blue-500/60 bg-blue-500/10"
-                    : ""
-                    }`}
-                  style={!showTopographicRelief ? {
-                    backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 1)' : 'rgba(0, 0, 0, 0.2)'
-                  } : undefined}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-1 h-4 w-4 flex-shrink-0 accent-blue-500"
-                    checked={showTopographicRelief}
-                    onChange={() => setShowTopographicRelief(!showTopographicRelief)}
-                  />
-                  <div className="space-y-1 flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-medium">Topographic Relief</h4>
-                      <span className="text-muted-foreground flex-shrink-0 flex items-center justify-center" style={{ width: '20px', height: '20px', minWidth: '20px', display: 'flex' }}>
-                        <Mountain className="h-4 w-4" />
-                      </span>
+                {layersInWidget.topographic && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showTopographicRelief ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowTopographicRelief(!showTopographicRelief)}>
+                    <Mountain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">Topographic Relief</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">USGS National Elevation Dataset</span>
+                        </p>
+                      )}
                     </div>
-                    <p className="text-[11px] text-muted-foreground/80 truncate">
-                      Source: <span className="font-medium text-foreground">USGS National Elevation Dataset</span>
-                    </p>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, topographic: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
                   </div>
-                </label>
+                )}
 
               </div>
             </div>
+
+            {/* Footer with View All/Remove All and Source toggle */}
+            <div className="flex items-center justify-between pt-3 flex-shrink-0">
+              <button
+                className="text-[11px] font-semibold text-[#5a7cec] hover:text-[#4a6cd6] transition-colors bg-transparent border-none"
+                onClick={() => {
+                  const newValue = !selectAllLayers
+                  setSelectAllLayers(newValue)
+                  if (newValue) {
+                    setLayersInWidget({
+                      metroWeather: true,
+                      metroPopulation: true,
+                      rivers: true,
+                      canals: true,
+                      dams: true,
+                      seaLevel: true,
+                      groundwater: true,
+                      aquifers: true,
+                      precipitation: true,
+                      wetBulb: true,
+                      temperature: true,
+                      factories: true,
+                      topographic: true
+                    })
+                  } else {
+                    setLayersInWidget({
+                      metroWeather: false,
+                      metroPopulation: false,
+                      rivers: false,
+                      canals: false,
+                      dams: false,
+                      seaLevel: false,
+                      groundwater: false,
+                      aquifers: false,
+                      precipitation: false,
+                      wetBulb: false,
+                      temperature: false,
+                      factories: false,
+                      topographic: false
+                    })
+                  }
+                }}
+              >{selectAllLayers ? 'Remove All Layers' : 'View All Layers'}</button>
+              <div className="flex items-center gap-1">
+                <span className="text-[11px] text-muted-foreground">Sources</span>
+                <button
+                  onClick={() => setShowSourceInfo(!showSourceInfo)}
+                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${showSourceInfo ? 'bg-blue-500' : 'bg-muted'
+                    }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showSourceInfo ? 'translate-x-[18px]' : 'translate-x-[2px]'
+                      }`}
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
         </aside>
       )}
 
@@ -4206,957 +4448,968 @@ export default function WaterAccessView() {
         const showClimateWidget = shouldShowClimateWidget(enabledLayerIds)
 
         return (
-          <div className="absolute top-4 right-4 z-[1000] w-80 h-[calc(100vh-32px)] pointer-events-auto overflow-y-auto">
-            <div className="space-y-4 pr-4">
+          <div className="absolute top-0 right-0 bottom-0 z-[1000] w-80 pointer-events-none overflow-y-auto">
+            <div className="space-y-4 py-4 pointer-events-auto" style={{ paddingLeft: '25px', paddingRight: '25px' }}>
               {/* Climate Projections Widget - Always visible */}
               <ClimateProjectionsWidget />
 
-          {/* Rivers Flow Status Widget - Shows when Rivers layer is active */}
-          {showRiversLayer && (
-            <AccordionItem title="River Flow Status" icon={<Waves className="h-4 w-4" />}>
-              {/* Opacity Slider */}
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs text-muted-foreground">River Opacity</label>
-                  <span className="text-xs font-medium">{Math.round(riverOpacity * 100)}%</span>
-                </div>
-                <Slider
-                  value={[Math.round(riverOpacity * 100)]}
-                  min={10}
-                  max={100}
-                  step={5}
-                  onValueChange={(value) => setRiverOpacity(value[0] / 100)}
-                />
-              </div>
-
-              {/* Legend */}
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-1 rounded" style={{ backgroundColor: '#dc2626' }}></div>
-                  <span className="text-[11px] text-foreground/70">Dry - Complete diversion</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-1 rounded" style={{ backgroundColor: '#f59e0b' }}></div>
-                  <span className="text-[11px] text-foreground/70">Seasonal - Wet season only</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-1 rounded" style={{ backgroundColor: '#fbbf24' }}></div>
-                  <span className="text-[11px] text-foreground/70">Reduced - 50%+ reduction</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-1 rounded" style={{ backgroundColor: '#3b82f6' }}></div>
-                  <span className="text-[11px] text-foreground/70">Natural - Unimpacted flow</span>
-                </div>
-              </div>
-            </AccordionItem>
-          )}
-
-          {/* Metro Weather Controls - Shows when layer is active */}
-          {showMetroHumidityLayer && (
-            <AccordionItem title="Metro Weather" icon={<Droplets className="h-4 w-4" />}>
-              {/* Bubble Data Toggles */}
-              <div className="space-y-3">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 accent-blue-500"
-                    checked={showHumidityWetBulb}
-                    onChange={() => setShowHumidityWetBulb(!showHumidityWetBulb)}
-                  />
-                  <span className="text-xs text-foreground">Humidity & Wet Bulb Events</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 accent-blue-500"
-                    checked={showTempHumidity}
-                    onChange={() => setShowTempHumidity(!showTempHumidity)}
-                  />
-                  <span className="text-xs text-foreground">Temperature & Humidity</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 accent-blue-500"
-                    checked={showAverageTemperatures}
-                    onChange={() => setShowAverageTemperatures(!showAverageTemperatures)}
-                  />
-                  <span className="text-xs text-foreground">Average Temperature</span>
-                </label>
-              </div>
-            </AccordionItem>
-          )}
-
-          {/* Metro Population Change Widget */}
-          {showMetroDataStatistics && (
-            <AccordionItem title="Metro Population Change" icon={<BarChart3 className="h-4 w-4" />}>
-              {/* Opacity Slider */}
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs text-muted-foreground">Layer Opacity</label>
-                  <span className="text-xs font-medium">{Math.round(metroDataOpacity * 100)}%</span>
-                </div>
-                <Slider
-                  value={[Math.round(metroDataOpacity * 100)]}
-                  min={10}
-                  max={100}
-                  step={5}
-                  onValueChange={(value) => {
-                    setMetroDataOpacity(value[0] / 100)
-                  }}
-                />
-              </div>
-
-              {/* Legend */}
-              <div className="space-y-1.5">
-                <h4 className="text-xs font-semibold text-muted-foreground mb-2">Population Growth</h4>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
-                  <span className="text-xs text-foreground">High Growth (20%+)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#3b82f6' }}></div>
-                  <span className="text-xs text-foreground">Moderate Growth (10-20%)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#fbbf24' }}></div>
-                  <span className="text-xs text-foreground">Low Growth (0-10%)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ef4444' }}></div>
-                  <span className="text-xs text-foreground">Declining</span>
-                </div>
-                <p className="text-[11px] text-muted-foreground mt-2">Circle size represents population</p>
-              </div>
-            </AccordionItem>
-          )}
-
-          {/* Topographic Relief Widget */}
-          {showTopographicRelief && (
-            <AccordionItem title="Topographic Relief" icon={<Mountain className="h-4 w-4" />}>
-              {/* Opacity Slider */}
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs text-muted-foreground">Hillshade Intensity</label>
-                  <span className="text-xs font-medium">{Math.round(topoReliefIntensity * 100)}%</span>
-                </div>
-                <Slider
-                  value={[Math.round(topoReliefIntensity * 100)]}
-                  min={10}
-                  max={100}
-                  step={5}
-                  onValueChange={(value) => {
-                    setTopoReliefIntensity(value[0] / 100)
-                  }}
-                />
-              </div>
-
-              {/* Legend */}
-              <div className="space-y-1.5">
-                <h4 className="text-xs font-semibold text-muted-foreground mb-2">Elevation Relief</h4>
-                <p className="text-xs text-foreground/80">Hillshade visualization showing terrain elevation and slopes</p>
-                <div className="space-y-1 mt-2">
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-muted-foreground">Light areas:</span>
-                    <span className="text-foreground">High elevation / slopes facing sun</span>
+              {/* Rivers Flow Status Widget - Shows when Rivers layer is active */}
+              {showRiversLayer && (
+                <AccordionItem title="River Flow Status" icon={<Waves className="h-4 w-4" />}>
+                  {/* Opacity Slider */}
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs text-muted-foreground">River Opacity</label>
+                      <span className="text-xs font-medium">{Math.round(riverOpacity * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[Math.round(riverOpacity * 100)]}
+                      min={10}
+                      max={100}
+                      step={5}
+                      onValueChange={(value) => setRiverOpacity(value[0] / 100)}
+                    />
                   </div>
-                  <div className="flex items-center justify-between text-[11px]">
-                    <span className="text-muted-foreground">Dark areas:</span>
-                    <span className="text-foreground">Low elevation / shaded slopes</span>
-                  </div>
-                </div>
-              </div>
-            </AccordionItem>
-          )}
 
-          {/* Factories Panel */}
-          {showFactoriesLayer && (
-            <div className="widget-container">
-              <h3 className="text-sm font-semibold mb-3">Factory Filters</h3>
-
-              {/* Status Filters */}
-              <div className="mb-4">
-                <h4 className="text-xs font-medium mb-2 text-muted-foreground">Status</h4>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="accent-blue-500" defaultChecked />
-                    <span className="text-sm">Operational</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="accent-blue-500" defaultChecked />
-                    <span className="text-sm">Under Construction</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <input type="checkbox" className="accent-blue-500" defaultChecked />
-                    <span className="text-sm">Planned</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Climate Risk Filters */}
-              <div>
-                <h4 className="text-xs font-medium mb-2 text-muted-foreground">Climate Risk</h4>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <input type="checkbox" className="accent-blue-500" defaultChecked />
-                    <span className="text-sm">Low (0-3)</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                    <input type="checkbox" className="accent-blue-500" defaultChecked />
-                    <span className="text-sm">Medium (4-6)</span>
-                  </label>
-                  <label className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                    <input type="checkbox" className="accent-blue-500" defaultChecked />
-                    <span className="text-sm">High (7-10)</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Wet Bulb Temperature Widget */}
-          {isWetBulbActive && (
-            <AccordionItem title="Wet Bulb Temperature" icon={<CloudRain className="h-4 w-4" />}>
-              {/* Opacity Slider - Always show since we use local data */}
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs text-muted-foreground">Layer Opacity</label>
-                  <span className="text-xs font-medium">{Math.round((controls.wetBulbOpacity || 0.6) * 100)}%</span>
-                </div>
-                <Slider
-                  value={[Math.round((controls.wetBulbOpacity || 0.6) * 100)]}
-                  min={10}
-                  max={100}
-                  step={5}
-                  onValueChange={(value) => setWetBulbOpacity(value[0] / 100)}
-                />
-              </div>
-
-              {/* Year indicator */}
-              <div className="text-xs text-muted-foreground mb-3">
-                Showing projections for <span className="font-semibold text-foreground">{projectionYear}</span>
-              </div>
-
-              {/* Legend - Color & Opacity show danger level */}
-              <div className="space-y-3 pt-3 border-t border-border/40">
-
-                {/* Danger Level Legend */}
-                <div>
-                  <h4 className="text-xs font-semibold text-muted-foreground mb-2">Danger Level</h4>
-                  <p className="text-[10px] text-muted-foreground mb-2">Size, color & opacity all increase with danger</p>
+                  {/* Legend */}
                   <div className="space-y-1.5">
                     <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#93c5fd', opacity: 0.3 }}></div>
-                      <span className="text-[11px] text-foreground">Minimal risk (faint, small)</span>
+                      <div className="w-5 h-1 rounded" style={{ backgroundColor: '#dc2626' }}></div>
+                      <span className="text-[11px] text-foreground/70">Dry - Complete diversion</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#fde047', opacity: 0.5 }}></div>
-                      <span className="text-[11px] text-foreground">Low risk</span>
+                      <div className="w-5 h-1 rounded" style={{ backgroundColor: '#f59e0b' }}></div>
+                      <span className="text-[11px] text-foreground/70">Seasonal - Wet season only</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-full" style={{ backgroundColor: '#fbbf24', opacity: 0.6 }}></div>
-                      <span className="text-[11px] text-foreground">Moderate risk</span>
+                      <div className="w-5 h-1 rounded" style={{ backgroundColor: '#fbbf24' }}></div>
+                      <span className="text-[11px] text-foreground/70">Reduced - 50%+ reduction</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full" style={{ backgroundColor: '#fb923c', opacity: 0.7 }}></div>
-                      <span className="text-[11px] text-foreground">Elevated risk</span>
+                      <div className="w-5 h-1 rounded" style={{ backgroundColor: '#3b82f6' }}></div>
+                      <span className="text-[11px] text-foreground/70">Natural - Unimpacted flow</span>
+                    </div>
+                  </div>
+                </AccordionItem>
+              )}
+
+              {/* Metro Weather Controls - Shows when layer is active */}
+              {showMetroHumidityLayer && (
+                <AccordionItem title="Metro Weather" icon={<Droplets className="h-4 w-4" />}>
+                  {/* Bubble Data Toggles */}
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-blue-500"
+                        checked={showHumidityWetBulb}
+                        onChange={() => setShowHumidityWetBulb(!showHumidityWetBulb)}
+                      />
+                      <span className="text-xs text-foreground">Humidity & Wet Bulb Events</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-blue-500"
+                        checked={showTempHumidity}
+                        onChange={() => setShowTempHumidity(!showTempHumidity)}
+                      />
+                      <span className="text-xs text-foreground">Temperature & Humidity</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-blue-500"
+                        checked={showAverageTemperatures}
+                        onChange={() => setShowAverageTemperatures(!showAverageTemperatures)}
+                      />
+                      <span className="text-xs text-foreground">Average Temperature</span>
+                    </label>
+                  </div>
+                </AccordionItem>
+              )}
+
+              {/* Metro Population Change Widget */}
+              {showMetroDataStatistics && (
+                <AccordionItem title="Metro Population Change" icon={<BarChart3 className="h-4 w-4" />}>
+                  {/* Opacity Slider */}
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                      <span className="text-xs font-medium">{Math.round(metroDataOpacity * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[Math.round(metroDataOpacity * 100)]}
+                      min={10}
+                      max={100}
+                      step={5}
+                      onValueChange={(value) => {
+                        setMetroDataOpacity(value[0] / 100)
+                      }}
+                    />
+                  </div>
+
+                  {/* Legend */}
+                  <div className="space-y-1.5">
+                    <h4 className="text-xs font-semibold text-muted-foreground mb-2">Population Growth</h4>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
+                      <span className="text-xs text-foreground">High Growth (20%+)</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full" style={{ backgroundColor: '#ef4444', opacity: 0.8 }}></div>
-                      <span className="text-[11px] text-foreground">High risk</span>
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#3b82f6' }}></div>
+                      <span className="text-xs text-foreground">Moderate Growth (10-20%)</span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full" style={{ backgroundColor: '#991b1b', opacity: 0.9 }}></div>
-                      <span className="text-[11px] text-foreground">Extreme danger (large, solid)</span>
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#fbbf24' }}></div>
+                      <span className="text-xs text-foreground">Low Growth (0-10%)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ef4444' }}></div>
+                      <span className="text-xs text-foreground">Declining</span>
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-2">Circle size represents population</p>
+                  </div>
+                </AccordionItem>
+              )}
+
+
+
+              {/* Factories Panel */}
+              {showFactoriesLayer && (
+                <div className="widget-container">
+                  <h3 className="text-sm font-semibold mb-3">Factory Filters</h3>
+
+                  {/* Status Filters */}
+                  <div className="mb-4">
+                    <h4 className="text-xs font-medium mb-2 text-muted-foreground">Status</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2">
+                        <input type="checkbox" className="accent-blue-500" defaultChecked />
+                        <span className="text-sm">Operational</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input type="checkbox" className="accent-blue-500" defaultChecked />
+                        <span className="text-sm">Under Construction</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <input type="checkbox" className="accent-blue-500" defaultChecked />
+                        <span className="text-sm">Planned</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Climate Risk Filters */}
+                  <div>
+                    <h4 className="text-xs font-medium mb-2 text-muted-foreground">Climate Risk</h4>
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                        <input type="checkbox" className="accent-blue-500" defaultChecked />
+                        <span className="text-sm">Low (0-3)</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                        <input type="checkbox" className="accent-blue-500" defaultChecked />
+                        <span className="text-sm">Medium (4-6)</span>
+                      </label>
+                      <label className="flex items-center gap-2">
+                        <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                        <input type="checkbox" className="accent-blue-500" defaultChecked />
+                        <span className="text-sm">High (7-10)</span>
+                      </label>
                     </div>
                   </div>
                 </div>
+              )}
 
-                <p className="text-[10px] text-muted-foreground mt-2 italic border-t border-border/40 pt-2">
-                  Gulf Coast cities (Houston, New Orleans, Miami) show as large, solid red circles. Northern and arid cities appear as small, faint circles.
-                </p>
-              </div>
-            </AccordionItem>
-          )}
+              {/* Wet Bulb Temperature Widget */}
+              {isWetBulbActive && (
+                <AccordionItem title="Wet Bulb Temperature" icon={<CloudRain className="h-4 w-4" />}>
+                  {/* Opacity Slider - Always show since we use local data */}
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                      <span className="text-xs font-medium">{Math.round((controls.wetBulbOpacity || 0.6) * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[Math.round((controls.wetBulbOpacity || 0.6) * 100)]}
+                      min={10}
+                      max={100}
+                      step={5}
+                      onValueChange={(value) => setWetBulbOpacity(value[0] / 100)}
+                    />
+                  </div>
 
-          {/* Groundwater Widget - Shows when groundwater layer is active */}
-          {showGroundwaterLayer && (
-            <AccordionItem title="Groundwater" icon={<Droplets className="h-4 w-4" />}>
-              {/* Water Depletion Areas (GRACE) Section */}
-              <div className="space-y-3 mb-4">
-                <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg ${showGRACELayer
-                  ? 'border-[1px] border-blue-500 bg-blue-500/5'
-                  : 'border-0 bg-white'
-                  }`}>
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 accent-blue-500"
-                    checked={showGRACELayer}
-                    onChange={() => setShowGRACELayer(!showGRACELayer)}
-                  />
-                  <span className="text-sm font-medium text-foreground">Water Depletion Areas</span>
-                </label>
+                  {/* Year indicator */}
+                  <div className="text-xs text-muted-foreground mb-3">
+                    Showing projections for <span className="font-semibold text-foreground">{projectionYear}</span>
+                  </div>
 
-                {showGRACELayer && (
-                  <div className="ml-1 space-y-2">
-                    <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
+                  {/* Legend - Color & Opacity show danger level */}
+                  <div className="space-y-3 pt-3 border-t border-border/40">
+
+                    {/* Danger Level Legend */}
+                    <div>
+                      <h4 className="text-xs font-semibold text-muted-foreground mb-2">Danger Level</h4>
+                      <p className="text-[10px] text-muted-foreground mb-2">Size, color & opacity all increase with danger</p>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#93c5fd', opacity: 0.3 }}></div>
+                          <span className="text-[11px] text-foreground">Minimal risk (faint, small)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#fde047', opacity: 0.5 }}></div>
+                          <span className="text-[11px] text-foreground">Low risk</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 rounded-full" style={{ backgroundColor: '#fbbf24', opacity: 0.6 }}></div>
+                          <span className="text-[11px] text-foreground">Moderate risk</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 rounded-full" style={{ backgroundColor: '#fb923c', opacity: 0.7 }}></div>
+                          <span className="text-[11px] text-foreground">Elevated risk</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-full" style={{ backgroundColor: '#ef4444', opacity: 0.8 }}></div>
+                          <span className="text-[11px] text-foreground">High risk</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full" style={{ backgroundColor: '#991b1b', opacity: 0.9 }}></div>
+                          <span className="text-[11px] text-foreground">Extreme danger (large, solid)</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <p className="text-[10px] text-muted-foreground mt-2 italic border-t border-border/40 pt-2">
+                      Gulf Coast cities (Houston, New Orleans, Miami) show as large, solid red circles. Northern and arid cities appear as small, faint circles.
+                    </p>
+                  </div>
+                </AccordionItem>
+              )}
+
+              {/* Groundwater Widget - Shows when groundwater layer is active */}
+              {showGroundwaterLayer && (
+                <AccordionItem title="Groundwater" icon={<Droplets className="h-4 w-4" />}>
+                  {/* Water Depletion Areas (GRACE) Section */}
+                  <div className="space-y-3 mb-4">
+                    <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg ${showGRACELayer
+                      ? 'border-[1px] border-blue-500 bg-blue-500/5'
+                      : 'border-0 bg-white'
+                      }`}>
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-blue-500"
+                        checked={showGRACELayer}
+                        onChange={() => setShowGRACELayer(!showGRACELayer)}
+                      />
+                      <span className="text-sm font-medium text-foreground">Water Depletion Areas</span>
+                    </label>
+
+                    {showGRACELayer && (
+                      <div className="ml-1 space-y-2">
+                        <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
+                        <Slider
+                          min={0}
+                          max={1}
+                          step={0.05}
+                          value={[graceOpacity]}
+                          onValueChange={(value) => setGraceOpacity(value[0])}
+                          className="mb-2"
+                        />
+
+                        {/* GRACE Legend */}
+                        <div className="mt-4 space-y-1.5">
+                          <div className="text-xs font-medium text-foreground mb-2">Change vs. 2004-2009 Baseline</div>
+                          <div className="h-3 w-full rounded" style={{
+                            background: 'linear-gradient(to right, #b2182b 0%, #ef8a62 20%, #fddbc7 40%, #f7f7f7 50%, #d1e5f0 60%, #67a9cf 80%, #2166ac 100%)'
+                          }} />
+                          <div className="flex justify-between text-[9px] text-muted-foreground">
+                            <span>-20 cm</span>
+                            <span>Depletion</span>
+                            <span>0</span>
+                            <span>Recharge</span>
+                            <span>+20 cm</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </AccordionItem>
+              )}
+
+              {/* Aquifers Widget - Shows when layer is active */}
+              {showAquifersLayer && (
+                <AccordionItem title="Aquifers" icon={<Droplets className="h-4 w-4" />}>
+                  {/* Opacity Slider */}
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                      <span className="text-xs font-medium">{Math.round(aquiferOpacity * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[Math.round(aquiferOpacity * 100)]}
+                      min={10}
+                      max={100}
+                      step={5}
+                      onValueChange={(value) => {
+                        setAquiferOpacity(value[0] / 100)
+                      }}
+                    />
+                  </div>
+
+                  {/* Aquifer Health Legend */}
+                  <div className="space-y-1.5">
+                    <h4 className="text-xs font-semibold text-muted-foreground mb-2">Aquifer Health Status</h4>
+                    <div className="h-3 w-full rounded" style={{
+                      background: 'linear-gradient(to right, #22c55e 0%, #3b82f6 25%, #94a3b8 50%, #f97316 75%, #ef4444 100%)'
+                    }} />
+                    <div className="flex justify-between text-[9px] text-muted-foreground">
+                      <span>Healthy</span>
+                      <span>Mending</span>
+                      <span>Stressed</span>
+                      <span>Depleting</span>
+                      <span>Unknown</span>
+                    </div>
+                  </div>
+                </AccordionItem>
+              )}
+
+              {/* GRACE Groundwater Widget - Shows when layer is active */}
+              {showGroundwaterLayer && (
+                <AccordionItem title="GRACE Groundwater" icon={<TrendingUp className="h-4 w-4" />}>
+                  {/* Description */}
+                  <div className="mb-4 p-3 rounded-lg bg-blue-50/50 dark:bg-blue-900/10">
+                    <p className="text-xs text-muted-foreground">
+                      NASA GRACE satellite measurements showing groundwater storage changes (2002-2024)
+                    </p>
+                  </div>
+
+                  {/* Depletion Status Legend */}
+                  <div className="space-y-1.5">
+                    <h4 className="text-xs font-semibold text-muted-foreground mb-2">Groundwater Trend</h4>
+                    <div className="h-3 w-full rounded" style={{
+                      background: 'linear-gradient(to right, #b2182b 0%, #ef8a62 20%, #fddbc7 40%, #f7f7f7 50%, #d1e5f0 60%, #67a9cf 80%, #2166ac 100%)'
+                    }} />
+                    <div className="flex justify-between text-[9px] text-muted-foreground">
+                      <span>-20cm</span>
+                      <span>Depletion</span>
+                      <span>0</span>
+                      <span>Recharge</span>
+                      <span>+20cm</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 text-[10px] text-muted-foreground italic">
+                    Change vs. 2004-2009 baseline
+                  </div>
+                </AccordionItem>
+              )}
+
+              {/* Temperature Projection Controls - Only shows when layer is active */}
+              {isTemperatureProjectionActive && (
+                <AccordionItem title="Future Temperature Anomaly" icon={<CloudRain className="h-4 w-4" />}>
+                  {/* Status Indicator */}
+                  {temperatureProjectionStatus === 'loading' && (
+                    <div className="space-y-2 rounded-md border border-orange-500/30 bg-orange-500/10 p-3 mb-3">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
+                        <p className="text-xs text-foreground">Loading temperature data...</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {temperatureProjectionStatus === 'success' && (
+                    <div className="space-y-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-green-500" />
+                        <p className="text-xs text-green-600 font-medium">✓ Real NASA climate data (Earth Engine)</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Temperature Mode Toggle */}
+                  <div className="space-y-2 mb-4">
+                    <div className="text-xs font-semibold text-foreground mb-2">Temperature Display</div>
+                    <div className="space-y-2">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="temperatureMode"
+                          value="anomaly"
+                          checked={controls.temperatureMode === 'anomaly'}
+                          onChange={() => { }}
+                          className="h-4 w-4"
+                        />
+                        <span className="text-sm text-foreground">Temperature Anomaly (Change)</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="temperatureMode"
+                          value="actual"
+                          checked={controls.temperatureMode === 'actual'}
+                          onChange={() => { }}
+                          className="h-4 w-4"
+                        />
+                        <span className="text-sm text-foreground">Actual Temperature</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Opacity Control */}
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-semibold text-foreground">Layer Opacity</label>
+                      <span className="text-xs text-muted-foreground">{Math.round((controls.projectionOpacity ?? 0.6) * 100)}%</span>
+                    </div>
                     <Slider
                       min={0}
                       max={1}
                       step={0.05}
-                      value={[graceOpacity]}
-                      onValueChange={(value) => setGraceOpacity(value[0])}
-                      className="mb-2"
+                      value={[controls.projectionOpacity ?? 0.6]}
+                      onValueChange={(value) => setProjectionOpacity(value[0])}
                     />
+                  </div>
 
-                    {/* GRACE Legend */}
-                    <div className="mt-4 space-y-1.5">
-                      <div className="text-xs font-medium text-foreground mb-2">Change vs. 2004-2009 Baseline</div>
-                      <div className="h-3 w-full rounded" style={{
-                        background: 'linear-gradient(to right, #b2182b 0%, #ef8a62 20%, #fddbc7 40%, #f7f7f7 50%, #d1e5f0 60%, #67a9cf 80%, #2166ac 100%)'
-                      }} />
-                      <div className="flex justify-between text-[9px] text-muted-foreground">
-                        <span>-20 cm</span>
-                        <span>Depletion</span>
-                        <span>0</span>
-                        <span>Recharge</span>
-                        <span>+20 cm</span>
+                  {/* Temperature Legend */}
+                  <div className="mt-4 space-y-2">
+                    <div className="text-xs font-semibold text-foreground">
+                      {controls.temperatureMode === 'anomaly' ? 'Temperature Anomaly' : 'Temperature'}
+                    </div>
+                    <div className="h-3 w-full rounded" style={{
+                      background: 'linear-gradient(to right, #0571b0 0%, #92c5de 25%, #ffffbf 50%, #f4a582 75%, #ca0020 100%)'
+                    }} />
+                    <div className="flex justify-between text-[9px] text-muted-foreground">
+                      <span>0°</span>
+                      <span>1°</span>
+                      <span>2°</span>
+                      <span>3°</span>
+                      <span>4°</span>
+                      <span>5°</span>
+                      <span>6°</span>
+                      <span>8°+</span>
+                    </div>
+                  </div>
+                </AccordionItem>
+              )}
+
+              {/* Precipitation & Drought Controls - Only shows when layer is active */}
+              {isPrecipitationDroughtActive && (
+                <AccordionItem title="Precipitation & Drought" icon={<CloudRain className="h-4 w-4" />}>
+                  {/* Status Indicator */}
+                  {precipitationDroughtStatus === 'loading' && (
+                    <div className="space-y-2 rounded-md border border-blue-500/30 bg-blue-500/10 p-3 mb-3">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                        <p className="text-xs text-foreground">Loading precipitation/drought data...</p>
                       </div>
                     </div>
+                  )}
+
+                  {precipitationDroughtStatus === 'success' && (
+                    <div className="space-y-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="rounded-full bg-green-500 p-0.5">
+                          <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                        <p className="text-xs text-foreground">
+                          {precipitationDroughtData?.metadata?.isRealData
+                            ? '✓ Real CHIRPS data (Earth Engine)'
+                            : '⚠ Data unavailable (Earth Engine error)'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Metric Type Selector */}
+                  <div className="space-y-2 mb-4">
+                    <label className="text-xs font-semibold text-muted-foreground">Metric Type</label>
+                    <Select
+                      value={controls.droughtMetric}
+                      onValueChange={(value) => setDroughtMetric(value as 'precipitation' | 'drought_index' | 'soil_moisture')}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Choose metric" />
+                      </SelectTrigger>
+                      <SelectContent className="z-[9999]">
+                        <SelectItem value="precipitation">Precipitation</SelectItem>
+                        <SelectItem value="drought_index">Drought Index</SelectItem>
+                        <SelectItem value="soil_moisture">Soil Moisture</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                )}
-              </div>
-            </AccordionItem>
-          )}
 
-          {/* Aquifers Widget - Shows when layer is active */}
-          {showAquifersLayer && (
-            <AccordionItem title="Aquifers" icon={<Droplets className="h-4 w-4" />}>
-              {/* Opacity Slider */}
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs text-muted-foreground">Layer Opacity</label>
-                  <span className="text-xs font-medium">{Math.round(aquiferOpacity * 100)}%</span>
-                </div>
-                <Slider
-                  value={[Math.round(aquiferOpacity * 100)]}
-                  min={10}
-                  max={100}
-                  step={5}
-                  onValueChange={(value) => {
-                    setAquiferOpacity(value[0] / 100)
-                  }}
-                />
-              </div>
-
-              {/* Aquifer Health Legend */}
-              <div className="space-y-1.5">
-                <h4 className="text-xs font-semibold text-muted-foreground mb-2">Aquifer Health Status</h4>
-                <div className="h-3 w-full rounded" style={{
-                  background: 'linear-gradient(to right, #22c55e 0%, #3b82f6 25%, #94a3b8 50%, #f97316 75%, #ef4444 100%)'
-                }} />
-                <div className="flex justify-between text-[9px] text-muted-foreground">
-                  <span>Healthy</span>
-                  <span>Mending</span>
-                  <span>Stressed</span>
-                  <span>Depleting</span>
-                  <span>Unknown</span>
-                </div>
-              </div>
-            </AccordionItem>
-          )}
-
-          {/* GRACE Groundwater Widget - Shows when layer is active */}
-          {showGroundwaterLayer && (
-            <AccordionItem title="GRACE Groundwater" icon={<TrendingUp className="h-4 w-4" />}>
-              {/* Description */}
-              <div className="mb-4 p-3 rounded-lg bg-blue-50/50 dark:bg-blue-900/10">
-                <p className="text-xs text-muted-foreground">
-                  NASA GRACE satellite measurements showing groundwater storage changes (2002-2024)
-                </p>
-              </div>
-
-              {/* Depletion Status Legend */}
-              <div className="space-y-1.5">
-                <h4 className="text-xs font-semibold text-muted-foreground mb-2">Groundwater Trend</h4>
-                <div className="h-3 w-full rounded" style={{
-                  background: 'linear-gradient(to right, #b2182b 0%, #ef8a62 20%, #fddbc7 40%, #f7f7f7 50%, #d1e5f0 60%, #67a9cf 80%, #2166ac 100%)'
-                }} />
-                <div className="flex justify-between text-[9px] text-muted-foreground">
-                  <span>-20cm</span>
-                  <span>Depletion</span>
-                  <span>0</span>
-                  <span>Recharge</span>
-                  <span>+20cm</span>
-                </div>
-              </div>
-
-              <div className="mt-3 text-[10px] text-muted-foreground italic">
-                Change vs. 2004-2009 baseline
-              </div>
-            </AccordionItem>
-          )}
-
-          {/* Temperature Projection Controls - Only shows when layer is active */}
-          {isTemperatureProjectionActive && (
-            <AccordionItem title="Future Temperature Anomaly" icon={<CloudRain className="h-4 w-4" />}>
-              {/* Status Indicator */}
-              {temperatureProjectionStatus === 'loading' && (
-                <div className="space-y-2 rounded-md border border-orange-500/30 bg-orange-500/10 p-3 mb-3">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
-                    <p className="text-xs text-foreground">Loading temperature data...</p>
-                  </div>
-                </div>
-              )}
-
-              {temperatureProjectionStatus === 'success' && (
-                <div className="space-y-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-green-500" />
-                    <p className="text-xs text-green-600 font-medium">✓ Real NASA climate data (Earth Engine)</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Temperature Mode Toggle */}
-              <div className="space-y-2 mb-4">
-                <div className="text-xs font-semibold text-foreground mb-2">Temperature Display</div>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="temperatureMode"
-                      value="anomaly"
-                      checked={controls.temperatureMode === 'anomaly'}
-                      onChange={() => {}}
-                      className="h-4 w-4"
+                  {/* Opacity Slider */}
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                      <span className="text-xs font-medium">{Math.round(controls.droughtOpacity * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[Math.round(controls.droughtOpacity * 100)]}
+                      min={10}
+                      max={100}
+                      step={5}
+                      onValueChange={(value) => setDroughtOpacity(value[0] / 100)}
                     />
-                    <span className="text-sm text-foreground">Temperature Anomaly (Change)</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="temperatureMode"
-                      value="actual"
-                      checked={controls.temperatureMode === 'actual'}
-                      onChange={() => {}}
-                      className="h-4 w-4"
-                    />
-                    <span className="text-sm text-foreground">Actual Temperature</span>
-                  </label>
-                </div>
-              </div>
-
-              {/* Opacity Control */}
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-foreground">Layer Opacity</label>
-                  <span className="text-xs text-muted-foreground">{Math.round((controls.projectionOpacity ?? 0.6) * 100)}%</span>
-                </div>
-                <Slider
-                  min={0}
-                  max={1}
-                  step={0.05}
-                  value={[controls.projectionOpacity ?? 0.6]}
-                  onValueChange={(value) => setProjectionOpacity(value[0])}
-                />
-              </div>
-
-              {/* Temperature Legend */}
-              <div className="mt-4 space-y-2">
-                <div className="text-xs font-semibold text-foreground">
-                  {controls.temperatureMode === 'anomaly' ? 'Temperature Anomaly' : 'Temperature'}
-                </div>
-                <div className="h-3 w-full rounded" style={{
-                  background: 'linear-gradient(to right, #0571b0 0%, #92c5de 25%, #ffffbf 50%, #f4a582 75%, #ca0020 100%)'
-                }} />
-                <div className="flex justify-between text-[9px] text-muted-foreground">
-                  <span>0°</span>
-                  <span>1°</span>
-                  <span>2°</span>
-                  <span>3°</span>
-                  <span>4°</span>
-                  <span>5°</span>
-                  <span>6°</span>
-                  <span>8°+</span>
-                </div>
-              </div>
-            </AccordionItem>
-          )}
-
-          {/* Precipitation & Drought Controls - Only shows when layer is active */}
-          {isPrecipitationDroughtActive && (
-            <AccordionItem title="Precipitation & Drought" icon={<CloudRain className="h-4 w-4" />}>
-              {/* Status Indicator */}
-              {precipitationDroughtStatus === 'loading' && (
-                <div className="space-y-2 rounded-md border border-blue-500/30 bg-blue-500/10 p-3 mb-3">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                    <p className="text-xs text-foreground">Loading precipitation/drought data...</p>
                   </div>
-                </div>
+
+                  {/* Legend based on selected metric */}
+                  <div className="space-y-1">
+                    {controls.droughtMetric === 'precipitation' && (
+                      <>
+                        <div className="h-3 w-full rounded-full" style={{
+                          background: 'linear-gradient(90deg, #F5ED53 0%, #F5F3CE 50%, #6B9AF3 75%, #2357D2 100%)'
+                        }} />
+                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                          <span>0</span>
+                          <span>2</span>
+                          <span>4</span>
+                          <span>6</span>
+                          <span>8</span>
+                          <span>10 mm/day</span>
+                        </div>
+                      </>
+                    )}
+                    {controls.droughtMetric === 'drought_index' && (
+                      <>
+                        <div className="h-3 w-full rounded-full" style={{
+                          background: 'linear-gradient(to right, #dc2626 0%, #f59e0b 16.67%, #fef08a 33.33%, #ffffff 50%, #90caf9 66.67%, #42a5f5 83.33%, #1e88e5 100%)'
+                        }} />
+                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                          <span>0</span>
+                          <span>1</span>
+                          <span>2</span>
+                          <span>3</span>
+                          <span>4</span>
+                          <span>5</span>
+                          <span>6+</span>
+                        </div>
+                      </>
+                    )}
+                    {controls.droughtMetric === 'soil_moisture' && (
+                      <>
+                        <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#8b4513] via-[#daa520] via-[#f0e68c] via-[#adff2f] via-[#7cfc00] to-[#32cd32]" />
+                        <div className="flex justify-between text-[10px] text-muted-foreground">
+                          <span>0</span>
+                          <span>2</span>
+                          <span>4</span>
+                          <span>6</span>
+                          <span>8</span>
+                          <span>10 mm</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </AccordionItem>
               )}
 
-              {precipitationDroughtStatus === 'success' && (
-                <div className="space-y-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 mb-3">
-                  <div className="flex items-center gap-2">
-                    <div className="rounded-full bg-green-500 p-0.5">
-                      <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    </div>
-                    <p className="text-xs text-foreground">
-                      {precipitationDroughtData?.metadata?.isRealData
-                        ? '✓ Real CHIRPS data (Earth Engine)'
-                        : '⚠ Data unavailable (Earth Engine error)'}
-                    </p>
-                  </div>
-                </div>
-              )}
+              {/* Metro Humidity Widget - Shows when layer is active */}
+              {showMetroHumidityLayer && selectedMetroCity && (() => {
+                const cityFeature = (metroHumidityData as any).features.find((f: any) => f.properties.city === selectedMetroCity)
+                if (!cityFeature) return null
 
-              {/* Metric Type Selector */}
-              <div className="space-y-2 mb-4">
-                <label className="text-xs font-semibold text-muted-foreground">Metric Type</label>
-                <Select
-                  value={controls.droughtMetric}
-                  onValueChange={(value) => setDroughtMetric(value as 'precipitation' | 'drought_index' | 'soil_moisture')}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Choose metric" />
-                  </SelectTrigger>
-                  <SelectContent className="z-[9999]">
-                    <SelectItem value="precipitation">Precipitation</SelectItem>
-                    <SelectItem value="drought_index">Drought Index</SelectItem>
-                    <SelectItem value="soil_moisture">Soil Moisture</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                const humidityData = cityFeature.properties.humidity_projections[projectionYear.toString()] ||
+                  cityFeature.properties.humidity_projections['2025']
+                if (!humidityData) return null
 
-              {/* Opacity Slider */}
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs text-muted-foreground">Layer Opacity</label>
-                  <span className="text-xs font-medium">{Math.round(controls.droughtOpacity * 100)}%</span>
-                </div>
-                <Slider
-                  value={[Math.round(controls.droughtOpacity * 100)]}
-                  min={10}
-                  max={100}
-                  step={5}
-                  onValueChange={(value) => setDroughtOpacity(value[0] / 100)}
-                />
-              </div>
-
-              {/* Legend based on selected metric */}
-              <div className="space-y-1">
-                {controls.droughtMetric === 'precipitation' && (
-                  <>
-                    <div className="h-3 w-full rounded-full" style={{
-                      background: 'linear-gradient(90deg, #F5ED53 0%, #F5F3CE 50%, #6B9AF3 75%, #2357D2 100%)'
-                    }} />
-                    <div className="flex justify-between text-[10px] text-muted-foreground">
-                      <span>0</span>
-                      <span>2</span>
-                      <span>4</span>
-                      <span>6</span>
-                      <span>8</span>
-                      <span>10 mm/day</span>
-                    </div>
-                  </>
-                )}
-                {controls.droughtMetric === 'drought_index' && (
-                  <>
-                    <div className="h-3 w-full rounded-full" style={{
-                      background: 'linear-gradient(to right, #dc2626 0%, #f59e0b 16.67%, #fef08a 33.33%, #ffffff 50%, #90caf9 66.67%, #42a5f5 83.33%, #1e88e5 100%)'
-                    }} />
-                    <div className="flex justify-between text-[10px] text-muted-foreground">
-                      <span>0</span>
-                      <span>1</span>
-                      <span>2</span>
-                      <span>3</span>
-                      <span>4</span>
-                      <span>5</span>
-                      <span>6+</span>
-                    </div>
-                  </>
-                )}
-                {controls.droughtMetric === 'soil_moisture' && (
-                  <>
-                    <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#8b4513] via-[#daa520] via-[#f0e68c] via-[#adff2f] via-[#7cfc00] to-[#32cd32]" />
-                    <div className="flex justify-between text-[10px] text-muted-foreground">
-                      <span>0</span>
-                      <span>2</span>
-                      <span>4</span>
-                      <span>6</span>
-                      <span>8</span>
-                      <span>10 mm</span>
-                    </div>
-                  </>
-                )}
-              </div>
-            </AccordionItem>
-          )}
-
-          {/* Metro Humidity Widget - Shows when layer is active */}
-          {showMetroHumidityLayer && selectedMetroCity && (() => {
-            const cityFeature = (metroHumidityData as any).features.find((f: any) => f.properties.city === selectedMetroCity)
-            if (!cityFeature) return null
-
-            const humidityData = cityFeature.properties.humidity_projections[projectionYear.toString()] ||
-              cityFeature.properties.humidity_projections['2025']
-            if (!humidityData) return null
-
-            return (
-              <div className="widget-container" style={{
-                backdropFilter: 'blur(2px)',
-                backgroundColor: 'rgba(255, 255, 255, 0.5)'
-              }}>
-                {/* Header */}
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 4,
-                  padding: '4px 8px',
-                  marginBottom: 4
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
+                return (
+                  <div className="widget-container" style={{
+                    backdropFilter: 'blur(2px)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.5)'
                   }}>
-                    <p className="text-xs font-bold uppercase text-foreground">
-                      {selectedMetroCity.toUpperCase()}
-                    </p>
-                    <p className="text-xs font-semibold text-foreground">
-                      {projectionYear}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Humidity & Wet Bulb Events Section */}
-                {showHumidityWetBulb && (
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    borderRadius: 4,
-                    overflow: 'hidden',
-                    marginBottom: 4
-                  }}>
+                    {/* Header */}
                     <div style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.35)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 4,
                       padding: '4px 8px',
-                      borderRadius: 4
+                      marginBottom: 4
                     }}>
-                      <p className="text-xs font-semibold text-muted-foreground">
-                        Humidity & Wet Bulb Events
-                      </p>
-                    </div>
-                    <div style={{ display: 'flex' }}>
-                      <div style={{ flex: 1, padding: '4px 8px' }}>
-                        <p className="text-[9px] font-medium text-foreground" style={{ minWidth: 'max-content' }}>
-                          Peak Humidity
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                      }}>
+                        <p className="text-xs font-bold uppercase text-foreground">
+                          {selectedMetroCity.toUpperCase()}
                         </p>
-                        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                          <p className="text-xs font-bold text-foreground">
-                            {humidityData.peak_humidity}%
+                        <p className="text-xs font-semibold text-foreground">
+                          {projectionYear}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Humidity & Wet Bulb Events Section */}
+                    {showHumidityWetBulb && (
+                      <div style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        borderRadius: 4,
+                        overflow: 'hidden',
+                        marginBottom: 4
+                      }}>
+                        <div style={{
+                          backgroundColor: 'rgba(255, 255, 255, 0.35)',
+                          padding: '4px 8px',
+                          borderRadius: 4
+                        }}>
+                          <p className="text-xs font-semibold text-muted-foreground">
+                            Humidity & Wet Bulb Events
                           </p>
+                        </div>
+                        <div style={{ display: 'flex' }}>
+                          <div style={{ flex: 1, padding: '4px 8px' }}>
+                            <p className="text-[9px] font-medium text-foreground" style={{ minWidth: 'max-content' }}>
+                              Peak Humidity
+                            </p>
+                            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                              <p className="text-xs font-bold text-foreground">
+                                {humidityData.peak_humidity}%
+                              </p>
+                            </div>
+                          </div>
+                          <div style={{ flex: 1, padding: '4px 8px' }}>
+                            <p className="text-[9px] font-medium text-foreground" style={{ minWidth: 'max-content' }}>
+                              # Wet Bulbs
+                            </p>
+                            <div style={{ display: 'flex', gap: 4, alignItems: 'center', justifyContent: 'center' }}>
+                              <p className="text-xs font-bold text-foreground">
+                                {humidityData.wet_bulb_events}
+                              </p>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div style={{ flex: 1, padding: '4px 8px' }}>
-                        <p className="text-[9px] font-medium text-foreground" style={{ minWidth: 'max-content' }}>
-                          # Wet Bulbs
-                        </p>
-                        <div style={{ display: 'flex', gap: 4, alignItems: 'center', justifyContent: 'center' }}>
-                          <p className="text-xs font-bold text-foreground">
-                            {humidityData.wet_bulb_events}
-                          </p>
-                        </div>
+                    )}
+
+                    {/* Temperature & Humidity Section - REMOVED - fields don't exist in wet bulb data */}
+                  </div>
+                )
+              })()}
+
+              {/* Topographic Relief Widget */}
+              {showTopographicRelief && (
+                <AccordionItem title="Topographic Relief" icon={<Mountain className="h-4 w-4" />}>
+                  {/* Opacity Slider */}
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs text-muted-foreground">Hillshade Intensity</label>
+                      <span className="text-xs font-medium">{Math.round(topoReliefIntensity * 100)}%</span>
+                    </div>
+                    <Slider
+                      value={[Math.round(topoReliefIntensity * 100)]}
+                      min={10}
+                      max={100}
+                      step={5}
+                      onValueChange={(value) => {
+                        setTopoReliefIntensity(value[0] / 100)
+                      }}
+                    />
+                  </div>
+
+                  {/* Legend */}
+                  <div className="space-y-1.5">
+                    <h4 className="text-xs font-semibold text-muted-foreground mb-2">Elevation Relief</h4>
+                    <p className="text-xs text-foreground/80">Hillshade visualization showing terrain elevation and slopes</p>
+                    <div className="space-y-1 mt-2">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-muted-foreground">Light areas:</span>
+                        <span className="text-foreground">High elevation / slopes facing sun</span>
+                      </div>
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-muted-foreground">Dark areas:</span>
+                        <span className="text-foreground">Low elevation / shaded slopes</span>
                       </div>
                     </div>
                   </div>
-                )}
-
-                {/* Temperature & Humidity Section - REMOVED - fields don't exist in wet bulb data */}
-              </div>
-            )
-          })()}
-
+                </AccordionItem>
+              )}
             </div>
           </div>
         )
       })()}
 
       {/* Groundwater Details Panel - Bottom Center */}
-      {selectedAquifer && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto" style={{ width: '640px' }}>
-          <GroundwaterDetailsPanel
-            selectedAquifer={selectedAquifer}
-            projectionYear={projectionYear}
-            onClose={closeDetailsPanel}
-          />
-        </div>
-      )}
+      {
+        selectedAquifer && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto" style={{ width: '640px' }}>
+            <GroundwaterDetailsPanel
+              selectedAquifer={selectedAquifer}
+              projectionYear={projectionYear}
+              onClose={closeDetailsPanel}
+            />
+          </div>
+        )
+      }
 
       {/* Factory Details Panel - Bottom Center */}
-      {selectedFactory && (
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto" style={{ width: '640px' }}>
-          <FactoryDetailsPanel
-            selectedFactory={selectedFactory}
-            onClose={() => setSelectedFactory(null)}
-          />
-        </div>
-      )}
+      {
+        selectedFactory && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto" style={{ width: '640px' }}>
+            <FactoryDetailsPanel
+              selectedFactory={selectedFactory}
+              onClose={() => setSelectedFactory(null)}
+            />
+          </div>
+        )
+      }
 
       {/* Metro Humidity Tooltip (like Metro Population Change) */}
-      {metroHoverInfo && metroHoverInfo.cityName && metroHoverInfo.humidityData && (
-        <div
-          className="absolute z-10 pointer-events-none bg-white rounded-lg shadow-lg border border-gray-200"
-          style={{
-            left: metroHoverInfo.x + 10,
-            top: metroHoverInfo.y + 10,
-            width: '200px',
-            fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-            overflow: 'hidden'
-          }}
-        >
-          {/* Header: City and Year */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            padding: '4px 8px',
-            fontSize: '10px',
-            lineHeight: 'normal',
-            color: '#101728',
-            borderBottom: '1px solid rgba(0, 0, 0, 0.05)'
-          }}>
-            <span style={{ fontWeight: 700, textTransform: 'uppercase' }}>
-              {metroHoverInfo.cityName.toUpperCase()}
-            </span>
-            <span style={{ fontWeight: 600 }}>{projectionYear}</span>
-          </div>
+      {
+        metroHoverInfo && metroHoverInfo.cityName && metroHoverInfo.humidityData && (
+          <div
+            className="absolute z-10 pointer-events-none bg-white rounded-lg shadow-lg border border-gray-200"
+            style={{
+              left: metroHoverInfo.x + 10,
+              top: metroHoverInfo.y + 10,
+              width: '200px',
+              fontFamily: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Header: City and Year */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '4px 8px',
+              fontSize: '10px',
+              lineHeight: 'normal',
+              color: '#101728',
+              borderBottom: '1px solid rgba(0, 0, 0, 0.05)'
+            }}>
+              <span style={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                {metroHoverInfo.cityName.toUpperCase()}
+              </span>
+              <span style={{ fontWeight: 600 }}>{projectionYear}</span>
+            </div>
 
-          {showHumidityWetBulb && (
-            <>
-              {/* Section 1: Humidity & Wet Bulb Events */}
-              <div style={{
-                padding: '4px 8px',
-                fontSize: '10px',
-                fontWeight: 600,
-                color: '#65758B',
-                lineHeight: 'normal',
-                borderBottom: '1px solid rgba(0, 0, 0, 0.05)'
-              }}>
-                Humidity & Wet Bulb Events
-              </div>
-              <div style={{ padding: '4px 8px', marginBottom: '4px' }}>
+            {showHumidityWetBulb && (
+              <>
+                {/* Section 1: Humidity & Wet Bulb Events */}
                 <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'flex-start',
-                  fontSize: '12px',
-                  lineHeight: 'normal'
+                  padding: '4px 8px',
+                  fontSize: '10px',
+                  fontWeight: 600,
+                  color: '#65758B',
+                  lineHeight: 'normal',
+                  borderBottom: '1px solid rgba(0, 0, 0, 0.05)'
                 }}>
-                  <div style={{ display: 'flex', flexDirection: 'column' }}>
-                    <span style={{
-                      fontSize: '9px',
-                      fontWeight: 500,
-                      color: '#101728',
-                      marginBottom: '2px',
-                      lineHeight: 'normal'
-                    }}>
-                      Peak Humidity
-                    </span>
-                    <span style={{ fontWeight: 700, color: '#101728' }}>
-                      {metroHoverInfo.humidityData.peak_humidity}%
-                    </span>
-                  </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
-                    <span style={{
-                      fontSize: '9px',
-                      fontWeight: 500,
-                      color: '#101728',
-                      marginBottom: '2px',
-                      lineHeight: 'normal'
-                    }}>
-                      # Wet Bulbs
-                    </span>
-                    <span style={{ fontWeight: 500, color: '#697487' }}>
-                      {metroHoverInfo.humidityData.wet_bulb_events}
-                    </span>
+                  Humidity & Wet Bulb Events
+                </div>
+                <div style={{ padding: '4px 8px', marginBottom: '4px' }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    fontSize: '12px',
+                    lineHeight: 'normal'
+                  }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{
+                        fontSize: '9px',
+                        fontWeight: 500,
+                        color: '#101728',
+                        marginBottom: '2px',
+                        lineHeight: 'normal'
+                      }}>
+                        Peak Humidity
+                      </span>
+                      <span style={{ fontWeight: 700, color: '#101728' }}>
+                        {metroHoverInfo.humidityData.peak_humidity}%
+                      </span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                      <span style={{
+                        fontSize: '9px',
+                        fontWeight: 500,
+                        color: '#101728',
+                        marginBottom: '2px',
+                        lineHeight: 'normal'
+                      }}>
+                        # Wet Bulbs
+                      </span>
+                      <span style={{ fontWeight: 500, color: '#697487' }}>
+                        {metroHoverInfo.humidityData.wet_bulb_events}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </>
-          )}
+              </>
+            )}
 
-          {/* Temperature & Humidity section removed - fields don't exist in data */}
-        </div>
-      )}
+            {/* Temperature & Humidity section removed - fields don't exist in data */}
+          </div>
+        )
+      }
 
       {/* Metro Population Change Tooltip (TEST - from Climate screen) */}
-      {megaregionHoverInfo && megaregionHoverInfo.metroName && megaregionHoverInfo.metroPopulation && (
-        <div
-          className="absolute z-10 pointer-events-none bg-card/95 backdrop-blur-lg border border-border/60 rounded-lg shadow-lg px-2.5 py-1.5 text-xs"
-          style={{
-            left: megaregionHoverInfo.x + 10,
-            top: megaregionHoverInfo.y + 10
-          }}
-        >
-          {/* Megaregion metro info */}
-          <div>
-            <div className="font-semibold text-foreground mb-1">
-              {megaregionHoverInfo.metroName}
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-blue-500">🏙️</span>
-              <span className="font-medium">
-                {megaregionHoverInfo.metroPopulation.toLocaleString()} people
-              </span>
-            </div>
-            <div className="text-[10px] opacity-70 mt-0.5">
-              {megaregionHoverInfo.metroYear} projection
+      {
+        megaregionHoverInfo && megaregionHoverInfo.metroName && megaregionHoverInfo.metroPopulation && (
+          <div
+            className="absolute z-10 pointer-events-none bg-card/95 backdrop-blur-lg border border-border/60 rounded-lg shadow-lg px-2.5 py-1.5 text-xs"
+            style={{
+              left: megaregionHoverInfo.x + 10,
+              top: megaregionHoverInfo.y + 10
+            }}
+          >
+            {/* Megaregion metro info */}
+            <div>
+              <div className="font-semibold text-foreground mb-1">
+                {megaregionHoverInfo.metroName}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <span className="text-blue-500">🏙️</span>
+                <span className="font-medium">
+                  {megaregionHoverInfo.metroPopulation.toLocaleString()} people
+                </span>
+              </div>
+              <div className="text-[10px] opacity-70 mt-0.5">
+                {megaregionHoverInfo.metroYear} projection
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )
+      }
 
       {/* Metro Weather React Overlay - Render MetroHumidityBubble components using map projection */}
-      {showMetroHumidityLayer && mapRef.current && mapLoaded && (
-        <div
-          onClick={(e) => {
-            // Deactivate bubble when clicking on the container (but not on a bubble itself)
-            if (e.target === e.currentTarget) {
-              setActiveBubbleIndex(null)
-            }
-          }}
-        >
-          {(metroHumidityData as any).features.map((feature: any, index: number) => {
-            const { city, lat, lng, humidity_projections } = feature.properties
+      {
+        showMetroHumidityLayer && mapRef.current && mapLoaded && (
+          <div
+            onClick={(e) => {
+              // Deactivate bubble when clicking on the container (but not on a bubble itself)
+              if (e.target === e.currentTarget) {
+                setActiveBubbleIndex(null)
+              }
+            }}
+          >
+            {(metroHumidityData as any).features.map((feature: any, index: number) => {
+              const { city, lat, lng, humidity_projections } = feature.properties
 
-            // Helper function to get humidity data for year with interpolation
-            const getHumidityDataForYear = (projections: any, year: number) => {
-              const yearStr = year.toString()
-              if (projections[yearStr]) return projections[yearStr]
+              // Helper function to get humidity data for year with interpolation
+              const getHumidityDataForYear = (projections: any, year: number) => {
+                const yearStr = year.toString()
+                if (projections[yearStr]) return projections[yearStr]
 
-              const years = Object.keys(projections).map(Number).sort((a, b) => a - b)
-              let lowerYear = years[0]
-              let upperYear = years[years.length - 1]
+                const years = Object.keys(projections).map(Number).sort((a, b) => a - b)
+                let lowerYear = years[0]
+                let upperYear = years[years.length - 1]
 
-              for (let i = 0; i < years.length - 1; i++) {
-                if (years[i] <= year && years[i + 1] >= year) {
-                  lowerYear = years[i]
-                  upperYear = years[i + 1]
-                  break
+                for (let i = 0; i < years.length - 1; i++) {
+                  if (years[i] <= year && years[i + 1] >= year) {
+                    lowerYear = years[i]
+                    upperYear = years[i + 1]
+                    break
+                  }
+                }
+
+                if (year <= lowerYear) return projections[lowerYear.toString()]
+                if (year >= upperYear) return projections[upperYear.toString()]
+
+                const ratio = (year - lowerYear) / (upperYear - lowerYear)
+                const lower = projections[lowerYear.toString()]
+                const upper = projections[upperYear.toString()]
+
+                return {
+                  peak_humidity: Math.round(lower.peak_humidity + (upper.peak_humidity - lower.peak_humidity) * ratio),
+                  wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
+                  days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
+                  days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
+                  estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
+                  casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
+                  extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
                 }
               }
 
-              if (year <= lowerYear) return projections[lowerYear.toString()]
-              if (year >= upperYear) return projections[upperYear.toString()]
+              const humidityData = getHumidityDataForYear(humidity_projections, projectionYear)
 
-              const ratio = (year - lowerYear) / (upperYear - lowerYear)
-              const lower = projections[lowerYear.toString()]
-              const upper = projections[upperYear.toString()]
+              // Get temperature data for this city
+              const getTempDataForCity = (cityName: string, year: number) => {
+                const normalizedCity = cityName.toLowerCase().trim()
 
-              return {
-                peak_humidity: Math.round(lower.peak_humidity + (upper.peak_humidity - lower.peak_humidity) * ratio),
-                wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
-                days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
-                days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
-                estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
-                casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
-                extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
+                const tempCity = Object.values(metroTemperatureData).find((city: any) => {
+                  const tempCityName = city.name.toLowerCase().trim()
+                  if (tempCityName === normalizedCity) return true
+
+                  const cityBase = normalizedCity.split(',')[0].trim()
+                  const tempCityBase = tempCityName.split(',')[0].trim()
+                  if (cityBase === tempCityBase) return true
+                  if (tempCityName.includes(cityBase) || cityBase.includes(tempCityBase)) return true
+
+                  return false
+                }) as any
+
+                if (!tempCity?.projections) return null
+
+                let mappedScenario = controls.scenario
+                if (controls.scenario === 'rcp26') mappedScenario = 'ssp126'
+                else if (controls.scenario === 'rcp45') mappedScenario = 'ssp245'
+                else if (controls.scenario === 'rcp60') mappedScenario = 'ssp370'
+                else if (controls.scenario === 'rcp85') mappedScenario = 'ssp585'
+
+                const scenarioData = tempCity.projections[mappedScenario] || tempCity.projections['ssp245']
+                if (!scenarioData) return null
+
+                const decades = Object.keys(scenarioData).map(Number).sort((a, b) => a - b)
+                if (decades.length === 0) return null
+
+                const closestDecade = decades.reduce((prev, curr) =>
+                  Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
+                )
+
+                return scenarioData[closestDecade]
               }
-            }
 
-            const humidityData = getHumidityDataForYear(humidity_projections, projectionYear)
+              const tempData = getTempDataForCity(city, projectionYear)
 
-            // Get temperature data for this city
-            const getTempDataForCity = (cityName: string, year: number) => {
-              const normalizedCity = cityName.toLowerCase().trim()
+              // Convert lat/lng to screen coordinates
+              const point = mapRef.current!.project([lng, lat])
 
-              const tempCity = Object.values(metroTemperatureData).find((city: any) => {
-                const tempCityName = city.name.toLowerCase().trim()
-                if (tempCityName === normalizedCity) return true
+              const isActive = activeBubbleIndex === index
 
-                const cityBase = normalizedCity.split(',')[0].trim()
-                const tempCityBase = tempCityName.split(',')[0].trim()
-                if (cityBase === tempCityBase) return true
-                if (tempCityName.includes(cityBase) || cityBase.includes(tempCityBase)) return true
-
-                return false
-              }) as any
-
-              if (!tempCity?.projections) return null
-
-              let mappedScenario = controls.scenario
-              if (controls.scenario === 'rcp26') mappedScenario = 'ssp126'
-              else if (controls.scenario === 'rcp45') mappedScenario = 'ssp245'
-              else if (controls.scenario === 'rcp60') mappedScenario = 'ssp370'
-              else if (controls.scenario === 'rcp85') mappedScenario = 'ssp585'
-
-              const scenarioData = tempCity.projections[mappedScenario] || tempCity.projections['ssp245']
-              if (!scenarioData) return null
-
-              const decades = Object.keys(scenarioData).map(Number).sort((a, b) => a - b)
-              if (decades.length === 0) return null
-
-              const closestDecade = decades.reduce((prev, curr) =>
-                Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
-              )
-
-              return scenarioData[closestDecade]
-            }
-
-            const tempData = getTempDataForCity(city, projectionYear)
-
-            // Convert lat/lng to screen coordinates
-            const point = mapRef.current!.project([lng, lat])
-
-            const isActive = activeBubbleIndex === index
-
-            return (
-              <div
-                key={`metro-humidity-${index}`}
-                style={{
-                  position: 'absolute',
-                  left: `${point.x}px`,
-                  top: `${point.y}px`,
-                  transform: 'translate(-50%, -50%)',
-                  pointerEvents: 'auto',
-                  zIndex: isActive ? 1000 : 100 // Higher z-index when active
-                }}
-              >
-                <MetroHumidityBubble
-                  metroName={city}
-                  year={projectionYear}
-                  peakHumidity={`${humidityData.peak_humidity}%`}
-                  wetBulbEvents={`${humidityData.wet_bulb_events}`}
-                  humidTemp={`${humidityData.days_over_95F || 0}°`}
-                  daysOver100={humidityData.days_over_100F ? `${humidityData.days_over_100F}` : 'N/A'}
-                  visible={true}
-                  showHumidityWetBulb={showHumidityWetBulb}
-                  showTempHumidity={showTempHumidity}
-                  showAverageTemperatures={showAverageTemperatures}
-                  summerAvg={tempData?.summer_avg ? `${tempData.summer_avg.toFixed(1)}°F` : undefined}
-                  winterAvg={tempData?.winter_avg ? `${tempData.winter_avg.toFixed(1)}°F` : undefined}
-                  onClose={() => { }}
-                  isActive={isActive}
-                  onClick={() => {
-                    // Toggle: if clicking the same bubble, deactivate it; otherwise activate the clicked one
-                    setActiveBubbleIndex(isActive ? null : index)
+              return (
+                <div
+                  key={`metro-humidity-${index}`}
+                  style={{
+                    position: 'absolute',
+                    left: `${point.x}px`,
+                    top: `${point.y}px`,
+                    transform: 'translate(-50%, -50%)',
+                    pointerEvents: 'auto',
+                    zIndex: isActive ? 1000 : 100 // Higher z-index when active
                   }}
-                />
-              </div>
-            )
-          })}
-        </div>
-      )}
+                >
+                  <MetroHumidityBubble
+                    metroName={city}
+                    year={projectionYear}
+                    peakHumidity={`${humidityData.peak_humidity}%`}
+                    wetBulbEvents={`${humidityData.wet_bulb_events}`}
+                    humidTemp={`${humidityData.days_over_95F || 0}°`}
+                    daysOver100={humidityData.days_over_100F ? `${humidityData.days_over_100F}` : 'N/A'}
+                    visible={true}
+                    showHumidityWetBulb={showHumidityWetBulb}
+                    showTempHumidity={showTempHumidity}
+                    showAverageTemperatures={showAverageTemperatures}
+                    summerAvg={tempData?.summer_avg ? `${tempData.summer_avg.toFixed(1)}°F` : undefined}
+                    winterAvg={tempData?.winter_avg ? `${tempData.winter_avg.toFixed(1)}°F` : undefined}
+                    onClose={() => { }}
+                    isActive={isActive}
+                    onClick={() => {
+                      // Toggle: if clicking the same bubble, deactivate it; otherwise activate the clicked one
+                      setActiveBubbleIndex(isActive ? null : index)
+                    }}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        )
+      }
 
-    </div>
+    </div >
   )
 }

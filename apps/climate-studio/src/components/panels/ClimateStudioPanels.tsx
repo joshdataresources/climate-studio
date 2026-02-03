@@ -318,11 +318,11 @@ export function ClimateStudioPanels({ mapBounds, viewport, onViewportChange }: C
               value={searchTerm}
               onChange={event => setSearchTerm(event.target.value)}
               placeholder="Search for a city, state, or country"
-              className="pr-10 bg-[rgba(40,40,40,0.8)] border-[rgba(63,63,63,1)]"
+              className="pr-10 bg-[rgba(40,40,40,0.8)] border-[rgba(0,0,0,0.15)]"
             />
             <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           </div>
-          <Button type="submit" variant="secondary" disabled={isSearching} className="bg-[rgba(40,40,40,0.8)] border border-[rgba(63,63,63,1)] hover:bg-white/10">
+          <Button type="submit" variant="secondary" disabled={isSearching} className="bg-[rgba(40,40,40,0.8)] border border-[rgba(0,0,0,0.15)] hover:bg-white/10">
             {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
           </Button>
         </form>
