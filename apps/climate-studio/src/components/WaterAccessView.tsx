@@ -514,29 +514,33 @@ function SortableViewItem({
   }
 
   return (
-    <li ref={setNodeRef} style={style} className="flex items-center gap-1">
+    <li ref={setNodeRef} style={style} className="flex gap-3 rounded-lg p-3 transition-colors border border-solid border-white/90 bg-white/25 items-center">
       <div
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing p-2 touch-none"
+        className="cursor-grab active:cursor-grabbing p-0 touch-none flex items-center justify-center"
       >
-        <GripVertical className="h-4 w-4 text-muted-foreground" />
+        <GripVertical className="h-5 w-5 text-muted-foreground" />
       </div>
       <button
         onClick={() => loadSavedView(view)}
-        className="flex flex-1 items-center gap-2 rounded-md border-0 h-9 px-4 py-2 text-left text-sm hover:bg-blue-500/10"
+        className="flex flex-1 items-center gap-3 rounded-md border-0 h-auto p-0 text-left text-sm hover:bg-transparent"
       >
-        <Bookmark className="h-4 w-4 text-blue-500 flex-shrink-0" />
-        <span className="flex-1 truncate">{view.name}</span>
+        <Bookmark className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
+          <div className="flex items-center justify-between gap-2">
+            <h4 className="text-sm font-semibold">{view.name}</h4>
+          </div>
+        </div>
       </button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             size="sm"
             variant="ghost"
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 hover:bg-transparent"
           >
-            <MoreHorizontal className="h-4 w-4" />
+            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -4051,7 +4055,7 @@ export default function WaterAccessView() {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, metroWeather: false })
                       }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
                       <X className="h-5 w-5 text-muted-foreground" />
                     </button>
@@ -4077,7 +4081,7 @@ export default function WaterAccessView() {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, metroPopulation: false })
                       }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
                       <X className="h-5 w-5 text-muted-foreground" />
                     </button>
@@ -4103,7 +4107,7 @@ export default function WaterAccessView() {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, rivers: false })
                       }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
                       <X className="h-5 w-5 text-muted-foreground" />
                     </button>
@@ -4131,7 +4135,7 @@ export default function WaterAccessView() {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, canals: false })
                       }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
                       <X className="h-5 w-5 text-muted-foreground" />
                     </button>
@@ -4159,7 +4163,7 @@ export default function WaterAccessView() {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, dams: false })
                       }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
                       <X className="h-5 w-5 text-muted-foreground" />
                     </button>
@@ -4187,7 +4191,7 @@ export default function WaterAccessView() {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, seaLevel: false })
                       }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
                       <X className="h-5 w-5 text-muted-foreground" />
                     </button>
@@ -4214,7 +4218,7 @@ export default function WaterAccessView() {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, groundwater: false })
                       }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
                       <X className="h-5 w-5 text-muted-foreground" />
                     </button>
@@ -4240,7 +4244,7 @@ export default function WaterAccessView() {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, aquifers: false })
                       }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
                       <X className="h-5 w-5 text-muted-foreground" />
                     </button>
@@ -4266,7 +4270,7 @@ export default function WaterAccessView() {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, precipitation: false })
                       }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
                       <X className="h-5 w-5 text-muted-foreground" />
                     </button>
@@ -4292,7 +4296,7 @@ export default function WaterAccessView() {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, wetBulb: false })
                       }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
                       <X className="h-5 w-5 text-muted-foreground" />
                     </button>
@@ -4318,7 +4322,7 @@ export default function WaterAccessView() {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, temperature: false })
                       }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
                       <X className="h-5 w-5 text-muted-foreground" />
                     </button>
@@ -4344,7 +4348,7 @@ export default function WaterAccessView() {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, factories: false })
                       }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
                       <X className="h-5 w-5 text-muted-foreground" />
                     </button>
@@ -4370,7 +4374,7 @@ export default function WaterAccessView() {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, topographic: false })
                       }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center"
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
                       <X className="h-5 w-5 text-muted-foreground" />
                     </button>

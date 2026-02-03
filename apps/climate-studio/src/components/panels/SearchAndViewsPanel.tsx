@@ -130,29 +130,33 @@ function SortableViewItem({
   }
 
   return (
-    <li ref={setNodeRef} style={style} className="flex items-center gap-1">
+    <li ref={setNodeRef} style={style} className="flex gap-2 rounded-lg px-3 py-2 transition-colors border border-solid border-white/90 bg-white/25 items-center">
       <div
         {...attributes}
         {...listeners}
-        className="cursor-grab active:cursor-grabbing p-2 touch-none"
+        className="cursor-grab active:cursor-grabbing p-0 touch-none flex items-center justify-center"
       >
         <GripVertical className="h-4 w-4 text-muted-foreground" />
       </div>
       <button
         onClick={() => loadSavedView(view)}
-        className="flex flex-1 items-center gap-2 rounded-md border-0 h-9 px-4 py-2 text-left text-sm hover:bg-blue-500/10"
+        className="flex flex-1 items-center gap-2 rounded-md border-0 h-auto p-0 text-left text-xs bg-transparent hover:bg-transparent"
       >
-        <Bookmark className="h-4 w-4 text-blue-500 flex-shrink-0" />
-        <span className="flex-1 truncate">{view.name}</span>
+        <Bookmark className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        <div className="flex-1 min-w-0 flex flex-col gap-1">
+          <div className="flex items-center justify-between gap-2">
+            <h4 className="text-xs font-semibold">{view.name}</h4>
+          </div>
+        </div>
       </button>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
             size="sm"
             variant="ghost"
-            className="h-8 w-8 p-0"
+            className="h-8 w-8 p-0 bg-transparent hover:bg-transparent"
           >
-            <MoreHorizontal className="h-4 w-4" />
+            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
@@ -253,8 +257,8 @@ export function SearchAndViewsPanel({
 
   const hasViewChanged = useCallback((view: SavedView) => {
     return viewport.center.lat !== view.viewport.center.lat ||
-           viewport.center.lng !== view.viewport.center.lng ||
-           viewport.zoom !== view.viewport.zoom
+      viewport.center.lng !== view.viewport.center.lng ||
+      viewport.zoom !== view.viewport.zoom
   }, [viewport])
 
   const editSavedView = useCallback((viewId: string) => {
@@ -364,7 +368,7 @@ export function SearchAndViewsPanel({
       )}
 
       {/* Saved Views Section */}
-      <div className="mt-3 space-y-2 border-t border-border/60 pt-3">
+      <div className="mt-4 space-y-2 border-t border-border/60 pt-4">
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold">Views</h3>
           <Button
@@ -385,7 +389,6 @@ export function SearchAndViewsPanel({
         ) : (
           <div
             className="rounded-md p-2"
-            style={{ backgroundColor: theme === 'light' ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.2)' }}
           >
             <DndContext
               sensors={sensors}
