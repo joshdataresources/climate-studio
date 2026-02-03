@@ -242,7 +242,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
       name: 'NASA NEX-GDDP-CMIP6',
       url: 'https://www.nccs.nasa.gov/services/data-collections'
     },
-    defaultActive: true,
+    defaultActive: false,
     controls: ['temperatureMode', 'projectionOpacity'],
     fetch: {
       method: 'GET',
@@ -364,7 +364,7 @@ export const climateLayers: ClimateLayerDefinition[] = [
       name: 'NASA NEX-GDDP-CMIP6',
       url: 'https://www.nccs.nasa.gov/services/data-collections/land-based-products/nex-gddp-cmip6'
     },
-    defaultActive: true,
+    defaultActive: false,
     controls: ['projectionYear', 'scenario', 'wetBulbOpacity'],
     fetch: {
       method: 'GET',
