@@ -43,7 +43,7 @@
   --sidebar-accent-foreground: hsl(0 0% 95%);
   --sidebar-border: hsl(0 0% 25%);
   --sidebar-ring: hsl(264 100% 65%);
-  
+
   /* Widget Container Variables - Global style for all widget panels */
   --widget-bg: rgba(30, 30, 30, 0.45);
   --widget-bg-panel: rgba(30, 30, 30, 0.45);
@@ -52,21 +52,25 @@
   --widget-padding: 1rem;
   --widget-backdrop-blur: blur(10px);
   --widget-box-shadow: 0 4px 25px 0 rgba(0, 0, 0, 0.10);
-  
+
   /* Input/Form Control Variables - Match Search Button Style */
   --input-bg: rgba(40, 40, 40, 0.8);
   --input-border: rgba(0, 0, 0, 0.15);
-  --input-border-radius: 0.375rem; /* rounded-md - matches Search button */
-  --input-hover-bg: rgba(255, 255, 255, 0.1); /* hover:bg-white/10 - matches Search button */
+  --input-border-radius: 0.375rem;
+  /* rounded-md - matches Search button */
+  --input-hover-bg: rgba(255, 255, 255, 0.1);
+  /* hover:bg-white/10 - matches Search button */
   --input-hover-border: rgba(0, 0, 0, 0.15);
   --input-focus-bg: rgba(40, 40, 40, 0.8);
-  --input-focus-border: #3b82f6; /* Blue border on focus - matches Search button */
+  --input-focus-border: #3b82f6;
+  /* Blue border on focus - matches Search button */
   --input-focus-ring: rgba(59, 130, 246, 0.5);
-  
+
   /* Button Variables - Default button style */
   --button-bg: rgba(40, 40, 40, 0.8);
   --button-border: rgba(0, 0, 0, 0.15);
-  --button-border-radius: 0.375rem; /* rounded-md - matches Search button */
+  --button-border-radius: 0.375rem;
+  /* rounded-md - matches Search button */
   --button-hover-bg: rgba(255, 255, 255, 0.1);
   --button-hover-border: rgba(0, 0, 0, 0.15);
   --button-focus-border: #3b82f6;
@@ -118,17 +122,18 @@
   * {
     @apply border-border outline-ring/50;
   }
-  
-  html, body {
+
+  html,
+  body {
     height: 100%;
     margin: 0;
     padding: 0;
   }
-  
+
   body {
     @apply bg-background text-foreground;
   }
-  
+
   #root {
     height: 100%;
   }
@@ -148,7 +153,8 @@
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 .widget-container {
-  position: relative; /* Required for backdrop-filter to work properly */
+  position: relative;
+  /* Required for backdrop-filter to work properly */
   border-radius: var(--widget-border-radius);
   border: 1px solid var(--widget-border);
   background: var(--widget-bg);
@@ -202,7 +208,7 @@
   padding: 0.75rem 0;
 }
 
-.widget-section + .widget-section {
+.widget-section+.widget-section {
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -228,9 +234,8 @@
 
 .layer-card.active {
   background: linear-gradient(135deg,
-    rgba(59, 130, 246, 0.12) 0%,
-    rgba(59, 130, 246, 0.06) 100%
-  );
+      rgba(59, 130, 246, 0.12) 0%,
+      rgba(59, 130, 246, 0.06) 100%);
   border-color: rgba(59, 130, 246, 0.4);
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
 }
@@ -509,29 +514,49 @@ button[role="combobox"][aria-expanded="true"] {
 [data-theme="light"],
 .light {
   /* Text/Foreground Colors - Light Theme (darker for contrast) */
-  --foreground: hsl(222 47% 11%); /* slate-900 - very dark */
-  --card-foreground: hsl(222 47% 11%); /* slate-900 */
-  --popover-foreground: hsl(222 47% 11%); /* slate-900 */
-  --primary-foreground: hsl(0 0% 98%); /* white for primary buttons */
-  --secondary-foreground: hsl(222 47% 11%); /* slate-900 */
-  --muted-foreground: hsl(215 16% 47%); /* slate-600 - medium dark */
-  --accent-foreground: hsl(222 47% 11%); /* slate-900 */
-  --destructive-foreground: hsl(0 0% 98%); /* white */
-  --sidebar-foreground: hsl(222 47% 11%); /* slate-900 */
-  --sidebar-primary-foreground: hsl(0 0% 98%); /* white */
-  --sidebar-accent-foreground: hsl(222 47% 11%); /* slate-900 */
-  
+  --foreground: hsl(222 47% 11%);
+  /* slate-900 - very dark */
+  --card-foreground: hsl(222 47% 11%);
+  /* slate-900 */
+  --popover-foreground: hsl(222 47% 11%);
+  /* slate-900 */
+  --primary-foreground: hsl(0 0% 98%);
+  /* white for primary buttons */
+  --secondary-foreground: hsl(222 47% 11%);
+  /* slate-900 */
+  --muted-foreground: hsl(215 16% 47%);
+  /* slate-600 - medium dark */
+  --accent-foreground: hsl(222 47% 11%);
+  /* slate-900 */
+  --destructive-foreground: hsl(0 0% 98%);
+  /* white */
+  --sidebar-foreground: hsl(222 47% 11%);
+  /* slate-900 */
+  --sidebar-primary-foreground: hsl(0 0% 98%);
+  /* white */
+  --sidebar-accent-foreground: hsl(222 47% 11%);
+  /* slate-900 */
+
   /* Background Colors - Light Theme */
-  --background: hsl(210 40% 98%); /* slate-50 - very light */
-  --card: hsl(0 0% 100%); /* white */
-  --popover: hsl(0 0% 100%); /* white */
-  --muted: hsl(210 40% 96%); /* slate-100 */
-  --accent: hsl(210 40% 96%); /* slate-100 */
-  --border: hsl(214 32% 91%); /* slate-200 */
-  --input: hsl(214 32% 91%); /* slate-200 */
-  --sidebar: hsl(210 40% 98%); /* slate-50 */
-  --sidebar-border: hsl(214 32% 91%); /* slate-200 */
-  
+  --background: hsl(210 40% 98%);
+  /* slate-50 - very light */
+  --card: hsl(0 0% 100%);
+  /* white */
+  --popover: hsl(0 0% 100%);
+  /* white */
+  --muted: hsl(210 40% 96%);
+  /* slate-100 */
+  --accent: hsl(210 40% 96%);
+  /* slate-100 */
+  --border: hsl(214 32% 91%);
+  /* slate-200 */
+  --input: hsl(214 32% 91%);
+  /* slate-200 */
+  --sidebar: hsl(210 40% 98%);
+  /* slate-50 */
+  --sidebar-border: hsl(214 32% 91%);
+  /* slate-200 */
+
   /* Widget Container Variables - Light Theme */
   --widget-bg: rgba(255, 255, 255, 0.45);
   --widget-bg-panel: rgba(255, 255, 255, 0.45);
@@ -539,68 +564,80 @@ button[role="combobox"][aria-expanded="true"] {
   --widget-border-radius: 16px;
   --widget-backdrop-blur: blur(10px);
   --widget-box-shadow: 0 4px 25px 0 rgba(0, 0, 0, 0.10);
-  
+
   /* Input/Form Control Variables - Light Theme */
-  --input-bg: rgba(248, 250, 252, 1); /* slate-50 */
+  --input-bg: rgba(248, 250, 252, 1);
+  /* slate-50 */
   --input-border: rgba(0, 0, 0, 0.15);
-  --input-hover-bg: rgba(241, 245, 249, 1); /* slate-100 */
+  --input-hover-bg: rgba(241, 245, 249, 1);
+  /* slate-100 */
   --input-hover-border: rgba(0, 0, 0, 0.15);
   --input-focus-bg: rgba(255, 255, 255, 1);
-  --input-focus-border: #437efc; /* brand-primary */
+  --input-focus-border: #437efc;
+  /* brand-primary */
   --input-focus-ring: rgba(67, 126, 252, 0.2);
-  
+
   /* Button Variables - Light Theme */
   --button-bg: rgba(255, 255, 255, 1);
   --button-border: rgba(0, 0, 0, 0.15);
-  --button-hover-bg: rgba(241, 245, 249, 1); /* slate-100 */
+  --button-hover-bg: rgba(241, 245, 249, 1);
+  /* slate-100 */
   --button-hover-border: rgba(0, 0, 0, 0.15);
   --button-focus-border: #437efc;
   --button-focus-ring: rgba(67, 126, 252, 0.2);
-  
+
   /* Widget hover state - Light Theme */
   .widget-container:hover {
-    border-color: rgba(255, 255, 255, 1); /* white */
+    border-color: rgba(255, 255, 255, 1);
+    /* white */
   }
-  
+
   /* Widget header - Light Theme */
   .widget-header {
-    border-bottom: 1px solid rgba(226, 232, 240, 1); /* slate-200 */
+    border-bottom: 1px solid rgba(226, 232, 240, 1);
+    /* slate-200 */
   }
 }
 
 [data-theme="light"] .widget-container:hover,
 .light .widget-container:hover {
-  border-color: rgba(255, 255, 255, 1); /* white */
+  border-color: rgba(255, 255, 255, 1);
+  /* white */
 }
 
 [data-theme="light"] .widget-header,
 .light .widget-header {
-  border-bottom: 1px solid rgba(226, 232, 240, 1); /* slate-200 */
+  border-bottom: 1px solid rgba(226, 232, 240, 1);
+  /* slate-200 */
 }
 
-[data-theme="light"] .widget-section + .widget-section,
-.light .widget-section + .widget-section {
-  border-top: 1px solid rgba(226, 232, 240, 1); /* slate-200 */
+[data-theme="light"] .widget-section+.widget-section,
+.light .widget-section+.widget-section {
+  border-top: 1px solid rgba(226, 232, 240, 1);
+  /* slate-200 */
 }
 
 [data-theme="light"] .layer-card,
 .light .layer-card {
-  border: 1px solid rgba(226, 232, 240, 1); /* slate-200 */
-  background: rgba(248, 250, 252, 1); /* slate-50 */
+  border: 1px solid rgba(226, 232, 240, 1);
+  /* slate-200 */
+  background: rgba(248, 250, 252, 1);
+  /* slate-50 */
 }
 
 [data-theme="light"] .layer-card:hover,
 .light .layer-card:hover {
-  background: rgba(241, 245, 249, 1); /* slate-100 */
-  border-color: rgba(203, 213, 225, 1); /* slate-300 */
+  background: rgba(241, 245, 249, 1);
+  /* slate-100 */
+  border-color: rgba(203, 213, 225, 1);
+  /* slate-300 */
 }
 
 [data-theme="light"] .layer-card.active,
 .light .layer-card.active {
   background: linear-gradient(135deg,
-    rgba(67, 126, 252, 0.12) 0%,
-    rgba(67, 126, 252, 0.06) 100%
-  );
+      rgba(67, 126, 252, 0.12) 0%,
+      rgba(67, 126, 252, 0.06) 100%);
   border-color: rgba(67, 126, 252, 0.3);
   box-shadow: 0 0 20px rgba(67, 126, 252, 0.1);
 }
@@ -624,7 +661,8 @@ button[role="combobox"][aria-expanded="true"] {
 /* Slider track styles - Default (dark theme) */
 [data-radix-slider-track],
 span[data-radix-slider-track] {
-  background-color: rgba(63, 63, 63, 1) !important; /* neutral-700 for dark theme */
+  background-color: rgba(63, 63, 63, 1) !important;
+  /* neutral-700 for dark theme */
 }
 
 /* Slider light theme styles */
@@ -632,38 +670,44 @@ span[data-radix-slider-track] {
 [data-theme="light"] span[data-radix-slider-track],
 .light [data-radix-slider-track],
 .light span[data-radix-slider-track] {
-  background-color: rgba(67, 126, 252, 0.25) !important; /* 25% opacity of --cs-brand-primary (#437efc) */
+  background-color: rgba(67, 126, 252, 0.25) !important;
+  /* 25% opacity of --cs-brand-primary (#437efc) */
 }
 
 [data-theme="light"] [data-radix-slider-track]:hover,
 [data-theme="light"] span[data-radix-slider-track]:hover,
 .light [data-radix-slider-track]:hover,
 .light span[data-radix-slider-track]:hover {
-  background-color: rgba(67, 126, 252, 0.25) !important; /* 25% opacity of --cs-brand-primary */
+  background-color: rgba(67, 126, 252, 0.25) !important;
+  /* 25% opacity of --cs-brand-primary */
 }
 
 [data-theme="light"] [data-radix-slider-range],
 .light [data-radix-slider-range] {
-  background: linear-gradient(to right, rgba(59, 130, 246, 0.7), rgba(96, 165, 250, 0.7)) !important; /* translucent blue-500 to blue-400 */
+  background: linear-gradient(to right, rgba(59, 130, 246, 0.7), rgba(96, 165, 250, 0.7)) !important;
+  /* translucent blue-500 to blue-400 */
 }
 
 [data-theme="light"] [data-radix-slider-thumb],
 .light [data-radix-slider-thumb] {
   background-color: white !important;
-  border-color: rgb(59, 130, 246) !important; /* blue-500 */
+  border-color: rgb(59, 130, 246) !important;
+  /* blue-500 */
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
 [data-theme="light"] [data-radix-slider-thumb]:hover,
 .light [data-radix-slider-thumb]:hover {
-  border-color: rgb(37, 99, 235) !important; /* blue-600 */
+  border-color: rgb(37, 99, 235) !important;
+  /* blue-600 */
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3) !important;
 }
 
 /* Mapbox control icons - Darker in light mode */
 [data-theme="light"] .mapboxgl-ctrl-group button .mapboxgl-ctrl-icon,
 .light .mapboxgl-ctrl-group button .mapboxgl-ctrl-icon {
-  filter: brightness(0) !important; /* Make icons black/dark */
+  filter: brightness(0) !important;
+  /* Make icons black/dark */
 }
 
 /* Remove shadows from buttons and form elements in light theme */
@@ -705,4 +749,3 @@ span[data-radix-slider-track] {
   border-left-color: rgba(255, 255, 255, 0.5) !important;
   border-right-color: rgba(255, 255, 255, 0.5) !important;
 }
-

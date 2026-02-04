@@ -13,6 +13,7 @@ import { climateLayers } from '@climate-studio/core/config'
 import { useClimateLayerData } from '../hooks/useClimateLayerData'
 import { GroundwaterDetailsPanel, SelectedAquifer } from './panels/GroundwaterDetailsPanel'
 import { SelectedFactory, FactoryDetailsPanel } from './panels/FactoryDetailsPanel'
+import { SelectedDam, DamDetailsPanel } from './panels/DamDetailsPanel'
 import { SearchAndViewsPanel } from './panels/SearchAndViewsPanel'
 import { ClimateProjectionsWidget } from './ClimateProjectionsWidget'
 import { Button } from './ui/button'
@@ -73,6 +74,41 @@ mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
 
 // Backend API base URL
 const API_BASE = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL || 'http://localhost:5001'
+
+// Helper: create a StyleImageInterface for Mapbox GL v3 symbol layers
+function createIconImage(size: number, draw: (ctx: CanvasRenderingContext2D, s: number) => void): { width: number; height: number; data: Uint8ClampedArray } {
+  const canvas = document.createElement('canvas')
+  canvas.width = size
+  canvas.height = size
+  const ctx = canvas.getContext('2d')!
+  draw(ctx, size)
+  const imageData = ctx.getImageData(0, 0, size, size)
+  return { width: size, height: size, data: imageData.data }
+}
+
+// Draw SVG path string onto canvas context, scaled from a source viewBox to the canvas size
+function drawSvgPath(ctx: CanvasRenderingContext2D, d: string, canvasSize: number, viewBoxSize: number) {
+  const scale = canvasSize / viewBoxSize
+  ctx.save()
+  ctx.scale(scale, scale)
+  ctx.fillStyle = '#ffffff'
+  ctx.fill(new Path2D(d))
+  ctx.restore()
+}
+
+// Dam icon path from Figma (viewBox 24x24) — white block/dam structure
+const DAM_PATH = 'M5.7 14.4706H12V18H5.7V14.4706ZM5 10.2353H9.2V13.7647H5V10.2353ZM9.9 10.2353H14.1V13.7647H9.9V10.2353ZM14.8 10.2353H19V13.7647H14.8V10.2353ZM12.7 14.4706H18.3V18H12.7V14.4706ZM5.7 6H11.3V9.52941H5.7V6ZM12 6H18.3V9.52941H12V6Z'
+
+// Factory icon path from Figma (viewBox 24x24) — white factory silhouette
+const FACTORY_PATH = 'M6.66667 15V16.3333H9.33333V15H6.66667ZM6.66667 12.3333V13.6667H13.3333V12.3333H6.66667ZM10.6667 15V16.3333H13.3333V15H10.6667ZM14.6667 12.3333V13.6667H17.3333V12.3333H14.6667ZM14.6667 15V16.3333H17.3333V15H14.6667ZM5.33333 17.6667V8.33333L8.66667 11V8.33333L12 11V8.33333L15.3333 11L16 4.33333H18L18.6667 11V17.6667H5.33333Z'
+
+function drawDamIcon(ctx: CanvasRenderingContext2D, s: number) {
+  drawSvgPath(ctx, DAM_PATH, s, 24)
+}
+
+function drawFactoryIcon(ctx: CanvasRenderingContext2D, s: number) {
+  drawSvgPath(ctx, FACTORY_PATH, s, 24)
+}
 
 // Combine all metro cities with wet bulb data from expanded 30-city dataset
 const metroHumidityData = {
@@ -598,6 +634,8 @@ export default function WaterAccessView() {
   const [selectedMetroCity, setSelectedMetroCity] = useState<string | null>(null)
   // Factory state
   const [selectedFactory, setSelectedFactory] = useState<SelectedFactory | null>(null)
+  // Dam state
+  const [selectedDam, setSelectedDam] = useState<SelectedDam | null>(null)
 
   // Use theme context for map style
   const { theme } = useTheme()
@@ -1371,14 +1409,7 @@ export default function WaterAccessView() {
           type: 'circle',
           source: 'dams',
           paint: {
-            'circle-radius': [
-              'interpolate',
-              ['linear'],
-              ['zoom'],
-              4, 4,
-              8, 8,
-              12, 12
-            ],
+            'circle-radius': 10,
             'circle-color': [
               'match',
               ['get', 'downstream_impact'],
@@ -1390,6 +1421,23 @@ export default function WaterAccessView() {
             'circle-stroke-width': 2,
             'circle-stroke-color': '#ffffff',
             'circle-opacity': 0.9
+          }
+        }, beforeId)
+      }
+
+      // Dam icon layer — white dam icon centered on each circle
+      if (!map.hasImage('dam-icon')) {
+        map.addImage('dam-icon', createIconImage(32, drawDamIcon))
+      }
+      if (!map.getLayer('dams-icons')) {
+        map.addLayer({
+          id: 'dams-icons',
+          type: 'symbol',
+          source: 'dams',
+          layout: {
+            'icon-image': 'dam-icon',
+            'icon-size': 0.6,
+            'icon-allow-overlap': true
           }
         }, beforeId)
       }
@@ -1415,6 +1463,42 @@ export default function WaterAccessView() {
           minzoom: 6
         })
       }
+
+      // Dam click handler
+      map.on('click', 'dams-circles', (e) => {
+        if (!e.features || e.features.length === 0) return
+        const props = e.features[0].properties
+        if (!props) return
+
+        // Close other detail panels
+        setSelectedAquifer(null)
+        setSelectedFeatureId(null)
+        setSelectedFactory(null)
+
+        setSelectedDam({
+          id: props.id || '',
+          name: props.name,
+          state: props.state || '',
+          reservoir: props.reservoir || '',
+          river: props.river || '',
+          year_completed: props.year_completed || 0,
+          height_ft: props.height_ft || 0,
+          storage_acre_ft: props.storage_acre_ft || 0,
+          capacity_mw: props.capacity_mw || 0,
+          serves: props.serves || '',
+          downstream_impact: props.downstream_impact || 'moderate',
+          impact_description: props.impact_description || '',
+          connected_infrastructure: props.connected_infrastructure || '',
+          dam_type: props.dam_type || ''
+        })
+      })
+
+      map.on('mouseenter', 'dams-circles', () => {
+        map.getCanvas().style.cursor = 'pointer'
+      })
+      map.on('mouseleave', 'dams-circles', () => {
+        map.getCanvas().style.cursor = ''
+      })
 
       // Add city markers for river and canal-supplied cities
       if (!map.getSource('river-cities')) {
@@ -2502,7 +2586,7 @@ export default function WaterAccessView() {
     const map = mapRef.current
     const visibility = showDamsLayer ? 'visible' : 'none'
 
-    const damLayerIds = ['dams-circles', 'dams-labels']
+    const damLayerIds = ['dams-circles', 'dams-icons', 'dams-labels']
 
     damLayerIds.forEach(layerId => {
       if (map.getLayer(layerId)) {
@@ -3296,6 +3380,7 @@ export default function WaterAccessView() {
       if (mapRef.current && mapLoaded) {
         const map = mapRef.current
         if (map.getLayer('factory-circles')) map.removeLayer('factory-circles')
+        if (map.getLayer('factory-icons')) map.removeLayer('factory-icons')
         if (map.getLayer('factory-labels')) map.removeLayer('factory-labels')
         if (map.getSource('factories')) map.removeSource('factories')
       }
@@ -3343,14 +3428,7 @@ export default function WaterAccessView() {
         type: 'circle',
         source: 'factories',
         paint: {
-          'circle-radius': [
-            'interpolate',
-            ['linear'],
-            ['zoom'],
-            4, 4,
-            8, 8,
-            12, 12
-          ],
+          'circle-radius': 10,
           'circle-color': [
             'interpolate',
             ['linear'],
@@ -3368,26 +3446,47 @@ export default function WaterAccessView() {
         }
       })
 
+      // Factory icon layer — white factory icon centered on each circle
+      if (!map.hasImage('factory-icon')) {
+        map.addImage('factory-icon', createIconImage(32, drawFactoryIcon))
+      }
+      if (!map.getLayer('factory-icons')) {
+        map.addLayer({
+          id: 'factory-icons',
+          type: 'symbol',
+          source: 'factories',
+          layout: {
+            'icon-image': 'factory-icon',
+            'icon-size': 0.6,
+            'icon-allow-overlap': true
+          }
+        })
+      } else {
+        map.setLayoutProperty('factory-icons', 'icon-size', 0.6)
+      }
+
       // Add labels layer
-      map.addLayer({
-        id: 'factory-labels',
-        type: 'symbol',
-        source: 'factories',
-        layout: {
-          'text-field': ['get', 'name'],
-          'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
-          'text-size': 11,
-          'text-offset': [0, 1.5],
-          'text-anchor': 'top',
-          'text-max-width': 12
-        },
-        paint: {
-          'text-color': '#ffffff',
-          'text-halo-color': 'rgba(0, 0, 0, 0.8)',
-          'text-halo-width': 1.5
-        },
-        minzoom: 6
-      })
+      if (!map.getLayer('factory-labels')) {
+        map.addLayer({
+          id: 'factory-labels',
+          type: 'symbol',
+          source: 'factories',
+          layout: {
+            'text-field': ['get', 'name'],
+            'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+            'text-size': 11,
+            'text-offset': [0, 1.5],
+            'text-anchor': 'top',
+            'text-max-width': 12
+          },
+          paint: {
+            'text-color': '#ffffff',
+            'text-halo-color': 'rgba(0, 0, 0, 0.8)',
+            'text-halo-width': 1.5
+          },
+          minzoom: 6
+        })
+      }
 
       // Add click handler for factory details
       map.on('click', 'factory-circles', (e) => {
@@ -3400,9 +3499,10 @@ export default function WaterAccessView() {
         const fullFactory = factoriesExpandedData.factories.find(f => f.id === props?.id)
         if (!fullFactory) return
 
-        // Close aquifer panel when opening factory panel
+        // Close other detail panels when opening factory panel
         setSelectedAquifer(null)
         setSelectedFeatureId(null)
+        setSelectedDam(null)
 
         setSelectedFactory({
           name: fullFactory.name,
@@ -3442,6 +3542,7 @@ export default function WaterAccessView() {
 
     return () => {
       if (map.getLayer('factory-circles')) map.removeLayer('factory-circles')
+      if (map.getLayer('factory-icons')) map.removeLayer('factory-icons')
       if (map.getLayer('factory-labels')) map.removeLayer('factory-labels')
       if (map.getSource('factories')) map.removeSource('factories')
     }
@@ -4088,6 +4189,60 @@ export default function WaterAccessView() {
                   </div>
                 )}
 
+                {/* Major Dams Layer */}
+                {layersInWidget.dams && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showDamsLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowDamsLayer(!showDamsLayer)}>
+                    <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M2 22h20v-2H2v2zm2-18v12h16V4H4zm2 10V6h12v8H6z" />
+                    </svg>
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">Major Dams</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">USGS / USBR</span>
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, dams: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Factories Layer */}
+                {layersInWidget.factories && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showFactoriesLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowFactoriesLayer(!showFactoriesLayer)}>
+                    <Factory className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">Factories</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">CHIPS Act, DOE</span>
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, factories: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
+
                 {/* Rivers Layer */}
                 {layersInWidget.rivers && (
                   <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showRiversLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowRiversLayer(!showRiversLayer)}>
@@ -4134,34 +4289,6 @@ export default function WaterAccessView() {
                       onClick={(e) => {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, canals: false })
-                      }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
-                    >
-                      <X className="h-5 w-5 text-muted-foreground" />
-                    </button>
-                  </div>
-                )}
-
-                {/* Major Dams Layer */}
-                {layersInWidget.dams && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showDamsLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowDamsLayer(!showDamsLayer)}>
-                    <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M2 22h20v-2H2v2zm2-18v12h16V4H4zm2 10V6h12v8H6z" />
-                    </svg>
-                    <div className="flex-1 min-w-0 flex flex-col gap-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-sm font-semibold">Major Dams</h4>
-                      </div>
-                      {showSourceInfo && (
-                        <p className="text-[11px] text-muted-foreground/80 truncate">
-                          Source: <span className="font-medium text-foreground">USGS / USBR</span>
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setLayersInWidget({ ...layersInWidget, dams: false })
                       }}
                       className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
@@ -4280,7 +4407,7 @@ export default function WaterAccessView() {
                 {/* Wet Bulb Temperature Layer */}
                 {layersInWidget.wetBulb && (
                   <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isWetBulbActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleLayer('wet_bulb')}>
-                    <Droplets className="h-5 w-5 flex-shrink-0 text-blue-500" />
+                    <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-2">
                         <h4 className="text-sm font-semibold">{wetBulbLayer?.title}</h4>
@@ -4321,32 +4448,6 @@ export default function WaterAccessView() {
                       onClick={(e) => {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, temperature: false })
-                      }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
-                    >
-                      <X className="h-5 w-5 text-muted-foreground" />
-                    </button>
-                  </div>
-                )}
-
-                {/* Factories Layer */}
-                {layersInWidget.factories && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showFactoriesLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowFactoriesLayer(!showFactoriesLayer)}>
-                    <Factory className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                    <div className="flex-1 min-w-0 flex flex-col gap-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-sm font-semibold">Factories</h4>
-                      </div>
-                      {showSourceInfo && (
-                        <p className="text-[11px] text-muted-foreground/80 truncate">
-                          Source: <span className="font-medium text-foreground">CHIPS Act, DOE</span>
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setLayersInWidget({ ...layersInWidget, factories: false })
                       }}
                       className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
@@ -4453,7 +4554,7 @@ export default function WaterAccessView() {
 
         return (
           <div className="absolute top-0 right-0 bottom-0 z-[1000] w-80 pointer-events-none overflow-y-auto">
-            <div className="space-y-4 py-4 pointer-events-auto" style={{ paddingLeft: '25px', paddingRight: '25px' }}>
+            <div className="space-y-4 py-4 pointer-events-auto" style={{ paddingLeft: '25px', paddingRight: '16px' }}>
               {/* Climate Projections Widget - Always visible */}
               <ClimateProjectionsWidget />
 
@@ -5157,6 +5258,18 @@ export default function WaterAccessView() {
             <FactoryDetailsPanel
               selectedFactory={selectedFactory}
               onClose={() => setSelectedFactory(null)}
+            />
+          </div>
+        )
+      }
+
+      {/* Dam Details Panel - Bottom Center */}
+      {
+        selectedDam && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto" style={{ width: '640px' }}>
+            <DamDetailsPanel
+              selectedDam={selectedDam}
+              onClose={() => setSelectedDam(null)}
             />
           </div>
         )

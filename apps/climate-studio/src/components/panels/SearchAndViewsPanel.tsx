@@ -388,7 +388,7 @@ export function SearchAndViewsPanel({
           </p>
         ) : (
           <div
-            className="rounded-md p-2"
+            className="rounded-md"
           >
             <DndContext
               sensors={sensors}

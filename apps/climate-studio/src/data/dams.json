@@ -5,13 +5,12 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          -114.7377,
-          36.0161
-        ]
+        "coordinates": [-114.7377, 36.0161]
       },
       "properties": {
+        "id": "hoover",
         "name": "Hoover Dam",
+        "state": "Nevada / Arizona",
         "reservoir": "Lake Mead",
         "river": "Colorado River",
         "year_completed": 1936,
@@ -20,9 +19,9 @@
         "capacity_mw": 2080,
         "serves": "Las Vegas, Los Angeles, Phoenix, Tucson",
         "downstream_impact": "severe",
-        "impact_description": "Controls flow to Lower Colorado River; major downstream reduction",
+        "impact_description": "Controls flow to Lower Colorado River; major downstream reduction. Lake Mead has declined dramatically due to drought and over-allocation.",
         "connected_infrastructure": "Central Arizona Project, Colorado River Aqueduct, All-American Canal",
-        "dam_type": "gravity arch",
+        "dam_type": "Gravity Arch",
         "infrastructure_type": "dam"
       }
     },
@@ -30,13 +29,12 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          -111.4842,
-          36.9364
-        ]
+        "coordinates": [-111.4842, 36.9364]
       },
       "properties": {
+        "id": "glen-canyon",
         "name": "Glen Canyon Dam",
+        "state": "Arizona",
         "reservoir": "Lake Powell",
         "river": "Colorado River",
         "year_completed": 1966,
@@ -45,9 +43,9 @@
         "capacity_mw": 1320,
         "serves": "Phoenix, Tucson, Las Vegas, Los Angeles, San Diego",
         "downstream_impact": "severe",
-        "impact_description": "Major flow regulation; feeds Lake Mead and Lower Basin",
+        "impact_description": "Major flow regulation; feeds Lake Mead and Lower Basin. Lake Powell has reached critically low levels, threatening power generation.",
         "connected_infrastructure": "Central Arizona Project, Colorado River Aqueduct",
-        "dam_type": "concrete arch",
+        "dam_type": "Concrete Arch",
         "infrastructure_type": "dam"
       }
     },
@@ -55,13 +53,12 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          -111.1575,
-          33.6733
-        ]
+        "coordinates": [-111.1575, 33.6733]
       },
       "properties": {
+        "id": "roosevelt",
         "name": "Roosevelt Dam",
+        "state": "Arizona",
         "reservoir": "Theodore Roosevelt Lake",
         "river": "Salt River",
         "year_completed": 1911,
@@ -70,9 +67,9 @@
         "capacity_mw": 36,
         "serves": "Phoenix, Mesa, Tempe, Scottsdale",
         "downstream_impact": "severe",
-        "impact_description": "Salt River runs dry downstream; water diverted to Phoenix metro",
+        "impact_description": "Salt River runs dry downstream; water diverted to Phoenix metro via Salt River Project canals.",
         "connected_infrastructure": "Salt River Project canals",
-        "dam_type": "cyclopean masonry arch",
+        "dam_type": "Cyclopean Masonry Arch",
         "infrastructure_type": "dam"
       }
     },
@@ -80,13 +77,12 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          -114.5703,
-          35.2019
-        ]
+        "coordinates": [-114.5703, 35.2019]
       },
       "properties": {
+        "id": "davis",
         "name": "Davis Dam",
+        "state": "Nevada / Arizona",
         "reservoir": "Lake Mohave",
         "river": "Colorado River",
         "year_completed": 1951,
@@ -95,9 +91,9 @@
         "capacity_mw": 255,
         "serves": "Bullhead City, Laughlin",
         "downstream_impact": "moderate",
-        "impact_description": "Regulates flow from Hoover Dam; afterbay for power generation",
+        "impact_description": "Regulates flow from Hoover Dam; afterbay for power generation and downstream distribution.",
         "connected_infrastructure": "Colorado River Aqueduct intake",
-        "dam_type": "gravity",
+        "dam_type": "Gravity",
         "infrastructure_type": "dam"
       }
     },
@@ -105,13 +101,12 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          -114.1364,
-          34.2939
-        ]
+        "coordinates": [-114.1364, 34.2939]
       },
       "properties": {
+        "id": "parker",
         "name": "Parker Dam",
+        "state": "California / Arizona",
         "reservoir": "Lake Havasu",
         "river": "Colorado River",
         "year_completed": 1938,
@@ -120,9 +115,9 @@
         "capacity_mw": 120,
         "serves": "Phoenix, Tucson, Los Angeles, San Diego",
         "downstream_impact": "severe",
-        "impact_description": "Diverts to CAP and Colorado River Aqueduct; major extraction point",
+        "impact_description": "Diverts to CAP and Colorado River Aqueduct; major extraction point for Southern California and Arizona.",
         "connected_infrastructure": "Central Arizona Project, Colorado River Aqueduct",
-        "dam_type": "concrete arch",
+        "dam_type": "Concrete Arch",
         "infrastructure_type": "dam"
       }
     },
@@ -130,13 +125,12 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          -114.4533,
-          32.8756
-        ]
+        "coordinates": [-114.4533, 32.8756]
       },
       "properties": {
+        "id": "imperial",
         "name": "Imperial Dam",
+        "state": "California",
         "reservoir": "Senator Wash Reservoir",
         "river": "Colorado River",
         "year_completed": 1938,
@@ -145,9 +139,9 @@
         "capacity_mw": 0,
         "serves": "Imperial Valley, Yuma, Coachella Valley",
         "downstream_impact": "severe",
-        "impact_description": "Diverts to All-American Canal and Gila Gravity Main Canal",
+        "impact_description": "Diverts to All-American Canal and Gila Gravity Main Canal; near-total extraction of remaining Colorado flow.",
         "connected_infrastructure": "All-American Canal, Gila Gravity Main Canal",
-        "dam_type": "gravity",
+        "dam_type": "Gravity",
         "infrastructure_type": "dam"
       }
     },
@@ -155,13 +149,12 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          -122.4197,
-          40.7181
-        ]
+        "coordinates": [-122.4197, 40.7181]
       },
       "properties": {
+        "id": "shasta",
         "name": "Shasta Dam",
+        "state": "California",
         "reservoir": "Shasta Lake",
         "river": "Sacramento River",
         "year_completed": 1945,
@@ -170,9 +163,9 @@
         "capacity_mw": 710,
         "serves": "Sacramento, San Francisco Bay Area, Central Valley",
         "downstream_impact": "moderate",
-        "impact_description": "Regulates Sacramento River flow; supports California Aqueduct",
-        "connected_infrastructure": "California Aqueduct",
-        "dam_type": "concrete gravity",
+        "impact_description": "Regulates Sacramento River flow; cornerstone of California State Water Project and Central Valley irrigation.",
+        "connected_infrastructure": "California Aqueduct, Central Valley Project",
+        "dam_type": "Concrete Gravity",
         "infrastructure_type": "dam"
       }
     },
@@ -180,13 +173,12 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          -121.4856,
-          39.5386
-        ]
+        "coordinates": [-121.4856, 39.5386]
       },
       "properties": {
+        "id": "oroville",
         "name": "Oroville Dam",
+        "state": "California",
         "reservoir": "Lake Oroville",
         "river": "Feather River",
         "year_completed": 1968,
@@ -195,9 +187,9 @@
         "capacity_mw": 819,
         "serves": "Sacramento, San Francisco Bay Area, Southern California",
         "downstream_impact": "moderate",
-        "impact_description": "Major California water project storage; supplies State Water Project",
+        "impact_description": "Tallest dam in the US. Major California water project storage; supplies State Water Project. Emergency spillway failure in 2017 prompted evacuation of 188,000 people.",
         "connected_infrastructure": "California Aqueduct",
-        "dam_type": "earthfill",
+        "dam_type": "Earthfill",
         "infrastructure_type": "dam"
       }
     },
@@ -205,24 +197,23 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          -109.4244,
-          40.9186
-        ]
+        "coordinates": [-109.4244, 40.9186]
       },
       "properties": {
+        "id": "flaming-gorge",
         "name": "Flaming Gorge Dam",
+        "state": "Utah",
         "reservoir": "Flaming Gorge Reservoir",
         "river": "Green River",
         "year_completed": 1964,
         "height_ft": 502,
         "storage_acre_ft": 3788700,
         "capacity_mw": 152,
-        "serves": "Salt Lake City region",
+        "serves": "Salt Lake City region, downstream Colorado River system",
         "downstream_impact": "moderate",
-        "impact_description": "Regulates Green River flow into Colorado River system",
-        "connected_infrastructure": "None",
-        "dam_type": "concrete thin-arch",
+        "impact_description": "Regulates Green River flow into Colorado River system; critical for downstream water balance.",
+        "connected_infrastructure": "Colorado River tributaries",
+        "dam_type": "Concrete Thin-Arch",
         "infrastructure_type": "dam"
       }
     },
@@ -230,13 +221,12 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          -107.6242,
-          36.8106
-        ]
+        "coordinates": [-107.6242, 36.8106]
       },
       "properties": {
+        "id": "navajo",
         "name": "Navajo Dam",
+        "state": "New Mexico",
         "reservoir": "Navajo Lake",
         "river": "San Juan River",
         "year_completed": 1963,
@@ -245,9 +235,9 @@
         "capacity_mw": 0,
         "serves": "Farmington, Navajo Nation",
         "downstream_impact": "moderate",
-        "impact_description": "Regulates San Juan River tributary to Colorado River",
-        "connected_infrastructure": "None",
-        "dam_type": "earthfill",
+        "impact_description": "Regulates San Juan River, a major tributary to the Colorado River. Supports irrigation in the San Juan Basin.",
+        "connected_infrastructure": "San Juan River tributaries",
+        "dam_type": "Earthfill",
         "infrastructure_type": "dam"
       }
     },
@@ -255,13 +245,12 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          -107.1825,
-          33.1528
-        ]
+        "coordinates": [-107.1825, 33.1528]
       },
       "properties": {
+        "id": "elephant-butte",
         "name": "Elephant Butte Dam",
+        "state": "New Mexico",
         "reservoir": "Elephant Butte Reservoir",
         "river": "Rio Grande",
         "year_completed": 1916,
@@ -270,9 +259,9 @@
         "capacity_mw": 24,
         "serves": "El Paso, Las Cruces, Albuquerque",
         "downstream_impact": "severe",
-        "impact_description": "Rio Grande often runs dry downstream; irrigation diversions",
-        "connected_infrastructure": "None",
-        "dam_type": "concrete gravity",
+        "impact_description": "Rio Grande often runs dry downstream; irrigation diversions serve both US and Mexico. Oldest and largest dam on the Rio Grande.",
+        "connected_infrastructure": "Rio Grande irrigation system",
+        "dam_type": "Concrete Gravity",
         "infrastructure_type": "dam"
       }
     },
@@ -280,13 +269,12 @@
       "type": "Feature",
       "geometry": {
         "type": "Point",
-        "coordinates": [
-          -114.7214,
-          32.7186
-        ]
+        "coordinates": [-114.7214, 32.7186]
       },
       "properties": {
+        "id": "morelos",
         "name": "Morelos Dam",
+        "state": "Arizona",
         "reservoir": "None (diversion structure)",
         "river": "Colorado River",
         "year_completed": 1950,
@@ -295,16 +283,424 @@
         "capacity_mw": 0,
         "serves": "Mexicali Valley (Mexico)",
         "downstream_impact": "extreme",
-        "impact_description": "Last diversion before Colorado River delta; river rarely reaches ocean",
+        "impact_description": "Last diversion before Colorado River delta; the river rarely reaches the ocean. Symbol of transboundary water crisis.",
         "connected_infrastructure": "Mexican irrigation canals",
-        "dam_type": "diversion",
+        "dam_type": "Diversion",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-118.97, 48.55]
+      },
+      "properties": {
+        "id": "grand-coulee",
+        "name": "Grand Coulee Dam",
+        "state": "Washington",
+        "reservoir": "Lake Roosevelt",
+        "river": "Columbia River",
+        "year_completed": 1942,
+        "height_ft": 550,
+        "storage_acre_ft": 9740000,
+        "capacity_mw": 6809,
+        "serves": "Pacific Northwest power grid, irrigation in eastern Washington",
+        "downstream_impact": "severe",
+        "impact_description": "Largest hydroelectric facility in the US. Completely blocked salmon migration upstream — no fish ladder installed. Major ecological impact on Pacific salmon populations.",
+        "connected_infrastructure": "Columbia River power grid, irrigation canals",
+        "dam_type": "Concrete Gravity",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.88, 45.61]
+      },
+      "properties": {
+        "id": "bonneville",
+        "name": "Bonneville Dam",
+        "state": "Oregon / Washington",
+        "reservoir": "Bonneville Pool",
+        "river": "Columbia River",
+        "year_completed": 1938,
+        "height_ft": 197,
+        "storage_acre_ft": 511000,
+        "capacity_mw": 1105,
+        "serves": "Portland, Seattle — Pacific Northwest power grid",
+        "downstream_impact": "moderate",
+        "impact_description": "First major dam on the Columbia River. Fish ladders were installed and are among the most successful in the US, allowing salmon passage.",
+        "connected_infrastructure": "Columbia River power grid",
+        "dam_type": "Concrete Gravity",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-118.98, 48.36]
+      },
+      "properties": {
+        "id": "chief-joseph",
+        "name": "Chief Joseph Dam",
+        "state": "Washington",
+        "reservoir": "Rufus Woods Lake",
+        "river": "Columbia River",
+        "year_completed": 1961,
+        "height_ft": 330,
+        "storage_acre_ft": 2580000,
+        "capacity_mw": 2620,
+        "serves": "Pacific Northwest power grid",
+        "downstream_impact": "severe",
+        "impact_description": "Second largest hydroelectric dam in the US. No fish passage facilities — blocks salmon migration for the upper Columbia River basin.",
+        "connected_infrastructure": "Columbia River power grid",
+        "dam_type": "Concrete Gravity",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-115.93, 46.55]
+      },
+      "properties": {
+        "id": "dworshak",
+        "name": "Dworshak Dam",
+        "state": "Idaho",
+        "reservoir": "Dworshak Reservoir",
+        "river": "North Fork Boise River",
+        "year_completed": 1972,
+        "height_ft": 717,
+        "storage_acre_ft": 1329000,
+        "capacity_mw": 317,
+        "serves": "Boise region, downstream flow augmentation for salmon",
+        "downstream_impact": "moderate",
+        "impact_description": "Tallest dam in Idaho. Water releases are used to augment flow in the Snake River to help juvenile salmon migrate to the ocean.",
+        "connected_infrastructure": "Snake River tributaries",
+        "dam_type": "Earthfill",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-84.10, 36.42]
+      },
+      "properties": {
+        "id": "norris",
+        "name": "Norris Dam",
+        "state": "Tennessee",
+        "reservoir": "Norris Reservoir",
+        "river": "Clinch River",
+        "year_completed": 1936,
+        "height_ft": 265,
+        "storage_acre_ft": 3638000,
+        "capacity_mw": 131,
+        "serves": "Knoxville, eastern Tennessee — TVA power grid",
+        "downstream_impact": "moderate",
+        "impact_description": "First dam built by the Tennessee Valley Authority (TVA). Transformed the region's economy through flood control, power generation, and recreation.",
+        "connected_infrastructure": "TVA power grid, Tennessee River system",
+        "dam_type": "Concrete Gravity",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-87.37, 34.80]
+      },
+      "properties": {
+        "id": "wheeler",
+        "name": "Wheeler Dam",
+        "state": "Alabama",
+        "reservoir": "Wheeler Reservoir",
+        "river": "Tennessee River",
+        "year_completed": 1944,
+        "height_ft": 229,
+        "storage_acre_ft": 6680000,
+        "capacity_mw": 358,
+        "serves": "Northern Alabama — Huntsville, TVA power grid",
+        "downstream_impact": "moderate",
+        "impact_description": "Major TVA dam providing flood control and power. Reservoir hosts significant wildlife habitat and is an important recreational resource.",
+        "connected_infrastructure": "TVA power grid, Tennessee River navigation",
+        "dam_type": "Concrete Gravity",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-85.22, 35.03]
+      },
+      "properties": {
+        "id": "chickamauga",
+        "name": "Chickamauga Dam",
+        "state": "Tennessee",
+        "reservoir": "Chickamauga Lake",
+        "river": "Tennessee River",
+        "year_completed": 1940,
+        "height_ft": 129,
+        "storage_acre_ft": 5290000,
+        "capacity_mw": 371,
+        "serves": "Chattanooga, eastern Tennessee — TVA power grid",
+        "downstream_impact": "moderate",
+        "impact_description": "TVA dam creating one of the largest reservoirs in the Southeast. Supports navigation, flood control, and significant recreational tourism.",
+        "connected_infrastructure": "TVA power grid, Tennessee River navigation",
+        "dam_type": "Concrete Gravity",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-101.48, 47.48]
+      },
+      "properties": {
+        "id": "garrison",
+        "name": "Garrison Dam",
+        "state": "North Dakota",
+        "reservoir": "Lake Sakakawea",
+        "river": "Missouri River",
+        "year_completed": 1953,
+        "height_ft": 210,
+        "storage_acre_ft": 18722000,
+        "capacity_mw": 456,
+        "serves": "North Dakota, downstream Missouri River states",
+        "downstream_impact": "severe",
+        "impact_description": "Creates Lake Sakakawea, the 4th largest man-made reservoir in the US. Flooded significant lands of the Three Affiliated Nations (Mandan, Hidatsa, Arikara). Major controversy over tribal displacement.",
+        "connected_infrastructure": "Missouri River system, irrigation districts",
+        "dam_type": "Earthfill",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-100.55, 44.37]
+      },
+      "properties": {
+        "id": "oahe",
+        "name": "Oahe Dam",
+        "state": "South Dakota",
+        "reservoir": "Lake Oahe",
+        "river": "Missouri River",
+        "year_completed": 1962,
+        "height_ft": 423,
+        "storage_acre_ft": 17424000,
+        "capacity_mw": 750,
+        "serves": "South Dakota, downstream Missouri system",
+        "downstream_impact": "severe",
+        "impact_description": "Creates Lake Oahe, the largest reservoir on the Missouri River. Flooded lands of the Crow Creek and Lower Brule reservations. Standing Rock Sioux water rights remain a major legal dispute (Dakota Access Pipeline controversy).",
+        "connected_infrastructure": "Missouri River system",
+        "dam_type": "Earthfill",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-100.04, 43.87]
+      },
+      "properties": {
+        "id": "fort-randall",
+        "name": "Fort Randall Dam",
+        "state": "South Dakota",
+        "reservoir": "Lake Sharpe",
+        "river": "Missouri River",
+        "year_completed": 1956,
+        "height_ft": 270,
+        "storage_acre_ft": 3400000,
+        "capacity_mw": 220,
+        "serves": "Pierre, South Dakota",
+        "downstream_impact": "moderate",
+        "impact_description": "Part of the Pick-Sloan Missouri Basin Program. Provides flood control, power, and irrigation for central South Dakota.",
+        "connected_infrastructure": "Missouri River system, irrigation canals",
+        "dam_type": "Earthfill",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-79.08, 41.87]
+      },
+      "properties": {
+        "id": "kinzua",
+        "name": "Kinzua Dam",
+        "state": "Pennsylvania",
+        "reservoir": "Kinzua Reservoir",
+        "river": "Allegheny River",
+        "year_completed": 1965,
+        "height_ft": 280,
+        "storage_acre_ft": 370000,
+        "capacity_mw": 39,
+        "serves": "Bradford, PA — flood control and water supply",
+        "downstream_impact": "severe",
+        "impact_description": "Highly controversial — flooded ancestral Seneca Nation lands protected by the Treaty of 1832. Became a symbol of the conflict between federal infrastructure and Native American land rights. Damaged by a tornado in 2003.",
+        "connected_infrastructure": "Allegheny River system",
+        "dam_type": "Earthfill",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-76.35, 39.65]
+      },
+      "properties": {
+        "id": "conowingo",
+        "name": "Conowingo Dam",
+        "state": "Maryland",
+        "reservoir": "Conowingo Reservoir",
+        "river": "Susquehanna River",
+        "year_completed": 1928,
+        "height_ft": 105,
+        "storage_acre_ft": 464000,
+        "capacity_mw": 388,
+        "serves": "Baltimore, Philadelphia — power grid",
+        "downstream_impact": "moderate",
+        "impact_description": "Traps massive amounts of sediment from upstream, degrading Chesapeake Bay water quality. Major source of nutrient pollution in the Bay. Blocks fish migration on the Susquehanna.",
+        "connected_infrastructure": "Susquehanna River, Chesapeake Bay watershed",
+        "dam_type": "Concrete Gravity",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-99.12, 26.56]
+      },
+      "properties": {
+        "id": "falcon",
+        "name": "Falcon Dam",
+        "state": "Texas",
+        "reservoir": "Falcon Lake",
+        "river": "Rio Grande",
+        "year_completed": 1954,
+        "height_ft": 147,
+        "storage_acre_ft": 3600000,
+        "capacity_mw": 88,
+        "serves": "Laredo, Eagle Pass — border region water supply",
+        "downstream_impact": "severe",
+        "impact_description": "Joint US-Mexico dam on the Rio Grande. Dramatically reduced river flow downstream, contributing to the Rio Grande drying up before reaching the Gulf of Mexico.",
+        "connected_infrastructure": "Rio Grande, US-Mexico water treaty infrastructure",
+        "dam_type": "Earthfill",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-120.52, 37.72]
+      },
+      "properties": {
+        "id": "new-melones",
+        "name": "New Melones Dam",
+        "state": "California",
+        "reservoir": "New Melones Reservoir",
+        "river": "Stanislaus River",
+        "year_completed": 1979,
+        "height_ft": 625,
+        "storage_acre_ft": 1870000,
+        "capacity_mw": 187,
+        "serves": "Stockton, Modesto — Central Valley irrigation",
+        "downstream_impact": "moderate",
+        "impact_description": "Submerged historic gold mining sites and Native American artifacts. Reservoir has frequently been drawn down to near-empty during drought years to meet Central Valley irrigation demands.",
+        "connected_infrastructure": "Central Valley Project, California irrigation system",
+        "dam_type": "Earthfill",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-121.08, 37.03]
+      },
+      "properties": {
+        "id": "san-luis",
+        "name": "San Luis Dam",
+        "state": "California",
+        "reservoir": "San Luis Reservoir",
+        "river": "San Luis Creek",
+        "year_completed": 1967,
+        "height_ft": 550,
+        "storage_acre_ft": 2041000,
+        "capacity_mw": 0,
+        "serves": "Central Valley, Southern California — off-stream storage",
+        "downstream_impact": "moderate",
+        "impact_description": "Largest off-stream reservoir in the US — stores water pumped from the Sacramento-San Joaquin Delta and Colorado River. Critical link in California's water transfer system.",
+        "connected_infrastructure": "California Aqueduct, Delta-Mendota Canal, State Water Project",
+        "dam_type": "Earthfill",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-93.13, 35.55]
+      },
+      "properties": {
+        "id": "ozark",
+        "name": "Ozark Dam",
+        "state": "Arkansas",
+        "reservoir": "Lake Francis City",
+        "river": "Arkansas River",
+        "year_completed": 1968,
+        "height_ft": 106,
+        "storage_acre_ft": 2070000,
+        "capacity_mw": 43,
+        "serves": "Fort Smith, Little Rock — navigation and flood control",
+        "downstream_impact": "moderate",
+        "impact_description": "Part of the Arkansas River Navigation System enabling barge traffic from the Mississippi to Tulsa. Provides flood protection for downstream communities.",
+        "connected_infrastructure": "Arkansas River Navigation System, Mississippi River",
+        "dam_type": "Concrete Gravity",
+        "infrastructure_type": "dam"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-92.64, 38.24]
+      },
+      "properties": {
+        "id": "bagnell",
+        "name": "Bagnell Dam",
+        "state": "Missouri",
+        "reservoir": "Lake of the Ozarks",
+        "river": "Osage River",
+        "year_completed": 1931,
+        "height_ft": 158,
+        "storage_acre_ft": 2080000,
+        "capacity_mw": 235,
+        "serves": "Jefferson City, Columbia — power and recreation",
+        "downstream_impact": "moderate",
+        "impact_description": "Creates Lake of the Ozarks, one of Missouri's largest lakes and a major tourism and recreational destination. Privately operated — one of the few large dams built by a utility company rather than the federal government.",
+        "connected_infrastructure": "Osage River, Missouri power grid",
+        "dam_type": "Earthfill",
         "infrastructure_type": "dam"
       }
     }
   ],
   "metadata": {
-    "source": "Compiled from USGS, Bureau of Reclamation, and public dam data",
-    "description": "Major water infrastructure dams in southwestern US",
-    "count": 12
+    "source": "Compiled from USGS, Bureau of Reclamation, TVA, Army Corps of Engineers, and public dam records",
+    "description": "Major water infrastructure dams across the United States",
+    "count": 29
   }
 }
