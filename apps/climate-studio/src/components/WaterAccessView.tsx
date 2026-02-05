@@ -45,8 +45,8 @@ import { CSS } from '@dnd-kit/utilities'
 
 // Import aquifer data with projections
 import aquifersData from '../data/aquifers.json'
-// Import river data - Natural Earth 10m rivers with accurate geometry
-import riversData from '../data/rivers-with-depletion.json'
+// Import river data - Natural Earth 10m rivers with flow projections by year/scenario
+import riversData from '../data/rivers-with-projections.json'
 // Import lakes data with water level projections
 import lakesData from '../data/lakes.json'
 // Import factory data with environmental impact information
@@ -676,7 +676,7 @@ export default function WaterAccessView() {
   const [editingViewName, setEditingViewName] = useState('')
 
   // Water access layer toggles
-  const [showRiversLayer, setShowRiversLayer] = useState(false)
+  const [showRiversLayer, setShowRiversLayer] = useState(true) // Default ON
   const [showCanalsLayer, setShowCanalsLayer] = useState(false)
   const [showAquifersLayer, setShowAquifersLayer] = useState(false)
   const [showDamsLayer, setShowDamsLayer] = useState(false)
@@ -713,7 +713,7 @@ export default function WaterAccessView() {
   const [layersInWidget, setLayersInWidget] = useState({
     metroWeather: true,
     metroPopulation: false,
-    rivers: false,
+    rivers: true,
     canals: false,
     dams: false,
     seaLevel: false,
@@ -2546,6 +2546,65 @@ export default function WaterAccessView() {
       }
     })
   }, [showRiversLayer, mapLoaded, riverOpacity])
+
+  // Update river flow status based on projection year and scenario
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return
+
+    const map = mapRef.current
+    const source = map.getSource('rivers') as mapboxgl.GeoJSONSource
+    if (!source) return
+
+    // Map RCP scenarios to SSP scenarios used in our projection data
+    let mappedScenario = 'ssp245' // default moderate scenario
+    if (controls.scenario === 'rcp26') mappedScenario = 'ssp126'
+    else if (controls.scenario === 'rcp45') mappedScenario = 'ssp245'
+    else if (controls.scenario === 'rcp60') mappedScenario = 'ssp370'
+    else if (controls.scenario === 'rcp85') mappedScenario = 'ssp585'
+
+    // Get the closest available year in our projection data
+    const availableYears = [2025, 2035, 2045, 2055, 2065, 2075, 2085, 2095]
+    const targetYear = controls.projectionYear || 2050
+    const closestYear = availableYears.reduce((prev, curr) =>
+      Math.abs(curr - targetYear) < Math.abs(prev - targetYear) ? curr : prev
+    )
+
+    console.log(`🌊 Updating river flow status for year ${closestYear}, scenario ${mappedScenario}`)
+
+    // Transform river data with projected flow status for the selected year/scenario
+    const updatedRivers = {
+      ...riversData,
+      features: (riversData as any).features.map((feature: any) => {
+        const props = feature.properties
+        let newFlowStatus = props.flow_status || 'natural' // Keep original as fallback
+
+        // Check if this river has flow projections
+        if (props.flow_projections && props.flow_projections[mappedScenario]) {
+          const scenarioData = props.flow_projections[mappedScenario]
+          if (scenarioData.flow_status && scenarioData.flow_status[String(closestYear)]) {
+            newFlowStatus = scenarioData.flow_status[String(closestYear)]
+          }
+        }
+
+        return {
+          ...feature,
+          properties: {
+            ...props,
+            flow_status: newFlowStatus,
+            _projected_year: closestYear,
+            _projected_scenario: mappedScenario
+          }
+        }
+      })
+    }
+
+    try {
+      source.setData(updatedRivers as any)
+      console.log(`✅ Updated ${updatedRivers.features.length} rivers for year ${closestYear}`)
+    } catch (error) {
+      console.error('❌ Error updating river source:', error)
+    }
+  }, [mapLoaded, controls.projectionYear, controls.scenario])
 
   // Toggle canals/aqueducts layer visibility
   useEffect(() => {
