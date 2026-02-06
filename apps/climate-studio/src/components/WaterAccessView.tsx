@@ -677,7 +677,7 @@ export default function WaterAccessView() {
 
   // Water access layer toggles
   const [showRiversLayer, setShowRiversLayer] = useState(true) // Default ON
-  const [showCanalsLayer, setShowCanalsLayer] = useState(false)
+  const [showCanalsLayer, setShowCanalsLayer] = useState(true) // Default ON - shows water infrastructure risk
   const [showAquifersLayer, setShowAquifersLayer] = useState(false)
   const [showDamsLayer, setShowDamsLayer] = useState(false)
   const [showMetroHumidityLayer, setShowMetroHumidityLayer] = useState(true) // Default ON
@@ -714,7 +714,7 @@ export default function WaterAccessView() {
     metroWeather: true,
     metroPopulation: false,
     rivers: true,
-    canals: false,
+    canals: true,
     dams: false,
     seaLevel: false,
     groundwater: false,
@@ -1247,11 +1247,57 @@ export default function WaterAccessView() {
       }
 
       // Extract canal/aqueduct features from enhanced infrastructure data
+      // Add initial risk level based on current projection year/scenario
+      const initialYear = controls.projectionYear || 2050
+      const availableYears = [2025, 2035, 2045, 2055, 2065, 2075, 2085, 2095]
+      const closestYear = availableYears.reduce((prev, curr) =>
+        Math.abs(curr - initialYear) < Math.abs(prev - initialYear) ? curr : prev
+      )
+
+      // Map scenario
+      let mappedScenario = 'ssp245'
+      if (controls.scenario === 'rcp26') mappedScenario = 'ssp126'
+      else if (controls.scenario === 'rcp45') mappedScenario = 'ssp245'
+      else if (controls.scenario === 'rcp60') mappedScenario = 'ssp370'
+      else if (controls.scenario === 'rcp85') mappedScenario = 'ssp585'
+
       const canals: GeoJSON.FeatureCollection = {
         type: 'FeatureCollection',
-        features: (enhancedInfrastructureData as any).features.filter((f: any) =>
-          f.properties?.infrastructure_type === 'aqueduct'
-        )
+        features: (enhancedInfrastructureData as any).features
+          .filter((f: any) => f.properties?.infrastructure_type === 'aqueduct')
+          .map((f: any) => {
+            const props = f.properties
+            let riskLevel = 'low'
+            let flowPercentage = 100
+            let flowStatus = 'natural'
+
+            // Get flow projections for this canal
+            if (props.flow_projections && props.flow_projections[mappedScenario]) {
+              const scenarioData = props.flow_projections[mappedScenario]
+              flowPercentage = scenarioData.flow_percentage?.[String(closestYear)] || 100
+              flowStatus = scenarioData.flow_status?.[String(closestYear)] || 'natural'
+
+              const servesWaterPoor = props.serves_water_poor_cities || props.water_poor_cities_count > 0
+
+              if (flowStatus === 'dry' || flowPercentage < 60) {
+                riskLevel = servesWaterPoor ? 'critical' : 'high'
+              } else if (flowStatus === 'seasonal' || flowPercentage < 75) {
+                riskLevel = servesWaterPoor ? 'high' : 'moderate'
+              } else if (flowStatus === 'reduced' || flowPercentage < 90) {
+                riskLevel = servesWaterPoor ? 'moderate' : 'low'
+              }
+            }
+
+            return {
+              ...f,
+              properties: {
+                ...props,
+                _risk_level: riskLevel,
+                _flow_percentage: flowPercentage,
+                _flow_status: flowStatus
+              }
+            }
+          })
       }
 
       // Add natural rivers source and layers (BOTTOM LAYER)
@@ -1333,13 +1379,12 @@ export default function WaterAccessView() {
         }, beforeId)
       }
 
-      // Add canals/aqueducts source and layers (distinct styling)
+      // Add canals/aqueducts source and layers (risk-based coloring)
       if (!map.getSource('canals')) {
         console.log('📦 Adding canals source...')
         map.addSource('canals', {
           type: 'geojson',
-          data: canals,
-          lineMetrics: true  // Enable line-progress for gradient support
+          data: canals
         })
       }
 
@@ -1354,8 +1399,17 @@ export default function WaterAccessView() {
             'line-cap': 'round'
           },
           paint: {
-            'line-color': '#0891b2', // Dark cyan for casing
-            'line-width': 5,
+            // Casing color based on risk level (darker version)
+            'line-color': [
+              'match',
+              ['get', '_risk_level'],
+              'critical', '#7f1d1d',  // Dark red
+              'high', '#9a3412',      // Dark orange
+              'moderate', '#854d0e',  // Dark yellow
+              'low', '#166534',       // Dark green
+              '#0e7490'               // Default dark cyan
+            ],
+            'line-width': 7,
             'line-opacity': 0.9
           }
         }, beforeId)
@@ -1372,20 +1426,17 @@ export default function WaterAccessView() {
             'line-cap': 'round'
           },
           paint: {
-            // Apply gradient to ALL canal lines using line-gradient (requires lineMetrics: true)
-            'line-gradient': [
-              'interpolate',
-              ['linear'],
-              ['line-progress'],
-              0, '#0066FF',     // Start - Blue
-              0.2, '#00AAFF',
-              0.35, '#00FFCC',  // Cyan
-              0.5, '#FFFF00',   // Middle - Yellow
-              0.65, '#FFD700',  // Gold
-              0.8, '#FF9900',   // Orange
-              1, '#FF0000'      // End - Red
+            // Solid color based on risk level - updates with year slider
+            'line-color': [
+              'match',
+              ['get', '_risk_level'],
+              'critical', '#dc2626',  // Red - critical risk (dry/< 60% flow)
+              'high', '#f97316',      // Orange - high risk (60-75% flow)
+              'moderate', '#eab308',  // Yellow - moderate risk (75-90% flow)
+              'low', '#22c55e',       // Green - low risk (> 90% flow)
+              '#06b6d4'               // Default cyan
             ],
-            'line-width': 5,
+            'line-width': 4,
             'line-opacity': 1.0
           }
         }, beforeId)
@@ -2621,6 +2672,113 @@ export default function WaterAccessView() {
       }
     })
   }, [showCanalsLayer, mapLoaded])
+
+  // Update canal/aqueduct risk colors based on projection year and scenario
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return
+
+    const map = mapRef.current
+    const source = map.getSource('canals') as mapboxgl.GeoJSONSource
+    if (!source) return
+
+    // Map RCP scenarios to SSP scenarios
+    let mappedScenario = 'ssp245'
+    if (controls.scenario === 'rcp26') mappedScenario = 'ssp126'
+    else if (controls.scenario === 'rcp45') mappedScenario = 'ssp245'
+    else if (controls.scenario === 'rcp60') mappedScenario = 'ssp370'
+    else if (controls.scenario === 'rcp85') mappedScenario = 'ssp585'
+
+    // Get closest available year
+    const availableYears = [2025, 2035, 2045, 2055, 2065, 2075, 2085, 2095]
+    const targetYear = controls.projectionYear || 2050
+    const closestYear = availableYears.reduce((prev, curr) =>
+      Math.abs(curr - targetYear) < Math.abs(prev - targetYear) ? curr : prev
+    )
+
+    console.log(`🚰 Updating canal risk for year ${closestYear}, scenario ${mappedScenario}`)
+
+    // Get canal features from enhanced infrastructure data
+    const canalFeatures = (enhancedInfrastructureData as any).features.filter((f: any) =>
+      f.properties?.infrastructure_type === 'aqueduct'
+    )
+
+    // Transform canal data with projected risk level
+    const updatedCanals = {
+      type: 'FeatureCollection',
+      features: canalFeatures.map((feature: any) => {
+        const props = feature.properties
+        let riskLevel = 'low'
+        let flowPercentage = 100
+        let flowStatus = 'natural'
+
+        // Get flow projections for this canal's source river
+        if (props.flow_projections && props.flow_projections[mappedScenario]) {
+          const scenarioData = props.flow_projections[mappedScenario]
+          flowPercentage = scenarioData.flow_percentage?.[String(closestYear)] || 100
+          flowStatus = scenarioData.flow_status?.[String(closestYear)] || 'natural'
+
+          // Calculate risk level based on flow and whether it serves water-poor cities
+          const servesWaterPoor = props.serves_water_poor_cities || props.water_poor_cities_count > 0
+
+          if (flowStatus === 'dry' || flowPercentage < 60) {
+            riskLevel = servesWaterPoor ? 'critical' : 'high'
+          } else if (flowStatus === 'seasonal' || flowPercentage < 75) {
+            riskLevel = servesWaterPoor ? 'high' : 'moderate'
+          } else if (flowStatus === 'reduced' || flowPercentage < 90) {
+            riskLevel = servesWaterPoor ? 'moderate' : 'low'
+          } else {
+            riskLevel = 'low'
+          }
+        }
+
+        return {
+          ...feature,
+          properties: {
+            ...props,
+            _risk_level: riskLevel,
+            _flow_percentage: flowPercentage,
+            _flow_status: flowStatus,
+            _projected_year: closestYear,
+            _projected_scenario: mappedScenario
+          }
+        }
+      })
+    }
+
+    try {
+      source.setData(updatedCanals as any)
+
+      // Update canal line colors based on risk level
+      if (map.getLayer('canal-lines')) {
+        map.setPaintProperty('canal-lines', 'line-color', [
+          'match',
+          ['get', '_risk_level'],
+          'critical', '#dc2626',  // Red - critical risk
+          'high', '#f97316',      // Orange - high risk
+          'moderate', '#eab308',  // Yellow - moderate risk
+          '#22c55e'               // Green - low risk (default)
+        ])
+        // Remove gradient, use solid color
+        map.setPaintProperty('canal-lines', 'line-width', 4)
+      }
+
+      if (map.getLayer('canal-lines-casing')) {
+        map.setPaintProperty('canal-lines-casing', 'line-color', [
+          'match',
+          ['get', '_risk_level'],
+          'critical', '#991b1b',  // Dark red
+          'high', '#c2410c',      // Dark orange
+          'moderate', '#a16207',  // Dark yellow
+          '#166534'               // Dark green (default)
+        ])
+        map.setPaintProperty('canal-lines-casing', 'line-width', 6)
+      }
+
+      console.log(`✅ Updated ${updatedCanals.features.length} canals for year ${closestYear}`)
+    } catch (error) {
+      console.error('❌ Error updating canal source:', error)
+    }
+  }, [mapLoaded, controls.projectionYear, controls.scenario])
 
   // Toggle aquifer layers visibility (independent layer)
   useEffect(() => {
