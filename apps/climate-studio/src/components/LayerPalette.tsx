@@ -75,7 +75,7 @@ export function LayerPalette({ className = '' }: LayerPaletteProps) {
 
   return (
     <div
-      className={`widget-container ${className}`}
+      className={`widget-container widget-container-no-padding ${className}`}
       style={{
         maxHeight,
         display: 'flex',
@@ -87,7 +87,8 @@ export function LayerPalette({ className = '' }: LayerPaletteProps) {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 12
+        marginBottom: 12,
+        padding: '16px 16px 0 16px'
       }}>
         <h3 className="text-sm font-semibold text-foreground">Layers</h3>
         <DropdownMenu>
@@ -120,7 +121,9 @@ export function LayerPalette({ className = '' }: LayerPaletteProps) {
         style={{
           flex: 1,
           overflowY: displayedLayers.length > 6 ? 'auto' : 'visible',
-          marginBottom: 12
+          padding: '0 16px 12px 16px',
+          borderBottom: '1px solid',
+          borderColor: 'hsl(var(--border))'
         }}
         className="space-y-2"
       >
@@ -138,9 +141,7 @@ export function LayerPalette({ className = '' }: LayerPaletteProps) {
       {/* Footer with Select All and Sources toggle */}
       <div
         style={{
-          borderTop: '1px solid',
-          borderColor: 'hsl(var(--border))',
-          paddingTop: 12,
+          padding: '12px 16px 16px 16px',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center'

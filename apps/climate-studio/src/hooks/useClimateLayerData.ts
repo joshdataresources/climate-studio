@@ -501,6 +501,7 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       });
       prevZoomRef.current = currentZoom;
       prevBoundsRef.current = currentBoundsKey;
+      prevControlsRef.current = controlsKey;
     } else {
       // Tile-based layers that don't depend on bounds (global tiles)
       // Hexagon layers depend on bounds (sea_level_rise, urban_expansion)

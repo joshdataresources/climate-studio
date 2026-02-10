@@ -14,15 +14,15 @@ import { useClimateLayerData } from '../hooks/useClimateLayerData'
 import { GroundwaterDetailsPanel, SelectedAquifer } from './panels/GroundwaterDetailsPanel'
 import { SelectedFactory, FactoryDetailsPanel } from './panels/FactoryDetailsPanel'
 import { SelectedDam, DamDetailsPanel } from './panels/DamDetailsPanel'
+import { AIDataCenterDetailPanel, SelectedDataCenter } from './panels/AIDataCenterDetailPanel'
 import { SearchAndViewsPanel } from './panels/SearchAndViewsPanel'
 import { ClimateProjectionsWidget } from './ClimateProjectionsWidget'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Slider } from './ui/slider'
-import { AccordionItem } from './ui/accordion'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import { Waves, Droplets, CloudRain, Factory, MapPin, BarChart3, Mountain, TrendingUp, Loader2, GripVertical, X, Layers, ChevronDown, Save, Trash2, Bookmark, MoreHorizontal, Pencil } from 'lucide-react'
+import { Waves, Droplets, CloudRain, Factory, MapPin, BarChart3, Mountain, TrendingUp, Loader2, GripVertical, X, Layers, ChevronDown, Save, Trash2, Bookmark, MoreHorizontal, Pencil, Zap } from 'lucide-react'
 import { useLayer } from '../contexts/LayerContext'
 import { shouldShowClimateWidget } from '../config/layerDefinitions'
 import {
@@ -62,6 +62,8 @@ import megaregionData from '../data/megaregion-data.json'
 // Removed aqueductsData import - using canal-lines layer only (no dashed lines)
 // Import dam infrastructure data
 import damsData from '../data/dams.json'
+// Import AI data center data
+import aiDatacentersData from '../data/ai-datacenters.json'
 // Import enhanced water infrastructure (impacted rivers, aqueducts, connections)
 import enhancedInfrastructureData from '../data/enhanced-water-infrastructure.json'
 // Import metro service areas
@@ -108,6 +110,13 @@ function drawDamIcon(ctx: CanvasRenderingContext2D, s: number) {
 
 function drawFactoryIcon(ctx: CanvasRenderingContext2D, s: number) {
   drawSvgPath(ctx, FACTORY_PATH, s, 24)
+}
+
+// Lightning bolt / zap icon path (viewBox 24x24) — white ⚡ electricity symbol
+const ZAP_PATH = 'M13 2L3 14h9l-1 8 10-12h-9l1-8z'
+
+function drawZapIcon(ctx: CanvasRenderingContext2D, s: number) {
+  drawSvgPath(ctx, ZAP_PATH, s, 24)
 }
 
 // Combine all metro cities with wet bulb data from expanded 30-city dataset
@@ -637,6 +646,9 @@ export default function WaterAccessView() {
   // Dam state
   const [selectedDam, setSelectedDam] = useState<SelectedDam | null>(null)
 
+  // Feature panel accordion state
+  const [collapsedFeatures, setCollapsedFeatures] = useState<Set<string>>(new Set())
+
   // Use theme context for map style
   const { theme } = useTheme()
 
@@ -682,7 +694,9 @@ export default function WaterAccessView() {
   const [showDamsLayer, setShowDamsLayer] = useState(false)
   const [showMetroHumidityLayer, setShowMetroHumidityLayer] = useState(true) // Default ON
   const [showGroundwaterLayer, setShowGroundwaterLayer] = useState(false)
-  const [showFactoriesLayer, setShowFactoriesLayer] = useState(false)
+  const [showFactoriesLayer, setShowFactoriesLayer] = useState(true)
+  const [showAIDataCentersLayer, setShowAIDataCentersLayer] = useState(true)
+  const [selectedDataCenter, setSelectedDataCenter] = useState<SelectedDataCenter | null>(null)
   const [showSeaLevelRiseLayer, setShowSeaLevelRiseLayer] = useState(false)
   const [seaLevelRiseFeet, setSeaLevelRiseFeet] = useState(3)
   const [showHumidityWetBulb, setShowHumidityWetBulb] = useState(true)
@@ -722,12 +736,13 @@ export default function WaterAccessView() {
     precipitation: false,
     wetBulb: true,
     temperature: true,
-    factories: false,
+    factories: true,
+    aiDataCenters: true,
     topographic: true
   })
 
   // Climate context for precipitation & drought layer
-  const { toggleLayer, isLayerActive, controls, setDroughtMetric, setDroughtOpacity, setWetBulbOpacity, setProjectionOpacity } = useClimate()
+  const { toggleLayer, isLayerActive, controls, setDroughtMetric, setDroughtOpacity, setWetBulbOpacity, setProjectionOpacity, setTemperatureMode } = useClimate()
 
   // Use projectionYear from climate context (slider) instead of local state
   // This ensures Metro Weather popovers update when the user moves the year slider
@@ -810,6 +825,10 @@ export default function WaterAccessView() {
     if (!layersInWidget.factories && showFactoriesLayer) {
       setShowFactoriesLayer(false)
     }
+    // AI Data Centers
+    if (!layersInWidget.aiDataCenters && showAIDataCentersLayer) {
+      setShowAIDataCentersLayer(false)
+    }
     // Topographic Relief
     if (!layersInWidget.topographic && showTopographicRelief) {
       setShowTopographicRelief(false)
@@ -837,6 +856,7 @@ export default function WaterAccessView() {
     layersInWidget.groundwater,
     layersInWidget.aquifers,
     layersInWidget.factories,
+    layersInWidget.aiDataCenters,
     layersInWidget.topographic,
     layersInWidget.precipitation,
     layersInWidget.wetBulb,
@@ -3682,26 +3702,26 @@ export default function WaterAccessView() {
         map.setLayoutProperty('factory-icons', 'icon-size', 0.6)
       }
 
-      // Add labels layer
+      // Add labels layer with company + name
       if (!map.getLayer('factory-labels')) {
         map.addLayer({
           id: 'factory-labels',
           type: 'symbol',
           source: 'factories',
           layout: {
-            'text-field': ['get', 'name'],
+            'text-field': ['concat', ['get', 'company'], ' — ', ['get', 'name']],
             'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
             'text-size': 11,
             'text-offset': [0, 1.5],
             'text-anchor': 'top',
-            'text-max-width': 12
+            'text-max-width': 14
           },
           paint: {
             'text-color': '#ffffff',
             'text-halo-color': 'rgba(0, 0, 0, 0.8)',
             'text-halo-width': 1.5
           },
-          minzoom: 6
+          minzoom: 5
         })
       }
 
@@ -3764,6 +3784,185 @@ export default function WaterAccessView() {
       if (map.getSource('factories')) map.removeSource('factories')
     }
   }, [mapLoaded, showFactoriesLayer])
+
+  // AI Data Centers Layer - Map Visualization with ⚡ electricity symbols
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded || !showAIDataCentersLayer) {
+      // Remove data center layers if they exist
+      if (mapRef.current && mapLoaded) {
+        const map = mapRef.current
+        if (map.getLayer('datacenter-labels')) map.removeLayer('datacenter-labels')
+        if (map.getLayer('datacenter-zap')) map.removeLayer('datacenter-zap')
+        if (map.getLayer('datacenter-circle')) map.removeLayer('datacenter-circle')
+        if (map.getLayer('datacenter-glow')) map.removeLayer('datacenter-glow')
+        if (map.getSource('ai-datacenters')) map.removeSource('ai-datacenters')
+      }
+      return
+    }
+
+    const map = mapRef.current
+
+    // Transform data center data to GeoJSON
+    const geojson: GeoJSON.FeatureCollection = {
+      type: 'FeatureCollection',
+      features: aiDatacentersData.datacenters.map((dc: any) => ({
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [dc.location.coordinates.lon, dc.location.coordinates.lat]
+        },
+        properties: {
+          id: dc.id,
+          name: dc.name,
+          company: dc.company,
+          city: dc.location.city,
+          state: dc.location.state,
+          power_capacity_mw: dc.power_capacity_mw,
+          grid_strain: dc.environmental_impact?.grid_strain || 'moderate',
+          status: dc.status
+        }
+      }))
+    }
+
+    // Add source
+    if (!map.getSource('ai-datacenters')) {
+      map.addSource('ai-datacenters', {
+        type: 'geojson',
+        data: geojson
+      })
+    }
+
+    // Layer 1: Outer glow — color by grid strain, sized by power
+    if (!map.getLayer('datacenter-glow')) {
+      map.addLayer({
+        id: 'datacenter-glow',
+        type: 'circle',
+        source: 'ai-datacenters',
+        paint: {
+          'circle-radius': [
+            'interpolate', ['linear'], ['get', 'power_capacity_mw'],
+            100, 18, 500, 26, 1000, 34, 1500, 42
+          ],
+          'circle-color': [
+            'match', ['get', 'grid_strain'],
+            'critical', '#ef4444', 'high', '#f97316', 'moderate', '#eab308', 'low', '#22c55e',
+            '#eab308'
+          ],
+          'circle-opacity': 0.2,
+          'circle-blur': 0.7
+        }
+      })
+    }
+
+    // Layer 2: Dark circle background
+    if (!map.getLayer('datacenter-circle')) {
+      map.addLayer({
+        id: 'datacenter-circle',
+        type: 'circle',
+        source: 'ai-datacenters',
+        paint: {
+          'circle-radius': ['interpolate', ['linear'], ['zoom'], 3, 8, 6, 11, 10, 14, 14, 18],
+          'circle-color': '#1a1a2e',
+          'circle-stroke-width': 2.5,
+          'circle-stroke-color': [
+            'match', ['get', 'grid_strain'],
+            'critical', '#ef4444', 'high', '#f97316', 'moderate', '#eab308', 'low', '#22c55e',
+            '#eab308'
+          ],
+          'circle-opacity': 0.95
+        }
+      })
+    }
+
+    // Layer 3: ⚡ icon on each circle
+    if (!map.hasImage('zap-icon')) {
+      map.addImage('zap-icon', createIconImage(32, drawZapIcon))
+    }
+    if (!map.getLayer('datacenter-zap')) {
+      map.addLayer({
+        id: 'datacenter-zap',
+        type: 'symbol',
+        source: 'ai-datacenters',
+        layout: {
+          'icon-image': 'zap-icon',
+          'icon-size': 0.6,
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true
+        }
+      })
+    }
+
+    // Layer 4: Labels
+    if (!map.getLayer('datacenter-labels')) {
+      map.addLayer({
+        id: 'datacenter-labels',
+        type: 'symbol',
+        source: 'ai-datacenters',
+        layout: {
+          'text-field': ['concat', ['get', 'company'], ' \u26A1', ['to-string', ['get', 'power_capacity_mw']], 'MW'],
+          'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+          'text-size': 11,
+          'text-offset': [0, 1.8],
+          'text-anchor': 'top',
+          'text-max-width': 14
+        },
+        paint: {
+          'text-color': '#fbbf24',
+          'text-halo-color': 'rgba(0, 0, 0, 0.85)',
+          'text-halo-width': 1.5
+        },
+        minzoom: 5
+      })
+    }
+
+    // Click handler — open detail panel
+    map.on('click', 'datacenter-circle', (e) => {
+      if (!e.features || e.features.length === 0) return
+      const props = e.features[0].properties
+      const fullDC = aiDatacentersData.datacenters.find((dc: any) => dc.id === props?.id)
+      if (!fullDC) return
+
+      // Close other panels
+      setSelectedAquifer(null)
+      setSelectedFactory(null)
+      setSelectedDam(null)
+
+      setSelectedDataCenter({
+        id: fullDC.id,
+        name: fullDC.name,
+        company: fullDC.company,
+        location: fullDC.location,
+        purpose: fullDC.purpose,
+        status: fullDC.status,
+        power_capacity_mw: fullDC.power_capacity_mw,
+        power_source: fullDC.power_source,
+        cooling_type: fullDC.cooling_type,
+        gpu_count: fullDC.gpu_count,
+        gpu_type: fullDC.gpu_type,
+        investment_usd: fullDC.investment_usd,
+        campus_acres: fullDC.campus_acres,
+        building_sqft: fullDC.building_sqft,
+        jobs: fullDC.jobs,
+        timeline: fullDC.timeline,
+        environmental_impact: fullDC.environmental_impact,
+        notes: fullDC.notes
+      })
+    })
+
+    // Cursor on hover
+    map.on('mouseenter', 'datacenter-circle', () => { map.getCanvas().style.cursor = 'pointer' })
+    map.on('mouseleave', 'datacenter-circle', () => { map.getCanvas().style.cursor = '' })
+
+    console.log('⚡ AI Data Centers layer added successfully with', geojson.features.length, 'data centers')
+
+    return () => {
+      if (map.getLayer('datacenter-labels')) map.removeLayer('datacenter-labels')
+      if (map.getLayer('datacenter-zap')) map.removeLayer('datacenter-zap')
+      if (map.getLayer('datacenter-circle')) map.removeLayer('datacenter-circle')
+      if (map.getLayer('datacenter-glow')) map.removeLayer('datacenter-glow')
+      if (map.getSource('ai-datacenters')) map.removeSource('ai-datacenters')
+    }
+  }, [mapLoaded, showAIDataCentersLayer])
 
   // Handle Metro Population Change layer rendering
   useEffect(() => {
@@ -4202,7 +4401,7 @@ export default function WaterAccessView() {
 
       {/* Left Sidebar - Search & Views */}
       {!panelsCollapsed && (
-        <aside className="absolute left-[92px] top-4 z-[1000] flex h-[calc(100vh-32px)] w-[360px] flex-col gap-4 pointer-events-none">
+        <aside className="absolute left-[92px] top-4 z-[1000] flex h-[calc(100vh-32px)] w-[352px] flex-col gap-4 pointer-events-none">
           <div className="pointer-events-auto flex-shrink-0">
             <SearchAndViewsPanel
               viewType="waterAccess"
@@ -4237,6 +4436,24 @@ export default function WaterAccessView() {
                         onChange={() => setLayersInWidget({ ...layersInWidget, metroWeather: !layersInWidget.metroWeather })}
                       />
                       <span className="text-xs font-semibold text-foreground">Metro Weather</span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.factories}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, factories: !layersInWidget.factories })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">Factories</span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.aiDataCenters}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, aiDataCenters: !layersInWidget.aiDataCenters })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">AI Data Centers</span>
                     </label>
                     <label className="flex items-start gap-2 cursor-pointer">
                       <input
@@ -4287,19 +4504,19 @@ export default function WaterAccessView() {
                       <input
                         type="checkbox"
                         className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.groundwater}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, groundwater: !layersInWidget.groundwater })}
+                        checked={layersInWidget.aquifers}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, aquifers: !layersInWidget.aquifers })}
                       />
-                      <span className="text-xs font-semibold text-foreground">Grace Groundwater</span>
+                      <span className="text-xs font-semibold text-foreground">Aquifers</span>
                     </label>
                     <label className="flex items-start gap-2 cursor-pointer">
                       <input
                         type="checkbox"
                         className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.aquifers}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, aquifers: !layersInWidget.aquifers })}
+                        checked={layersInWidget.groundwater}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, groundwater: !layersInWidget.groundwater })}
                       />
-                      <span className="text-xs font-semibold text-foreground">Aquifers</span>
+                      <span className="text-xs font-semibold text-foreground">Historic Groundwater Baseline</span>
                     </label>
                     <label className="flex items-start gap-2 cursor-pointer">
                       <input
@@ -4332,15 +4549,6 @@ export default function WaterAccessView() {
                       <input
                         type="checkbox"
                         className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.factories}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, factories: !layersInWidget.factories })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">Factories</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
                         checked={layersInWidget.topographic}
                         onChange={() => setLayersInWidget({ ...layersInWidget, topographic: !layersInWidget.topographic })}
                       />
@@ -4352,7 +4560,7 @@ export default function WaterAccessView() {
             </div>
 
             {/* Layers List with divider */}
-            <div className="border-t border-b border-border/20 flex flex-col flex-1 min-h-0 py-3 overflow-hidden">
+            <div className="border-t border-b border-border/100 flex flex-col flex-1 min-h-0 py-3 overflow-hidden">
               <div className="space-y-2 overflow-y-auto flex-1 pb-3 rounded-b-lg">
                 {/* Metro Weather Layer */}
                 {layersInWidget.metroWeather && (
@@ -4460,6 +4668,32 @@ export default function WaterAccessView() {
                   </div>
                 )}
 
+                {/* AI Data Centers Layer */}
+                {layersInWidget.aiDataCenters && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showAIDataCentersLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowAIDataCentersLayer(!showAIDataCentersLayer)}>
+                    <Zap className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">AI Data Centers</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">Public filings, DOE</span>
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, aiDataCenters: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
+
                 {/* Rivers Layer */}
                 {layersInWidget.rivers && (
                   <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showRiversLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowRiversLayer(!showRiversLayer)}>
@@ -4543,32 +4777,6 @@ export default function WaterAccessView() {
                 )}
 
 
-                {/* Groundwater Layer */}
-                {layersInWidget.groundwater && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showGroundwaterLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowGroundwaterLayer(!showGroundwaterLayer)}>
-                    <TrendingUp className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                    <div className="flex-1 min-w-0 flex flex-col gap-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-sm font-semibold">Grace Groundwater</h4>
-                      </div>
-                      {showSourceInfo && (
-                        <p className="text-[11px] text-muted-foreground/80 truncate">
-                          Source: <span className="font-medium text-foreground">NASA GRACE</span>
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setLayersInWidget({ ...layersInWidget, groundwater: false })
-                      }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
-                    >
-                      <X className="h-5 w-5 text-muted-foreground" />
-                    </button>
-                  </div>
-                )}
-
                 {/* Aquifers Layer */}
                 {layersInWidget.aquifers && (
                   <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showAquifersLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowAquifersLayer(!showAquifersLayer)}>
@@ -4587,6 +4795,32 @@ export default function WaterAccessView() {
                       onClick={(e) => {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, aquifers: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Groundwater Layer */}
+                {layersInWidget.groundwater && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showGroundwaterLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowGroundwaterLayer(!showGroundwaterLayer)}>
+                    <TrendingUp className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">Historic Groundwater Baseline</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">NASA GRACE</span>
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, groundwater: false })
                       }}
                       className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
@@ -4770,690 +5004,1005 @@ export default function WaterAccessView() {
         const showClimateWidget = shouldShowClimateWidget(enabledLayerIds)
 
         return (
-          <div className="absolute top-0 right-0 bottom-0 z-[1000] w-80 pointer-events-none overflow-y-auto">
-            <div className="space-y-4 py-4 pointer-events-auto" style={{ paddingLeft: '25px', paddingRight: '16px' }}>
-              {/* Climate Projections Widget - Always visible */}
+          <div className="absolute top-0 right-0 bottom-0 z-[1000] w-[361px] pointer-events-none flex flex-col" style={{ paddingLeft: '25px', paddingRight: '16px', paddingTop: '16px', paddingBottom: '16px' }}>
+            {/* Climate Projections Widget - Fixed at top */}
+            <div className="flex-shrink-0 pointer-events-auto mb-4">
               <ClimateProjectionsWidget />
-
-              {/* Rivers Flow Status Widget - Shows when Rivers layer is active */}
-              {showRiversLayer && (
-                <AccordionItem title="River Flow Status" icon={<Waves className="h-4 w-4" />}>
-                  {/* Opacity Slider */}
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs text-muted-foreground">River Opacity</label>
-                      <span className="text-xs font-medium">{Math.round(riverOpacity * 100)}%</span>
-                    </div>
-                    <Slider
-                      value={[Math.round(riverOpacity * 100)]}
-                      min={10}
-                      max={100}
-                      step={5}
-                      onValueChange={(value) => setRiverOpacity(value[0] / 100)}
-                    />
-                  </div>
-
-                  {/* Legend */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-1 rounded" style={{ backgroundColor: '#dc2626' }}></div>
-                      <span className="text-[11px] text-foreground/70">Dry - Complete diversion</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-1 rounded" style={{ backgroundColor: '#f59e0b' }}></div>
-                      <span className="text-[11px] text-foreground/70">Seasonal - Wet season only</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-1 rounded" style={{ backgroundColor: '#fbbf24' }}></div>
-                      <span className="text-[11px] text-foreground/70">Reduced - 50%+ reduction</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-1 rounded" style={{ backgroundColor: '#3b82f6' }}></div>
-                      <span className="text-[11px] text-foreground/70">Natural - Unimpacted flow</span>
-                    </div>
-                  </div>
-                </AccordionItem>
-              )}
-
-              {/* Metro Weather Controls - Shows when layer is active */}
-              {showMetroHumidityLayer && (
-                <AccordionItem title="Metro Weather" icon={<Droplets className="h-4 w-4" />}>
-                  {/* Bubble Data Toggles */}
-                  <div className="space-y-3">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 accent-blue-500"
-                        checked={showHumidityWetBulb}
-                        onChange={() => setShowHumidityWetBulb(!showHumidityWetBulb)}
-                      />
-                      <span className="text-xs text-foreground">Humidity & Wet Bulb Events</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 accent-blue-500"
-                        checked={showTempHumidity}
-                        onChange={() => setShowTempHumidity(!showTempHumidity)}
-                      />
-                      <span className="text-xs text-foreground">Temperature & Humidity</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 accent-blue-500"
-                        checked={showAverageTemperatures}
-                        onChange={() => setShowAverageTemperatures(!showAverageTemperatures)}
-                      />
-                      <span className="text-xs text-foreground">Average Temperature</span>
-                    </label>
-                  </div>
-                </AccordionItem>
-              )}
-
-              {/* Metro Population Change Widget */}
-              {showMetroDataStatistics && (
-                <AccordionItem title="Metro Population Change" icon={<BarChart3 className="h-4 w-4" />}>
-                  {/* Opacity Slider */}
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs text-muted-foreground">Layer Opacity</label>
-                      <span className="text-xs font-medium">{Math.round(metroDataOpacity * 100)}%</span>
-                    </div>
-                    <Slider
-                      value={[Math.round(metroDataOpacity * 100)]}
-                      min={10}
-                      max={100}
-                      step={5}
-                      onValueChange={(value) => {
-                        setMetroDataOpacity(value[0] / 100)
-                      }}
-                    />
-                  </div>
-
-                  {/* Legend */}
-                  <div className="space-y-1.5">
-                    <h4 className="text-xs font-semibold text-muted-foreground mb-2">Population Growth</h4>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
-                      <span className="text-xs text-foreground">High Growth (20%+)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#3b82f6' }}></div>
-                      <span className="text-xs text-foreground">Moderate Growth (10-20%)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#fbbf24' }}></div>
-                      <span className="text-xs text-foreground">Low Growth (0-10%)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ef4444' }}></div>
-                      <span className="text-xs text-foreground">Declining</span>
-                    </div>
-                    <p className="text-[11px] text-muted-foreground mt-2">Circle size represents population</p>
-                  </div>
-                </AccordionItem>
-              )}
-
-
-
-              {/* Factories Panel */}
-              {showFactoriesLayer && (
-                <div className="widget-container">
-                  <h3 className="text-sm font-semibold mb-3">Factory Filters</h3>
-
-                  {/* Status Filters */}
-                  <div className="mb-4">
-                    <h4 className="text-xs font-medium mb-2 text-muted-foreground">Status</h4>
-                    <div className="space-y-2">
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" className="accent-blue-500" defaultChecked />
-                        <span className="text-sm">Operational</span>
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" className="accent-blue-500" defaultChecked />
-                        <span className="text-sm">Under Construction</span>
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <input type="checkbox" className="accent-blue-500" defaultChecked />
-                        <span className="text-sm">Planned</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Climate Risk Filters */}
-                  <div>
-                    <h4 className="text-xs font-medium mb-2 text-muted-foreground">Climate Risk</h4>
-                    <div className="space-y-2">
-                      <label className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                        <input type="checkbox" className="accent-blue-500" defaultChecked />
-                        <span className="text-sm">Low (0-3)</span>
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                        <input type="checkbox" className="accent-blue-500" defaultChecked />
-                        <span className="text-sm">Medium (4-6)</span>
-                      </label>
-                      <label className="flex items-center gap-2">
-                        <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                        <input type="checkbox" className="accent-blue-500" defaultChecked />
-                        <span className="text-sm">High (7-10)</span>
-                      </label>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Wet Bulb Temperature Widget */}
-              {isWetBulbActive && (
-                <AccordionItem title="Wet Bulb Temperature" icon={<CloudRain className="h-4 w-4" />}>
-                  {/* Opacity Slider - Always show since we use local data */}
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs text-muted-foreground">Layer Opacity</label>
-                      <span className="text-xs font-medium">{Math.round((controls.wetBulbOpacity || 0.6) * 100)}%</span>
-                    </div>
-                    <Slider
-                      value={[Math.round((controls.wetBulbOpacity || 0.6) * 100)]}
-                      min={10}
-                      max={100}
-                      step={5}
-                      onValueChange={(value) => setWetBulbOpacity(value[0] / 100)}
-                    />
-                  </div>
-
-                  {/* Year indicator */}
-                  <div className="text-xs text-muted-foreground mb-3">
-                    Showing projections for <span className="font-semibold text-foreground">{projectionYear}</span>
-                  </div>
-
-                  {/* Legend - Color & Opacity show danger level */}
-                  <div className="space-y-3 pt-3 border-t border-border/40">
-
-                    {/* Danger Level Legend */}
-                    <div>
-                      <h4 className="text-xs font-semibold text-muted-foreground mb-2">Danger Level</h4>
-                      <p className="text-[10px] text-muted-foreground mb-2">Size, color & opacity all increase with danger</p>
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-2">
-                          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#93c5fd', opacity: 0.3 }}></div>
-                          <span className="text-[11px] text-foreground">Minimal risk (faint, small)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#fde047', opacity: 0.5 }}></div>
-                          <span className="text-[11px] text-foreground">Low risk</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 rounded-full" style={{ backgroundColor: '#fbbf24', opacity: 0.6 }}></div>
-                          <span className="text-[11px] text-foreground">Moderate risk</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-full" style={{ backgroundColor: '#fb923c', opacity: 0.7 }}></div>
-                          <span className="text-[11px] text-foreground">Elevated risk</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-7 h-7 rounded-full" style={{ backgroundColor: '#ef4444', opacity: 0.8 }}></div>
-                          <span className="text-[11px] text-foreground">High risk</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="w-8 h-8 rounded-full" style={{ backgroundColor: '#991b1b', opacity: 0.9 }}></div>
-                          <span className="text-[11px] text-foreground">Extreme danger (large, solid)</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="text-[10px] text-muted-foreground mt-2 italic border-t border-border/40 pt-2">
-                      Gulf Coast cities (Houston, New Orleans, Miami) show as large, solid red circles. Northern and arid cities appear as small, faint circles.
-                    </p>
-                  </div>
-                </AccordionItem>
-              )}
-
-              {/* Groundwater Widget - Shows when groundwater layer is active */}
-              {showGroundwaterLayer && (
-                <AccordionItem title="Groundwater" icon={<Droplets className="h-4 w-4" />}>
-                  {/* Water Depletion Areas (GRACE) Section */}
-                  <div className="space-y-3 mb-4">
-                    <label className={`flex items-center gap-2 cursor-pointer p-3 rounded-lg ${showGRACELayer
-                      ? 'border-[1px] border-blue-500 bg-blue-500/5'
-                      : 'border-0 bg-white'
-                      }`}>
-                      <input
-                        type="checkbox"
-                        className="h-4 w-4 accent-blue-500"
-                        checked={showGRACELayer}
-                        onChange={() => setShowGRACELayer(!showGRACELayer)}
-                      />
-                      <span className="text-sm font-medium text-foreground">Water Depletion Areas</span>
-                    </label>
-
-                    {showGRACELayer && (
-                      <div className="ml-1 space-y-2">
-                        <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
-                        <Slider
-                          min={0}
-                          max={1}
-                          step={0.05}
-                          value={[graceOpacity]}
-                          onValueChange={(value) => setGraceOpacity(value[0])}
-                          className="mb-2"
-                        />
-
-                        {/* GRACE Legend */}
-                        <div className="mt-4 space-y-1.5">
-                          <div className="text-xs font-medium text-foreground mb-2">Change vs. 2004-2009 Baseline</div>
-                          <div className="h-3 w-full rounded" style={{
-                            background: 'linear-gradient(to right, #b2182b 0%, #ef8a62 20%, #fddbc7 40%, #f7f7f7 50%, #d1e5f0 60%, #67a9cf 80%, #2166ac 100%)'
-                          }} />
-                          <div className="flex justify-between text-[9px] text-muted-foreground">
-                            <span>-20 cm</span>
-                            <span>Depletion</span>
-                            <span>0</span>
-                            <span>Recharge</span>
-                            <span>+20 cm</span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </AccordionItem>
-              )}
-
-              {/* Aquifers Widget - Shows when layer is active */}
-              {showAquifersLayer && (
-                <AccordionItem title="Aquifers" icon={<Droplets className="h-4 w-4" />}>
-                  {/* Opacity Slider */}
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs text-muted-foreground">Layer Opacity</label>
-                      <span className="text-xs font-medium">{Math.round(aquiferOpacity * 100)}%</span>
-                    </div>
-                    <Slider
-                      value={[Math.round(aquiferOpacity * 100)]}
-                      min={10}
-                      max={100}
-                      step={5}
-                      onValueChange={(value) => {
-                        setAquiferOpacity(value[0] / 100)
-                      }}
-                    />
-                  </div>
-
-                  {/* Aquifer Health Legend */}
-                  <div className="space-y-1.5">
-                    <h4 className="text-xs font-semibold text-muted-foreground mb-2">Aquifer Health Status</h4>
-                    <div className="h-3 w-full rounded" style={{
-                      background: 'linear-gradient(to right, #22c55e 0%, #3b82f6 25%, #94a3b8 50%, #f97316 75%, #ef4444 100%)'
-                    }} />
-                    <div className="flex justify-between text-[9px] text-muted-foreground">
-                      <span>Healthy</span>
-                      <span>Mending</span>
-                      <span>Stressed</span>
-                      <span>Depleting</span>
-                      <span>Unknown</span>
-                    </div>
-                  </div>
-                </AccordionItem>
-              )}
-
-              {/* GRACE Groundwater Widget - Shows when layer is active */}
-              {showGroundwaterLayer && (
-                <AccordionItem title="GRACE Groundwater" icon={<TrendingUp className="h-4 w-4" />}>
-                  {/* Description */}
-                  <div className="mb-4 p-3 rounded-lg bg-blue-50/50 dark:bg-blue-900/10">
-                    <p className="text-xs text-muted-foreground">
-                      NASA GRACE satellite measurements showing groundwater storage changes (2002-2024)
-                    </p>
-                  </div>
-
-                  {/* Depletion Status Legend */}
-                  <div className="space-y-1.5">
-                    <h4 className="text-xs font-semibold text-muted-foreground mb-2">Groundwater Trend</h4>
-                    <div className="h-3 w-full rounded" style={{
-                      background: 'linear-gradient(to right, #b2182b 0%, #ef8a62 20%, #fddbc7 40%, #f7f7f7 50%, #d1e5f0 60%, #67a9cf 80%, #2166ac 100%)'
-                    }} />
-                    <div className="flex justify-between text-[9px] text-muted-foreground">
-                      <span>-20cm</span>
-                      <span>Depletion</span>
-                      <span>0</span>
-                      <span>Recharge</span>
-                      <span>+20cm</span>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 text-[10px] text-muted-foreground italic">
-                    Change vs. 2004-2009 baseline
-                  </div>
-                </AccordionItem>
-              )}
-
-              {/* Temperature Projection Controls - Only shows when layer is active */}
-              {isTemperatureProjectionActive && (
-                <AccordionItem title="Future Temperature Anomaly" icon={<CloudRain className="h-4 w-4" />}>
-                  {/* Status Indicator */}
-                  {temperatureProjectionStatus === 'loading' && (
-                    <div className="space-y-2 rounded-md border border-orange-500/30 bg-orange-500/10 p-3 mb-3">
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
-                        <p className="text-xs text-foreground">Loading temperature data...</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {temperatureProjectionStatus === 'success' && (
-                    <div className="space-y-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="h-2 w-2 rounded-full bg-green-500" />
-                        <p className="text-xs text-green-600 font-medium">✓ Real NASA climate data (Earth Engine)</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Temperature Mode Toggle */}
-                  <div className="space-y-2 mb-4">
-                    <div className="text-xs font-semibold text-foreground mb-2">Temperature Display</div>
-                    <div className="space-y-2">
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="temperatureMode"
-                          value="anomaly"
-                          checked={controls.temperatureMode === 'anomaly'}
-                          onChange={() => { }}
-                          className="h-4 w-4"
-                        />
-                        <span className="text-sm text-foreground">Temperature Anomaly (Change)</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer">
-                        <input
-                          type="radio"
-                          name="temperatureMode"
-                          value="actual"
-                          checked={controls.temperatureMode === 'actual'}
-                          onChange={() => { }}
-                          className="h-4 w-4"
-                        />
-                        <span className="text-sm text-foreground">Actual Temperature</span>
-                      </label>
-                    </div>
-                  </div>
-
-                  {/* Opacity Control */}
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-semibold text-foreground">Layer Opacity</label>
-                      <span className="text-xs text-muted-foreground">{Math.round((controls.projectionOpacity ?? 0.6) * 100)}%</span>
-                    </div>
-                    <Slider
-                      min={0}
-                      max={1}
-                      step={0.05}
-                      value={[controls.projectionOpacity ?? 0.6]}
-                      onValueChange={(value) => setProjectionOpacity(value[0])}
-                    />
-                  </div>
-
-                  {/* Temperature Legend */}
-                  <div className="mt-4 space-y-2">
-                    <div className="text-xs font-semibold text-foreground">
-                      {controls.temperatureMode === 'anomaly' ? 'Temperature Anomaly' : 'Temperature'}
-                    </div>
-                    <div className="h-3 w-full rounded" style={{
-                      background: 'linear-gradient(to right, #0571b0 0%, #92c5de 25%, #ffffbf 50%, #f4a582 75%, #ca0020 100%)'
-                    }} />
-                    <div className="flex justify-between text-[9px] text-muted-foreground">
-                      <span>0°</span>
-                      <span>1°</span>
-                      <span>2°</span>
-                      <span>3°</span>
-                      <span>4°</span>
-                      <span>5°</span>
-                      <span>6°</span>
-                      <span>8°+</span>
-                    </div>
-                  </div>
-                </AccordionItem>
-              )}
-
-              {/* Precipitation & Drought Controls - Only shows when layer is active */}
-              {isPrecipitationDroughtActive && (
-                <AccordionItem title="Precipitation & Drought" icon={<CloudRain className="h-4 w-4" />}>
-                  {/* Status Indicator */}
-                  {precipitationDroughtStatus === 'loading' && (
-                    <div className="space-y-2 rounded-md border border-blue-500/30 bg-blue-500/10 p-3 mb-3">
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                        <p className="text-xs text-foreground">Loading precipitation/drought data...</p>
-                      </div>
-                    </div>
-                  )}
-
-                  {precipitationDroughtStatus === 'success' && (
-                    <div className="space-y-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 mb-3">
-                      <div className="flex items-center gap-2">
-                        <div className="rounded-full bg-green-500 p-0.5">
-                          <svg className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </div>
-                        <p className="text-xs text-foreground">
-                          {precipitationDroughtData?.metadata?.isRealData
-                            ? '✓ Real CHIRPS data (Earth Engine)'
-                            : '⚠ Data unavailable (Earth Engine error)'}
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Metric Type Selector */}
-                  <div className="space-y-2 mb-4">
-                    <label className="text-xs font-semibold text-muted-foreground">Metric Type</label>
-                    <Select
-                      value={controls.droughtMetric}
-                      onValueChange={(value) => setDroughtMetric(value as 'precipitation' | 'drought_index' | 'soil_moisture')}
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Choose metric" />
-                      </SelectTrigger>
-                      <SelectContent className="z-[9999]">
-                        <SelectItem value="precipitation">Precipitation</SelectItem>
-                        <SelectItem value="drought_index">Drought Index</SelectItem>
-                        <SelectItem value="soil_moisture">Soil Moisture</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Opacity Slider */}
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs text-muted-foreground">Layer Opacity</label>
-                      <span className="text-xs font-medium">{Math.round(controls.droughtOpacity * 100)}%</span>
-                    </div>
-                    <Slider
-                      value={[Math.round(controls.droughtOpacity * 100)]}
-                      min={10}
-                      max={100}
-                      step={5}
-                      onValueChange={(value) => setDroughtOpacity(value[0] / 100)}
-                    />
-                  </div>
-
-                  {/* Legend based on selected metric */}
-                  <div className="space-y-1">
-                    {controls.droughtMetric === 'precipitation' && (
-                      <>
-                        <div className="h-3 w-full rounded-full" style={{
-                          background: 'linear-gradient(90deg, #F5ED53 0%, #F5F3CE 50%, #6B9AF3 75%, #2357D2 100%)'
-                        }} />
-                        <div className="flex justify-between text-[10px] text-muted-foreground">
-                          <span>0</span>
-                          <span>2</span>
-                          <span>4</span>
-                          <span>6</span>
-                          <span>8</span>
-                          <span>10 mm/day</span>
-                        </div>
-                      </>
-                    )}
-                    {controls.droughtMetric === 'drought_index' && (
-                      <>
-                        <div className="h-3 w-full rounded-full" style={{
-                          background: 'linear-gradient(to right, #dc2626 0%, #f59e0b 16.67%, #fef08a 33.33%, #ffffff 50%, #90caf9 66.67%, #42a5f5 83.33%, #1e88e5 100%)'
-                        }} />
-                        <div className="flex justify-between text-[10px] text-muted-foreground">
-                          <span>0</span>
-                          <span>1</span>
-                          <span>2</span>
-                          <span>3</span>
-                          <span>4</span>
-                          <span>5</span>
-                          <span>6+</span>
-                        </div>
-                      </>
-                    )}
-                    {controls.droughtMetric === 'soil_moisture' && (
-                      <>
-                        <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#8b4513] via-[#daa520] via-[#f0e68c] via-[#adff2f] via-[#7cfc00] to-[#32cd32]" />
-                        <div className="flex justify-between text-[10px] text-muted-foreground">
-                          <span>0</span>
-                          <span>2</span>
-                          <span>4</span>
-                          <span>6</span>
-                          <span>8</span>
-                          <span>10 mm</span>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                </AccordionItem>
-              )}
-
-              {/* Metro Humidity Widget - Shows when layer is active */}
-              {showMetroHumidityLayer && selectedMetroCity && (() => {
-                const cityFeature = (metroHumidityData as any).features.find((f: any) => f.properties.city === selectedMetroCity)
-                if (!cityFeature) return null
-
-                const humidityData = cityFeature.properties.humidity_projections[projectionYear.toString()] ||
-                  cityFeature.properties.humidity_projections['2025']
-                if (!humidityData) return null
-
-                return (
-                  <div className="widget-container" style={{
-                    backdropFilter: 'blur(2px)',
-                    backgroundColor: 'rgba(255, 255, 255, 0.5)'
-                  }}>
-                    {/* Header */}
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 4,
-                      padding: '4px 8px',
-                      marginBottom: 4
-                    }}>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between'
-                      }}>
-                        <p className="text-xs font-bold uppercase text-foreground">
-                          {selectedMetroCity.toUpperCase()}
-                        </p>
-                        <p className="text-xs font-semibold text-foreground">
-                          {projectionYear}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Humidity & Wet Bulb Events Section */}
-                    {showHumidityWetBulb && (
-                      <div style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        borderRadius: 4,
-                        overflow: 'hidden',
-                        marginBottom: 4
-                      }}>
-                        <div style={{
-                          backgroundColor: 'rgba(255, 255, 255, 0.35)',
-                          padding: '4px 8px',
-                          borderRadius: 4
-                        }}>
-                          <p className="text-xs font-semibold text-muted-foreground">
-                            Humidity & Wet Bulb Events
-                          </p>
-                        </div>
-                        <div style={{ display: 'flex' }}>
-                          <div style={{ flex: 1, padding: '4px 8px' }}>
-                            <p className="text-[9px] font-medium text-foreground" style={{ minWidth: 'max-content' }}>
-                              Peak Humidity
-                            </p>
-                            <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-                              <p className="text-xs font-bold text-foreground">
-                                {humidityData.peak_humidity}%
-                              </p>
-                            </div>
-                          </div>
-                          <div style={{ flex: 1, padding: '4px 8px' }}>
-                            <p className="text-[9px] font-medium text-foreground" style={{ minWidth: 'max-content' }}>
-                              # Wet Bulbs
-                            </p>
-                            <div style={{ display: 'flex', gap: 4, alignItems: 'center', justifyContent: 'center' }}>
-                              <p className="text-xs font-bold text-foreground">
-                                {humidityData.wet_bulb_events}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Temperature & Humidity Section - REMOVED - fields don't exist in wet bulb data */}
-                  </div>
-                )
-              })()}
-
-              {/* Topographic Relief Widget */}
-              {showTopographicRelief && (
-                <AccordionItem title="Topographic Relief" icon={<Mountain className="h-4 w-4" />}>
-                  {/* Opacity Slider */}
-                  <div className="space-y-2 mb-4">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs text-muted-foreground">Hillshade Intensity</label>
-                      <span className="text-xs font-medium">{Math.round(topoReliefIntensity * 100)}%</span>
-                    </div>
-                    <Slider
-                      value={[Math.round(topoReliefIntensity * 100)]}
-                      min={10}
-                      max={100}
-                      step={5}
-                      onValueChange={(value) => {
-                        setTopoReliefIntensity(value[0] / 100)
-                      }}
-                    />
-                  </div>
-
-                  {/* Legend */}
-                  <div className="space-y-1.5">
-                    <h4 className="text-xs font-semibold text-muted-foreground mb-2">Elevation Relief</h4>
-                    <p className="text-xs text-foreground/80">Hillshade visualization showing terrain elevation and slopes</p>
-                    <div className="space-y-1 mt-2">
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-muted-foreground">Light areas:</span>
-                        <span className="text-foreground">High elevation / slopes facing sun</span>
-                      </div>
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-muted-foreground">Dark areas:</span>
-                        <span className="text-foreground">Low elevation / shaded slopes</span>
-                      </div>
-                    </div>
-                  </div>
-                </AccordionItem>
-              )}
             </div>
+
+            {/* Features Panel - Stretches to fill remaining height, scrolls internally */}
+            <div className="widget-container flex flex-col flex-1 min-h-0 overflow-hidden pointer-events-auto" style={{ padding: 0 }}>
+              <div className="flex items-center justify-between px-4 pt-4 pb-3 flex-shrink-0">
+                <h3 className="text-sm font-semibold">Features</h3>
+              </div>
+              <div className="border-t border-b border-border/100 flex flex-col flex-1 min-h-0 overflow-hidden">
+                <div className="space-y-2 overflow-y-auto flex-1 px-4 py-3">
+
+                  {/* Metro Weather Controls */}
+                  {layersInWidget.metroWeather && showMetroHumidityLayer && (
+                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-2.5"
+                        onClick={() => {
+                          const newCollapsed = new Set(collapsedFeatures)
+                          if (newCollapsed.has('metroWeather')) {
+                            newCollapsed.delete('metroWeather')
+                          } else {
+                            newCollapsed.add('metroWeather')
+                          }
+                          setCollapsedFeatures(newCollapsed)
+                        }}
+                      >
+                        <h4 className="text-[13px] font-semibold">Metro Weather</h4>
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('metroWeather') ? '-rotate-90' : ''}`}
+                        />
+                      </div>
+                      {!collapsedFeatures.has('metroWeather') && (
+                        <>
+                          {/* Bubble Data Toggles */}
+                          <div className="space-y-3">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                className="h-4 w-4 accent-blue-500"
+                                checked={showHumidityWetBulb}
+                                onChange={() => setShowHumidityWetBulb(!showHumidityWetBulb)}
+                              />
+                              <span className="text-[13px] text-foreground">Humidity & Wet Bulb Events</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                className="h-4 w-4 accent-blue-500"
+                                checked={showTempHumidity}
+                                onChange={() => setShowTempHumidity(!showTempHumidity)}
+                              />
+                              <span className="text-[13px] text-foreground">Temperature & Humidity</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                className="h-4 w-4 accent-blue-500"
+                                checked={showAverageTemperatures}
+                                onChange={() => setShowAverageTemperatures(!showAverageTemperatures)}
+                              />
+                              <span className="text-[13px] text-foreground">Average Temperature</span>
+                            </label>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Metro Population Change */}
+                  {layersInWidget.metroPopulation && showMetroDataStatistics && (
+                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-2.5"
+                        onClick={() => {
+                          const newCollapsed = new Set(collapsedFeatures)
+                          if (newCollapsed.has('metroPopulation')) {
+                            newCollapsed.delete('metroPopulation')
+                          } else {
+                            newCollapsed.add('metroPopulation')
+                          }
+                          setCollapsedFeatures(newCollapsed)
+                        }}
+                      >
+                        <h4 className="text-[13px] font-semibold">Metro Population Change</h4>
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('metroPopulation') ? '-rotate-90' : ''}`}
+                        />
+                      </div>
+                      {!collapsedFeatures.has('metroPopulation') && (
+                        <>
+                          {/* Opacity Slider */}
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                              <span className="text-xs font-medium">{Math.round(metroDataOpacity * 100)}%</span>
+                            </div>
+                            <Slider
+                              value={[Math.round(metroDataOpacity * 100)]}
+                              min={10}
+                              max={100}
+                              step={5}
+                              onValueChange={(value) => {
+                                setMetroDataOpacity(value[0] / 100)
+                              }}
+                            />
+                          </div>
+
+                          {/* Legend */}
+                          <div className="space-y-1.5">
+                            <h4 className="text-xs font-semibold text-muted-foreground mb-2">Population Growth</h4>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
+                              <span className="text-xs text-foreground">High Growth (20%+)</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#3b82f6' }}></div>
+                              <span className="text-xs text-foreground">Moderate Growth (10-20%)</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#fbbf24' }}></div>
+                              <span className="text-xs text-foreground">Low Growth (0-10%)</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ef4444' }}></div>
+                              <span className="text-xs text-foreground">Declining</span>
+                            </div>
+                            <p className="text-[11px] text-muted-foreground mt-2">Circle size represents population</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Factory Filters */}
+                  {layersInWidget.factories && showFactoriesLayer && (
+                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-2.5"
+                        onClick={() => {
+                          const newCollapsed = new Set(collapsedFeatures)
+                          if (newCollapsed.has('factories')) {
+                            newCollapsed.delete('factories')
+                          } else {
+                            newCollapsed.add('factories')
+                          }
+                          setCollapsedFeatures(newCollapsed)
+                        }}
+                      >
+                        <h4 className="text-[13px] font-semibold">Factory Filters</h4>
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('factories') ? '-rotate-90' : ''}`}
+                        />
+                      </div>
+                      {!collapsedFeatures.has('factories') && (
+                        <>
+                          {/* Status Filters */}
+                          <div className="mb-4">
+                            <h4 className="text-xs font-semibold mb-2 text-muted-foreground">Status</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center gap-2">
+                                <input type="checkbox" className="accent-blue-500" defaultChecked />
+                                <span className="text-sm">Operational</span>
+                              </label>
+                              <label className="flex items-center gap-2">
+                                <input type="checkbox" className="accent-blue-500" defaultChecked />
+                                <span className="text-sm">Under Construction</span>
+                              </label>
+                              <label className="flex items-center gap-2">
+                                <input type="checkbox" className="accent-blue-500" defaultChecked />
+                                <span className="text-sm">Planned</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Climate Risk Filters */}
+                          <div>
+                            <h4 className="text-xs font-semibold mb-2 text-muted-foreground">Climate Risk</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                <input type="checkbox" className="accent-blue-500" defaultChecked />
+                                <span className="text-sm">Low (0-3)</span>
+                              </label>
+                              <label className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <input type="checkbox" className="accent-blue-500" defaultChecked />
+                                <span className="text-sm">Medium (4-6)</span>
+                              </label>
+                              <label className="flex items-center gap-2">
+                                <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                                <input type="checkbox" className="accent-blue-500" defaultChecked />
+                                <span className="text-sm">High (7-10)</span>
+                              </label>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                  )}
+
+                  {/* Rivers Flow Status */}
+                  {layersInWidget.rivers && showRiversLayer && (
+                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-2.5"
+                        onClick={() => {
+                          const newCollapsed = new Set(collapsedFeatures)
+                          if (newCollapsed.has('rivers')) {
+                            newCollapsed.delete('rivers')
+                          } else {
+                            newCollapsed.add('rivers')
+                          }
+                          setCollapsedFeatures(newCollapsed)
+                        }}
+                      >
+                        <h4 className="text-[13px] font-semibold">River Flow Status</h4>
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('rivers') ? '-rotate-90' : ''}`}
+                        />
+                      </div>
+                      {!collapsedFeatures.has('rivers') && (
+                        <>
+                          {/* Opacity Slider */}
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs text-muted-foreground">River Opacity</label>
+                              <span className="text-xs font-medium">{Math.round(riverOpacity * 100)}%</span>
+                            </div>
+                            <Slider
+                              value={[Math.round(riverOpacity * 100)]}
+                              min={10}
+                              max={100}
+                              step={5}
+                              onValueChange={(value) => setRiverOpacity(value[0] / 100)}
+                            />
+                          </div>
+
+                          {/* Legend */}
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 h-1 rounded" style={{ backgroundColor: '#dc2626' }}></div>
+                              <span className="text-[11px] text-foreground/70">Dry - Complete diversion</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 h-1 rounded" style={{ backgroundColor: '#f59e0b' }}></div>
+                              <span className="text-[11px] text-foreground/70">Seasonal - Wet season only</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 h-1 rounded" style={{ backgroundColor: '#fbbf24' }}></div>
+                              <span className="text-[11px] text-foreground/70">Reduced - 50%+ reduction</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 h-1 rounded" style={{ backgroundColor: '#3b82f6' }}></div>
+                              <span className="text-[11px] text-foreground/70">Natural - Unimpacted flow</span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Canals & Aqueducts */}
+                  {layersInWidget.canals && showCanalsLayer && (
+                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-2.5"
+                        onClick={() => {
+                          const newCollapsed = new Set(collapsedFeatures)
+                          if (newCollapsed.has('canals')) {
+                            newCollapsed.delete('canals')
+                          } else {
+                            newCollapsed.add('canals')
+                          }
+                          setCollapsedFeatures(newCollapsed)
+                        }}
+                      >
+                        <h4 className="text-[13px] font-semibold">Canals & Aqueducts</h4>
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('canals') ? '-rotate-90' : ''}`}
+                        />
+                      </div>
+                      {!collapsedFeatures.has('canals') && (
+                        <>
+                          {/* Description */}
+                          <div className="mb-3">
+                            <p className="text-xs text-muted-foreground">
+                              Major water transport infrastructure including canals, aqueducts, and water conveyance systems
+                            </p>
+                          </div>
+                          {/* Legend */}
+                          <div className="space-y-1.5">
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 h-1 rounded" style={{ backgroundColor: '#dc2626' }}></div>
+                              <span className="text-[11px] text-foreground/70">Non-operational / Dry</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 h-1 rounded" style={{ backgroundColor: '#f59e0b' }}></div>
+                              <span className="text-[11px] text-foreground/70">Limited capacity</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 h-1 rounded" style={{ backgroundColor: '#fbbf24' }}></div>
+                              <span className="text-[11px] text-foreground/70">Reduced flow</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="w-5 h-1 rounded" style={{ backgroundColor: '#3b82f6' }}></div>
+                              <span className="text-[11px] text-foreground/70">Full capacity / Operational</span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Aquifers */}
+                  {layersInWidget.aquifers && showAquifersLayer && (
+                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-2.5"
+                        onClick={() => {
+                          const newCollapsed = new Set(collapsedFeatures)
+                          if (newCollapsed.has('aquifers')) {
+                            newCollapsed.delete('aquifers')
+                          } else {
+                            newCollapsed.add('aquifers')
+                          }
+                          setCollapsedFeatures(newCollapsed)
+                        }}
+                      >
+                        <h4 className="text-[13px] font-semibold">Aquifers</h4>
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('aquifers') ? '-rotate-90' : ''}`}
+                        />
+                      </div>
+                      {!collapsedFeatures.has('aquifers') && (
+                        <>
+                          {/* Opacity Slider */}
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                              <span className="text-xs font-medium">{Math.round(aquiferOpacity * 100)}%</span>
+                            </div>
+                            <Slider
+                              value={[Math.round(aquiferOpacity * 100)]}
+                              min={10}
+                              max={100}
+                              step={5}
+                              onValueChange={(value) => {
+                                setAquiferOpacity(value[0] / 100)
+                              }}
+                            />
+                          </div>
+
+                          {/* Aquifer Health Legend */}
+                          <div className="space-y-1.5">
+                            <h4 className="text-xs font-semibold text-muted-foreground mb-2">Aquifer Health Status</h4>
+                            <div className="h-3 w-full rounded" style={{
+                              background: 'linear-gradient(to right, #22c55e 0%, #3b82f6 25%, #94a3b8 50%, #f97316 75%, #ef4444 100%)'
+                            }} />
+                            <div className="flex justify-between text-[9px] text-muted-foreground">
+                              <span>Healthy</span>
+                              <span>Mending</span>
+                              <span>Stressed</span>
+                              <span>Depleting</span>
+                              <span>Unknown</span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Groundwater */}
+                  {layersInWidget.groundwater && showGroundwaterLayer && (
+                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-2.5"
+                        onClick={() => {
+                          const newCollapsed = new Set(collapsedFeatures)
+                          if (newCollapsed.has('groundwater')) {
+                            newCollapsed.delete('groundwater')
+                          } else {
+                            newCollapsed.add('groundwater')
+                          }
+                          setCollapsedFeatures(newCollapsed)
+                        }}
+                      >
+                        <h4 className="text-[13px] font-semibold">Groundwater</h4>
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('groundwater') ? '-rotate-90' : ''}`}
+                        />
+                      </div>
+                      {!collapsedFeatures.has('groundwater') && (
+                        <>
+                          {/* Transparency Control */}
+                          <div className="space-y-2 mb-4">
+                            <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
+                            <Slider
+                              min={0}
+                              max={1}
+                              step={0.05}
+                              value={[graceOpacity]}
+                              onValueChange={(value) => setGraceOpacity(value[0])}
+                              className="mb-2"
+                            />
+                          </div>
+
+                          {/* GRACE Legend */}
+                          <div className="space-y-1.5">
+                            <h4 className="text-xs font-semibold text-foreground mb-2">Change vs. 2004-2009 Baseline</h4>
+                            <div className="h-3 w-full rounded" style={{
+                              background: 'linear-gradient(to right, #b2182b 0%, #ef8a62 20%, #fddbc7 40%, #f7f7f7 50%, #d1e5f0 60%, #67a9cf 80%, #2166ac 100%)'
+                            }} />
+                            <div className="flex justify-between text-[9px] text-muted-foreground">
+                              <span>-20 cm</span>
+                              <span>Depletion</span>
+                              <span>0</span>
+                              <span>Recharge</span>
+                              <span>+20 cm</span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Historic Groundwater Baseline */}
+                  {layersInWidget.groundwater && showGRACELayer && (
+                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-2.5"
+                        onClick={() => {
+                          const newCollapsed = new Set(collapsedFeatures)
+                          if (newCollapsed.has('graceGroundwater')) {
+                            newCollapsed.delete('graceGroundwater')
+                          } else {
+                            newCollapsed.add('graceGroundwater')
+                          }
+                          setCollapsedFeatures(newCollapsed)
+                        }}
+                      >
+                        <h4 className="text-[13px] font-semibold">Historic Groundwater Baseline</h4>
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('graceGroundwater') ? '-rotate-90' : ''}`}
+                        />
+                      </div>
+                      {!collapsedFeatures.has('graceGroundwater') && (
+                        <>
+                          {/* Description */}
+                          <div className="mb-4 p-3 rounded-lg bg-blue-50/50 dark:bg-blue-900/10">
+                            <p className="text-xs text-muted-foreground">
+                              NASA GRACE satellite measurements showing groundwater storage changes (2002-2024)
+                            </p>
+                          </div>
+
+                          {/* Depletion Status Legend */}
+                          <div className="space-y-1.5">
+                            <h4 className="text-xs font-semibold text-muted-foreground mb-2">Groundwater Trend</h4>
+                            <div className="h-3 w-full rounded" style={{
+                              background: 'linear-gradient(to right, #b2182b 0%, #ef8a62 20%, #fddbc7 40%, #f7f7f7 50%, #d1e5f0 60%, #67a9cf 80%, #2166ac 100%)'
+                            }} />
+                            <div className="flex justify-between text-[9px] text-muted-foreground">
+                              <span>-20cm</span>
+                              <span>Depletion</span>
+                              <span>0</span>
+                              <span>Recharge</span>
+                              <span>+20cm</span>
+                            </div>
+                          </div>
+
+                          <div className="mt-3 text-[10px] text-muted-foreground italic">
+                            Change vs. 2004-2009 baseline
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Future Temperature Anomaly */}
+                  {layersInWidget.temperature && isTemperatureProjectionActive && (
+                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-2.5"
+                        onClick={() => {
+                          const newCollapsed = new Set(collapsedFeatures)
+                          if (newCollapsed.has('temperature')) {
+                            newCollapsed.delete('temperature')
+                          } else {
+                            newCollapsed.add('temperature')
+                          }
+                          setCollapsedFeatures(newCollapsed)
+                        }}
+                      >
+                        <h4 className="text-[13px] font-semibold">Future Temperature Anomaly</h4>
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('temperature') ? '-rotate-90' : ''}`}
+                        />
+                      </div>
+                      {!collapsedFeatures.has('temperature') && (
+                        <div className="pt-2">
+                          {/* Status Indicator */}
+                          {temperatureProjectionStatus === 'loading' && (
+                            <div className="space-y-2 rounded-md border border-orange-500/30 bg-orange-500/10 p-3 mb-3">
+                              <div className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
+                                <p className="text-xs text-foreground">Loading temperature data...</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {temperatureProjectionStatus === 'success' && (
+                            <div className="space-y-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 mb-3">
+                              <div className="flex items-center gap-2">
+                                <div className="h-2 w-2 rounded-full bg-green-500" />
+                                <p className="text-xs text-green-600 font-medium">✓ Real NASA climate data (Earth Engine)</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Temperature Mode Toggle */}
+                          <div className="space-y-2 mb-4">
+                            <h4 className="text-xs font-semibold text-foreground mb-2">Temperature Display</h4>
+                            <div className="space-y-2">
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="temperatureMode"
+                                  value="anomaly"
+                                  checked={controls.temperatureMode === 'anomaly'}
+                                  onChange={() => setTemperatureMode('anomaly')}
+                                  className="h-4 w-4"
+                                />
+                                <span className="text-sm text-foreground">Temperature Anomaly (Change)</span>
+                              </label>
+                              <label className="flex items-center gap-2 cursor-pointer">
+                                <input
+                                  type="radio"
+                                  name="temperatureMode"
+                                  value="actual"
+                                  checked={controls.temperatureMode === 'actual'}
+                                  onChange={() => setTemperatureMode('actual')}
+                                  className="h-4 w-4"
+                                />
+                                <span className="text-sm text-foreground">Actual Temperature</span>
+                              </label>
+                            </div>
+                          </div>
+
+                          {/* Opacity Control */}
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs font-semibold text-foreground">Layer Opacity</label>
+                              <span className="text-xs text-muted-foreground">{Math.round((controls.projectionOpacity ?? 0.6) * 100)}%</span>
+                            </div>
+                            <Slider
+                              min={0}
+                              max={1}
+                              step={0.05}
+                              value={[controls.projectionOpacity ?? 0.6]}
+                              onValueChange={(value) => setProjectionOpacity(value[0])}
+                            />
+                          </div>
+
+                          {/* Temperature Legend */}
+                          <div className="mt-4 space-y-2">
+                            <h4 className="text-xs font-semibold text-foreground">
+                              {controls.temperatureMode === 'anomaly' ? 'Temperature Anomaly' : 'Temperature'}
+                            </h4>
+                            <div className="h-3 w-full rounded" style={{
+                              background: 'linear-gradient(to right, #0571b0 0%, #92c5de 25%, #ffffbf 50%, #f4a582 75%, #ca0020 100%)'
+                            }} />
+                            <div className="flex justify-between text-[9px] text-muted-foreground">
+                              <span>0°</span>
+                              <span>1°</span>
+                              <span>2°</span>
+                              <span>3°</span>
+                              <span>4°</span>
+                              <span>5°</span>
+                              <span>6°</span>
+                              <span>8°+</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Precipitation & Drought */}
+                  {layersInWidget.precipitation && isPrecipitationDroughtActive && (
+                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-2.5"
+                        onClick={() => {
+                          const newCollapsed = new Set(collapsedFeatures)
+                          if (newCollapsed.has('precipitation')) {
+                            newCollapsed.delete('precipitation')
+                          } else {
+                            newCollapsed.add('precipitation')
+                          }
+                          setCollapsedFeatures(newCollapsed)
+                        }}
+                      >
+                        <h4 className="text-[13px] font-semibold">Precipitation & Drought</h4>
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('precipitation') ? '-rotate-90' : ''}`}
+                        />
+                      </div>
+                      {!collapsedFeatures.has('precipitation') && (
+                        <div className="pt-2">
+                          {/* Status Indicator */}
+                          {precipitationDroughtStatus === 'loading' && (
+                            <div className="space-y-2 rounded-md border border-blue-500/30 bg-blue-500/10 p-3 mb-3">
+                              <div className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
+                                <p className="text-xs text-foreground">Loading precipitation/drought data...</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {precipitationDroughtStatus === 'success' && (
+                            <div className="space-y-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 mb-3">
+                              <div className="flex items-center gap-2">
+                                <div className="h-2 w-2 rounded-full bg-green-500" />
+                                <p className="text-xs text-green-600 font-medium">✓ Real NASA climate data (Earth Engine)</p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Metric Type Selector */}
+                          <div className="space-y-2 mb-4">
+                            <label className="text-xs font-semibold text-muted-foreground">Metric Type</label>
+                            <Select
+                              value={controls.droughtMetric}
+                              onValueChange={(value) => setDroughtMetric(value as 'precipitation' | 'drought_index' | 'soil_moisture')}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue placeholder="Choose metric" />
+                              </SelectTrigger>
+                              <SelectContent className="z-[9999]">
+                                <SelectItem value="precipitation">Precipitation</SelectItem>
+                                <SelectItem value="drought_index">Drought Index</SelectItem>
+                                <SelectItem value="soil_moisture">Soil Moisture</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+
+                          {/* Opacity Slider */}
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                              <span className="text-xs font-medium">{Math.round(controls.droughtOpacity * 100)}%</span>
+                            </div>
+                            <Slider
+                              value={[Math.round(controls.droughtOpacity * 100)]}
+                              min={10}
+                              max={100}
+                              step={5}
+                              onValueChange={(value) => setDroughtOpacity(value[0] / 100)}
+                            />
+                          </div>
+
+                          {/* Legend based on selected metric */}
+                          <div className="space-y-1">
+                            {controls.droughtMetric === 'precipitation' && (
+                              <>
+                                <div className="h-3 w-full rounded-full" style={{
+                                  background: 'linear-gradient(90deg, #F5ED53 0%, #F5F3CE 50%, #6B9AF3 75%, #2357D2 100%)'
+                                }} />
+                                <div className="flex justify-between text-[10px] text-muted-foreground">
+                                  <span>0</span>
+                                  <span>2</span>
+                                  <span>4</span>
+                                  <span>6</span>
+                                  <span>8</span>
+                                  <span>10 mm/day</span>
+                                </div>
+                              </>
+                            )}
+                            {controls.droughtMetric === 'drought_index' && (
+                              <>
+                                <div className="h-3 w-full rounded-full" style={{
+                                  background: 'linear-gradient(to right, #dc2626 0%, #f59e0b 16.67%, #fef08a 33.33%, #ffffff 50%, #90caf9 66.67%, #42a5f5 83.33%, #1e88e5 100%)'
+                                }} />
+                                <div className="flex justify-between text-[10px] text-muted-foreground">
+                                  <span>0</span>
+                                  <span>1</span>
+                                  <span>2</span>
+                                  <span>3</span>
+                                  <span>4</span>
+                                  <span>5</span>
+                                  <span>6+</span>
+                                </div>
+                              </>
+                            )}
+                            {controls.droughtMetric === 'soil_moisture' && (
+                              <>
+                                <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#8b4513] via-[#daa520] via-[#f0e68c] via-[#adff2f] via-[#7cfc00] to-[#32cd32]" />
+                                <div className="flex justify-between text-[10px] text-muted-foreground">
+                                  <span>0</span>
+                                  <span>2</span>
+                                  <span>4</span>
+                                  <span>6</span>
+                                  <span>8</span>
+                                  <span>10 mm</span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Wet Bulb Temperature */}
+                  {layersInWidget.wetBulb && isWetBulbActive && (
+                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-2.5"
+                        onClick={() => {
+                          const newCollapsed = new Set(collapsedFeatures)
+                          if (newCollapsed.has('wetBulb')) {
+                            newCollapsed.delete('wetBulb')
+                          } else {
+                            newCollapsed.add('wetBulb')
+                          }
+                          setCollapsedFeatures(newCollapsed)
+                        }}
+                      >
+                        <h4 className="text-[13px] font-semibold">Wet Bulb Temperature</h4>
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('wetBulb') ? '-rotate-90' : ''}`}
+                        />
+                      </div>
+                      {!collapsedFeatures.has('wetBulb') && (
+                        <>
+                          {/* Opacity Slider */}
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                              <span className="text-xs font-medium">{Math.round((controls.wetBulbOpacity || 0.6) * 100)}%</span>
+                            </div>
+                            <Slider
+                              value={[Math.round((controls.wetBulbOpacity || 0.6) * 100)]}
+                              min={10}
+                              max={100}
+                              step={5}
+                              onValueChange={(value) => setWetBulbOpacity(value[0] / 100)}
+                            />
+                          </div>
+
+                          {/* Year indicator */}
+                          <div className="text-xs text-muted-foreground mb-3">
+                            Showing projections for <span className="font-semibold text-foreground">{projectionYear}</span>
+                          </div>
+
+                          {/* Legend */}
+                          <div className="space-y-3 pt-3 border-t border-border/40">
+                            <div>
+                              <h4 className="text-xs font-semibold text-muted-foreground mb-2">Danger Level</h4>
+                              <p className="text-[10px] text-muted-foreground mb-2">Size, color & opacity increase with danger</p>
+                              <div className="space-y-1.5">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#93c5fd', opacity: 0.3 }}></div>
+                                  <span className="text-[11px] text-foreground">Minimal risk</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-4 h-4 rounded-full" style={{ backgroundColor: '#fde047', opacity: 0.5 }}></div>
+                                  <span className="text-[11px] text-foreground">Low risk</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-5 h-5 rounded-full" style={{ backgroundColor: '#fbbf24', opacity: 0.6 }}></div>
+                                  <span className="text-[11px] text-foreground">Moderate risk</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-6 h-6 rounded-full" style={{ backgroundColor: '#fb923c', opacity: 0.7 }}></div>
+                                  <span className="text-[11px] text-foreground">Elevated risk</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-7 h-7 rounded-full" style={{ backgroundColor: '#ef4444', opacity: 0.8 }}></div>
+                                  <span className="text-[11px] text-foreground">High risk</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="w-8 h-8 rounded-full" style={{ backgroundColor: '#991b1b', opacity: 0.9 }}></div>
+                                  <span className="text-[11px] text-foreground">Extreme danger</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Metro Humidity Widget */}
+                  {layersInWidget.metroWeather && showMetroHumidityLayer && selectedMetroCity && (() => {
+                    const cityFeature = (metroHumidityData as any).features.find((f: any) => f.properties.city === selectedMetroCity)
+                    if (!cityFeature) return null
+
+                    const humidityData = cityFeature.properties.humidity_projections[projectionYear.toString()] ||
+                      cityFeature.properties.humidity_projections['2025']
+                    if (!humidityData) return null
+
+                    return (
+                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                        {/* Header */}
+                        <div
+                          className="flex items-center justify-between cursor-pointer mb-2.5"
+                          onClick={() => {
+                            const newCollapsed = new Set(collapsedFeatures)
+                            if (newCollapsed.has('metroHumidity')) {
+                              newCollapsed.delete('metroHumidity')
+                            } else {
+                              newCollapsed.add('metroHumidity')
+                            }
+                            setCollapsedFeatures(newCollapsed)
+                          }}
+                        >
+                          <h4 className="text-[13px] font-semibold">Metro Humidity Widget</h4>
+                          <ChevronDown
+                            className={`h-4 w-4 transition-transform ${collapsedFeatures.has('metroHumidity') ? '-rotate-90' : ''}`}
+                          />
+                        </div>
+                        {!collapsedFeatures.has('metroHumidity') && (
+                          <>
+                            {/* City and Year Info */}
+                            <div style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: 4,
+                              padding: '4px 8px',
+                              marginBottom: 4
+                            }}>
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between'
+                              }}>
+                                <p className="text-xs font-bold uppercase text-foreground">
+                                  {selectedMetroCity.toUpperCase()}
+                                </p>
+                                <p className="text-xs font-semibold text-foreground">
+                                  {projectionYear}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Humidity & Wet Bulb Events Section */}
+                            {showHumidityWetBulb && (
+                              <div style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                borderRadius: 4,
+                                overflow: 'hidden',
+                                marginBottom: 4
+                              }}>
+                                <div style={{
+                                  backgroundColor: 'rgba(255, 255, 255, 0.35)',
+                                  padding: '4px 8px',
+                                  borderRadius: 4
+                                }}>
+                                  <p className="text-xs font-semibold text-muted-foreground">
+                                    Humidity & Wet Bulb Events
+                                  </p>
+                                </div>
+                                <div style={{ display: 'flex' }}>
+                                  <div style={{ flex: 1, padding: '4px 8px' }}>
+                                    <p className="text-[9px] font-medium text-foreground" style={{ minWidth: 'max-content' }}>
+                                      Peak Humidity
+                                    </p>
+                                    <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+                                      <p className="text-xs font-bold text-foreground">
+                                        {humidityData.peak_humidity}%
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <div style={{ flex: 1, padding: '4px 8px' }}>
+                                    <p className="text-[9px] font-medium text-foreground" style={{ minWidth: 'max-content' }}>
+                                      # Wet Bulbs
+                                    </p>
+                                    <div style={{ display: 'flex', gap: 4, alignItems: 'center', justifyContent: 'center' }}>
+                                      <p className="text-xs font-bold text-foreground">
+                                        {humidityData.wet_bulb_events}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Temperature & Humidity Section - REMOVED - fields don't exist in wet bulb data */}
+                          </>
+                        )}
+                      </div>
+                    )
+                  })()}
+
+                  {/* Topographic Relief */}
+                  {layersInWidget.topographic && showTopographicRelief && (
+                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-2.5"
+                        onClick={() => {
+                          const newCollapsed = new Set(collapsedFeatures)
+                          if (newCollapsed.has('topographic')) {
+                            newCollapsed.delete('topographic')
+                          } else {
+                            newCollapsed.add('topographic')
+                          }
+                          setCollapsedFeatures(newCollapsed)
+                        }}
+                      >
+                        <h4 className="text-[13px] font-semibold">Topographic Relief</h4>
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('topographic') ? '-rotate-90' : ''}`}
+                        />
+                      </div>
+                      {!collapsedFeatures.has('topographic') && (
+                        <>
+                          {/* Opacity Slider */}
+                          <div className="space-y-2 mb-4">
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs text-muted-foreground">Hillshade Intensity</label>
+                              <span className="text-xs font-medium">{Math.round(topoReliefIntensity * 100)}%</span>
+                            </div>
+                            <Slider
+                              value={[Math.round(topoReliefIntensity * 100)]}
+                              min={10}
+                              max={100}
+                              step={5}
+                              onValueChange={(value) => {
+                                setTopoReliefIntensity(value[0] / 100)
+                              }}
+                            />
+                          </div>
+
+                          {/* Legend */}
+                          <div className="space-y-1.5">
+                            <h4 className="text-xs font-semibold text-muted-foreground mb-2">Elevation Relief</h4>
+                            <p className="text-xs text-foreground/80">Hillshade visualization showing terrain elevation and slopes</p>
+                            <div className="space-y-1 mt-2">
+                              <div className="flex items-center justify-between text-[11px]">
+                                <span className="text-muted-foreground">Light areas:</span>
+                                <span className="text-foreground">High elevation / slopes facing sun</span>
+                              </div>
+                              <div className="flex items-center justify-between text-[11px]">
+                                <span className="text-muted-foreground">Dark areas:</span>
+                                <span className="text-foreground">Low elevation / shaded slopes</span>
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                </div>{/* end scrollable list */}
+
+                {/* Footer with Collapse/Expand All */}
+                <div className="flex items-center justify-between px-4 py-3 flex-shrink-0 border-t border-border/20">
+                  <button
+                    className="text-[11px] font-semibold text-[#5a7cec] hover:text-[#4a6cd6] transition-colors bg-transparent border-none cursor-pointer"
+                    onClick={() => {
+                      if (collapsedFeatures.size === 0) {
+                        // Collapse all
+                        setCollapsedFeatures(new Set([
+                          'metroWeather',
+                          'metroPopulation',
+                          'factories',
+                          'rivers',
+                          'canals',
+                          'aquifers',
+                          'groundwater',
+                          'graceGroundwater',
+                          'temperature',
+                          'precipitation',
+                          'wetBulb',
+                          'metroHumidity',
+                          'topographic'
+                        ]))
+                      } else {
+                        // Expand all
+                        setCollapsedFeatures(new Set())
+                      }
+                    }}
+                  >
+                    {collapsedFeatures.size === 0 ? 'Collapse All Features' : 'Expand All Features'}
+                  </button>
+                </div>
+
+              </div>{/* end border area */}
+            </div>{/* end Features widget-container */}
           </div>
         )
       })()}
+
+
 
       {/* Groundwater Details Panel - Bottom Center */}
       {
@@ -5475,6 +6024,18 @@ export default function WaterAccessView() {
             <FactoryDetailsPanel
               selectedFactory={selectedFactory}
               onClose={() => setSelectedFactory(null)}
+            />
+          </div>
+        )
+      }
+
+      {/* AI Data Center Details Panel - Bottom Center */}
+      {
+        selectedDataCenter && (
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto" style={{ width: '640px' }}>
+            <AIDataCenterDetailPanel
+              datacenter={selectedDataCenter}
+              onClose={() => setSelectedDataCenter(null)}
             />
           </div>
         )

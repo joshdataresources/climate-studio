@@ -72,10 +72,10 @@ export function GISAnalysisApp() {
           const formatted = Number.isNaN(parsed.getTime())
             ? controls.analysisDate
             : parsed.toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-                year: "numeric",
-              })
+              month: "short",
+              day: "numeric",
+              year: "numeric",
+            })
           return { label: "Last captured", value: formatted }
         }
         case "displayStyle": {
@@ -230,21 +230,21 @@ export function GISAnalysisApp() {
       </main>
 
       {!panelsCollapsed && (
-      <aside className="absolute left-[92px] top-4 z-[1000] w-[360px] pointer-events-none transition-all duration-300 animate-in fade-in slide-in-from-left-10">
-        <div className="space-y-4 pointer-events-auto">
-          <SearchAndViewsPanel
-            viewType="climate"
-            searchPlaceholder="Search for a city, state, or country"
-            activeLayerIds={activeLayerIds}
-            controls={controls}
-          />
+        <aside className="absolute left-[92px] top-4 z-[1000] w-[352px] pointer-events-none transition-all duration-300 animate-in fade-in slide-in-from-left-10">
+          <div className="space-y-4 pointer-events-auto">
+            <SearchAndViewsPanel
+              viewType="climate"
+              searchPlaceholder="Search for a city, state, or country"
+              activeLayerIds={activeLayerIds}
+              controls={controls}
+            />
 
-          <section className="widget-container widget-container-no-padding">
-            <LayerPanel layerStates={layerStates} />
-          </section>
+            <section className="widget-container widget-container-no-padding">
+              <LayerPanel layerStates={layerStates} />
+            </section>
 
-        </div>
-      </aside>
+          </div>
+        </aside>
       )}
 
     </div>

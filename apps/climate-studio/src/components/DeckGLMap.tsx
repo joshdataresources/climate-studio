@@ -534,6 +534,7 @@ export function DeckGLMap({
     isLayerActive("temperature_projection"),
     layerStates.temperature_projection,
     controls.projectionOpacity,
+    controls.temperatureMode,
     tileLoadConfig,
     loadTileImage
   ])

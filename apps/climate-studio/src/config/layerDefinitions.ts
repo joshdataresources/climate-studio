@@ -12,7 +12,8 @@ import {
   CloudRain,
   Wind,
   TrendingUp,
-  Mountain
+  Mountain,
+  Zap
 } from 'lucide-react'
 import { FactoryLayersPanel } from '../components/panels/FactoryLayersPanel'
 import { ClimateLayerControlsPanel } from '../components/panels/ClimateLayerControlsPanel'
@@ -84,6 +85,29 @@ export const layerDefinitions: LayerDefinition[] = [
         'circle-stroke-width': 2,
         'circle-stroke-color': '#ffffff',
         'circle-stroke-opacity': 0.9
+      }
+    }
+  },
+  {
+    id: 'ai_datacenters',
+    name: 'AI Data Centers',
+    description: 'AI computing infrastructure & energy impact (2024-2026)',
+    type: 'geojson',
+    category: 'infrastructure',
+    icon: Zap,
+    sourceUrl: 'Public filings, DOE',
+    sourceAttribution: 'Company announcements, DOE, public filings',
+    enabled: true,
+    visible: true,
+    opacity: 1.0,
+    availableInViews: [],
+    hasMapVisualization: true,
+    requiresClimateWidget: false,
+    dataSource: '/data/ai-datacenters.json',
+    renderConfig: {
+      layerType: 'symbol',
+      paint: {
+        'icon-opacity': 0.85
       }
     }
   },

@@ -45,8 +45,8 @@
   --sidebar-ring: hsl(264 100% 65%);
 
   /* Widget Container Variables - Global style for all widget panels */
-  --widget-bg: rgba(30, 30, 30, 0.45);
-  --widget-bg-panel: rgba(30, 30, 30, 0.45);
+  --widget-bg: rgba(30, 30, 30, 0.75);
+  --widget-bg-panel: rgba(30, 30, 30, 0.75);
   --widget-border: rgba(255, 255, 255, 0.89);
   --widget-border-radius: 16px;
   --widget-padding: 1rem;
@@ -238,6 +238,36 @@
       rgba(59, 130, 246, 0.06) 100%);
   border-color: rgba(59, 130, 246, 0.4);
   box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * FEATURE CARDS (inset cards inside Features panel)
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+.feature-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.03);
+  transition: border-color 0.2s ease;
+}
+
+.feature-card:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.feature-card-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.625rem;
+}
+
+/* Features panel divider between header and content */
+.features-divider {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -558,8 +588,8 @@ button[role="combobox"][aria-expanded="true"] {
   /* slate-200 */
 
   /* Widget Container Variables - Light Theme */
-  --widget-bg: rgba(255, 255, 255, 0.45);
-  --widget-bg-panel: rgba(255, 255, 255, 0.45);
+  --widget-bg: rgba(255, 255, 255, 0.75);
+  --widget-bg-panel: rgba(255, 255, 255, 0.75);
   --widget-border: rgba(255, 255, 255, 0.89);
   --widget-border-radius: 16px;
   --widget-backdrop-blur: blur(10px);
@@ -642,6 +672,24 @@ button[role="combobox"][aria-expanded="true"] {
   box-shadow: 0 0 20px rgba(67, 126, 252, 0.1);
 }
 
+
+/* Light theme feature cards */
+[data-theme="light"] .feature-card,
+.light .feature-card {
+  background: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 1);
+  box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .feature-card:hover,
+.light .feature-card:hover {
+  border-color: rgba(226, 232, 240, 1);
+}
+
+[data-theme="light"] .features-divider,
+.light .features-divider {
+  border-color: rgba(0, 0, 0, 0.12);
+}
 
 /* Input hover states for light theme */
 [data-theme="light"] input:hover,

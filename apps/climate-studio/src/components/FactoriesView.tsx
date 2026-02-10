@@ -7,15 +7,19 @@ import { useSidebar } from '../contexts/SidebarContext'
 import { useLayer } from '../contexts/LayerContext'
 import { useMap } from '../contexts/MapContext'
 import { FactoryDetailPanel, SelectedFactory } from './panels/FactoryDetailPanel'
+import { AIDataCenterDetailPanel, SelectedDataCenter } from './panels/AIDataCenterDetailPanel'
 import { LayerControlsPanel } from './panels/LayerControlsPanel'
 import { LayerLibraryPanel } from './panels/LayerLibraryPanel'
 import { SearchAndViewsPanel } from './panels/SearchAndViewsPanel'
 import { ClimateProjectionsWidget } from './ClimateProjectionsWidget'
 import { shouldShowClimateWidget } from '../config/layerDefinitions'
 import { useLayerOrchestrator } from '../hooks/useLayerOrchestrator'
+import { setupDataCenterLayer } from '../utils/dataCenterLayerSetup'
 
 // Import expanded factory data
 import factoriesExpandedData from '../data/factories-expanded.json'
+// Import AI data centers data
+import aiDatacentersData from '../data/ai-datacenters.json'
 
 // Use environment variable or fallback to the token
 const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1Ijoiam9zaHVhYmJ1dGxlciIsImEiOiJjbWcwNXpyNXUwYTdrMmtva2tiZ2NjcGxhIn0.Fc3d_CloJGiw9-BE4nI_Kw'
@@ -30,8 +34,10 @@ export default function FactoriesView() {
   const { viewport } = useMap()
 
   const [selectedFactory, setSelectedFactory] = useState<SelectedFactory | null>(null)
+  const [selectedDataCenter, setSelectedDataCenter] = useState<SelectedDataCenter | null>(null)
   const [mapLoaded, setMapLoaded] = useState(false)
   const [filteredFactories, setFilteredFactories] = useState<any[]>([])
+  const [showAIDataCenters, setShowAIDataCenters] = useState(true)
 
   // Initialize LayerOrchestrator for automatic layer sync
   const { activePanels, isLayerRendered } = useLayerOrchestrator({
@@ -178,6 +184,7 @@ export default function FactoriesView() {
       if (fullFactory) {
         console.log('✅ Factory found:', fullFactory.name)
         setSelectedFactory(fullFactory)
+        setSelectedDataCenter(null) // Close data center panel if open
       } else {
         console.error('❌ Factory not found in data for ID:', factoryId)
       }
@@ -240,8 +247,8 @@ export default function FactoriesView() {
 
     console.log('🔍 Applied filter:', combinedFilter)
   }, [mapLoaded, showOperational, showConstruction, showAnnounced, showFailed,
-      showSemiconductor, showBattery, showEV, showDataCenter, showElectronics,
-      showLowRisk, showModerateRisk, showHighRisk, showCriticalRisk])
+    showSemiconductor, showBattery, showEV, showDataCenter, showElectronics,
+    showLowRisk, showModerateRisk, showHighRisk, showCriticalRisk])
 
   // Initialize map ONCE
   useEffect(() => {
@@ -268,6 +275,13 @@ export default function FactoriesView() {
     map.on('load', () => {
       console.log('✅ Map loaded for Factories view')
       setupFactoryLayers(map)
+
+      // Setup AI Data Centers layer
+      setupDataCenterLayer(map, aiDatacentersData, (datacenter) => {
+        setSelectedDataCenter(datacenter)
+        setSelectedFactory(null) // Close factory panel if open
+      })
+
       setMapLoaded(true)
     })
 
@@ -303,6 +317,12 @@ export default function FactoriesView() {
       console.log('🎨 Style loaded, re-adding factory layers...')
       setupFactoryLayers(map)
       updateMapFilters()
+
+      // Re-add AI Data Centers layer after style change
+      setupDataCenterLayer(map, aiDatacentersData, (datacenter) => {
+        setSelectedDataCenter(datacenter)
+        setSelectedFactory(null)
+      })
     })
   }, [isDark, mapLoaded, setupFactoryLayers, updateMapFilters])
 
@@ -362,7 +382,7 @@ export default function FactoriesView() {
 
       {/* Left Panel - Search and Layer Library */}
       {!panelsCollapsed && (
-        <aside className="absolute left-[92px] top-4 z-[1000] w-[360px] pointer-events-none transition-all duration-300 animate-in fade-in slide-in-from-left-10">
+        <aside className="absolute left-[92px] top-4 z-[1000] w-[352px] pointer-events-none transition-all duration-300 animate-in fade-in slide-in-from-left-10">
           <div className="space-y-4 pointer-events-auto">
             <SearchAndViewsPanel
               viewType="factories"
@@ -392,7 +412,7 @@ export default function FactoriesView() {
 
       {/* Right Panel - Full height scrollable container matching Water/Climate views */}
       {!panelsCollapsed && (
-        <div className="absolute top-4 right-4 z-[1000] w-80 h-[calc(100vh-32px)] pointer-events-auto overflow-y-auto">
+        <div className="absolute top-4 right-4 z-[1000] w-[336px] h-[calc(100vh-32px)] pointer-events-auto overflow-y-auto">
           <div className="space-y-4 pr-4">
             {/* Climate Projections Widget - Top (conditional) */}
             {showClimateWidget && (
@@ -439,6 +459,16 @@ export default function FactoriesView() {
           <FactoryDetailPanel
             factory={selectedFactory}
             onClose={() => setSelectedFactory(null)}
+          />
+        </div>
+      )}
+
+      {/* Bottom Center - AI Data Center Detail Panel */}
+      {selectedDataCenter && !selectedFactory && (
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] w-[640px] pointer-events-auto">
+          <AIDataCenterDetailPanel
+            datacenter={selectedDataCenter}
+            onClose={() => setSelectedDataCenter(null)}
           />
         </div>
       )}

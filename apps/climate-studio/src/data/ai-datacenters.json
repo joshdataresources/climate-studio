@@ -1,0 +1,707 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "last_updated": "2026-02-09",
+    "total_datacenters": 20,
+    "total_investment": "$600B+",
+    "total_power_capacity_gw": "15+",
+    "description": "Major AI data center facilities in the US (2024-2026)",
+    "research_status": "Phase 1 - Initial Data Collection"
+  },
+  "datacenters": [
+    {
+      "id": "msft-fairwater-wi",
+      "name": "Microsoft Fairwater Data Center",
+      "company": "Microsoft",
+      "location": {
+        "city": "Mount Pleasant",
+        "state": "Wisconsin",
+        "county": "Racine",
+        "coordinates": { "lat": 42.7258, "lon": -87.8364 }
+      },
+      "purpose": "AI Training & Inference",
+      "status": "under_construction",
+      "power_capacity_mw": 350,
+      "power_source": "Grid + Renewables",
+      "cooling_type": "Zero-water liquid cooling",
+      "gpu_count": 400000,
+      "gpu_type": "NVIDIA GB200/GB300",
+      "investment_usd": 7000000000,
+      "campus_acres": 315,
+      "building_sqft": 1200000,
+      "jobs": { "permanent": 200, "construction": 5000 },
+      "timeline": {
+        "announced": "2024-03-15",
+        "construction_start": "2024-06-01",
+        "expected_operational": "2026-03-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 3066000,
+        "water_usage_gallons_per_day": 0,
+        "carbon_offset_commitment": true,
+        "grid_strain": "moderate",
+        "power_equivalent": "Equivalent to 280,000 homes"
+      },
+      "notes": "World's most powerful AI data center prototype. Pioneered zero-water liquid cooling. Blueprint for Microsoft's global AI factory network."
+    },
+    {
+      "id": "aws-rainier-in",
+      "name": "AWS Project Rainier Campus",
+      "company": "Amazon (AWS)",
+      "location": {
+        "city": "New Carlisle",
+        "state": "Indiana",
+        "county": "St. Joseph",
+        "coordinates": { "lat": 41.7031, "lon": -86.5086 }
+      },
+      "purpose": "AI Training (Anthropic Claude Models)",
+      "status": "operational",
+      "power_capacity_mw": 500,
+      "power_source": "Grid + Nuclear (planned)",
+      "cooling_type": "Liquid + Air Hybrid",
+      "gpu_count": 500000,
+      "gpu_type": "Amazon Trainium 2",
+      "investment_usd": 11000000000,
+      "campus_acres": 1200,
+      "building_sqft": 3000000,
+      "jobs": { "permanent": 1000, "construction": 8000 },
+      "timeline": {
+        "announced": "2023-09-25",
+        "construction_start": "2024-01-15",
+        "operational": "2025-10-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 4380000,
+        "water_usage_gallons_per_day": 3500000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "high",
+        "power_equivalent": "Equivalent to 400,000 homes"
+      },
+      "notes": "Largest AI-dedicated cluster in the world. First major non-NVIDIA AI cluster at hyperscale, built on Amazon's custom Trainium 2 silicon. 30 data centers consuming 2.2 GW total."
+    },
+    {
+      "id": "meta-columbus-oh",
+      "name": "Meta AI Data Center",
+      "company": "Meta",
+      "location": {
+        "city": "New Albany",
+        "state": "Ohio",
+        "county": "Franklin",
+        "coordinates": { "lat": 40.0815, "lon": -82.8085 }
+      },
+      "purpose": "AI Training (Llama Models)",
+      "status": "operational",
+      "power_capacity_mw": 500,
+      "power_source": "Grid + Solar PPA",
+      "cooling_type": "Air + Temporary High-Density Tents",
+      "gpu_count": 300000,
+      "gpu_type": "NVIDIA H100 / H200",
+      "investment_usd": 4500000000,
+      "campus_acres": 400,
+      "building_sqft": 2500000,
+      "jobs": { "permanent": 300, "construction": 3000 },
+      "timeline": {
+        "announced": "2022-06-15",
+        "construction_start": "2022-10-01",
+        "operational": "2024-09-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 4380000,
+        "water_usage_gallons_per_day": 4200000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "high",
+        "power_equivalent": "Equivalent to 400,000 homes"
+      },
+      "notes": "Trains Meta's latest Llama models. Mixes traditional buildings with temporary high-density 'tents' for rapid GPU deployment."
+    },
+    {
+      "id": "meta-richland-la",
+      "name": "Meta Louisiana AI Campus",
+      "company": "Meta",
+      "location": {
+        "city": "Richland Parish",
+        "state": "Louisiana",
+        "county": "Richland",
+        "coordinates": { "lat": 32.4180, "lon": -91.7140 }
+      },
+      "purpose": "AI Training & Inference",
+      "status": "under_construction",
+      "power_capacity_mw": 800,
+      "power_source": "Grid + Natural Gas",
+      "cooling_type": "Liquid Cooling",
+      "gpu_count": 500000,
+      "gpu_type": "NVIDIA B200",
+      "investment_usd": 10000000000,
+      "campus_acres": 600,
+      "building_sqft": 4000000,
+      "jobs": { "permanent": 500, "construction": 5000 },
+      "timeline": {
+        "announced": "2024-08-01",
+        "construction_start": "2024-12-01",
+        "expected_operational": "2030-01-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 7008000,
+        "water_usage_gallons_per_day": 6000000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "critical",
+        "power_equivalent": "Equivalent to 640,000 homes"
+      },
+      "notes": "Massive 9-building complex. One of the largest data center projects announced globally. Expected completion by 2030."
+    },
+    {
+      "id": "google-council-bluffs-ia",
+      "name": "Google Council Bluffs Campus",
+      "company": "Google",
+      "location": {
+        "city": "Council Bluffs",
+        "state": "Iowa",
+        "county": "Pottawattamie",
+        "coordinates": { "lat": 41.2619, "lon": -95.8608 }
+      },
+      "purpose": "AI Training & Search Infrastructure",
+      "status": "operational",
+      "power_capacity_mw": 600,
+      "power_source": "Grid + Wind PPAs",
+      "cooling_type": "Air + Evaporative",
+      "gpu_count": 200000,
+      "gpu_type": "Google TPU v5",
+      "investment_usd": 5000000000,
+      "campus_acres": 500,
+      "building_sqft": 3500000,
+      "jobs": { "permanent": 400, "construction": 4000 },
+      "timeline": {
+        "announced": "2007-06-01",
+        "construction_start": "2007-09-01",
+        "operational": "2009-01-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 5256000,
+        "water_usage_gallons_per_day": 5000000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "moderate",
+        "power_equivalent": "Equivalent to 480,000 homes"
+      },
+      "notes": "Largest data center campus in the world. Continuously expanded since 2009. Major AI workload hub with TPU v5 clusters."
+    },
+    {
+      "id": "stargate-abilene-tx",
+      "name": "Stargate Abilene Data Center",
+      "company": "OpenAI / Oracle / SoftBank",
+      "location": {
+        "city": "Abilene",
+        "state": "Texas",
+        "county": "Taylor",
+        "coordinates": { "lat": 32.4487, "lon": -99.7331 }
+      },
+      "purpose": "AI Training (GPT Models)",
+      "status": "operational",
+      "power_capacity_mw": 1200,
+      "power_source": "Grid + Solar + Wind",
+      "cooling_type": "Liquid Cooling",
+      "gpu_count": 600000,
+      "gpu_type": "NVIDIA GB200",
+      "investment_usd": 100000000000,
+      "campus_acres": 800,
+      "building_sqft": 4000000,
+      "jobs": { "permanent": 1500, "construction": 10000 },
+      "timeline": {
+        "announced": "2024-01-21",
+        "construction_start": "2024-06-01",
+        "operational": "2025-09-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 10512000,
+        "water_usage_gallons_per_day": 8000000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "critical",
+        "power_equivalent": "Equivalent to 960,000 homes"
+      },
+      "notes": "Part of the $500B Stargate Project. First two buildings (980k sqft, 200 MW) online Sep 2024. Scaling to 1.2 GW across 4M sqft by mid-2026. Government-backed initiative."
+    },
+    {
+      "id": "stargate-shackelford-tx",
+      "name": "Stargate Shackelford County",
+      "company": "OpenAI / Oracle / SoftBank",
+      "location": {
+        "city": "Albany",
+        "state": "Texas",
+        "county": "Shackelford",
+        "coordinates": { "lat": 32.7234, "lon": -99.2968 }
+      },
+      "purpose": "AI Training & Inference",
+      "status": "under_construction",
+      "power_capacity_mw": 500,
+      "power_source": "Grid + Wind",
+      "cooling_type": "Liquid Cooling",
+      "gpu_count": 250000,
+      "gpu_type": "NVIDIA GB200",
+      "investment_usd": 20000000000,
+      "campus_acres": 400,
+      "building_sqft": 2000000,
+      "jobs": { "permanent": 500, "construction": 5000 },
+      "timeline": {
+        "announced": "2024-06-01",
+        "construction_start": "2025-03-01",
+        "expected_operational": "2026-06-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 4380000,
+        "water_usage_gallons_per_day": 4000000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "high",
+        "power_equivalent": "Equivalent to 400,000 homes"
+      },
+      "notes": "Part of the Stargate Project expansion into West Texas. Leveraging wind energy resources in the region."
+    },
+    {
+      "id": "msft-tmi-pa",
+      "name": "Microsoft Three Mile Island Nuclear DC",
+      "company": "Microsoft",
+      "location": {
+        "city": "Londonderry Township",
+        "state": "Pennsylvania",
+        "county": "Dauphin",
+        "coordinates": { "lat": 40.1533, "lon": -76.7247 }
+      },
+      "purpose": "AI Training & Azure Cloud",
+      "status": "announced",
+      "power_capacity_mw": 835,
+      "power_source": "Nuclear (Three Mile Island Unit 1)",
+      "cooling_type": "Water Cooling (Susquehanna River)",
+      "gpu_count": 300000,
+      "gpu_type": "NVIDIA H200 / GB200",
+      "investment_usd": 8000000000,
+      "campus_acres": 200,
+      "building_sqft": 1500000,
+      "jobs": { "permanent": 600, "construction": 3000 },
+      "timeline": {
+        "announced": "2024-09-20",
+        "expected_operational": "2028-01-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 7314600,
+        "water_usage_gallons_per_day": 2000000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "low",
+        "power_equivalent": "Equivalent to 670,000 homes"
+      },
+      "notes": "Historic agreement to restart Three Mile Island Unit 1 for 20 years of dedicated nuclear power for AI. Zero-carbon baseload power. Unit 1 was not involved in the 1979 accident (that was Unit 2)."
+    },
+    {
+      "id": "aws-madison-ms",
+      "name": "AWS Madison County Complex",
+      "company": "Amazon (AWS)",
+      "location": {
+        "city": "Canton",
+        "state": "Mississippi",
+        "county": "Madison",
+        "coordinates": { "lat": 32.6126, "lon": -90.0368 }
+      },
+      "purpose": "AI Training & Cloud Services",
+      "status": "under_construction",
+      "power_capacity_mw": 400,
+      "power_source": "Grid + Solar",
+      "cooling_type": "Air + Evaporative",
+      "gpu_count": 200000,
+      "gpu_type": "Amazon Trainium 2 / NVIDIA H100",
+      "investment_usd": 10000000000,
+      "campus_acres": 800,
+      "building_sqft": 2500000,
+      "jobs": { "permanent": 1000, "construction": 3000 },
+      "timeline": {
+        "announced": "2024-01-15",
+        "construction_start": "2024-06-01",
+        "expected_operational": "2027-01-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 3504000,
+        "water_usage_gallons_per_day": 3000000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "high",
+        "power_equivalent": "Equivalent to 320,000 homes"
+      },
+      "notes": "$10B data center complex in Madison County announced 2024. Part of major AWS Mississippi expansion."
+    },
+    {
+      "id": "aws-warren-ms",
+      "name": "AWS Warren County Campus",
+      "company": "Amazon (AWS)",
+      "location": {
+        "city": "Vicksburg",
+        "state": "Mississippi",
+        "county": "Warren",
+        "coordinates": { "lat": 32.3526, "lon": -90.8779 }
+      },
+      "purpose": "AI Cloud Services",
+      "status": "under_construction",
+      "power_capacity_mw": 200,
+      "power_source": "Grid",
+      "cooling_type": "Air + Evaporative",
+      "gpu_count": 100000,
+      "gpu_type": "Amazon Trainium 2",
+      "investment_usd": 3000000000,
+      "campus_acres": 300,
+      "building_sqft": 1000000,
+      "jobs": { "permanent": 200, "construction": 2000 },
+      "timeline": {
+        "announced": "2024-04-01",
+        "construction_start": "2024-09-01",
+        "expected_operational": "2027-06-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 1752000,
+        "water_usage_gallons_per_day": 2000000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "moderate",
+        "power_equivalent": "Equivalent to 160,000 homes"
+      },
+      "notes": "$3B campus in Warren County. Part of broader AWS Mississippi investment strategy."
+    },
+    {
+      "id": "google-armstrong-tx",
+      "name": "Google Armstrong County Campus",
+      "company": "Google",
+      "location": {
+        "city": "Claude",
+        "state": "Texas",
+        "county": "Armstrong",
+        "coordinates": { "lat": 34.8601, "lon": -101.3632 }
+      },
+      "purpose": "AI Training (Gemini Models)",
+      "status": "under_construction",
+      "power_capacity_mw": 400,
+      "power_source": "Grid + Wind + Solar",
+      "cooling_type": "Liquid Cooling",
+      "gpu_count": 200000,
+      "gpu_type": "Google TPU v6",
+      "investment_usd": 6000000000,
+      "campus_acres": 500,
+      "building_sqft": 2000000,
+      "jobs": { "permanent": 300, "construction": 3500 },
+      "timeline": {
+        "announced": "2024-04-01",
+        "construction_start": "2025-01-01",
+        "expected_operational": "2027-01-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 3504000,
+        "water_usage_gallons_per_day": 3500000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "moderate",
+        "power_equivalent": "Equivalent to 320,000 homes"
+      },
+      "notes": "Part of Google's Texas expansion initiative. Three new campuses planned across Armstrong and Haskell counties."
+    },
+    {
+      "id": "google-haskell-tx",
+      "name": "Google Haskell County Campus",
+      "company": "Google",
+      "location": {
+        "city": "Haskell",
+        "state": "Texas",
+        "county": "Haskell",
+        "coordinates": { "lat": 33.1576, "lon": -99.7337 }
+      },
+      "purpose": "AI Training & Cloud",
+      "status": "announced",
+      "power_capacity_mw": 600,
+      "power_source": "Grid + Renewables",
+      "cooling_type": "Liquid Cooling",
+      "gpu_count": 300000,
+      "gpu_type": "Google TPU v6",
+      "investment_usd": 8000000000,
+      "campus_acres": 700,
+      "building_sqft": 3000000,
+      "jobs": { "permanent": 400, "construction": 4000 },
+      "timeline": {
+        "announced": "2024-04-01",
+        "expected_operational": "2028-01-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 5256000,
+        "water_usage_gallons_per_day": 5000000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "high",
+        "power_equivalent": "Equivalent to 480,000 homes"
+      },
+      "notes": "Two campus sites in Haskell County. Part of Google's West Texas AI infrastructure expansion."
+    },
+    {
+      "id": "xai-memphis-tn",
+      "name": "xAI Colossus Supercomputer",
+      "company": "xAI (Elon Musk)",
+      "location": {
+        "city": "Memphis",
+        "state": "Tennessee",
+        "county": "Shelby",
+        "coordinates": { "lat": 35.1495, "lon": -90.0490 }
+      },
+      "purpose": "AI Training (Grok Models)",
+      "status": "operational",
+      "power_capacity_mw": 150,
+      "power_source": "Grid + Natural Gas Turbines",
+      "cooling_type": "Liquid Cooling",
+      "gpu_count": 100000,
+      "gpu_type": "NVIDIA H100",
+      "investment_usd": 3000000000,
+      "campus_acres": 100,
+      "building_sqft": 800000,
+      "jobs": { "permanent": 150, "construction": 1000 },
+      "timeline": {
+        "announced": "2024-06-01",
+        "construction_start": "2024-06-15",
+        "operational": "2024-09-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 1314000,
+        "water_usage_gallons_per_day": 1000000,
+        "carbon_offset_commitment": false,
+        "grid_strain": "high",
+        "power_equivalent": "Equivalent to 120,000 homes"
+      },
+      "notes": "Built in record 122 days. 100,000 H100 GPUs in a single cluster. Controversial natural gas turbine use prompted environmental concerns and local opposition."
+    },
+    {
+      "id": "aws-nova-va",
+      "name": "AWS Northern Virginia Hub",
+      "company": "Amazon (AWS)",
+      "location": {
+        "city": "Ashburn",
+        "state": "Virginia",
+        "county": "Loudoun",
+        "coordinates": { "lat": 39.0438, "lon": -77.4874 }
+      },
+      "purpose": "AI Cloud Services & Training",
+      "status": "operational",
+      "power_capacity_mw": 1500,
+      "power_source": "Grid + Nuclear + Solar PPAs",
+      "cooling_type": "Air + Liquid Hybrid",
+      "gpu_count": 500000,
+      "gpu_type": "NVIDIA H100 / Trainium",
+      "investment_usd": 35000000000,
+      "campus_acres": 2000,
+      "building_sqft": 8000000,
+      "jobs": { "permanent": 3000, "construction": 15000 },
+      "timeline": {
+        "announced": "2006-01-01",
+        "operational": "2006-08-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 13140000,
+        "water_usage_gallons_per_day": 12000000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "critical",
+        "power_equivalent": "Equivalent to 1,200,000 homes"
+      },
+      "notes": "Heart of 'Data Center Alley' in Loudoun County. Virginia data centers consume 26% of state electricity. Expected to drive residential bills up $172/month by 2039."
+    },
+    {
+      "id": "msft-nova-va",
+      "name": "Microsoft Azure Virginia Campus",
+      "company": "Microsoft",
+      "location": {
+        "city": "Leesburg",
+        "state": "Virginia",
+        "county": "Loudoun",
+        "coordinates": { "lat": 39.1157, "lon": -77.5636 }
+      },
+      "purpose": "Azure AI & OpenAI Services",
+      "status": "operational",
+      "power_capacity_mw": 800,
+      "power_source": "Grid + Nuclear PPA",
+      "cooling_type": "Liquid Cooling",
+      "gpu_count": 300000,
+      "gpu_type": "NVIDIA H100 / H200",
+      "investment_usd": 15000000000,
+      "campus_acres": 500,
+      "building_sqft": 3500000,
+      "jobs": { "permanent": 1200, "construction": 6000 },
+      "timeline": {
+        "announced": "2010-01-01",
+        "operational": "2011-06-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 7008000,
+        "water_usage_gallons_per_day": 6500000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "critical",
+        "power_equivalent": "Equivalent to 640,000 homes"
+      },
+      "notes": "Major Azure region for OpenAI model hosting. Part of Virginia's massive data center corridor."
+    },
+    {
+      "id": "google-midlothian-tx",
+      "name": "Google Midlothian Data Center",
+      "company": "Google",
+      "location": {
+        "city": "Midlothian",
+        "state": "Texas",
+        "county": "Ellis",
+        "coordinates": { "lat": 32.4824, "lon": -96.9945 }
+      },
+      "purpose": "AI Training & Cloud",
+      "status": "operational",
+      "power_capacity_mw": 375,
+      "power_source": "Grid + Wind PPAs",
+      "cooling_type": "Air + Evaporative",
+      "gpu_count": 150000,
+      "gpu_type": "Google TPU v5 / NVIDIA H100",
+      "investment_usd": 3000000000,
+      "campus_acres": 350,
+      "building_sqft": 2000000,
+      "jobs": { "permanent": 300, "construction": 2500 },
+      "timeline": {
+        "announced": "2019-06-01",
+        "construction_start": "2020-01-01",
+        "operational": "2022-06-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 3285000,
+        "water_usage_gallons_per_day": 3200000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "moderate",
+        "power_equivalent": "Equivalent to 300,000 homes"
+      },
+      "notes": "Major Google campus south of Dallas. Continuously expanded for AI workloads."
+    },
+    {
+      "id": "coreweave-nj",
+      "name": "CoreWeave NJ GPU Cloud Center",
+      "company": "CoreWeave",
+      "location": {
+        "city": "Weehawken",
+        "state": "New Jersey",
+        "county": "Hudson",
+        "coordinates": { "lat": 40.7690, "lon": -74.0208 }
+      },
+      "purpose": "AI GPU Cloud (Multi-tenant)",
+      "status": "operational",
+      "power_capacity_mw": 100,
+      "power_source": "Grid",
+      "cooling_type": "Liquid Cooling",
+      "gpu_count": 50000,
+      "gpu_type": "NVIDIA H100 / H200",
+      "investment_usd": 2000000000,
+      "campus_acres": 50,
+      "building_sqft": 500000,
+      "jobs": { "permanent": 200, "construction": 500 },
+      "timeline": {
+        "announced": "2023-06-01",
+        "construction_start": "2023-09-01",
+        "operational": "2024-03-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 876000,
+        "water_usage_gallons_per_day": 500000,
+        "carbon_offset_commitment": false,
+        "grid_strain": "moderate",
+        "power_equivalent": "Equivalent to 80,000 homes"
+      },
+      "notes": "Major AI GPU cloud provider. Raised $23B+ in funding. Primary infrastructure partner for many AI startups."
+    },
+    {
+      "id": "meta-mesa-az",
+      "name": "Meta Mesa Data Center",
+      "company": "Meta",
+      "location": {
+        "city": "Mesa",
+        "state": "Arizona",
+        "county": "Maricopa",
+        "coordinates": { "lat": 33.4152, "lon": -111.8315 }
+      },
+      "purpose": "AI Training & Social Media Infrastructure",
+      "status": "operational",
+      "power_capacity_mw": 300,
+      "power_source": "Grid + Solar",
+      "cooling_type": "Evaporative + Air",
+      "gpu_count": 150000,
+      "gpu_type": "NVIDIA A100 / H100",
+      "investment_usd": 2000000000,
+      "campus_acres": 450,
+      "building_sqft": 1800000,
+      "jobs": { "permanent": 200, "construction": 2000 },
+      "timeline": {
+        "announced": "2018-01-01",
+        "construction_start": "2018-06-01",
+        "operational": "2020-01-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 2628000,
+        "water_usage_gallons_per_day": 3800000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "moderate",
+        "power_equivalent": "Equivalent to 240,000 homes"
+      },
+      "notes": "Located in Arizona drought zone. Significant water usage in water-stressed region. Being expanded for AI workloads."
+    },
+    {
+      "id": "stargate-lordstown-oh",
+      "name": "Stargate Lordstown Data Center",
+      "company": "OpenAI / Oracle / SoftBank",
+      "location": {
+        "city": "Lordstown",
+        "state": "Ohio",
+        "county": "Trumbull",
+        "coordinates": { "lat": 41.1665, "lon": -80.8673 }
+      },
+      "purpose": "AI Training & Inference",
+      "status": "announced",
+      "power_capacity_mw": 400,
+      "power_source": "Grid + Nuclear (nearby plants)",
+      "cooling_type": "Liquid Cooling",
+      "gpu_count": 200000,
+      "gpu_type": "NVIDIA GB200",
+      "investment_usd": 15000000000,
+      "campus_acres": 500,
+      "building_sqft": 2000000,
+      "jobs": { "permanent": 600, "construction": 4000 },
+      "timeline": {
+        "announced": "2024-01-21",
+        "expected_operational": "2027-06-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 3504000,
+        "water_usage_gallons_per_day": 3000000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "high",
+        "power_equivalent": "Equivalent to 320,000 homes"
+      },
+      "notes": "Built on former Lordstown Motors factory site. Part of the Stargate Project expansion. Leveraging proximity to nuclear power plants."
+    },
+    {
+      "id": "stargate-dona-ana-nm",
+      "name": "Stargate Doña Ana County",
+      "company": "OpenAI / Oracle / SoftBank",
+      "location": {
+        "city": "Las Cruces",
+        "state": "New Mexico",
+        "county": "Doña Ana",
+        "coordinates": { "lat": 32.3199, "lon": -106.7637 }
+      },
+      "purpose": "AI Training",
+      "status": "announced",
+      "power_capacity_mw": 300,
+      "power_source": "Grid + Solar",
+      "cooling_type": "Liquid Cooling",
+      "gpu_count": 150000,
+      "gpu_type": "NVIDIA GB200",
+      "investment_usd": 10000000000,
+      "campus_acres": 400,
+      "building_sqft": 1500000,
+      "jobs": { "permanent": 400, "construction": 3000 },
+      "timeline": {
+        "announced": "2024-01-21",
+        "expected_operational": "2028-01-01"
+      },
+      "environmental_impact": {
+        "annual_electricity_mwh": 2628000,
+        "water_usage_gallons_per_day": 2500000,
+        "carbon_offset_commitment": true,
+        "grid_strain": "moderate",
+        "power_equivalent": "Equivalent to 240,000 homes"
+      },
+      "notes": "Part of the Stargate Project. Located in arid Southwest with water stress concerns. Near White Sands Missile Range."
+    }
+  ]
+}
