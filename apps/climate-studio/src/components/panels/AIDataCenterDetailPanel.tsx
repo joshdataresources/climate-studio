@@ -1,5 +1,5 @@
 // AI Data Center Detail Panel - Comprehensive data center information with energy impact
-import { X, AlertTriangle, CheckCircle2, Clock, DollarSign, Users, MapPin, Zap, Globe, Cpu, Droplet, Thermometer, Server, BatteryCharging } from 'lucide-react'
+import { X, AlertTriangle, CheckCircle2, XCircle, Clock, DollarSign, Users, MapPin, Zap, Globe, Cpu, Droplet, Thermometer, Server, BatteryCharging, Wind, TrendingUp, Shield } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 
 export interface SelectedDataCenter {
@@ -51,26 +51,29 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
   const { theme } = useTheme()
   const isDark = theme === 'dark'
 
-  // Grid strain colors
-  const getGridStrainColor = (strain: string) => {
-    switch (strain) {
-      case 'critical': return '#ef4444'
-      case 'high': return '#f97316'
-      case 'moderate': return '#eab308'
-      case 'low': return '#22c55e'
-      default: return '#6b7280'
-    }
-  }
-
-  // Power capacity risk level
+  // Power capacity risk level (matching Factory risk score structure)
   const getPowerRiskScore = (mw: number) => {
-    if (mw >= 1000) return { score: 9, label: 'Extreme', color: '#ef4444' }
-    if (mw >= 500) return { score: 7, label: 'High', color: '#f97316' }
-    if (mw >= 200) return { score: 5, label: 'Moderate', color: '#eab308' }
-    return { score: 3, label: 'Low', color: '#22c55e' }
+    if (mw >= 1000) return 9
+    if (mw >= 500) return 7
+    if (mw >= 200) return 5
+    return 3
   }
 
-  const powerRisk = getPowerRiskScore(datacenter.power_capacity_mw)
+  const powerRiskScore = getPowerRiskScore(datacenter.power_capacity_mw)
+
+  const getRiskColor = (score: number) => {
+    if (score < 3) return '#22c55e'
+    if (score < 5) return '#eab308'
+    if (score < 7) return '#f97316'
+    return '#ef4444'
+  }
+
+  const getRiskLabel = (score: number) => {
+    if (score < 3) return 'Low Impact'
+    if (score < 5) return 'Moderate Impact'
+    if (score < 7) return 'High Impact'
+    return 'Critical Impact'
+  }
 
   // Status badge
   const getStatusBadge = () => {
@@ -81,15 +84,41 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
         return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-blue-100 text-blue-800"><Clock size={12} /> Under Construction</span>
       case 'announced':
         return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-purple-100 text-purple-800"><Clock size={12} /> Announced</span>
+      case 'paused':
+        return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-800"><AlertTriangle size={12} /> Paused</span>
+      case 'cancelled':
+        return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-800"><XCircle size={12} /> Cancelled</span>
       default:
         return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-800">{datacenter.status}</span>
     }
   }
 
+  // Purpose/Use case badge
+  const getPurposeBadge = () => {
+    const purposeColors: Record<string, string> = {
+      'AI Training': 'bg-indigo-100 text-indigo-800',
+      'AI Inference': 'bg-purple-100 text-purple-800',
+      'Mixed Use': 'bg-cyan-100 text-cyan-800',
+      'Cloud Services': 'bg-blue-100 text-blue-800',
+      'Enterprise': 'bg-emerald-100 text-emerald-800'
+    }
+
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold ${purposeColors[datacenter.purpose] || 'bg-gray-100 text-gray-800'}`}>
+        <Cpu size={12} />
+        {datacenter.purpose}
+      </span>
+    )
+  }
+
   // Format currency
   const formatCurrency = (amount: number) => {
-    if (amount >= 1000000000) return `$${(amount / 1000000000).toFixed(1)}B`
-    if (amount >= 1000000) return `$${(amount / 1000000).toFixed(0)}M`
+    if (amount >= 1000000000) {
+      return `$${(amount / 1000000000).toFixed(2)}B`
+    }
+    if (amount >= 1000000) {
+      return `$${(amount / 1000000).toFixed(0)}M`
+    }
     return `$${amount.toLocaleString()}`
   }
 
@@ -99,6 +128,22 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
     if (num >= 1000) return `${(num / 1000).toFixed(0)}K`
     return num.toLocaleString()
   }
+
+  // Grid strain colors
+  const getGridStrainColor = (strain: string) => {
+    switch (strain.toLowerCase()) {
+      case 'critical': return '#ef4444'
+      case 'high': return '#f97316'
+      case 'moderate': return '#eab308'
+      case 'low': return '#22c55e'
+      default: return '#6b7280'
+    }
+  }
+
+  // Cost per job calculation
+  const costPerJob = datacenter.jobs.permanent > 0
+    ? datacenter.investment_usd / datacenter.jobs.permanent
+    : 0
 
   return (
     <div
@@ -117,22 +162,17 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
       >
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-1">
-              <Zap size={20} className="text-yellow-500" />
-              <h2 className="text-xl font-bold" style={{ color: isDark ? '#fff' : '#000' }}>
-                {datacenter.company}
-              </h2>
-            </div>
+            <h2 className="text-xl font-bold mb-1" style={{ color: isDark ? '#fff' : '#000' }}>
+              {datacenter.company}
+            </h2>
             <p className="text-sm mb-2" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>
               {datacenter.name}
             </p>
             <div className="flex items-center gap-2 flex-wrap">
               {getStatusBadge()}
+              {getPurposeBadge()}
               <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-800">
                 <Zap size={12} /> {datacenter.power_capacity_mw} MW
-              </span>
-              <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-cyan-100 text-cyan-800">
-                <Cpu size={12} /> {datacenter.purpose}
               </span>
             </div>
           </div>
@@ -165,42 +205,48 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
           </div>
         </section>
 
-        {/* Power & Energy Impact - PROMINENT */}
+        {/* Energy Impact Score - PROMINENT (matching Factory Climate Risk) */}
         <section className="p-4 rounded-lg border-2" style={{
           backgroundColor: isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.5)',
-          borderColor: powerRisk.color
+          borderColor: getRiskColor(powerRiskScore)
         }}>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-lg flex items-center gap-2" style={{ color: isDark ? '#fff' : '#000' }}>
-              <Zap size={20} className="text-yellow-500" />
-              Energy Impact
+            <h3 className="font-bold text-lg" style={{ color: isDark ? '#fff' : '#000' }}>
+              Energy Impact Score
             </h3>
-            <div className="text-3xl font-bold" style={{ color: powerRisk.color }}>
-              {datacenter.power_capacity_mw} MW
+            <div className="text-4xl font-bold" style={{ color: getRiskColor(powerRiskScore) }}>
+              {powerRiskScore.toFixed(1)}
             </div>
           </div>
-
           <div className="mb-3">
             <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
               <div
                 className="h-full transition-all"
                 style={{
-                  width: `${Math.min((datacenter.power_capacity_mw / 1500) * 100, 100)}%`,
-                  backgroundColor: powerRisk.color
+                  width: `${(powerRiskScore / 10) * 100}%`,
+                  backgroundColor: getRiskColor(powerRiskScore)
                 }}
               />
             </div>
           </div>
-
-          <div className="text-sm font-semibold mb-1" style={{ color: powerRisk.color }}>
-            {powerRisk.label} Grid Impact
+          <div className="text-sm font-semibold" style={{ color: getRiskColor(powerRiskScore) }}>
+            {getRiskLabel(powerRiskScore)}
           </div>
-          <div className="text-xs" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>
-            {datacenter.environmental_impact.power_equivalent}
+          <div className="text-xs mt-2" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>
+            Power Equivalent: <span className="font-semibold">{datacenter.environmental_impact.power_equivalent}</span>
           </div>
 
-          {/* Energy Breakdown */}
+          {/* Environmental Impact Breakdown */}
           <div className="mt-4 pt-4 border-t space-y-2" style={{ borderColor: isDark ? '#374151' : '#d1d5db' }}>
+            <div className="flex items-center justify-between text-xs">
+              <span className="flex items-center gap-1" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
+                <Zap size={12} />
+                Power Capacity
+              </span>
+              <span className="font-semibold">
+                {datacenter.power_capacity_mw} MW
+              </span>
+            </div>
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
                 <BatteryCharging size={12} />
@@ -209,13 +255,6 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
               <span className="font-semibold">
                 {formatNumber(datacenter.environmental_impact.annual_electricity_mwh)} MWh/year
               </span>
-            </div>
-            <div className="flex items-center justify-between text-xs">
-              <span className="flex items-center gap-1" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                <Zap size={12} />
-                Power Source
-              </span>
-              <span className="font-semibold">{datacenter.power_source}</span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
@@ -228,18 +267,27 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                <Thermometer size={12} />
-                Cooling Type
+                <Wind size={12} />
+                Grid Strain
               </span>
-              <span className="font-semibold">{datacenter.cooling_type}</span>
+              <span className={`font-semibold uppercase ${datacenter.environmental_impact.grid_strain.toLowerCase() === 'critical' ? 'text-red-600' : datacenter.environmental_impact.grid_strain.toLowerCase() === 'high' ? 'text-orange-600' : 'text-green-600'}`}>
+                {datacenter.environmental_impact.grid_strain}
+              </span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <span className="flex items-center gap-1" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                Grid Strain
+                <Thermometer size={12} />
+                Cooling System
               </span>
-              <span className="font-semibold uppercase" style={{ color: getGridStrainColor(datacenter.environmental_impact.grid_strain) }}>
-                {datacenter.environmental_impact.grid_strain}
+              <span className="font-semibold">
+                {datacenter.cooling_type}
               </span>
+            </div>
+            <div className="flex items-center justify-between text-xs pt-2 border-t" style={{ borderColor: isDark ? '#374151' : '#d1d5db' }}>
+              <span style={{ color: isDark ? '#d1d5db' : '#374151' }}>
+                Power Source
+              </span>
+              <span className="font-semibold">{datacenter.power_source}</span>
             </div>
             <div className="flex items-center justify-between text-xs">
               <span style={{ color: isDark ? '#d1d5db' : '#374151' }}>
@@ -258,26 +306,26 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
             <Server size={16} />
             Compute Infrastructure
           </h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm">
               <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>GPU/Accelerator Count</span>
               <span className="font-bold" style={{ color: isDark ? '#fff' : '#000' }}>
                 {formatNumber(datacenter.gpu_count)}
               </span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between text-sm">
               <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Hardware Type</span>
               <span className="font-semibold" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
                 {datacenter.gpu_type}
               </span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between text-sm">
               <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Campus Size</span>
               <span className="font-semibold" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
                 {datacenter.campus_acres.toLocaleString()} acres
               </span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between text-sm">
               <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Building Space</span>
               <span className="font-semibold" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
                 {formatNumber(datacenter.building_sqft)} sq ft
@@ -292,13 +340,21 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
             <DollarSign size={16} />
             Investment
           </h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm">
               <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Total Investment</span>
-              <span className="font-bold text-lg" style={{ color: isDark ? '#fff' : '#000' }}>
+              <span className="font-bold" style={{ color: isDark ? '#fff' : '#000' }}>
                 {formatCurrency(datacenter.investment_usd)}
               </span>
             </div>
+            {costPerJob > 0 && (
+              <div className="flex justify-between text-sm pt-2 border-t" style={{ borderColor: isDark ? '#374151' : '#d1d5db' }}>
+                <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Investment Per Permanent Job</span>
+                <span className="font-semibold" style={{ color: costPerJob > 5000000 ? '#ef4444' : isDark ? '#fff' : '#000' }}>
+                  {formatCurrency(costPerJob)}
+                </span>
+              </div>
+            )}
           </div>
         </section>
 
@@ -308,14 +364,14 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
             <Users size={16} />
             Jobs
           </h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
+          <div className="space-y-3">
+            <div className="flex justify-between text-sm">
               <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Permanent Jobs</span>
               <span className="font-semibold" style={{ color: isDark ? '#fff' : '#000' }}>
                 {datacenter.jobs.permanent.toLocaleString()}
               </span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between text-sm">
               <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Construction Jobs</span>
               <span className="font-semibold" style={{ color: isDark ? '#fff' : '#000' }}>
                 {datacenter.jobs.construction.toLocaleString()}
@@ -367,12 +423,11 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
         {/* Notes */}
         {datacenter.notes && (
           <section className="p-4 rounded-lg" style={{
-            backgroundColor: isDark ? 'rgba(234, 179, 8, 0.1)' : 'rgba(234, 179, 8, 0.05)',
-            border: `1px solid ${isDark ? 'rgba(234, 179, 8, 0.3)' : 'rgba(234, 179, 8, 0.2)'}`
+            backgroundColor: isDark ? 'rgba(90, 124, 236, 0.1)' : 'rgba(90, 124, 236, 0.05)',
+            border: `1px solid ${isDark ? 'rgba(90, 124, 236, 0.3)' : 'rgba(90, 124, 236, 0.2)'}`
           }}>
-            <h3 className="font-semibold text-sm mb-2 flex items-center gap-2" style={{ color: isDark ? '#fff' : '#000' }}>
-              <Globe size={16} />
-              Notes
+            <h3 className="font-semibold text-sm mb-2" style={{ color: isDark ? '#fff' : '#000' }}>
+              Additional Information
             </h3>
             <p className="text-sm" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
               {datacenter.notes}
