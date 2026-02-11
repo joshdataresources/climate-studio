@@ -2583,10 +2583,10 @@ export default function WaterAccessView() {
             })
           }
 
-          // Re-apply selection if there was one (after data update, feature IDs might change)
-          // For now, just clear selection when data updates
+          // Keep the aquifer panel open when only the projection year changed
+          // The panel recalculates from projections data on its own
+          // Only clear the visual feature state highlight (it gets reset by removeFeatureState above)
           setSelectedFeatureId(null)
-          setSelectedAquifer(null)
 
           map.triggerRepaint()
         } catch (error) {
@@ -4561,7 +4561,7 @@ export default function WaterAccessView() {
 
             {/* Layers List with divider */}
             <div className="border-t border-b border-border/100 flex flex-col flex-1 min-h-0 overflow-hidden">
-              <div className="space-y-2 overflow-y-auto flex-1 py-3">
+              <div className="space-y-2 overflow-y-auto flex-1 py-3 rounded-b-lg">
                 {/* Metro Weather Layer */}
                 {layersInWidget.metroWeather && (
                   <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showMetroHumidityLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowMetroHumidityLayer(!showMetroHumidityLayer)}>

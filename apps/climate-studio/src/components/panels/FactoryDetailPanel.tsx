@@ -1,5 +1,5 @@
-// Factory Detail Panel - Comprehensive factory information with deep insights
-import { X, TrendingDown, TrendingUp, AlertTriangle, CheckCircle2, XCircle, Clock, DollarSign, Users, MapPin, Factory as FactoryIcon, Globe, Shield, Droplet, Thermometer, Wind } from 'lucide-react'
+// Factory Detail Panel - Compact detail card matching Figma design
+import { X, AlertTriangle, MapPin, Factory as FactoryIcon, Thermometer } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 
 export interface SelectedFactory {
@@ -84,76 +84,43 @@ interface FactoryDetailPanelProps {
   onClose: () => void
 }
 
+// Water stress severity → badge color + label
+function getWaterStressInfo(stress?: string): { label: string; color: string; bgTint: string; show: boolean } {
+  if (!stress) return { label: '', color: '#6b7280', bgTint: 'rgba(107,114,128,0.1)', show: false }
+
+  switch (stress.toLowerCase()) {
+    case 'extreme':
+      return { label: 'Extreme Water Stress', color: '#ff3636', bgTint: 'rgba(255, 57, 57, 0.1)', show: true }
+    case 'high':
+      return { label: 'High Water Stress', color: '#e97b35', bgTint: 'rgba(233, 123, 53, 0.1)', show: true }
+    case 'moderate':
+      return { label: 'Moderate Water Stress', color: '#eab308', bgTint: 'rgba(234, 179, 8, 0.1)', show: true }
+    case 'low':
+      return { label: 'Low Water Stress', color: '#22c55e', bgTint: 'rgba(34, 197, 94, 0.1)', show: false }
+    case 'very_low':
+      return { label: 'Very Low Water Stress', color: '#22c55e', bgTint: 'rgba(34, 197, 94, 0.1)', show: false }
+    default:
+      return { label: stress, color: '#6b7280', bgTint: 'rgba(107,114,128,0.1)', show: false }
+  }
+}
+
 export function FactoryDetailPanel({ factory, onClose }: FactoryDetailPanelProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
 
-  // Risk score colors and labels
-  const getRiskColor = (score: number) => {
-    if (score < 3) return '#22c55e'
-    if (score < 5) return '#eab308'
-    if (score < 7) return '#f97316'
-    return '#ef4444'
-  }
-
-  const getRiskLabel = (score: number) => {
-    if (score < 3) return 'Low Risk'
-    if (score < 5) return 'Moderate Risk'
-    if (score < 7) return 'High Risk'
-    return 'Critical Risk'
-  }
-
-  // Status badge
-  const getStatusBadge = () => {
-    switch (factory.status) {
-      case 'operational':
-        return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-green-100 text-green-800"><CheckCircle2 size={12} /> Operational</span>
-      case 'under_construction':
-        return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-blue-100 text-blue-800"><Clock size={12} /> Under Construction</span>
-      case 'announced':
-        return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-purple-100 text-purple-800"><Clock size={12} /> Announced</span>
-      case 'paused':
-      case 'PAUSED':
-        return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-yellow-100 text-yellow-800"><AlertTriangle size={12} /> Paused</span>
-      case 'failed':
-      case 'FAILED':
-        return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-800"><XCircle size={12} /> Failed</span>
-      case 'AT RISK':
-        return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-orange-100 text-orange-800"><AlertTriangle size={12} /> At Risk</span>
-      default:
-        return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-gray-100 text-gray-800">{factory.status}</span>
-    }
-  }
-
-  // Sector badge
-  const getSectorBadge = () => {
-    const sectorColors: Record<string, string> = {
-      semiconductor: 'bg-indigo-100 text-indigo-800',
-      battery: 'bg-amber-100 text-amber-800',
-      electric_vehicle: 'bg-emerald-100 text-emerald-800',
-      data_center: 'bg-cyan-100 text-cyan-800',
-      electronics: 'bg-violet-100 text-violet-800'
-    }
-
-    const sectorLabels: Record<string, string> = {
-      semiconductor: 'Semiconductor',
-      battery: 'Battery',
-      electric_vehicle: 'Electric Vehicle',
-      data_center: 'Data Center',
-      electronics: 'Electronics'
-    }
-
-    return (
-      <span className={`px-2 py-1 rounded text-xs font-semibold ${sectorColors[factory.sector] || 'bg-gray-100 text-gray-800'}`}>
-        {sectorLabels[factory.sector] || factory.sector}
-      </span>
-    )
+  // Sector display label
+  const sectorLabels: Record<string, string> = {
+    semiconductor: 'Semiconductor',
+    battery: 'Battery',
+    electric_vehicle: 'Electric Vehicle',
+    data_center: 'Data Center',
+    electronics: 'Electronics'
   }
 
   // Format currency
   const formatCurrency = (amount: number) => {
     if (amount >= 1000000000) {
-      return `$${(amount / 1000000000).toFixed(2)}B`
+      return `$${(amount / 1000000000).toFixed(1)}B`
     }
     if (amount >= 1000000) {
       return `$${(amount / 1000000).toFixed(0)}M`
@@ -161,51 +128,37 @@ export function FactoryDetailPanel({ factory, onClose }: FactoryDetailPanelProps
     return `$${amount.toLocaleString()}`
   }
 
-  // Jobs delivery rate
-  const jobsDeliveryRate = factory.jobs.actual
-    ? Math.round((factory.jobs.actual / factory.jobs.promised) * 100)
-    : 0
+  // Water stress info
+  const stressInfo = getWaterStressInfo(factory.environmental_risk.water_stress)
 
-  const jobsDeliveryColor = jobsDeliveryRate >= 80 ? '#22c55e' : jobsDeliveryRate >= 50 ? '#eab308' : '#ef4444'
-
-  // Ownership flag
-  const getOwnershipFlag = () => {
-    if (factory.ownership.type === 'domestic') {
-      return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-blue-100 text-blue-800"><Shield size={12} /> US Owned</span>
-    }
-    if (factory.ownership.state_backed) {
-      return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-red-100 text-red-800"><AlertTriangle size={12} /> Foreign State-Backed</span>
-    }
-    return <span className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold bg-orange-100 text-orange-800"><Globe size={12} /> Foreign Owned ({factory.ownership.country})</span>
-  }
+  // Environmental impact color — use the stress color, fallback to risk score based
+  const envColor = stressInfo.show ? stressInfo.color : '#ff2222'
+  const envBg = stressInfo.show ? stressInfo.bgTint : 'rgba(255, 57, 57, 0.1)'
 
   return (
     <div
-      className="w-full max-h-[60vh] overflow-y-auto rounded-lg backdrop-blur-md shadow-xl"
+      className="w-full rounded-lg backdrop-blur-md shadow-xl"
       style={{
         backgroundColor: isDark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.95)',
         border: `1px solid ${isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'}`
       }}
     >
-      {/* Header */}
-      <div className="sticky top-0 z-10 backdrop-blur-md border-b p-4"
-        style={{
-          backgroundColor: isDark ? 'rgba(0, 0, 0, 0.9)' : 'rgba(255, 255, 255, 0.95)',
-          borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)'
-        }}
-      >
+      {/* Header - Figma style: Name as title, company + location as subtitle */}
+      <div className="p-4 pb-2">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <h2 className="text-xl font-bold mb-1" style={{ color: isDark ? '#fff' : '#000' }}>
-              {factory.company}
-            </h2>
-            <p className="text-sm mb-2" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>
               {factory.name}
-            </p>
-            <div className="flex items-center gap-2 flex-wrap">
-              {getStatusBadge()}
-              {getSectorBadge()}
-              {getOwnershipFlag()}
+            </h2>
+            <div className="flex items-center gap-3 text-sm" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>
+              <span className="inline-flex items-center gap-1">
+                <FactoryIcon size={14} />
+                {factory.company}
+              </span>
+              <span className="inline-flex items-center gap-1">
+                <MapPin size={14} />
+                {factory.location.city}, {factory.location.state}
+              </span>
             </div>
           </div>
           <button
@@ -218,438 +171,164 @@ export function FactoryDetailPanel({ factory, onClose }: FactoryDetailPanelProps
         </div>
       </div>
 
-      {/* Content */}
-      <div className="p-4 space-y-6">
-        {/* Location */}
-        <section>
-          <h3 className="font-semibold text-sm mb-2 flex items-center gap-2" style={{ color: isDark ? '#fff' : '#000' }}>
-            <MapPin size={16} />
-            Location
-          </h3>
-          <div className="text-sm space-y-1">
-            <div style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-              {factory.location.city}, {factory.location.state}
-            </div>
-            <div className="text-xs" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>
-              {factory.location.coordinates.lat.toFixed(4)}°N, {factory.location.coordinates.lon.toFixed(4)}°W
-            </div>
-          </div>
-        </section>
-
-        {/* Climate Risk Score - PROMINENT */}
-        <section className="p-4 rounded-lg border-2" style={{
-          backgroundColor: isDark ? 'rgba(0, 0, 0, 0.3)' : 'rgba(255, 255, 255, 0.5)',
-          borderColor: getRiskColor(factory.environmental_risk.overall_risk_score)
-        }}>
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-bold text-lg" style={{ color: isDark ? '#fff' : '#000' }}>
-              Climate Risk Score
-            </h3>
-            <div className="text-4xl font-bold" style={{ color: getRiskColor(factory.environmental_risk.overall_risk_score) }}>
-              {factory.environmental_risk.overall_risk_score.toFixed(1)}
-            </div>
-          </div>
-          <div className="mb-3">
-            <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+      {/* Content - Two Column Layout */}
+      <div className="p-4 pt-2">
+        <div className="flex gap-4">
+          {/* LEFT COLUMN - Warning & Environmental */}
+          <div className="flex-1 flex flex-col gap-3">
+            {/* Warning Badge - Water Stress (only show for moderate+ stress) */}
+            {stressInfo.show && (
               <div
-                className="h-full transition-all"
+                className="flex items-center justify-center gap-3 px-3 py-2 rounded-lg border border-solid w-full"
                 style={{
-                  width: `${(factory.environmental_risk.overall_risk_score / 10) * 100}%`,
-                  backgroundColor: getRiskColor(factory.environmental_risk.overall_risk_score)
+                  backgroundColor: stressInfo.color,
+                  borderColor: stressInfo.color,
+                  boxShadow: '0px 0px 8px 0px rgba(0,0,0,0.03)'
                 }}
-              />
-            </div>
-          </div>
-          <div className="text-sm font-semibold" style={{ color: getRiskColor(factory.environmental_risk.overall_risk_score) }}>
-            {getRiskLabel(factory.environmental_risk.overall_risk_score)}
-          </div>
-          <div className="text-xs mt-2" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>
-            2040 Projection: <span className="font-semibold">{factory.environmental_risk.climate_projection_2040}</span>
-          </div>
+              >
+                <AlertTriangle size={16} style={{ color: '#fff', height: '13.818px', width: '16px' }} />
+                <span className="text-xs font-semibold text-white text-center">
+                  {stressInfo.label}
+                </span>
+              </div>
+            )}
 
-          {/* Environmental Risk Breakdown */}
-          <div className="mt-4 pt-4 border-t space-y-2" style={{ borderColor: isDark ? '#374151' : '#d1d5db' }}>
-            {factory.environmental_risk.water_stress && (
-              <div className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-1" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                  <Droplet size={12} />
-                  Water Stress
-                </span>
-                <span className={`font-semibold uppercase ${factory.environmental_risk.water_stress === 'extreme' ? 'text-red-600' : factory.environmental_risk.water_stress === 'high' ? 'text-orange-600' : 'text-green-600'}`}>
-                  {factory.environmental_risk.water_stress}
-                </span>
-              </div>
-            )}
-            {factory.environmental_risk.heat_risk && (
-              <div className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-1" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                  <Thermometer size={12} />
-                  Heat Risk
-                </span>
-                <span className={`font-semibold uppercase ${factory.environmental_risk.heat_risk === 'extreme' ? 'text-red-600' : factory.environmental_risk.heat_risk === 'high' ? 'text-orange-600' : 'text-green-600'}`}>
-                  {factory.environmental_risk.heat_risk}
-                </span>
-              </div>
-            )}
-            {factory.environmental_risk.drought_risk && (
-              <div className="flex items-center justify-between text-xs">
-                <span className="flex items-center gap-1" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                  <Wind size={12} />
-                  Drought Risk
-                </span>
-                <span className={`font-semibold uppercase ${factory.environmental_risk.drought_risk === 'extreme' ? 'text-red-600' : factory.environmental_risk.drought_risk === 'high' ? 'text-orange-600' : 'text-green-600'}`}>
-                  {factory.environmental_risk.drought_risk}
-                </span>
-              </div>
-            )}
-            {factory.environmental_risk.water_usage_gallons_per_day && (
-              <div className="flex items-center justify-between text-xs">
-                <span style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                  Water Usage
-                </span>
-                <span className="font-semibold">
-                  {(factory.environmental_risk.water_usage_gallons_per_day / 1000000).toFixed(1)}M gal/day
-                </span>
-              </div>
-            )}
-            {factory.water_source && (
-              <div className="text-xs mt-2 pt-2 border-t" style={{ borderColor: isDark ? '#374151' : '#d1d5db', color: isDark ? '#9ca3af' : '#6b7280' }}>
-                <strong>Water Source:</strong> {factory.water_source}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Investment & Incentives */}
-        <section>
-          <h3 className="font-semibold text-sm mb-3 flex items-center gap-2" style={{ color: isDark ? '#fff' : '#000' }}>
-            <DollarSign size={16} />
-            Investment & Incentives
-          </h3>
-          <div className="space-y-3">
-            <div className="flex justify-between text-sm">
-              <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Total Investment</span>
-              <span className="font-bold" style={{ color: isDark ? '#fff' : '#000' }}>
-                {formatCurrency(factory.investment.total)}
-              </span>
-            </div>
-            {factory.investment.chips_act_grant && (
-              <div className="flex justify-between text-sm">
-                <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>CHIPS Act Grant</span>
-                <span className="font-semibold text-blue-600">
-                  {formatCurrency(factory.investment.chips_act_grant)}
-                </span>
-              </div>
-            )}
-            {factory.investment.chips_act_loan && (
-              <div className="flex justify-between text-sm">
-                <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>CHIPS Act Loan</span>
-                <span className="font-semibold text-indigo-600">
-                  {formatCurrency(factory.investment.chips_act_loan)}
-                </span>
-              </div>
-            )}
-            {factory.incentives?.total_state_local && (
-              <div className="flex justify-between text-sm">
-                <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>State/Local Incentives</span>
-                <span className="font-semibold text-purple-600">
-                  {formatCurrency(factory.incentives.total_state_local)}
-                </span>
-              </div>
-            )}
-            {factory.incentives?.cost_per_job && (
-              <div className="flex justify-between text-sm pt-2 border-t" style={{ borderColor: isDark ? '#374151' : '#d1d5db' }}>
-                <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Cost Per Job</span>
-                <span className="font-semibold" style={{ color: factory.incentives.cost_per_job > 300000 ? '#ef4444' : isDark ? '#fff' : '#000' }}>
-                  {formatCurrency(factory.incentives.cost_per_job)}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Incentive Breakdown (if available) */}
-          {factory.incentives && (factory.incentives.property_tax_abatement || factory.incentives.infrastructure_investment || factory.incentives.workforce_training) && (
-            <div className="mt-3 pt-3 border-t space-y-2 text-xs" style={{ borderColor: isDark ? '#374151' : '#d1d5db' }}>
-              <div className="font-semibold" style={{ color: isDark ? '#fff' : '#000' }}>Incentive Breakdown:</div>
-              {factory.incentives.property_tax_abatement && (
-                <div className="flex justify-between">
-                  <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Property Tax Abatement</span>
-                  <span>{formatCurrency(factory.incentives.property_tax_abatement)}</span>
-                </div>
-              )}
-              {factory.incentives.infrastructure_investment && (
-                <div className="flex justify-between">
-                  <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Infrastructure Investment</span>
-                  <span>{formatCurrency(factory.incentives.infrastructure_investment)}</span>
-                </div>
-              )}
-              {factory.incentives.workforce_training && (
-                <div className="flex justify-between">
-                  <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Workforce Training</span>
-                  <span>{formatCurrency(factory.incentives.workforce_training)}</span>
-                </div>
-              )}
-            </div>
-          )}
-        </section>
-
-        {/* Jobs */}
-        <section>
-          <h3 className="font-semibold text-sm mb-3 flex items-center gap-2" style={{ color: isDark ? '#fff' : '#000' }}>
-            <Users size={16} />
-            Jobs
-          </h3>
-          <div className="space-y-3">
-            <div className="flex justify-between text-sm">
-              <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Promised</span>
-              <span className="font-semibold" style={{ color: isDark ? '#fff' : '#000' }}>
-                {factory.jobs.promised.toLocaleString()}
-              </span>
-            </div>
-            {factory.jobs.actual !== undefined && (
-              <>
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Delivered</span>
-                  <span className="font-semibold" style={{ color: jobsDeliveryColor }}>
-                    {factory.jobs.actual.toLocaleString()}
-                  </span>
-                </div>
-                <div>
-                  <div className="flex justify-between text-xs mb-1">
-                    <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Delivery Rate</span>
-                    <span className="font-semibold" style={{ color: jobsDeliveryColor }}>
-                      {jobsDeliveryRate}%
+            {/* Environmental Impact Box */}
+            <div className="flex flex-col items-start w-full">
+              <div
+                className="flex flex-col gap-3 items-start p-3 rounded-lg w-full"
+                style={{
+                  backgroundColor: envBg,
+                  boxShadow: '0px 0px 8px 0px rgba(0,0,0,0.03)'
+                }}
+              >
+                <div className="flex flex-col gap-1 items-start w-full">
+                  <div className="flex items-center gap-2 w-full">
+                    <Thermometer size={20} style={{ color: envColor }} />
+                    <span className="text-xs font-semibold text-center" style={{ color: envColor }}>
+                      Environmental Impact
                     </span>
                   </div>
-                  <div className="h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div
-                      className="h-full transition-all"
-                      style={{
-                        width: `${jobsDeliveryRate}%`,
-                        backgroundColor: jobsDeliveryColor
-                      }}
-                    />
+
+                  <div className="flex gap-1 items-start w-full text-xs">
+                    <p className="flex-1 m-0" style={{ color: '#697487' }}>Climate Risk Score:</p>
+                    <p className="flex-1 m-0 font-semibold text-right" style={{ color: '#101728' }}>
+                      {factory.environmental_risk.overall_risk_score.toFixed(1)}/10
+                    </p>
                   </div>
-                </div>
-              </>
-            )}
-            {factory.jobs.construction && (
-              <div className="flex justify-between text-sm">
-                <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Construction Jobs</span>
-                <span className="font-semibold" style={{ color: isDark ? '#fff' : '#000' }}>
-                  {factory.jobs.construction.toLocaleString()}
-                </span>
-              </div>
-            )}
-          </div>
-        </section>
 
-        {/* Timeline */}
-        <section>
-          <h3 className="font-semibold text-sm mb-3 flex items-center gap-2" style={{ color: isDark ? '#fff' : '#000' }}>
-            <Clock size={16} />
-            Timeline
-          </h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Announced</span>
-              <span style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                {new Date(factory.timeline.announced).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
-              </span>
-            </div>
-            {factory.timeline.construction_start && (
-              <div className="flex justify-between">
-                <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Construction Started</span>
-                <span style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                  {new Date(factory.timeline.construction_start).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
-                </span>
-              </div>
-            )}
-            {factory.timeline.operational && (
-              <div className="flex justify-between">
-                <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Operational</span>
-                <span className="font-semibold text-green-600">
-                  {new Date(factory.timeline.operational).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
-                </span>
-              </div>
-            )}
-            {factory.timeline.expected_operational && (
-              <div className="flex justify-between">
-                <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Expected Operational</span>
-                <span style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                  {new Date(factory.timeline.expected_operational).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
-                </span>
-              </div>
-            )}
-            {factory.timeline.paused && (
-              <div className="flex justify-between">
-                <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Paused</span>
-                <span className="font-semibold text-yellow-600">
-                  {new Date(factory.timeline.paused).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
-                </span>
-              </div>
-            )}
-            {factory.timeline.failed && (
-              <div className="flex justify-between">
-                <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Failed</span>
-                <span className="font-semibold text-red-600">
-                  {new Date(factory.timeline.failed).toLocaleDateString('en-US', { year: 'numeric', month: 'short' })}
-                </span>
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* Ownership */}
-        <section>
-          <h3 className="font-semibold text-sm mb-3 flex items-center gap-2" style={{ color: isDark ? '#fff' : '#000' }}>
-            <Globe size={16} />
-            Ownership
-          </h3>
-          <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-              <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Type</span>
-              <span className="font-semibold capitalize" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                {factory.ownership.type.replace('_', ' ')}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Country</span>
-              <span className="font-semibold" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                {factory.ownership.country}
-              </span>
-            </div>
-            {factory.ownership.parent_company && (
-              <div className="flex justify-between">
-                <span style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>Parent Company</span>
-                <span className="font-semibold" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                  {factory.ownership.parent_company}
-                </span>
-              </div>
-            )}
-            {factory.ownership.state_backed && (
-              <div className="mt-2 p-2 rounded bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
-                <div className="flex items-center gap-2 text-xs font-semibold text-red-700 dark:text-red-400">
-                  <AlertTriangle size={14} />
-                  State-Backed Entity
-                </div>
-              </div>
-            )}
-            {factory.ownership.major_foreign_investor && (
-              <div className="mt-2 text-xs" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>
-                <strong>Major Investor:</strong> {factory.ownership.major_foreign_investor}
-              </div>
-            )}
-          </div>
-        </section>
-
-        {/* National Security Concerns */}
-        {factory.national_security_flags && factory.national_security_flags.length > 0 && (
-          <section className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border-2 border-red-200 dark:border-red-800">
-            <h3 className="font-semibold text-sm mb-3 flex items-center gap-2 text-red-700 dark:text-red-400">
-              <Shield size={16} />
-              National Security Concerns
-            </h3>
-            <ul className="space-y-2 text-xs">
-              {factory.national_security_flags.map((flag, idx) => (
-                <li key={idx} className="flex items-start gap-2 text-red-700 dark:text-red-400">
-                  <AlertTriangle size={12} className="mt-0.5 flex-shrink-0" />
-                  <span>{flag}</span>
-                </li>
-              ))}
-            </ul>
-          </section>
-        )}
-
-        {/* Proximity Concerns */}
-        {factory.proximity_concerns && (factory.proximity_concerns.military_bases_within_50mi || factory.proximity_concerns.sensitive_infrastructure) && (
-          <section>
-            <h3 className="font-semibold text-sm mb-3 flex items-center gap-2" style={{ color: isDark ? '#fff' : '#000' }}>
-              <MapPin size={16} />
-              Proximity Concerns
-            </h3>
-            <div className="space-y-2 text-xs">
-              {factory.proximity_concerns.military_bases_within_50mi && factory.proximity_concerns.military_bases_within_50mi.length > 0 && (
-                <div>
-                  <div className="font-semibold mb-1" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                    Military Bases (within 50mi):
+                  <div className="flex gap-1 items-start w-full text-xs">
+                    <p className="flex-1 m-0" style={{ color: '#697487' }}>Heat Risk:</p>
+                    <p className="flex-1 m-0 font-semibold text-right" style={{ color: '#101728' }}>
+                      {factory.environmental_risk.heat_risk || 'Undefined'}
+                    </p>
                   </div>
-                  <ul className="list-disc list-inside space-y-1" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>
-                    {factory.proximity_concerns.military_bases_within_50mi.map((base, idx) => (
-                      <li key={idx}>{base}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {factory.proximity_concerns.sensitive_infrastructure && factory.proximity_concerns.sensitive_infrastructure.length > 0 && (
-                <div>
-                  <div className="font-semibold mb-1" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-                    Sensitive Infrastructure:
+
+                  <div className="flex gap-1 items-start w-full text-xs">
+                    <p className="flex-1 m-0" style={{ color: '#697487' }}>Drough Risk:</p>
+                    <p className="flex-1 m-0 font-semibold text-right" style={{ color: '#101728' }}>
+                      {factory.environmental_risk.drought_risk || 'Undefined'}
+                    </p>
                   </div>
-                  <ul className="list-disc list-inside space-y-1" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>
-                    {factory.proximity_concerns.sensitive_infrastructure.map((infra, idx) => (
-                      <li key={idx}>{infra}</li>
-                    ))}
-                  </ul>
+
+                  <div className="flex gap-1 items-start w-full text-xs">
+                    <p className="flex-1 m-0" style={{ color: '#697487' }}>Wildfire Risk</p>
+                    <p className="flex-1 m-0 font-semibold text-right" style={{ color: '#101728' }}>
+                      {factory.environmental_risk.wildfire_risk || 'Undefined'}
+                    </p>
+                  </div>
+
+                  {/* Water Source - only show if actual data exists */}
+                  {factory.water_source && (
+                    <div className="flex gap-1 items-start w-full text-xs">
+                      <p className="flex-1 m-0" style={{ color: '#697487' }}>Water Source:</p>
+                      <p className="flex-1 m-0 font-semibold text-right" style={{ color: '#101728' }}>
+                        {factory.water_source}
+                      </p>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
-          </section>
-        )}
+          </div>
 
-        {/* Community Impact (for failed projects) */}
-        {factory.community_impact && (
-          <section className="p-4 rounded-lg bg-orange-50 dark:bg-orange-900/20 border-2 border-orange-200 dark:border-orange-800">
-            <h3 className="font-semibold text-sm mb-3 flex items-center gap-2 text-orange-700 dark:text-orange-400">
-              <AlertTriangle size={16} />
-              Community Impact
-            </h3>
-            <div className="space-y-2 text-xs text-orange-700 dark:text-orange-400">
-              {factory.community_impact.homes_demolished && (
-                <div>
-                  <strong>Homes Demolished:</strong> {factory.community_impact.homes_demolished}
+          {/* RIGHT COLUMN - Supporting Info */}
+          <div className="flex-1 flex flex-col gap-3 self-stretch">
+            {/* Top Row */}
+            <div className="flex flex-1 gap-3 items-center w-full">
+              <div
+                className="flex-1 flex gap-3 h-full items-start p-3 border-t border-solid"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                  borderColor: 'rgba(0, 0, 0, 0.1)'
+                }}
+              >
+                <div className="flex flex-col gap-1 items-start">
+                  <p className="m-0 text-[11px] font-normal" style={{ color: '#697487' }}>
+                    Industry
+                  </p>
+                  <p className="m-0 text-xs font-semibold text-black text-center">
+                    {sectorLabels[factory.sector] || factory.sector}
+                  </p>
                 </div>
-              )}
-              {factory.community_impact.land_seized_acres && (
-                <div>
-                  <strong>Land Seized:</strong> {factory.community_impact.land_seized_acres.toLocaleString()} acres
+              </div>
+
+              <div
+                className="flex-1 flex gap-3 h-full items-start p-3 border-t border-solid"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                  borderColor: 'rgba(0, 0, 0, 0.1)'
+                }}
+              >
+                <div className="flex flex-col gap-1 items-start">
+                  <p className="m-0 text-[11px] font-normal" style={{ color: '#697487' }}>
+                    Established
+                  </p>
+                  <p className="m-0 text-xs font-semibold text-black text-center">
+                    {factory.timeline.announced ? new Date(factory.timeline.announced).getFullYear() : 'N/A'}
+                  </p>
                 </div>
-              )}
-              {factory.community_impact.environmental_damage && (
-                <div>
-                  <strong>Environmental Damage:</strong> {factory.community_impact.environmental_damage}
-                </div>
-              )}
+              </div>
             </div>
-          </section>
-        )}
 
-        {/* Assessment */}
-        {factory.assessment && (
-          <section className="p-4 rounded-lg" style={{
-            backgroundColor: isDark ? 'rgba(90, 124, 236, 0.1)' : 'rgba(90, 124, 236, 0.05)',
-            border: `1px solid ${isDark ? 'rgba(90, 124, 236, 0.3)' : 'rgba(90, 124, 236, 0.2)'}`
-          }}>
-            <h3 className="font-semibold text-sm mb-2" style={{ color: isDark ? '#fff' : '#000' }}>
-              Assessment
-            </h3>
-            <p className="text-sm" style={{ color: isDark ? '#d1d5db' : '#374151' }}>
-              {factory.assessment}
-            </p>
-          </section>
-        )}
+            {/* Bottom Row */}
+            <div className="flex flex-1 gap-3 items-center w-full">
+              <div
+                className="flex-1 flex gap-3 h-full items-start p-3 border-t border-solid"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                  borderColor: 'rgba(0, 0, 0, 0.1)'
+                }}
+              >
+                <div className="flex flex-col gap-1 items-start">
+                  <p className="m-0 text-[11px] font-normal" style={{ color: '#697487' }}>
+                    Investment
+                  </p>
+                  <p className="m-0 text-xs font-semibold text-black text-center">
+                    {formatCurrency(factory.investment.total)}
+                  </p>
+                </div>
+              </div>
 
-        {/* Status Notes */}
-        {factory.status_notes && (
-          <section>
-            <h3 className="font-semibold text-sm mb-2" style={{ color: isDark ? '#fff' : '#000' }}>
-              Status Notes
-            </h3>
-            <p className="text-sm" style={{ color: isDark ? '#9ca3af' : '#6b7280' }}>
-              {factory.status_notes}
-            </p>
-          </section>
-        )}
+              <div
+                className="flex-1 flex gap-3 h-full items-start p-3 border-t border-solid"
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.25)',
+                  borderColor: 'rgba(0, 0, 0, 0.1)'
+                }}
+              >
+                <div className="flex flex-col gap-1 items-start">
+                  <p className="m-0 text-[11px] font-normal" style={{ color: '#697487' }}>
+                    Employees
+                  </p>
+                  <p className="m-0 text-xs font-semibold text-black text-center">
+                    {factory.jobs.promised.toLocaleString()}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

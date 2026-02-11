@@ -454,7 +454,7 @@ export default function FactoriesView() {
       )}
 
       {/* Bottom Center - Factory Detail Panel */}
-      {selectedFactory && (
+      {selectedFactory && !selectedDataCenter && (
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] w-[640px] pointer-events-auto">
           <FactoryDetailPanel
             factory={selectedFactory}
