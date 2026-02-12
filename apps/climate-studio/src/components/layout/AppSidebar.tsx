@@ -267,8 +267,8 @@ export function AppSidebar() {
             </div>
           )}
 
-          {/* Settings button */}
-          <button
+          {/* Settings button - hidden until dark theme is complete */}
+          {/* <button
             onClick={() => handleMenuItemClick('settings')}
             className={`content-stretch flex flex-col gap-[4px] items-center justify-center px-[5px] py-[10px] relative rounded-[8px] shrink-0 transition-colors ${
               activeMenuItem === 'settings'
@@ -293,14 +293,14 @@ export function AppSidebar() {
             >
               Settings
             </p>
-          </button>
+          </button> */}
 
-          {/* Divider */}
-          <div className="h-px relative shrink-0 w-full">
+          {/* Divider - hidden until dark theme is complete */}
+          {/* <div className="h-px relative shrink-0 w-full">
             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 60 1">
               <path d="M60 0V1H0V0H60Z" fill={isDark ? '#FFFFFF' : '#D7D7D7'} fillOpacity={isDark ? '0.15' : '0.45'} />
             </svg>
-          </div>
+          </div> */}
 
           {/* Panels toggle - Hide/Show panels */}
           <button
@@ -337,14 +337,14 @@ export function AppSidebar() {
             </p>
           </button>
 
-          {/* UI Mode toggle - switches between Light and Dark */}
-          <ToggleItem
+          {/* UI Mode toggle - hidden until dark theme is complete */}
+          {/* <ToggleItem
             icon={theme === 'light' ? SVG_PATHS.lightUI : SVG_PATHS.darkUI}
             label={theme === 'light' ? 'Light UI' : 'Dark UI'}
             isActive={false}
             onClick={toggleTheme}
             disabled={isDesignSystemPage}
-          />
+          /> */}
         </div>
       </div>
       
