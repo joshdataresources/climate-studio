@@ -12,7 +12,7 @@ import { useClimate } from '@climate-studio/core'
 import { climateLayers } from '@climate-studio/core/config'
 import { useClimateLayerData } from '../hooks/useClimateLayerData'
 import { GroundwaterDetailsPanel, SelectedAquifer } from './panels/GroundwaterDetailsPanel'
-import { SelectedFactory, FactoryDetailsPanel } from './panels/FactoryDetailsPanel'
+import { SelectedFactory, FactoryDetailPanel } from './panels/FactoryDetailPanel'
 import { SelectedDam, DamDetailsPanel } from './panels/DamDetailsPanel'
 import { AIDataCenterDetailPanel, SelectedDataCenter } from './panels/AIDataCenterDetailPanel'
 import { SearchAndViewsPanel } from './panels/SearchAndViewsPanel'
@@ -1545,6 +1545,7 @@ export default function WaterAccessView() {
         setSelectedAquifer(null)
         setSelectedFeatureId(null)
         setSelectedFactory(null)
+        setSelectedDataCenter(null)
 
         setSelectedDam({
           id: props.id || '',
@@ -2316,8 +2317,10 @@ export default function WaterAccessView() {
         }
       }
 
-      // Close factory panel when opening aquifer panel
+      // Close all other panels when opening aquifer panel
       setSelectedFactory(null)
+      setSelectedDataCenter(null)
+      setSelectedDam(null)
 
       // Set selected aquifer for details panel with new data structure
       setSelectedAquifer({
@@ -3740,30 +3743,9 @@ export default function WaterAccessView() {
         setSelectedAquifer(null)
         setSelectedFeatureId(null)
         setSelectedDam(null)
+        setSelectedDataCenter(null)
 
-        setSelectedFactory({
-          name: fullFactory.name,
-          company: fullFactory.company,
-          city: fullFactory.location.city,
-          state: fullFactory.location.state,
-          type: fullFactory.sector || fullFactory.type,
-          investment: fullFactory.investment?.total,
-          employees: fullFactory.jobs?.promised || fullFactory.jobs?.actual,
-          yearEstablished: fullFactory.timeline?.announced ? new Date(fullFactory.timeline.announced).getFullYear() : undefined,
-          facilities: fullFactory.facilities,
-          waterUsage: fullFactory.environmental_risk ? {
-            daily_gallons: fullFactory.environmental_risk.water_usage_gallons_per_day,
-            description: `Water source: ${fullFactory.water_source || 'Unknown'}`
-          } : undefined,
-          environmental: fullFactory.environmental_risk ? {
-            stress_type: `${fullFactory.environmental_risk.water_stress || 'Unknown'} Water Stress`,
-            severity: fullFactory.environmental_risk.overall_risk_score >= 8 ? 'critical' :
-              fullFactory.environmental_risk.overall_risk_score >= 6 ? 'stressed' :
-                fullFactory.environmental_risk.overall_risk_score >= 4 ? 'moderate' : 'stable',
-            drought_duration: fullFactory.environmental_risk.drought_risk === 'extreme' ? 5 : undefined,
-            impact_description: `Climate Risk Score: ${fullFactory.environmental_risk.overall_risk_score}/10. Heat Risk: ${fullFactory.environmental_risk.heat_risk}, Drought Risk: ${fullFactory.environmental_risk.drought_risk}, Wildfire Risk: ${fullFactory.environmental_risk.wildfire_risk}.`
-          } : undefined
-        })
+        setSelectedFactory(fullFactory as unknown as SelectedFactory)
       })
 
       // Change cursor on hover
@@ -3924,6 +3906,7 @@ export default function WaterAccessView() {
 
       // Close other panels
       setSelectedAquifer(null)
+      setSelectedFeatureId(null)
       setSelectedFactory(null)
       setSelectedDam(null)
 
@@ -6021,8 +6004,8 @@ export default function WaterAccessView() {
       {
         selectedFactory && (
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto" style={{ width: '640px' }}>
-            <FactoryDetailsPanel
-              selectedFactory={selectedFactory}
+            <FactoryDetailPanel
+              factory={selectedFactory}
               onClose={() => setSelectedFactory(null)}
             />
           </div>
