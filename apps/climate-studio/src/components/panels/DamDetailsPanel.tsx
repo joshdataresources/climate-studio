@@ -30,17 +30,17 @@ function formatStorage(acres: number): string {
   return `${acres.toLocaleString()} acre-ft`
 }
 
-// Impact severity → badge color + label
+// Impact severity → badge color + label (colors match map icon circles)
 function getImpactInfo(impact: string): { label: string; color: string; bgTint: string } {
   switch (impact) {
     case 'extreme':
-      return { label: 'Critical Impact', color: '#ff3636', bgTint: 'rgba(255, 57, 57, 0.1)' }
+      return { label: 'Critical Impact', color: '#7f1d1d', bgTint: 'rgba(127, 29, 29, 0.1)' }
     case 'severe':
-      return { label: 'High Impact', color: '#ff3636', bgTint: 'rgba(255, 57, 57, 0.1)' }
+      return { label: 'High Impact', color: '#dc2626', bgTint: 'rgba(220, 38, 38, 0.1)' }
     case 'moderate':
-      return { label: 'Moderate Impact', color: '#e97b35', bgTint: 'rgba(233, 123, 53, 0.1)' }
+      return { label: 'Moderate Impact', color: '#f59e0b', bgTint: 'rgba(245, 158, 11, 0.1)' }
     default:
-      return { label: 'Low Impact', color: '#22c55e', bgTint: 'rgba(34, 197, 94, 0.1)' }
+      return { label: 'Low Impact', color: '#3b82f6', bgTint: 'rgba(59, 130, 246, 0.1)' }
   }
 }
 
