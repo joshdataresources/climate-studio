@@ -236,7 +236,7 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
           {isAnnounced && !hasHighImpact && datacenter.notes && (
             <div
               className="p-3 rounded-lg"
-              style={{ backgroundColor: 'rgba(90, 124, 236, 0.1)' }}
+              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}
             >
               <p className="text-xs mb-0" style={{ color: isDark ? '#9ca3af' : '#697487' }}>
                 {datacenter.notes}
@@ -276,7 +276,7 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
             <div className="flex gap-3">
               <div
                 className="flex-1 p-3 rounded-lg"
-                style={{ backgroundColor: 'rgba(90, 124, 236, 0.1)' }}
+                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}
               >
                 <div className="text-[11px] mb-1" style={{ color: isDark ? '#9ca3af' : '#697487' }}>
                   Announced
@@ -287,7 +287,7 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
               </div>
               <div
                 className="flex-1 p-3 rounded-lg"
-                style={{ backgroundColor: 'rgba(90, 124, 236, 0.1)' }}
+                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}
               >
                 <div className="text-[11px] mb-1" style={{ color: isDark ? '#9ca3af' : '#697487' }}>
                   Expected Operational

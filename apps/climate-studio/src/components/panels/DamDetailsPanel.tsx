@@ -134,23 +134,23 @@ export function DamDetailsPanel({ selectedDam, onClose }: DamDetailsPanelProps) 
           <div className="flex gap-3">
             <div
               className="flex-1 p-3 rounded-lg"
-              style={{ backgroundColor: 'rgba(16, 132, 254, 0.1)' }}
+              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}
             >
               <div className="text-[11px] mb-1" style={{ color: isDark ? '#9ca3af' : '#697487' }}>
                 Water
               </div>
-              <div className="text-xs font-semibold" style={{ color: '#1084fe' }}>
+              <div className="text-xs font-semibold" style={{ color: isDark ? '#e5e7eb' : '#000' }}>
                 {formatStorage(selectedDam.storage_acre_ft)}
               </div>
             </div>
             <div
               className="flex-1 p-3 rounded-lg"
-              style={{ backgroundColor: 'rgba(227, 197, 2, 0.1)' }}
+              style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)' }}
             >
               <div className="text-[11px] mb-1" style={{ color: isDark ? '#9ca3af' : '#697487' }}>
                 Storage
               </div>
-              <div className="text-xs font-semibold" style={{ color: '#e3c502' }}>
+              <div className="text-xs font-semibold" style={{ color: isDark ? '#e5e7eb' : '#000' }}>
                 {selectedDam.capacity_mw > 0 ? `${selectedDam.capacity_mw.toLocaleString()} MW` : 'No generation'}
               </div>
             </div>
@@ -200,7 +200,7 @@ export function DamDetailsPanel({ selectedDam, onClose }: DamDetailsPanelProps) 
                 <p className="m-0 text-[11px] font-normal" style={{ color: isDark ? '#9ca3af' : '#697487' }}>
                   Dam Type
                 </p>
-                <p className="m-0 text-xs font-semibold text-center" style={{ color: isDark ? '#e5e7eb' : '#000' }}>
+                <p className="m-0 text-xs font-semibold text-left" style={{ color: isDark ? '#e5e7eb' : '#000' }}>
                   {selectedDam.dam_type}
                 </p>
               </div>
@@ -214,7 +214,7 @@ export function DamDetailsPanel({ selectedDam, onClose }: DamDetailsPanelProps) 
                 <p className="m-0 text-[11px] font-normal" style={{ color: isDark ? '#9ca3af' : '#697487' }}>
                   Reservoir
                 </p>
-                <p className="m-0 text-xs font-semibold text-center" style={{ color: isDark ? '#e5e7eb' : '#000' }}>
+                <p className="m-0 text-xs font-semibold text-left" style={{ color: isDark ? '#e5e7eb' : '#000' }}>
                   {selectedDam.reservoir}
                 </p>
               </div>
