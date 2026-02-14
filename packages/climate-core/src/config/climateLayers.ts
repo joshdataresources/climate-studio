@@ -369,11 +369,29 @@ export const climateLayers: ClimateLayerDefinition[] = [
     fetch: {
       method: 'GET',
       route: '/api/climate/wet-bulb-temperature',
-      query: ({ projectionYear, scenario }) => ({
-        year: projectionYear,
-        scenario: scenario,
-        resolution: 4
-      })
+      query: ({ bounds, projectionYear, scenario }) => {
+        const { north, south, east, west } = bounds ?? {
+          north: 41,
+          south: 40,
+          east: -73,
+          west: -74
+        };
+        // Map RCP scenarios to SSP format expected by the endpoint
+        const rcpToSsp: Record<string, string> = {
+          rcp26: 'ssp126',
+          rcp45: 'ssp245',
+          rcp85: 'ssp585'
+        };
+        return {
+          north,
+          south,
+          east,
+          west,
+          year: projectionYear,
+          scenario: rcpToSsp[scenario] ?? 'ssp245',
+          resolution: 4
+        };
+      }
     },
     style: {
       color: '#ff4d00',

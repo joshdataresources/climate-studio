@@ -1514,6 +1514,86 @@ app.get('/api/nasa/temperature-projection', async (req, res) => {
   }
 });
 
+// Temperature Projection Tiles - Proxy to Python Climate Service
+app.get('/api/climate/temperature-projection/tiles', async (req, res) => {
+  try {
+    const { north, south, east, west, year, scenario, mode } = req.query;
+
+    console.log(`🌡️ Proxying temperature projection tiles request: year=${year}, scenario=${scenario}, mode=${mode}...`);
+
+    // Build query parameters for climate service
+    const params = new URLSearchParams();
+    if (north) params.append('north', north);
+    if (south) params.append('south', south);
+    if (east) params.append('east', east);
+    if (west) params.append('west', west);
+    if (year) params.append('year', year);
+    if (scenario) params.append('scenario', scenario);
+    if (mode) params.append('mode', mode);
+
+    // Proxy request to Python climate service
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/temperature-projection/tiles?${params.toString()}`;
+
+    console.log(`📡 Fetching from: ${climateServiceUrl}`);
+
+    const response = await axios.get(climateServiceUrl, {
+      timeout: 60000 // 60 second timeout
+    });
+
+    console.log(`✅ Received temperature projection tiles from climate service`);
+
+    // Return the response from climate service
+    res.json(response.data);
+
+  } catch (error) {
+    console.error('❌ Temperature projection tiles error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Precipitation & Drought Tiles - Proxy to Python Climate Service
+app.get('/api/climate/precipitation-drought/tiles', async (req, res) => {
+  try {
+    const { north, south, east, west, scenario, year, metric } = req.query;
+
+    console.log(`🌧️ Proxying precipitation/drought tiles request: metric=${metric}, scenario=${scenario}, year=${year}...`);
+
+    // Build query parameters for climate service
+    const params = new URLSearchParams();
+    if (north) params.append('north', north);
+    if (south) params.append('south', south);
+    if (east) params.append('east', east);
+    if (west) params.append('west', west);
+    if (scenario) params.append('scenario', scenario);
+    if (year) params.append('year', year);
+    if (metric) params.append('metric', metric);
+
+    // Proxy request to Python climate service
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/precipitation-drought/tiles?${params.toString()}`;
+
+    console.log(`📡 Fetching from: ${climateServiceUrl}`);
+
+    const response = await axios.get(climateServiceUrl, {
+      timeout: 60000 // 60 second timeout
+    });
+
+    console.log(`✅ Received precipitation/drought tiles from climate service`);
+
+    // Return the response from climate service
+    res.json(response.data);
+
+  } catch (error) {
+    console.error('❌ Precipitation/drought tiles error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Temperature Projection - Alias endpoint for /api/climate path
 app.get('/api/climate/temperature-projection', async (req, res) => {
   try {
@@ -1752,58 +1832,6 @@ app.get('/api/climate/topographic-relief/tiles', async (req, res) => {
 
   } catch (error) {
     console.error('❌ Topographic relief tiles error:', error.message);
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
-
-// Precipitation & Drought Endpoint - Proxy to Python Climate Service
-app.get('/api/climate/precipitation-drought', async (req, res) => {
-  try {
-    const { north, south, east, west, scenario, year, metric, resolution } = req.query;
-
-    console.log(`🌧️ Proxying precipitation/drought request: scenario=${scenario}, year=${year}, metric=${metric}, resolution=${resolution}...`);
-
-    // Build query parameters for climate service
-    const params = new URLSearchParams();
-    if (north) params.append('north', north);
-    if (south) params.append('south', south);
-    if (east) params.append('east', east);
-    if (west) params.append('west', west);
-    if (scenario) params.append('scenario', scenario);
-    if (year) params.append('year', year);
-    if (metric) params.append('metric', metric);
-    if (resolution) params.append('resolution', resolution);
-
-    // Proxy request to Python climate service
-    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/precipitation-drought?${params.toString()}`;
-
-    console.log(`📡 Fetching from: ${climateServiceUrl}`);
-
-    const response = await axios.get(climateServiceUrl, {
-      timeout: 60000 // 60 second timeout for Earth Engine processing
-    });
-
-    // Check if real or fallback data
-    const isRealData = response.data.data?.metadata?.isRealData === true;
-    const dataSource = response.data.data?.metadata?.source || 'unknown';
-    const featureCount = response.data.data?.features?.length || 0;
-
-    if (isRealData) {
-      console.log(`✅ REAL CHIRPS DATA: ${featureCount} hexes from climate service`);
-      console.log(`✅ Source: ${dataSource}`);
-    } else {
-      console.warn(`⚠️ FALLBACK DATA: ${featureCount} hexes from climate service`);
-      console.warn(`⚠️ Source: ${dataSource}`);
-    }
-
-    // Return the response from climate service
-    res.json(response.data);
-
-  } catch (error) {
-    console.error('❌ Precipitation/drought error:', error.message);
     res.status(500).json({
       success: false,
       error: error.message

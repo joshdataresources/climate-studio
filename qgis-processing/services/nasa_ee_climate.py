@@ -41,14 +41,23 @@ class NASAEEClimateService:
         self._initialize_ee()
 
     def _initialize_ee(self):
-        """Initialize Google Earth Engine"""
+        """Initialize Google Earth Engine with service account or user credentials"""
+        import os
         try:
-            if self.ee_project:
+            # Try service account credentials first
+            sa_key = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+            sa_email = os.getenv('EE_SERVICE_ACCOUNT')
+            if sa_key and sa_email and os.path.exists(sa_key):
+                credentials = ee.ServiceAccountCredentials(sa_email, sa_key)
+                ee.Initialize(credentials, project=self.ee_project)
+                logger.info(f"Earth Engine initialized with service account: {sa_email}")
+            elif self.ee_project:
                 ee.Initialize(project=self.ee_project)
+                logger.info("Earth Engine initialized with user credentials")
             else:
                 ee.Initialize()
+                logger.info("Earth Engine initialized with default credentials")
             self.initialized = True
-            logger.info("Earth Engine initialized for NASA climate data")
         except Exception as e:
             logger.error(f"Failed to initialize Earth Engine: {e}")
             self.initialized = False

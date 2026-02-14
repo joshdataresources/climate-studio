@@ -14,8 +14,16 @@ import json
 import requests
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
-load_dotenv()
+# Load environment variables from .env file (relative to this script)
+_script_dir = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(_script_dir, '.env'))
+
+# Resolve GOOGLE_APPLICATION_CREDENTIALS relative to script directory if it's a relative path
+_sa_key = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', '')
+if _sa_key and not os.path.isabs(_sa_key):
+    _resolved = os.path.join(_script_dir, _sa_key)
+    if os.path.exists(_resolved):
+        os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = _resolved
 
 # Add services directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'services'))

@@ -26,13 +26,22 @@ class PrecipitationDroughtService:
         self.ee_project = ee_project
         self.initialized = False
 
+        import os
         try:
-            if ee_project:
+            # Try service account credentials first
+            sa_key = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+            sa_email = os.getenv('EE_SERVICE_ACCOUNT')
+            if sa_key and sa_email and os.path.exists(sa_key):
+                credentials = ee.ServiceAccountCredentials(sa_email, sa_key)
+                ee.Initialize(credentials, project=ee_project)
+                logger.info(f"Earth Engine initialized for precipitation/drought with service account: {sa_email}")
+            elif ee_project:
                 ee.Initialize(project=ee_project)
+                logger.info(f"Earth Engine initialized for precipitation/drought (project: {ee_project})")
             else:
                 ee.Initialize()
+                logger.info("Earth Engine initialized for precipitation/drought with default credentials")
             self.initialized = True
-            logger.info(f"Earth Engine initialized for precipitation/drought (project: {ee_project})")
         except Exception as e:
             logger.error(f"Failed to initialize Earth Engine: {e}")
             logger.warning("Precipitation/drought service will not be available")

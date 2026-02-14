@@ -87,6 +87,11 @@ qgis-processing/data/processed/*
 qgis-data/*
 !qgis-data/.gitkeep
 
+# Service account keys (NEVER commit these)
+*-service-account*.json
+*-credentials*.json
+ee-service-account.json
+
 # Temporary files
 *.tmp
 *.temp
