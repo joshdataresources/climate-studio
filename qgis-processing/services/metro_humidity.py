@@ -49,10 +49,21 @@ class MetroHumidityService:
 
     def _initialize_ee(self):
         """Initialize Earth Engine"""
+        import os
         try:
-            ee.Initialize(project=self.ee_project)
+            sa_key = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+            sa_email = os.getenv('EE_SERVICE_ACCOUNT')
+            if sa_key and sa_email and os.path.exists(sa_key):
+                credentials = ee.ServiceAccountCredentials(sa_email, sa_key)
+                ee.Initialize(credentials, project=self.ee_project)
+                logger.info(f"✅ Metro Humidity Service: Earth Engine initialized with service account: {sa_email}")
+            elif self.ee_project:
+                ee.Initialize(project=self.ee_project)
+                logger.info("✅ Metro Humidity Service: Earth Engine initialized")
+            else:
+                ee.Initialize()
+                logger.info("✅ Metro Humidity Service: Earth Engine initialized with default credentials")
             self.initialized = True
-            logger.info("✅ Metro Humidity Service: Earth Engine initialized")
         except Exception as e:
             logger.error(f"❌ Metro Humidity Service: Failed to initialize Earth Engine: {e}")
             self.initialized = False

@@ -22,7 +22,7 @@ load_dotenv(os.path.join(_script_dir, '.env'))
 _sa_key = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', '')
 _sa_json = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON', '')
 
-if _sa_json and not _sa_key:
+if _sa_json:
     # Render / cloud deploy: JSON content is in env var, write it to a temp file
     _temp_key_path = os.path.join(_script_dir, '.ee-credentials-tmp.json')
     with open(_temp_key_path, 'w') as f:
@@ -41,6 +41,12 @@ elif _sa_key and not os.path.isabs(_sa_key):
     _resolved = os.path.join(_script_dir, _sa_key)
     if os.path.exists(_resolved):
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = _resolved
+elif _sa_key and os.path.isabs(_sa_key):
+    # Absolute path (e.g. Render secret file at /etc/secrets/...)
+    if os.path.exists(_sa_key):
+        print(f"✅ Using EE credentials from: {_sa_key}")
+    else:
+        print(f"⚠️ GOOGLE_APPLICATION_CREDENTIALS file not found: {_sa_key}")
 
 # Add services directory to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'services'))

@@ -51,13 +51,21 @@ class GRACEGroundwaterService:
 
     def _initialize_ee(self):
         """Initialize Google Earth Engine"""
+        import os
         try:
-            if self.ee_project:
+            sa_key = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+            sa_email = os.getenv('EE_SERVICE_ACCOUNT')
+            if sa_key and sa_email and os.path.exists(sa_key):
+                credentials = ee.ServiceAccountCredentials(sa_email, sa_key)
+                ee.Initialize(credentials, project=self.ee_project)
+                logger.info(f"Earth Engine initialized for GRACE with service account: {sa_email}")
+            elif self.ee_project:
                 ee.Initialize(project=self.ee_project)
+                logger.info("Earth Engine initialized for GRACE groundwater data")
             else:
                 ee.Initialize()
+                logger.info("Earth Engine initialized for GRACE with default credentials")
             self.initialized = True
-            logger.info("Earth Engine initialized for GRACE groundwater data")
         except Exception as e:
             logger.error(f"Failed to initialize Earth Engine: {e}")
             self.initialized = False

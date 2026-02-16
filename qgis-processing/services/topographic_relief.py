@@ -24,8 +24,14 @@ class TopographicReliefService:
         """Initialize Google Earth Engine"""
         try:
             project = os.environ.get('EARTHENGINE_PROJECT')
+            sa_key = os.getenv('GOOGLE_APPLICATION_CREDENTIALS')
+            sa_email = os.getenv('EE_SERVICE_ACCOUNT')
 
-            if project:
+            if sa_key and sa_email and os.path.exists(sa_key):
+                credentials = ee.ServiceAccountCredentials(sa_email, sa_key)
+                ee.Initialize(credentials, project=project)
+                logger.info(f"Earth Engine initialized for terrain with service account: {sa_email}")
+            elif project:
                 logger.info(f"Initializing Earth Engine for terrain with project: {project}")
                 ee.Initialize(project=project)
             else:
