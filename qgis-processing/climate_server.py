@@ -18,9 +18,26 @@ from dotenv import load_dotenv
 _script_dir = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(os.path.join(_script_dir, '.env'))
 
-# Resolve GOOGLE_APPLICATION_CREDENTIALS relative to script directory if it's a relative path
+# Handle Earth Engine credentials for both local (file path) and deployed (JSON env var) environments
 _sa_key = os.getenv('GOOGLE_APPLICATION_CREDENTIALS', '')
-if _sa_key and not os.path.isabs(_sa_key):
+_sa_json = os.getenv('GOOGLE_APPLICATION_CREDENTIALS_JSON', '')
+
+if _sa_json and not _sa_key:
+    # Render / cloud deploy: JSON content is in env var, write it to a temp file
+    _temp_key_path = os.path.join(_script_dir, '.ee-credentials-tmp.json')
+    with open(_temp_key_path, 'w') as f:
+        f.write(_sa_json)
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = _temp_key_path
+    # Also extract EE_SERVICE_ACCOUNT from the JSON if not already set
+    if not os.getenv('EE_SERVICE_ACCOUNT'):
+        try:
+            _creds = json.loads(_sa_json)
+            os.environ['EE_SERVICE_ACCOUNT'] = _creds.get('client_email', '')
+        except json.JSONDecodeError:
+            pass
+    print(f"✅ Wrote EE credentials from env var to {_temp_key_path}")
+elif _sa_key and not os.path.isabs(_sa_key):
+    # Local dev: resolve relative path
     _resolved = os.path.join(_script_dir, _sa_key)
     if os.path.exists(_resolved):
         os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = _resolved

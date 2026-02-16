@@ -91,6 +91,7 @@ qgis-data/*
 *-service-account*.json
 *-credentials*.json
 ee-service-account.json
+.ee-credentials-tmp.json
 
 # Temporary files
 *.tmp

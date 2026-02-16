@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Render Environment Setup Guide</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0f; color: #e1e1e6; min-height: 100vh; }
+
+  /* Render-style sidebar */
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar { width: 240px; background: #111118; border-right: 1px solid #2a2a35; padding: 16px 0; flex-shrink: 0; }
+  .sidebar-logo { padding: 8px 20px 24px; font-size: 18px; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 8px; }
+  .sidebar-logo span { color: #6c6cff; }
+  .sidebar-item { padding: 8px 20px; font-size: 13px; color: #8888a0; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+  .sidebar-item:hover { color: #e1e1e6; background: #1a1a25; }
+  .sidebar-item.active { color: #fff; background: #1e1e2e; border-left: 2px solid #6c6cff; }
+  .sidebar-section { padding: 16px 20px 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: #555568; }
+
+  /* Main content */
+  .main { flex: 1; display: flex; flex-direction: column; }
+  .topbar { height: 56px; border-bottom: 1px solid #2a2a35; display: flex; align-items: center; padding: 0 24px; gap: 12px; }
+  .topbar .service-name { font-size: 16px; font-weight: 600; color: #fff; }
+  .topbar .badge { background: #1a3a1a; color: #4ade80; font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+  .topbar .url { font-size: 12px; color: #6c6cff; margin-left: auto; }
+
+  /* Tabs */
+  .tabs { display: flex; border-bottom: 1px solid #2a2a35; padding: 0 24px; background: #0d0d14; }
+  .tab { padding: 12px 16px; font-size: 13px; color: #8888a0; cursor: pointer; border-bottom: 2px solid transparent; }
+  .tab:hover { color: #e1e1e6; }
+  .tab.active { color: #fff; border-bottom-color: #6c6cff; }
+
+  /* Content area */
+  .content { padding: 32px 24px; flex: 1; max-width: 900px; }
+  .content h2 { font-size: 20px; font-weight: 600; margin-bottom: 8px; color: #fff; }
+  .content p.desc { font-size: 13px; color: #8888a0; margin-bottom: 24px; }
+
+  /* Environment variables table */
+  .env-section { margin-bottom: 32px; }
+  .env-section h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; color: #c0c0d0; display: flex; align-items: center; gap: 8px; }
+  .env-table { width: 100%; border: 1px solid #2a2a35; border-radius: 8px; overflow: hidden; }
+  .env-row { display: flex; border-bottom: 1px solid #2a2a35; align-items: stretch; }
+  .env-row:last-child { border-bottom: none; }
+  .env-row.header { background: #15151f; }
+  .env-row.header .env-cell { font-size: 11px; text-transform: uppercase; letter-spacing: 0.8px; color: #6a6a80; font-weight: 600; padding: 10px 16px; }
+  .env-cell { padding: 12px 16px; font-size: 13px; }
+  .env-cell.key { width: 380px; flex-shrink: 0; background: #111118; font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; color: #e1e1e6; }
+  .env-cell.value { flex: 1; background: #0d0d14; color: #8888a0; font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace; word-break: break-all; }
+
+  /* Existing vars */
+  .existing .env-cell.value { color: #4ade80; }
+
+  /* New vars to add - highlighted */
+  .new-var { position: relative; }
+  .new-var .env-cell { background: #1a1a0a !important; }
+  .new-var .env-cell.key { color: #fbbf24; }
+  .new-var .env-cell.value { color: #fbbf24; }
+  .new-var-badge { display: inline-block; background: #fbbf24; color: #000; font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 3px; margin-left: 8px; font-family: -apple-system, sans-serif; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* Secret files section */
+  .secret-file-box { border: 1px solid #2a2a35; border-radius: 8px; padding: 16px; background: #111118; margin-bottom: 16px; }
+  .secret-file-box .filename { font-family: 'SF Mono', Monaco, monospace; font-size: 14px; color: #6c6cff; margin-bottom: 8px; }
+  .secret-file-box .filepath { font-size: 11px; color: #6a6a80; margin-bottom: 12px; }
+  .secret-file-box .json-preview { background: #0a0a0f; border: 1px solid #2a2a35; border-radius: 6px; padding: 12px; font-family: 'SF Mono', Monaco, monospace; font-size: 11px; color: #8888a0; white-space: pre; overflow-x: auto; max-height: 180px; }
+  .secret-file-box .json-preview .highlight { color: #fbbf24; }
+
+  /* Buttons */
+  .btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; }
+  .btn-primary { background: #6c6cff; color: #fff; }
+  .btn-primary:hover { background: #5a5aee; }
+  .btn-outline { background: transparent; color: #8888a0; border: 1px solid #2a2a35; }
+  .btn-add { background: #1a2a1a; color: #4ade80; border: 1px solid #2a4a2a; margin-top: 12px; }
+
+  /* Steps overlay */
+  .step-guide { position: fixed; bottom: 24px; right: 24px; width: 420px; background: #1a1a28; border: 1px solid #3a3a50; border-radius: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); z-index: 100; overflow: hidden; }
+  .step-guide-header { background: #6c6cff; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .step-guide-header h3 { color: #fff; font-size: 14px; font-weight: 600; }
+  .step-guide-header .step-count { color: rgba(255,255,255,0.8); font-size: 12px; }
+  .step-guide-body { padding: 20px; }
+  .step { display: flex; gap: 14px; margin-bottom: 18px; align-items: flex-start; }
+  .step:last-child { margin-bottom: 0; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; }
+  .step-num.done { background: #1a3a1a; color: #4ade80; }
+  .step-num.current { background: #fbbf24; color: #000; animation: pulse 2s infinite; }
+  .step-num.pending { background: #2a2a35; color: #6a6a80; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(251,191,36,0.4); } 50% { box-shadow: 0 0 0 8px rgba(251,191,36,0); } }
+  .step-text { font-size: 13px; line-height: 1.5; }
+  .step-text strong { color: #fff; }
+  .step-text { color: #b0b0c0; }
+  .step-text code { background: #0a0a0f; padding: 1px 6px; border-radius: 3px; font-size: 12px; color: #6c6cff; font-family: 'SF Mono', Monaco, monospace; }
+
+  /* Arrow annotations */
+  .arrow-annotation { position: absolute; color: #fbbf24; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+</style>
+</head>
+<body>
+<div class="layout">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo"><span>R</span> Render</div>
+    <div class="sidebar-section">Services</div>
+    <div class="sidebar-item active">climate-studio-backend</div>
+    <div class="sidebar-item">climate-studio-python</div>
+    <div class="sidebar-section">Project</div>
+    <div class="sidebar-item">Events</div>
+    <div class="sidebar-item">Settings</div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="service-name">climate-studio-backend</div>
+      <div class="badge">Live</div>
+      <div class="url">https://climate-studio-backend.onrender.com</div>
+    </div>
+
+    <div class="tabs">
+      <div class="tab">Events</div>
+      <div class="tab">Logs</div>
+      <div class="tab active">Environment</div>
+      <div class="tab">Shell</div>
+      <div class="tab">Settings</div>
+    </div>
+
+    <div class="content">
+      <h2>Environment Variables & Secret Files</h2>
+      <p class="desc">Configure environment variables and secret files for your service. Changes will trigger a redeploy.</p>
+
+      <!-- Existing Variables -->
+      <div class="env-section">
+        <h3>Environment Variables</h3>
+        <div class="env-table">
+          <div class="env-row header">
+            <div class="env-cell key">Key</div>
+            <div class="env-cell value">Value</div>
+          </div>
+
+          <!-- Already there -->
+          <div class="env-row existing">
+            <div class="env-cell key">EARTHENGINE_PROJECT</div>
+            <div class="env-cell value">josh-geo-the-second</div>
+          </div>
+          <div class="env-row existing">
+            <div class="env-cell key">PORT</div>
+            <div class="env-cell value">5001</div>
+          </div>
+
+          <!-- NEW - to add -->
+          <div class="env-row new-var">
+            <div class="env-cell key">EE_SERVICE_ACCOUNT <span class="new-var-badge">Add this</span></div>
+            <div class="env-cell value">climate-suite@josh-geo-the-second.iam.gserviceaccount.com</div>
+          </div>
+          <div class="env-row new-var">
+            <div class="env-cell key">GOOGLE_APPLICATION_CREDENTIALS <span class="new-var-badge">Add this</span></div>
+            <div class="env-cell value">/etc/secrets/ee-service-account.json</div>
+          </div>
+        </div>
+        <button class="btn btn-add" style="margin-top:12px;">+ Add Environment Variable</button>
+      </div>
+
+      <!-- Secret Files -->
+      <div class="env-section">
+        <h3>Secret Files <span class="new-var-badge">Add this</span></h3>
+        <div class="secret-file-box">
+          <div class="filename">ee-service-account.json</div>
+          <div class="filepath">Mounted at: /etc/secrets/ee-service-account.json</div>
+          <div class="json-preview"><span class="highlight">{
+  "type": "service_account",
+  "project_id": "josh-geo-the-second",
+  "private_key_id": "...",
+  "private_key": "-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----\n",
+  "client_email": "climate-suite@josh-geo-the-second.iam.gserviceaccount.com",
+  "client_id": "...",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  ...
+}</span></div>
+          <p style="margin-top:10px; font-size:12px; color:#fbbf24;">Copy from Terminal: <code style="background:#0a0a0f; padding:2px 8px; border-radius:3px; color:#6c6cff;">cat ~/Documents/github-project/climate-suite/qgis-processing/ee-service-account.json | pbcopy</code></p>
+        </div>
+        <button class="btn btn-add">+ Add Secret File</button>
+      </div>
+
+      <!-- Save button -->
+      <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid #2a2a35; display: flex; gap: 12px;">
+        <button class="btn btn-primary" style="font-size: 14px; padding: 10px 24px;">Save Changes</button>
+        <span style="color: #8888a0; font-size: 13px; line-height: 40px;">This will trigger a redeploy of your service</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Step-by-step guide overlay -->
+<div class="step-guide">
+  <div class="step-guide-header">
+    <h3>Setup Steps</h3>
+    <div class="step-count">4 steps</div>
+  </div>
+  <div class="step-guide-body">
+    <div class="step">
+      <div class="step-num current">1</div>
+      <div class="step-text"><strong>Add Secret File:</strong> Click <code>+ Add Secret File</code>. Set filename to <code>ee-service-account.json</code>. Paste JSON key contents.</div>
+    </div>
+    <div class="step">
+      <div class="step-num pending">2</div>
+      <div class="step-text"><strong>Add env var:</strong> <code>GOOGLE_APPLICATION_CREDENTIALS</code> = <code>/etc/secrets/ee-service-account.json</code></div>
+    </div>
+    <div class="step">
+      <div class="step-num pending">3</div>
+      <div class="step-text"><strong>Add env var:</strong> <code>EE_SERVICE_ACCOUNT</code> = <code>climate-suite@josh-geo-the-second.iam.gserviceaccount.com</code></div>
+    </div>
+    <div class="step">
+      <div class="step-num pending">4</div>
+      <div class="step-text"><strong>Click "Save Changes"</strong> to rebuild and deploy with the new credentials.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
