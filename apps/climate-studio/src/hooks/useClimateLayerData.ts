@@ -424,6 +424,7 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
   const prevZoomRef = useRef<number | null>(null);
   const prevBoundsRef = useRef<string | null>(null);
   const prevControlsRef = useRef<string | null>(null);
+  const prevActiveLayersRef = useRef<Set<ClimateLayerId>>(new Set());
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Cleanup abort controllers for inactive layers
@@ -492,6 +493,10 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       clearTimeout(debounceTimerRef.current);
     }
 
+    // Detect newly activated layers (toggled on since last render)
+    const prevActiveSet = prevActiveLayersRef.current;
+    const newlyActivated = uniqueActiveLayers.filter(id => !prevActiveSet.has(id));
+
     // For first load, fetch immediately without debounce
     if (isFirstLoad) {
       console.log('🎬 First load - fetching all active layers immediately');
@@ -502,14 +507,25 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       prevZoomRef.current = currentZoom;
       prevBoundsRef.current = currentBoundsKey;
       prevControlsRef.current = controlsKey;
+      prevActiveLayersRef.current = new Set(uniqueActiveLayers);
     } else {
       // Tile-based layers that don't depend on bounds (global tiles)
       // Hexagon layers depend on bounds (sea_level_rise, urban_expansion)
       const globalTileLayers: ClimateLayerId[] = ['temperature_projection', 'urban_heat_island', 'topographic_relief', 'precipitation_drought'];
 
+      // Fetch newly activated layers immediately, regardless of bounds/controls
+      if (newlyActivated.length > 0) {
+        console.log('🆕 Newly activated layers - fetching immediately:', newlyActivated);
+        newlyActivated.forEach(layerId => {
+          fetchLayer(layerId);
+        });
+      }
+
       // Refetch tile-based layers when control parameters change (not bounds)
       if (controlsChanged) {
-        const activeTileLayers = uniqueActiveLayers.filter(id => globalTileLayers.includes(id));
+        const activeTileLayers = uniqueActiveLayers.filter(
+          id => globalTileLayers.includes(id) && !newlyActivated.includes(id)
+        );
         if (activeTileLayers.length > 0) {
           console.log(`🎛️  Controls changed - refetching tile layers:`, activeTileLayers);
           activeTileLayers.forEach(layerId => {
@@ -521,7 +537,7 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       // Always fetch bounds-based hexagon layers immediately on bounds change (no debounce)
       // Includes: sea_level_rise, precipitation_drought, urban_expansion
       const boundsBasedLayers = uniqueActiveLayers.filter(
-        id => !globalTileLayers.includes(id)
+        id => !globalTileLayers.includes(id) && !newlyActivated.includes(id)
       );
       if (boundsBasedLayers.length > 0 && boundsChanged) {
         console.log(`🗺️  Fetching bounds-based layers immediately:`, boundsBasedLayers);
@@ -533,6 +549,7 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       prevZoomRef.current = currentZoom;
       prevBoundsRef.current = currentBoundsKey;
       prevControlsRef.current = controlsKey;
+      prevActiveLayersRef.current = new Set(uniqueActiveLayers);
     }
 
     // Cleanup debounce timer on unmount
