@@ -72,8 +72,9 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)
 
-# Cache for EE tile fetchers (avoids re-generating map IDs for the same params)
+# Per-process cache for EE tile fetchers (keyed by year:scenario:mode)
 _ee_tile_fetcher_cache: dict = {}
+_ee_tile_fetcher_lock = None  # initialized lazily to avoid import issues
 
 # Get Earth Engine project from environment
 ee_project = os.getenv('EARTHENGINE_PROJECT', 'josh-geo-the-second')
@@ -351,8 +352,20 @@ def temperature_projection_proxy_tile(year, scenario, mode, z, x, y):
     """Proxy EE temperature tiles through the server to handle auth"""
     try:
         cache_key = f"temp:{year}:{scenario}:{mode}"
+
+        # Populate cache if missing (e.g. after a worker restart)
         if cache_key not in _ee_tile_fetcher_cache:
-            return '', 204  # No tile fetcher yet, return empty
+            logger.info(f"Cache miss for {cache_key} - regenerating tile fetcher")
+            result = climate_service.get_tile_url(
+                bounds={'north': 90, 'south': -90, 'east': 180, 'west': -180},
+                year=year,
+                scenario=scenario,
+                mode=mode
+            )
+            if not result:
+                logger.error(f"Failed to generate tile fetcher for {cache_key}")
+                return '', 204
+            _ee_tile_fetcher_cache[cache_key] = result
 
         tile_fetcher = _ee_tile_fetcher_cache[cache_key]['tile_fetcher']
         tile_data = tile_fetcher.fetch_tile(x, y, z)
@@ -362,7 +375,6 @@ def temperature_projection_proxy_tile(year, scenario, mode, z, x, y):
         }
     except Exception as e:
         logger.error(f"Error proxying temperature tile {z}/{x}/{y}: {e}")
-        # Return transparent PNG on error
         import io
         from PIL import Image
         img = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
