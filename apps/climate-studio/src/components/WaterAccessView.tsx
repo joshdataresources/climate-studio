@@ -635,7 +635,6 @@ export default function WaterAccessView() {
   } | null>(null)
   const [mapLoaded, setMapLoaded] = useState(false)
   const [aquiferData, setAquiferData] = useState<GeoJSON.FeatureCollection | null>(null)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [aquiferCount, setAquiferCount] = useState(0)
   const [selectedAquifer, setSelectedAquifer] = useState<SelectedAquifer | null>(null)
@@ -1004,7 +1003,6 @@ export default function WaterAccessView() {
 
   // Fetch aquifer data for visible map bounds
   const fetchAquiferData = useCallback(async (bounds?: { north: number; south: number; east: number; west: number }) => {
-    setLoading(true)
     setError(null)
 
     let url = `${API_BASE}/api/usgs/aquifers`
@@ -1047,7 +1045,6 @@ export default function WaterAccessView() {
           const aquifers = result.data
 
           if (!aquifers || !aquifers.features) {
-            setLoading(false)
             return
           }
 
@@ -1116,8 +1113,6 @@ export default function WaterAccessView() {
           setError(err instanceof Error ? err.message : 'Failed to load aquifer data. Please check that the backend server is running.')
         }
       }
-    } finally {
-      setLoading(false)
     }
   }, [enhanceAquiferData])
 
@@ -4362,8 +4357,6 @@ export default function WaterAccessView() {
           outline: 'none'
         }}
       />
-
-      {loading && <LoadingOverlay message="Loading aquifer data from USGS..." />}
 
       {/* Error overlay for map issues */}
       {error && error.includes('Mapbox') && (
