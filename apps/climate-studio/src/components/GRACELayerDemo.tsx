@@ -61,7 +61,7 @@ export function GRACELayer({ map, aquifer = 'high_plains', resolution = 6 }: GRA
           }
 
           // Use environment variable or default to localhost:5001
-          const apiUrl = import.meta.env.VITE_CLIMATE_API_URL || 'http://localhost:5001'
+          const apiUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8081'
 
           // Use viewport bounds instead of fixed aquifer with adaptive resolution
           const boundsParam = encodeURIComponent(JSON.stringify(boundsObj))

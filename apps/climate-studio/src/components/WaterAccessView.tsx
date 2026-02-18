@@ -726,18 +726,17 @@ export default function WaterAccessView() {
   // Which layers are IN the widget (visible in the list) - separate from whether they're active
   const [layersInWidget, setLayersInWidget] = useState({
     metroWeather: true,
-    metroPopulation: false,
+    factories: true,
+    aiDataCenters: true,
+    dams: false,
     rivers: true,
     canals: true,
-    dams: false,
     seaLevel: false,
-    groundwater: false,
     aquifers: false,
+    groundwater: false,
     precipitation: false,
     wetBulb: true,
     temperature: true,
-    factories: true,
-    aiDataCenters: true,
     topographic: true
   })
 
@@ -872,7 +871,7 @@ export default function WaterAccessView() {
   useEffect(() => {
     const fetchGRACETileUrl = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_CLIMATE_API_URL || 'http://localhost:5001'
+        const apiUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8081'
         const response = await fetch(`${apiUrl}/api/climate/groundwater/tiles`)
 
         if (response.ok) {
@@ -2335,7 +2334,12 @@ export default function WaterAccessView() {
         currentVolume: properties.currentVolume,
         depletionStatus: properties.depletionStatus,
         depletionSeverity: properties.depletionSeverity,
-        depletionPercentage: properties.depletionPercentage
+        depletionPercentage: properties.depletionPercentage,
+        stress_level: properties.stress_level,
+        depletion_ft: properties.depletion_ft,
+        depletion_period: properties.depletion_period,
+        stress_note: properties.stress_note,
+        primary_use: properties.primary_use
       })
     })
 
@@ -4442,10 +4446,10 @@ export default function WaterAccessView() {
                       <input
                         type="checkbox"
                         className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.metroPopulation}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, metroPopulation: !layersInWidget.metroPopulation })}
+                        checked={layersInWidget.dams}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, dams: !layersInWidget.dams })}
                       />
-                      <span className="text-xs font-semibold text-foreground">Metro Population Change</span>
+                      <span className="text-xs font-semibold text-foreground">Major Dams</span>
                     </label>
                     <label className="flex items-start gap-2 cursor-pointer">
                       <input
@@ -4464,15 +4468,6 @@ export default function WaterAccessView() {
                         onChange={() => setLayersInWidget({ ...layersInWidget, canals: !layersInWidget.canals })}
                       />
                       <span className="text-xs font-semibold text-foreground">Canals & Aqueducts</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.dams}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, dams: !layersInWidget.dams })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">Major Dams</span>
                     </label>
                     <label className="flex items-start gap-2 cursor-pointer">
                       <input
@@ -4571,60 +4566,6 @@ export default function WaterAccessView() {
                   </div>
                 )}
 
-                {/* Metro Population Change Layer */}
-                {layersInWidget.metroPopulation && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showMetroDataStatistics ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowMetroDataStatistics(!showMetroDataStatistics)}>
-                    <BarChart3 className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                    <div className="flex-1 min-w-0 flex flex-col gap-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-sm font-semibold">Metro Population Change</h4>
-                      </div>
-                      {showSourceInfo && (
-                        <p className="text-[11px] text-muted-foreground/80 truncate">
-                          Source: <span className="font-medium text-foreground">NOAA Regional Climate Centers</span>
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setLayersInWidget({ ...layersInWidget, metroPopulation: false })
-                      }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
-                    >
-                      <X className="h-5 w-5 text-muted-foreground" />
-                    </button>
-                  </div>
-                )}
-
-                {/* Major Dams Layer */}
-                {layersInWidget.dams && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showDamsLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowDamsLayer(!showDamsLayer)}>
-                    <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M2 22h20v-2H2v2zm2-18v12h16V4H4zm2 10V6h12v8H6z" />
-                    </svg>
-                    <div className="flex-1 min-w-0 flex flex-col gap-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-sm font-semibold">Major Dams</h4>
-                      </div>
-                      {showSourceInfo && (
-                        <p className="text-[11px] text-muted-foreground/80 truncate">
-                          Source: <span className="font-medium text-foreground">USGS / USBR</span>
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setLayersInWidget({ ...layersInWidget, dams: false })
-                      }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
-                    >
-                      <X className="h-5 w-5 text-muted-foreground" />
-                    </button>
-                  </div>
-                )}
-
                 {/* Factories Layer */}
                 {layersInWidget.factories && (
                   <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showFactoriesLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowFactoriesLayer(!showFactoriesLayer)}>
@@ -4669,6 +4610,34 @@ export default function WaterAccessView() {
                       onClick={(e) => {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, aiDataCenters: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Major Dams Layer */}
+                {layersInWidget.dams && (
+                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showDamsLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowDamsLayer(!showDamsLayer)}>
+                    <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M2 22h20v-2H2v2zm2-18v12h16V4H4zm2 10V6h12v8H6z" />
+                    </svg>
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">Major Dams</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">USGS / USBR</span>
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, dams: false })
                       }}
                       className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
@@ -4927,35 +4896,36 @@ export default function WaterAccessView() {
                   const newValue = !selectAllLayers
                   setSelectAllLayers(newValue)
                   if (newValue) {
+                    setShowSourceInfo(false)
                     setLayersInWidget({
                       metroWeather: true,
-                      metroPopulation: true,
+                      factories: true,
+                      aiDataCenters: true,
+                      dams: true,
                       rivers: true,
                       canals: true,
-                      dams: true,
                       seaLevel: true,
                       groundwater: true,
                       aquifers: true,
                       precipitation: true,
                       wetBulb: true,
                       temperature: true,
-                      factories: true,
                       topographic: true
                     })
                   } else {
                     setLayersInWidget({
                       metroWeather: false,
-                      metroPopulation: false,
+                      factories: false,
+                      aiDataCenters: false,
+                      dams: false,
                       rivers: false,
                       canals: false,
-                      dams: false,
                       seaLevel: false,
                       groundwater: false,
                       aquifers: false,
                       precipitation: false,
                       wetBulb: false,
                       temperature: false,
-                      factories: false,
                       topographic: false
                     })
                   }
@@ -4965,12 +4935,10 @@ export default function WaterAccessView() {
                 <span className="text-[11px] text-muted-foreground">Sources</span>
                 <button
                   onClick={() => setShowSourceInfo(!showSourceInfo)}
-                  className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${showSourceInfo ? 'bg-blue-500' : 'bg-muted'
-                    }`}
+                  className={`relative inline-flex h-[18px] w-[32px] flex-shrink-0 items-center rounded-[999px] transition-colors duration-200 ${showSourceInfo ? 'bg-[#5a7cec]' : 'bg-[#c8d0f5]'}`}
                 >
                   <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showSourceInfo ? 'translate-x-[18px]' : 'translate-x-[2px]'
-                      }`}
+                    className={`inline-block h-[14px] w-[14px] transform rounded-[999px] shadow-sm transition-transform duration-200 ${showSourceInfo ? 'translate-x-[16px] bg-white' : 'translate-x-[2px] bg-[#5a7cec]'}`}
                   />
                 </button>
               </div>

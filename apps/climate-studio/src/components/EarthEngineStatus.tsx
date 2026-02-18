@@ -23,7 +23,7 @@ const isLocalDev = typeof window !== 'undefined' &&
 
 // Use the same backend URL as the layers to ensure consistency
 const BACKEND_BASE_URL =
-  import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001'
+  import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001'
 
 export function EarthEngineStatus() {
   const { theme } = useTheme()

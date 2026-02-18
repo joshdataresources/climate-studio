@@ -67,7 +67,7 @@ interface DeckGLMapProps {
 
 const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1Ijoiam9zaHVhYmJ1dGxlciIsImEiOiJjbWcwNXpyNXUwYTdrMmtva2tiZ2NjcGxhIn0.Fc3d_CloJGiw9-BE4nI_Kw'
 // Use empty string for relative URLs (goes through Vite proxy to port 5001), or explicit URL if set
-const backendUrl = import.meta.env.VITE_BACKEND_URL || ''
+const backendUrl = import.meta.env.VITE_NODE_BACKEND_URL || ''
 
 export function DeckGLMap({
   className,

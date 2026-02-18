@@ -18,7 +18,7 @@ export interface LayerFetchState {
 export type LayerStateMap = Partial<Record<ClimateLayerId, LayerFetchState>>;
 
 const BACKEND_BASE_URL =
-  import.meta.env.VITE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001';
+  import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001';
 
 const buildQueryString = (params: Record<string, string | number | boolean>) => {
   const search = new URLSearchParams();

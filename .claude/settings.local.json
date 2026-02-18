@@ -19,7 +19,13 @@
       "Bash(rm:*)",
       "Bash(npm run:*)",
       "Bash(ls:*)",
-      "Bash(./run_temperature_extraction.sh:*)"
+      "Bash(./run_temperature_extraction.sh:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker restart:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(node -e:*)",
+      "Bash(node:*)"
     ],
     "deny": [],
     "ask": []

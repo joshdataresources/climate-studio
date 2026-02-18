@@ -31,6 +31,7 @@ export interface SelectedFactory {
     heat_risk?: string
     drought_risk?: string
     wildfire_risk?: string
+    water_risk?: string
     flood_risk?: string
     hurricane_risk?: string
     overall_risk_score: number
@@ -226,6 +227,13 @@ export function FactoryDetailPanel({ factory, onClose }: FactoryDetailPanelProps
                   <p className="flex-1 m-0" style={{ color: isDark ? '#9ca3af' : '#697487' }}>Wildfire Risk:</p>
                   <p className="flex-1 m-0 font-semibold text-right" style={{ color: isDark ? '#e5e7eb' : '#101728' }}>
                     {factory.environmental_risk.wildfire_risk || 'Undefined'}
+                  </p>
+                </div>
+
+                <div className="flex gap-1 items-start w-full text-xs">
+                  <p className="flex-1 m-0" style={{ color: isDark ? '#9ca3af' : '#697487' }}>Water Risk:</p>
+                  <p className="flex-1 m-0 font-semibold text-right" style={{ color: isDark ? '#e5e7eb' : '#101728' }}>
+                    {factory.environmental_risk.water_risk || factory.environmental_risk.water_stress || 'Undefined'}
                   </p>
                 </div>
 

@@ -112,6 +112,23 @@ export const layerDefinitions: LayerDefinition[] = [
     }
   },
   {
+    id: 'major_dams',
+    name: 'Major Dams',
+    description: 'Large dam infrastructure and water storage facilities',
+    type: 'geojson',
+    category: 'infrastructure',
+    icon: DamIcon,
+    sourceUrl: 'US Army Corps',
+    sourceAttribution: 'U.S. Army Corps of Engineers, National Inventory of Dams',
+    enabled: true,
+    visible: true,
+    opacity: 1.0,
+    availableInViews: ['climate_analysis', 'water_access'],
+    hasMapVisualization: true,
+    requiresClimateWidget: false,
+    dataSource: '/data/dams.json'
+  },
+  {
     id: 'metro_service_areas',
     name: 'Metro Service Areas',
     description: 'Major metropolitan service boundaries',
@@ -380,22 +397,6 @@ export const layerDefinitions: LayerDefinition[] = [
     enabled: false,
     visible: true,
     opacity: 0.8,
-    availableInViews: [],
-    hasMapVisualization: false, // Not implemented yet
-    requiresClimateWidget: false
-  },
-  {
-    id: 'major_dams',
-    name: 'Major Dams',
-    description: 'Large dam infrastructure',
-    type: 'geojson',
-    category: 'water',
-    icon: DamIcon,
-    sourceUrl: 'US Army Corps',
-    sourceAttribution: 'U.S. Army Corps of Engineers, National Inventory of Dams',
-    enabled: false,
-    visible: true,
-    opacity: 1.0,
     availableInViews: [],
     hasMapVisualization: false, // Not implemented yet
     requiresClimateWidget: false

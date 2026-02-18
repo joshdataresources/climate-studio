@@ -19,6 +19,11 @@ export interface SelectedAquifer {
   depletionStatus?: string
   depletionSeverity?: string
   depletionPercentage?: number
+  stress_level?: string
+  depletion_ft?: number | null
+  depletion_period?: string
+  stress_note?: string
+  primary_use?: string
 }
 
 interface GroundwaterDetailsPanelProps {
@@ -323,6 +328,49 @@ export function GroundwaterDetailsPanel({ selectedAquifer, projectionYear, onClo
           </div>
         </div>
       </div>
+
+      {/* Historical Depletion / Stress Note */}
+      {(selectedAquifer.stress_level || selectedAquifer.depletion_ft || selectedAquifer.stress_note || selectedAquifer.primary_use) && (
+        <div className="mt-3 flex flex-col gap-2">
+          {(selectedAquifer.depletion_ft || selectedAquifer.stress_level) && (
+            <div className="flex gap-2">
+              {selectedAquifer.depletion_ft != null && (
+                <div className="flex-1 flex flex-col gap-1 p-3 rounded-lg" style={{ backgroundColor: 'rgba(239,68,68,0.08)' }}>
+                  <p className="m-0 text-[11px] font-normal" style={{ color: '#697487' }}>Historical Decline</p>
+                  <p className="m-0 text-xs font-semibold" style={{ color: '#ef4444' }}>
+                    {selectedAquifer.depletion_ft} ft
+                    {selectedAquifer.depletion_period ? ` (${selectedAquifer.depletion_period})` : ''}
+                  </p>
+                </div>
+              )}
+              {selectedAquifer.stress_level && (
+                <div className="flex-1 flex flex-col gap-1 p-3 rounded-lg" style={{ backgroundColor: 'rgba(239,68,68,0.08)' }}>
+                  <p className="m-0 text-[11px] font-normal" style={{ color: '#697487' }}>Stress Level</p>
+                  <p className="m-0 text-xs font-semibold" style={{
+                    color: selectedAquifer.stress_level === 'Critical' ? '#ef4444'
+                      : selectedAquifer.stress_level === 'High' ? '#f97316'
+                      : selectedAquifer.stress_level === 'Moderate' ? '#3b82f6'
+                      : '#22c55e'
+                  }}>
+                    {selectedAquifer.stress_level}
+                  </p>
+                </div>
+              )}
+              {selectedAquifer.primary_use && (
+                <div className="flex-1 flex flex-col gap-1 p-3 rounded-lg" style={{ backgroundColor: statusBg }}>
+                  <p className="m-0 text-[11px] font-normal" style={{ color: '#697487' }}>Primary Use</p>
+                  <p className="m-0 text-xs font-semibold" style={{ color: statusColor }}>{selectedAquifer.primary_use}</p>
+                </div>
+              )}
+            </div>
+          )}
+          {selectedAquifer.stress_note && (
+            <div className="p-3 rounded-lg" style={{ backgroundColor: 'rgba(239,68,68,0.06)' }}>
+              <p className="m-0 text-[11px]" style={{ color: '#697487' }}>{selectedAquifer.stress_note}</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   )
 }
