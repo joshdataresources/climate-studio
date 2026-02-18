@@ -1542,16 +1542,7 @@ app.get('/api/climate/temperature-projection/tiles', async (req, res) => {
 
     console.log(`✅ Received temperature projection tiles from climate service`);
 
-    // Rewrite the relative proxy tile URL to an absolute URL pointing to this Node backend
-    const data = response.data;
-    if (data && data.tile_url && data.tile_url.startsWith('/api/climate/temperature-projection/proxy-tile/')) {
-      const backendBase = process.env.BACKEND_PUBLIC_URL ||
-        `${req.protocol}://${req.get('host')}`;
-      data.tile_url = `${backendBase}${data.tile_url}`;
-      console.log(`🔗 Rewrote tile URL to: ${data.tile_url.split('{')[0]}...`);
-    }
-
-    res.json(data);
+    res.json(response.data);
 
   } catch (error) {
     console.error('❌ Temperature projection tiles error:', error.message);

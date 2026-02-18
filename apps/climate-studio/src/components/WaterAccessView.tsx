@@ -2991,7 +2991,9 @@ export default function WaterAccessView() {
         return () => clearTimeout(retryTimer)
       }
 
-      const tileUrl = data.tile_url
+      const rawTileUrl = data.tile_url
+      const nodeBackendBase = import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001'
+      const tileUrl = rawTileUrl.startsWith('/') ? `${nodeBackendBase}${rawTileUrl}` : rawTileUrl
 
       if (!map.getSource('temperature-tiles')) {
         console.log('🌡️ Adding temperature projection tile source...')
