@@ -1542,8 +1542,16 @@ app.get('/api/climate/temperature-projection/tiles', async (req, res) => {
 
     console.log(`✅ Received temperature projection tiles from climate service`);
 
-    // Return the response from climate service
-    res.json(response.data);
+    // Rewrite the relative proxy tile URL to an absolute URL pointing to this Node backend
+    const data = response.data;
+    if (data && data.tile_url && data.tile_url.startsWith('/api/climate/temperature-projection/proxy-tile/')) {
+      const backendBase = process.env.BACKEND_PUBLIC_URL ||
+        `${req.protocol}://${req.get('host')}`;
+      data.tile_url = `${backendBase}${data.tile_url}`;
+      console.log(`🔗 Rewrote tile URL to: ${data.tile_url.split('{')[0]}...`);
+    }
+
+    res.json(data);
 
   } catch (error) {
     console.error('❌ Temperature projection tiles error:', error.message);
@@ -1551,6 +1559,28 @@ app.get('/api/climate/temperature-projection/tiles', async (req, res) => {
       success: false,
       error: error.message
     });
+  }
+});
+
+// Temperature Projection Proxy Tiles - forward EE tile requests through Python climate service
+app.get('/api/climate/temperature-projection/proxy-tile/:year/:scenario/:mode/:z/:x/:y', async (req, res) => {
+  try {
+    const { year, scenario, mode, z, x, y } = req.params;
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/temperature-projection/proxy-tile/${year}/${scenario}/${mode}/${z}/${x}/${y}`;
+
+    const response = await axios.get(climateServiceUrl, {
+      responseType: 'arraybuffer',
+      timeout: 15000
+    });
+
+    res.set('Content-Type', 'image/png');
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.send(response.data);
+  } catch (error) {
+    console.error('❌ Temperature proxy tile error:', error.message);
+    const transparent = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+    res.set('Content-Type', 'image/png');
+    res.send(transparent);
   }
 });
 

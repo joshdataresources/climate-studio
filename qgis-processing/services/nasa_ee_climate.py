@@ -128,39 +128,14 @@ class NASAEEClimateService:
                 scale=5000  # 5km resolution
             )
 
-            # Get map ID and tile URL
+            # Get map ID and tile fetcher
             map_id = temp_display_resampled.getMapId(vis_params)
-            tile_url = map_id['tile_fetcher'].url_format
+            tile_fetcher = map_id['tile_fetcher']
 
-            # Calculate regional statistics for the viewport
-            region = ee.Geometry.Rectangle([
-                bounds['west'], bounds['south'],
-                bounds['east'], bounds['north']
-            ])
-
-            # Get mean temperature for the region
-            stats = temp_display_resampled.reduceRegion(
-                reducer=ee.Reducer.mean(),
-                geometry=region,
-                scale=5000,
-                maxPixels=1e9
-            ).getInfo()
-
-            mean_temp = stats.get('tasmax', None)
-
-            # Calculate average temperature and anomaly
-            if mode == 'anomaly':
-                average_anomaly = mean_temp if mean_temp is not None else None
-                average_temperature = (mean_temp + self.BASELINE_TEMP_C) if mean_temp is not None else None
-            else:
-                average_temperature = mean_temp
-                average_anomaly = (mean_temp - self.BASELINE_TEMP_C) if mean_temp is not None else None
-
-            logger.info(f"Generated tile URL for NASA temperature: {year}, {scenario}, mode={mode}")
-            logger.info(f"Regional stats: avg_temp={average_temperature}, avg_anomaly={average_anomaly}")
+            logger.info(f"Generated tile fetcher for NASA temperature: {year}, {scenario}, mode={mode}")
 
             return {
-                'tile_url': tile_url,
+                'tile_fetcher': tile_fetcher,
                 'metadata': {
                     'source': 'NASA NEX-GDDP-CMIP6 via Earth Engine',
                     'model': self.DEFAULT_MODEL,
@@ -169,9 +144,7 @@ class NASAEEClimateService:
                     'year': year,
                     'mode': mode,
                     'isRealData': True,
-                    'dataType': 'tiles',
-                    'averageTemperature': round(average_temperature, 2) if average_temperature is not None else None,
-                    'averageAnomaly': round(average_anomaly, 2) if average_anomaly is not None else None
+                    'dataType': 'tiles'
                 }
             }
 

@@ -72,6 +72,9 @@ logger = logging.getLogger(__name__)
 app = Flask(__name__)
 CORS(app)
 
+# Cache for EE tile fetchers (avoids re-generating map IDs for the same params)
+_ee_tile_fetcher_cache: dict = {}
+
 # Get Earth Engine project from environment
 ee_project = os.getenv('EARTHENGINE_PROJECT', 'josh-geo-the-second')
 
@@ -305,25 +308,35 @@ def temperature_projection_tiles():
             'west': west or -180
         }
 
-        # Get tile URL
-        result = climate_service.get_tile_url(
-            bounds=bounds,
-            year=year,
-            scenario=scenario,
-            mode=mode
-        )
+        # Build a cache key from the parameters that affect the tile image
+        cache_key = f"temp:{year}:{scenario}:{mode}"
 
-        if result:
-            return jsonify({
-                'success': True,
-                'tile_url': result['tile_url'],
-                'metadata': result['metadata']
-            })
+        # Get tile fetcher (or use cached one)
+        if cache_key not in _ee_tile_fetcher_cache:
+            result = climate_service.get_tile_url(
+                bounds=bounds,
+                year=year,
+                scenario=scenario,
+                mode=mode
+            )
+            if not result:
+                return jsonify({
+                    'success': False,
+                    'error': 'Could not generate tile URL'
+                }), 500
+            _ee_tile_fetcher_cache[cache_key] = result
         else:
-            return jsonify({
-                'success': False,
-                'error': 'Could not generate tile URL'
-            }), 500
+            result = _ee_tile_fetcher_cache[cache_key]
+            logger.info(f"Using cached tile fetcher for {cache_key}")
+
+        # Return a proxy URL that the browser can call without auth
+        proxy_url = f"/api/climate/temperature-projection/proxy-tile/{year}/{scenario}/{mode}/{{z}}/{{x}}/{{y}}"
+
+        return jsonify({
+            'success': True,
+            'tile_url': proxy_url,
+            'metadata': result['metadata']
+        })
 
     except Exception as e:
         logger.error(f"Error generating temperature tile URL: {str(e)}", exc_info=True)
@@ -331,6 +344,32 @@ def temperature_projection_tiles():
             'success': False,
             'error': str(e)
         }), 500
+
+
+@app.route('/api/climate/temperature-projection/proxy-tile/<int:year>/<scenario>/<mode>/<int:z>/<int:x>/<int:y>', methods=['GET'])
+def temperature_projection_proxy_tile(year, scenario, mode, z, x, y):
+    """Proxy EE temperature tiles through the server to handle auth"""
+    try:
+        cache_key = f"temp:{year}:{scenario}:{mode}"
+        if cache_key not in _ee_tile_fetcher_cache:
+            return '', 204  # No tile fetcher yet, return empty
+
+        tile_fetcher = _ee_tile_fetcher_cache[cache_key]['tile_fetcher']
+        tile_data = tile_fetcher.fetch_tile(x, y, z)
+        return tile_data, 200, {
+            'Content-Type': 'image/png',
+            'Cache-Control': 'public, max-age=3600'
+        }
+    except Exception as e:
+        logger.error(f"Error proxying temperature tile {z}/{x}/{y}: {e}")
+        # Return transparent PNG on error
+        import io
+        from PIL import Image
+        img = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
+        buf = io.BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+        return buf.getvalue(), 200, {'Content-Type': 'image/png'}
 
 
 @app.route('/api/tiles/noaa-slr-metadata', methods=['GET'])

@@ -25,7 +25,8 @@
       "Bash(docker restart:*)",
       "Bash(docker-compose up:*)",
       "Bash(node -e:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(pip show:*)"
     ],
     "deny": [],
     "ask": []
