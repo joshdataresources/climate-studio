@@ -22,6 +22,13 @@ import {
 import { MetroTooltipBubble } from './MetroTooltipBubble'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
+// Resolve relative tile URLs (e.g. "/api/climate/...") to absolute backend URLs for production
+const BACKEND_BASE_URL =
+  import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001';
+
+const resolveAbsoluteTileUrl = (tileUrl: string): string =>
+  tileUrl.startsWith('/') ? `${BACKEND_BASE_URL}${tileUrl}` : tileUrl;
+
 // Memoized DeckGL overlay for better performance
 const DeckGLOverlay = memo(function DeckGLOverlay(props: { layers: any[], getTooltip?: any }) {
   const overlay = useControl<MapboxOverlay>(() => new MapboxOverlay({
@@ -500,7 +507,7 @@ export function DeckGLMap({
     const data = layerStates.temperature_projection?.data as any
     if (!data || !data.tile_url) return null
 
-    const tileUrl = data.tile_url
+    const tileUrl = resolveAbsoluteTileUrl(data.tile_url)
     return new TileLayer({
       id: 'temperature-projection-tiles',
       data: tileUrl,
@@ -595,16 +602,17 @@ export function DeckGLMap({
     const tileData = layerStates.precipitation_drought?.data as any
     if (!tileData || !tileData.tile_url) return null
 
+    const resolvedTileUrl = resolveAbsoluteTileUrl(tileData.tile_url)
     return new TileLayer({
       id: 'precipitation-drought-tiles',
-      data: tileData.tile_url,
+      data: resolvedTileUrl,
       minZoom: 0,
       maxZoom: 19,
       tileSize: 256,
       opacity: controls.droughtOpacity ?? 0.75,
       getTileData: (tile: any) => {
         const { x, y, z } = tile.index
-        const url = tileData.tile_url.replace('{z}', z).replace('{x}', x).replace('{y}', y)
+        const url = resolvedTileUrl.replace('{z}', z).replace('{x}', x).replace('{y}', y)
         return new Promise((resolve, reject) => {
           const image = new Image()
           image.crossOrigin = 'anonymous'
@@ -767,16 +775,17 @@ export function DeckGLMap({
     const data = layerStates.urban_heat_island?.data as any
     if (!data || !data.tile_url) return null
 
+    const resolvedUrl = resolveAbsoluteTileUrl(data.tile_url)
     return new TileLayer({
       id: 'urban-heat-island-tiles',
-      data: data.tile_url,
+      data: resolvedUrl,
       minZoom: 0,
       maxZoom: 19,
       tileSize: 256,
       opacity: controls.urbanHeatOpacity ?? 0.3,
       getTileData: (tile: any) => {
         const { x, y, z } = tile.index
-        const url = data.tile_url.replace('{z}', z).replace('{x}', x).replace('{y}', y)
+        const url = resolvedUrl.replace('{z}', z).replace('{x}', x).replace('{y}', y)
         return new Promise((resolve, reject) => {
           const image = new Image()
           image.crossOrigin = 'anonymous'
@@ -825,16 +834,17 @@ export function DeckGLMap({
     })
     if (!data || !data.tile_url) return null
 
+    const resolvedUrl = resolveAbsoluteTileUrl(data.tile_url)
     return new TileLayer({
       id: 'topographic-relief-tiles',
-      data: data.tile_url,
+      data: resolvedUrl,
       minZoom: 0,
       maxZoom: 19,
       tileSize: 256,
       opacity: opacityValue,
       getTileData: (tile: any) => {
         const { x, y, z } = tile.index
-        const url = data.tile_url.replace('{z}', z).replace('{x}', x).replace('{y}', y)
+        const url = resolvedUrl.replace('{z}', z).replace('{x}', x).replace('{y}', y)
         return new Promise((resolve, reject) => {
           const image = new Image()
           image.crossOrigin = 'anonymous'

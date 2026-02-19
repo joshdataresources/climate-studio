@@ -9,6 +9,13 @@ import type { MapRef } from "react-map-gl"
 import { useClimate } from "@climate-studio/core"
 import { MegaregionLayer } from "./MegaregionLayer"
 
+// Resolve relative tile URLs (e.g. "/api/climate/...") to absolute backend URLs for production
+const BACKEND_BASE_URL =
+  import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001';
+
+const resolveAbsoluteTileUrl = (tileUrl: string): string =>
+  tileUrl.startsWith('/') ? `${BACKEND_BASE_URL}${tileUrl}` : tileUrl;
+
 interface MapboxGlobeProps {
   className?: string
   center: { lat: number; lng: number }
@@ -288,7 +295,7 @@ export function MapboxGlobe({
           <Source
             id="temperature-projection"
             type="raster"
-            tiles={[tempProjectionData.tile_url]}
+            tiles={[resolveAbsoluteTileUrl(tempProjectionData.tile_url)]}
             tileSize={256}
           >
             <Layer
@@ -335,7 +342,7 @@ export function MapboxGlobe({
           <Source
             id="precipitation-drought"
             type="raster"
-            tiles={[precipitationDroughtData.tile_url]}
+            tiles={[resolveAbsoluteTileUrl(precipitationDroughtData.tile_url)]}
             tileSize={256}
           >
             <Layer
@@ -353,7 +360,7 @@ export function MapboxGlobe({
           <Source
             id="topographic-relief"
             type="raster"
-            tiles={[topographicReliefData.tile_url]}
+            tiles={[resolveAbsoluteTileUrl(topographicReliefData.tile_url)]}
             tileSize={256}
           >
             <Layer
@@ -371,7 +378,7 @@ export function MapboxGlobe({
           <Source
             id="urban-heat-island"
             type="raster"
-            tiles={[urbanHeatData.tile_url]}
+            tiles={[resolveAbsoluteTileUrl(urbanHeatData.tile_url)]}
             tileSize={256}
           >
             <Layer

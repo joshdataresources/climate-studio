@@ -4117,7 +4117,9 @@ export default function WaterAccessView() {
         return () => clearTimeout(retryTimer)
       }
 
-      const tileUrl = precipitationDroughtData.tile_url
+      const rawPrecipTileUrl = precipitationDroughtData.tile_url
+      const precipBackendBase = import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001'
+      const tileUrl = rawPrecipTileUrl.startsWith('/') ? `${precipBackendBase}${rawPrecipTileUrl}` : rawPrecipTileUrl
 
       // Add or update source
       if (!map.getSource(sourceId)) {
