@@ -4362,6 +4362,60 @@ export default function WaterAccessView() {
         }}
       />
 
+      {/* Climate layer loading banner */}
+      {(() => {
+        const loadingLayers: string[] = []
+        if (isTemperatureProjectionActive && layerStates.temperature_projection?.status === 'loading') {
+          loadingLayers.push('Temperature Anomaly')
+        }
+        if (isPrecipitationDroughtActive && layerStates.precipitation_drought?.status === 'loading') {
+          loadingLayers.push('Precipitation & Drought')
+        }
+        if (loadingLayers.length === 0) return null
+        return (
+          <div style={{
+            position: 'absolute',
+            top: 12,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(15, 23, 42, 0.88)',
+            backdropFilter: 'blur(12px)',
+            color: '#e2e8f0',
+            padding: '10px 20px',
+            borderRadius: 10,
+            zIndex: 1100,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            fontSize: 13,
+            fontWeight: 500,
+            fontFamily: 'Inter, system-ui, sans-serif',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            whiteSpace: 'nowrap',
+            animation: 'fadeIn 0.3s ease-out'
+          }}>
+            <div style={{
+              width: 16,
+              height: 16,
+              border: '2px solid rgba(90, 124, 236, 0.3)',
+              borderTop: '2px solid #5A7CEC',
+              borderRadius: '50%',
+              animation: 'spin 0.8s linear infinite'
+            }} />
+            <span>
+              Warming up Earth Engine{' '}
+              <span style={{ color: '#94a3b8' }}>
+                &mdash; loading {loadingLayers.join(' & ')}
+              </span>
+            </span>
+            <style>{`
+              @keyframes spin { to { transform: rotate(360deg); } }
+              @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(-8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+            `}</style>
+          </div>
+        )
+      })()}
+
       {/* Error overlay for map issues */}
       {error && error.includes('Mapbox') && (
         <div style={{
