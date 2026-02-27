@@ -4362,6 +4362,60 @@ export default function WaterAccessView() {
         }}
       />
 
+      {/* Climate layer loading banner */}
+      {(() => {
+        const loadingLayers: string[] = []
+        if (isTemperatureProjectionActive && layerStates.temperature_projection?.status === 'loading') {
+          loadingLayers.push('Temperature Anomaly')
+        }
+        if (isPrecipitationDroughtActive && layerStates.precipitation_drought?.status === 'loading') {
+          loadingLayers.push('Precipitation & Drought')
+        }
+        if (loadingLayers.length === 0) return null
+        return (
+          <div style={{
+            position: 'absolute',
+            top: 12,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: 'rgba(15, 23, 42, 0.88)',
+            backdropFilter: 'blur(12px)',
+            color: '#e2e8f0',
+            padding: '10px 20px',
+            borderRadius: 10,
+            zIndex: 1100,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            fontSize: 13,
+            fontWeight: 500,
+            fontFamily: 'Inter, system-ui, sans-serif',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.3)',
+            whiteSpace: 'nowrap',
+            animation: 'fadeIn 0.3s ease-out'
+          }}>
+            <div style={{
+              width: 16,
+              height: 16,
+              border: '2px solid rgba(90, 124, 236, 0.3)',
+              borderTop: '2px solid #5A7CEC',
+              borderRadius: '50%',
+              animation: 'spin 0.8s linear infinite'
+            }} />
+            <span>
+              Warming up Earth Engine{' '}
+              <span style={{ color: '#94a3b8' }}>
+                &mdash; loading {loadingLayers.join(' & ')}
+              </span>
+            </span>
+            <style>{`
+              @keyframes spin { to { transform: rotate(360deg); } }
+              @keyframes fadeIn { from { opacity: 0; transform: translateX(-50%) translateY(-8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+            `}</style>
+          </div>
+        )
+      })()}
+
       {/* Error overlay for map issues */}
       {error && error.includes('Mapbox') && (
         <div style={{
@@ -4932,10 +4986,10 @@ export default function WaterAccessView() {
                 <span className="text-[11px] text-muted-foreground">Sources</span>
                 <button
                   onClick={() => setShowSourceInfo(!showSourceInfo)}
-                  className={`relative inline-flex h-[18px] w-[32px] flex-shrink-0 items-center rounded-[999px] transition-colors duration-200 ${showSourceInfo ? 'bg-[#5a7cec]' : 'bg-[#c8d0f5]'}`}
+                  className={`relative inline-flex h-[18px] w-[32px] flex-shrink-0 items-center rounded-[10px] transition-colors duration-200 ${showSourceInfo ? 'bg-[#c8d0f5]' : 'bg-[#D0D5DD]'}`}
                 >
                   <span
-                    className={`inline-block h-[14px] w-[14px] transform rounded-[999px] shadow-sm transition-transform duration-200 ${showSourceInfo ? 'translate-x-[16px] bg-white' : 'translate-x-[2px] bg-[#5a7cec]'}`}
+                    className={`inline-block h-[14px] w-[14px] transform rounded-[10px] shadow-sm transition-transform duration-200 ${showSourceInfo ? 'translate-x-[16px] bg-[#5a7cec]' : 'translate-x-[2px] bg-[#94a3b8]'}`}
                   />
                 </button>
               </div>
@@ -5327,60 +5381,6 @@ export default function WaterAccessView() {
                     </div>
                   )}
 
-                  {/* Groundwater */}
-                  {layersInWidget.groundwater && showGroundwaterLayer && (
-                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
-                      <div
-                        className="flex items-center justify-between cursor-pointer mb-2.5"
-                        onClick={() => {
-                          const newCollapsed = new Set(collapsedFeatures)
-                          if (newCollapsed.has('groundwater')) {
-                            newCollapsed.delete('groundwater')
-                          } else {
-                            newCollapsed.add('groundwater')
-                          }
-                          setCollapsedFeatures(newCollapsed)
-                        }}
-                      >
-                        <h4 className="text-[13px] font-semibold">Groundwater</h4>
-                        <ChevronDown
-                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('groundwater') ? '-rotate-90' : ''}`}
-                        />
-                      </div>
-                      {!collapsedFeatures.has('groundwater') && (
-                        <>
-                          {/* Transparency Control */}
-                          <div className="space-y-2 mb-4">
-                            <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
-                            <Slider
-                              min={0}
-                              max={1}
-                              step={0.05}
-                              value={[graceOpacity]}
-                              onValueChange={(value) => setGraceOpacity(value[0])}
-                              className="mb-2"
-                            />
-                          </div>
-
-                          {/* GRACE Legend */}
-                          <div className="space-y-1.5">
-                            <h4 className="text-xs font-semibold text-foreground mb-2">Change vs. 2004-2009 Baseline</h4>
-                            <div className="h-3 w-full rounded" style={{
-                              background: 'linear-gradient(to right, #b2182b 0%, #ef8a62 20%, #fddbc7 40%, #f7f7f7 50%, #d1e5f0 60%, #67a9cf 80%, #2166ac 100%)'
-                            }} />
-                            <div className="flex justify-between text-[9px] text-muted-foreground">
-                              <span>-20 cm</span>
-                              <span>Depletion</span>
-                              <span>0</span>
-                              <span>Recharge</span>
-                              <span>+20 cm</span>
-                            </div>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-
                   {/* Historic Groundwater Baseline */}
                   {layersInWidget.groundwater && showGRACELayer && (
                     <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
@@ -5403,6 +5403,19 @@ export default function WaterAccessView() {
                       </div>
                       {!collapsedFeatures.has('graceGroundwater') && (
                         <>
+                          {/* Transparency Control */}
+                          <div className="space-y-2 mb-4">
+                            <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
+                            <Slider
+                              min={0}
+                              max={1}
+                              step={0.05}
+                              value={[graceOpacity]}
+                              onValueChange={(value) => setGraceOpacity(value[0])}
+                              className="mb-2"
+                            />
+                          </div>
+
                           {/* Description */}
                           <div className="mb-4 p-3 rounded-lg bg-blue-50/50 dark:bg-blue-900/10">
                             <p className="text-xs text-muted-foreground">
