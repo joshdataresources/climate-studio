@@ -261,7 +261,8 @@ export const climateLayers: ClimateLayerDefinition[] = [
           west,
           year: projectionYear,
           scenario,
-          mode: temperatureMode
+          mode: temperatureMode,
+          zoom: Math.round(bounds?.zoom ?? 0)
         };
       }
     },

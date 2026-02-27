@@ -1517,9 +1517,9 @@ app.get('/api/nasa/temperature-projection', async (req, res) => {
 // Temperature Projection Tiles - Proxy to Python Climate Service
 app.get('/api/climate/temperature-projection/tiles', async (req, res) => {
   try {
-    const { north, south, east, west, year, scenario, mode } = req.query;
+    const { north, south, east, west, year, scenario, mode, zoom } = req.query;
 
-    console.log(`🌡️ Proxying temperature projection tiles request: year=${year}, scenario=${scenario}, mode=${mode}...`);
+    console.log(`🌡️ Proxying temperature projection tiles request: year=${year}, scenario=${scenario}, mode=${mode}, zoom=${zoom}...`);
 
     // Build query parameters for climate service
     const params = new URLSearchParams();
@@ -1530,6 +1530,7 @@ app.get('/api/climate/temperature-projection/tiles', async (req, res) => {
     if (year) params.append('year', year);
     if (scenario) params.append('scenario', scenario);
     if (mode) params.append('mode', mode);
+    if (zoom) params.append('zoom', zoom);
 
     // Proxy request to Python climate service
     const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/temperature-projection/tiles?${params.toString()}`;
@@ -1553,7 +1554,29 @@ app.get('/api/climate/temperature-projection/tiles', async (req, res) => {
   }
 });
 
-// Temperature Projection Proxy Tiles - forward EE tile requests through Python climate service
+// Temperature Projection Proxy Tiles - Downscaled (CMIP6 + UHI at 300m)
+app.get('/api/climate/temperature-projection/proxy-tile/:year/:scenario/:mode/downscaled/:z/:x/:y', async (req, res) => {
+  try {
+    const { year, scenario, mode, z, x, y } = req.params;
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/temperature-projection/proxy-tile/${year}/${scenario}/${mode}/downscaled/${z}/${x}/${y}`;
+
+    const response = await axios.get(climateServiceUrl, {
+      responseType: 'arraybuffer',
+      timeout: 15000
+    });
+
+    res.set('Content-Type', 'image/png');
+    res.set('Cache-Control', 'public, max-age=3600');
+    res.send(response.data);
+  } catch (error) {
+    console.error('❌ Downscaled temperature proxy tile error:', error.message);
+    const transparent = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+    res.set('Content-Type', 'image/png');
+    res.send(transparent);
+  }
+});
+
+// Temperature Projection Proxy Tiles - Standard (CMIP6 at ~5km)
 app.get('/api/climate/temperature-projection/proxy-tile/:year/:scenario/:mode/:z/:x/:y', async (req, res) => {
   try {
     const { year, scenario, mode, z, x, y } = req.params;

@@ -447,6 +447,15 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
     const currentZoom = fetchContext.bounds?.zoom ?? 10;
     const currentBoundsKey = boundsKey;
 
+    // Compute zoom band for temperature projection microclimate downscaling.
+    // When zoom crosses 10, the backend switches from standard CMIP6 (~25km)
+    // to downscaled CMIP6+UHI tiles (300m), so we need to refetch.
+    const getZoomBand = (zoom: number): string => {
+      if (zoom >= 10) return 'city';
+      return 'regional';
+    };
+    const currentZoomBand = getZoomBand(currentZoom);
+
     // Track control parameters separately from bounds for tile layers
     const controlsKey = JSON.stringify({
       scenario: fetchContext.scenario,
@@ -455,7 +464,8 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       season: fetchContext.urbanHeatSeason,
       colorScheme: fetchContext.urbanHeatColorScheme,
       reliefStyle: fetchContext.reliefStyle,
-      droughtMetric: fetchContext.droughtMetric
+      droughtMetric: fetchContext.droughtMetric,
+      tempZoomBand: currentZoomBand
     });
     const controlsChanged = prevControlsRef.current !== null && prevControlsRef.current !== controlsKey;
 
