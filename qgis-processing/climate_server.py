@@ -60,6 +60,7 @@ from urban_expansion import UrbanExpansionService
 from grace_groundwater import GRACEGroundwaterService
 from metro_humidity import MetroHumidityService
 from wet_bulb_service import WetBulbService
+from microclimate_downscaling import MicroclimateDownscalingService
 
 # Configure logging
 logging.basicConfig(
@@ -89,6 +90,7 @@ urban_expansion_service = UrbanExpansionService(ee_project=ee_project)
 wet_bulb_service = WetBulbService(project_id=ee_project)
 groundwater_service = GRACEGroundwaterService(ee_project=ee_project)
 metro_humidity_service = MetroHumidityService(ee_project=ee_project)
+microclimate_service = MicroclimateDownscalingService(ee_project=ee_project)
 
 # Health check endpoint
 @app.route('/health', methods=['GET'])
@@ -254,7 +256,10 @@ def temperature_projection():
 @app.route('/api/climate/temperature-projection/tiles', methods=['GET'])
 def temperature_projection_tiles():
     """
-    Get temperature projection tile URL for smooth heatmap visualization
+    Get temperature projection tile URL for smooth heatmap visualization.
+
+    When zoom >= 10, returns downscaled tiles that combine CMIP6 projections
+    with 300m UHI spatial patterns for city-level microclimate detail.
 
     Query Parameters:
         north (float): Northern latitude bound (optional, for API compatibility)
@@ -264,6 +269,7 @@ def temperature_projection_tiles():
         year (int): Projection year (2020-2100), default 2050
         scenario (str): Climate scenario (rcp26, rcp45, rcp85), default rcp45
         mode (str): Display mode ('anomaly' or 'actual'), default 'anomaly'
+        zoom (int): Map zoom level - triggers microclimate downscaling at >= 10
 
     Returns:
         JSON with Earth Engine tile URL and metadata
@@ -277,6 +283,7 @@ def temperature_projection_tiles():
         year = request.args.get('year', default=2050, type=int)
         scenario = request.args.get('scenario', default='rcp45', type=str)
         mode = request.args.get('mode', default='anomaly', type=str)
+        zoom = request.args.get('zoom', default=0, type=int)
 
         # Validate year range
         if not (2020 <= year <= 2100):
@@ -299,7 +306,13 @@ def temperature_projection_tiles():
                 'error': 'Mode must be one of: anomaly, actual'
             }), 400
 
-        logger.info(f"Temperature projection tile request: year={year}, scenario={scenario}, mode={mode}")
+        # Determine whether to use downscaled microclimate tiles
+        use_downscaling = microclimate_service.should_downscale(zoom)
+
+        logger.info(
+            f"Temperature projection tile request: year={year}, scenario={scenario}, "
+            f"mode={mode}, zoom={zoom}, downscale={use_downscaling}"
+        )
 
         # Build bounds dict (optional, not used for global tiles)
         bounds = {
@@ -309,29 +322,58 @@ def temperature_projection_tiles():
             'west': west or -180
         }
 
-        # Build a cache key from the parameters that affect the tile image
-        cache_key = f"temp:{year}:{scenario}:{mode}"
+        if use_downscaling:
+            # --- Downscaled path: CMIP6 + UHI at 300m ---
+            cache_key = f"temp_downscaled:{year}:{scenario}:{mode}"
 
-        # Get tile fetcher (or use cached one)
-        if cache_key not in _ee_tile_fetcher_cache:
-            result = climate_service.get_tile_url(
-                bounds=bounds,
-                year=year,
-                scenario=scenario,
-                mode=mode
-            )
-            if not result:
-                return jsonify({
-                    'success': False,
-                    'error': 'Could not generate tile URL'
-                }), 500
-            _ee_tile_fetcher_cache[cache_key] = result
+            if cache_key not in _ee_tile_fetcher_cache:
+                result = microclimate_service.get_downscaled_tile_url(
+                    year=year,
+                    scenario=scenario,
+                    mode=mode
+                )
+                if not result:
+                    # Fallback to standard CMIP6 tiles if downscaling fails
+                    logger.warning("Downscaling failed, falling back to standard CMIP6 tiles")
+                    cache_key = f"temp:{year}:{scenario}:{mode}"
+                    if cache_key not in _ee_tile_fetcher_cache:
+                        result = climate_service.get_tile_url(
+                            bounds=bounds, year=year, scenario=scenario, mode=mode
+                        )
+                        if not result:
+                            return jsonify({
+                                'success': False,
+                                'error': 'Could not generate tile URL'
+                            }), 500
+                    else:
+                        result = _ee_tile_fetcher_cache[cache_key]
+                else:
+                    _ee_tile_fetcher_cache[cache_key] = result
+            else:
+                result = _ee_tile_fetcher_cache[cache_key]
+                logger.info(f"Using cached downscaled tile fetcher for {cache_key}")
+
+            # Proxy URL includes 'downscaled' marker so the proxy route knows which fetcher to use
+            proxy_url = f"/api/climate/temperature-projection/proxy-tile/{year}/{scenario}/{mode}/downscaled/{{z}}/{{x}}/{{y}}"
         else:
-            result = _ee_tile_fetcher_cache[cache_key]
-            logger.info(f"Using cached tile fetcher for {cache_key}")
+            # --- Standard path: CMIP6 at ~5km ---
+            cache_key = f"temp:{year}:{scenario}:{mode}"
 
-        # Return a proxy URL that the browser can call without auth
-        proxy_url = f"/api/climate/temperature-projection/proxy-tile/{year}/{scenario}/{mode}/{{z}}/{{x}}/{{y}}"
+            if cache_key not in _ee_tile_fetcher_cache:
+                result = climate_service.get_tile_url(
+                    bounds=bounds, year=year, scenario=scenario, mode=mode
+                )
+                if not result:
+                    return jsonify({
+                        'success': False,
+                        'error': 'Could not generate tile URL'
+                    }), 500
+                _ee_tile_fetcher_cache[cache_key] = result
+            else:
+                result = _ee_tile_fetcher_cache[cache_key]
+                logger.info(f"Using cached tile fetcher for {cache_key}")
+
+            proxy_url = f"/api/climate/temperature-projection/proxy-tile/{year}/{scenario}/{mode}/{{z}}/{{x}}/{{y}}"
 
         return jsonify({
             'success': True,
@@ -345,6 +387,40 @@ def temperature_projection_tiles():
             'success': False,
             'error': str(e)
         }), 500
+
+
+@app.route('/api/climate/temperature-projection/proxy-tile/<int:year>/<scenario>/<mode>/downscaled/<int:z>/<int:x>/<int:y>', methods=['GET'])
+def temperature_projection_proxy_tile_downscaled(year, scenario, mode, z, x, y):
+    """Proxy downscaled (CMIP6 + UHI) temperature tiles through the server"""
+    try:
+        cache_key = f"temp_downscaled:{year}:{scenario}:{mode}"
+
+        if cache_key not in _ee_tile_fetcher_cache:
+            logger.info(f"Cache miss for {cache_key} - regenerating downscaled tile fetcher")
+            result = microclimate_service.get_downscaled_tile_url(
+                year=year, scenario=scenario, mode=mode
+            )
+            if not result:
+                # Fallback to standard tiles
+                logger.warning("Downscaling regeneration failed, falling back to standard tiles")
+                return temperature_projection_proxy_tile(year, scenario, mode, z, x, y)
+            _ee_tile_fetcher_cache[cache_key] = result
+
+        tile_fetcher = _ee_tile_fetcher_cache[cache_key]['tile_fetcher']
+        tile_data = tile_fetcher.fetch_tile(x, y, z)
+        return tile_data, 200, {
+            'Content-Type': 'image/png',
+            'Cache-Control': 'public, max-age=3600'
+        }
+    except Exception as e:
+        logger.error(f"Error proxying downscaled tile {z}/{x}/{y}: {e}")
+        import io
+        from PIL import Image
+        img = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
+        buf = io.BytesIO()
+        img.save(buf, format='PNG')
+        buf.seek(0)
+        return buf.getvalue(), 200, {'Content-Type': 'image/png'}
 
 
 @app.route('/api/climate/temperature-projection/proxy-tile/<int:year>/<scenario>/<mode>/<int:z>/<int:x>/<int:y>', methods=['GET'])
