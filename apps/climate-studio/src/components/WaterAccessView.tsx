@@ -4442,7 +4442,11 @@ export default function WaterAccessView() {
 
       {/* Left Sidebar - Search & Views */}
       {!panelsCollapsed && !isTablet && (
-        <aside className="absolute left-[92px] top-4 z-[1000] flex h-[calc(100vh-32px)] w-[352px] flex-col gap-4 pointer-events-none">
+        <aside
+          className="absolute left-[92px] top-4 z-[1000] flex w-[352px] flex-col gap-4 pointer-events-none safari-panel-height"
+          style={{
+            height: 'calc(100vh - 32px)'
+          }}>
           <div className="pointer-events-auto flex-shrink-0">
             <SearchAndViewsPanel
               viewType="waterAccess"
@@ -5980,7 +5984,12 @@ export default function WaterAccessView() {
         const showClimateWidget = shouldShowClimateWidget(enabledLayerIds)
 
         return (
-          <aside className="tablet-combined-panel absolute left-[92px] top-4 z-[1000] flex h-[calc(100vh-32px)] w-[352px] flex-col gap-3 pointer-events-none overflow-y-auto overflow-x-hidden" style={{ scrollbarWidth: 'none' }}>
+          <aside
+            className="tablet-combined-panel absolute left-[92px] top-4 z-[1000] flex w-[352px] flex-col gap-3 pointer-events-none overflow-y-auto overflow-x-hidden safari-panel-height"
+            style={{
+              height: 'calc(100vh - 32px)',
+              scrollbarWidth: 'none'
+            }}>
 
             {/* ── 1. Views / Bookmarks ── */}
             <div className="pointer-events-auto flex-shrink-0 overflow-hidden">

@@ -538,6 +538,17 @@ button[role="combobox"][aria-expanded="true"] {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+ * SAFARI-SPECIFIC FIXES
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Safari panel height fix - uses dynamic viewport height (dvh) and safe area insets */
+@supports (height: 100dvh) {
+  .safari-panel-height {
+    height: calc(100dvh - 32px - env(safe-area-inset-bottom, 0px)) !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
  * LIGHT THEME OVERRIDES
  * ═══════════════════════════════════════════════════════════════════════════ */
 
@@ -884,7 +895,9 @@ span[data-radix-slider-track] {
     width: 320px !important;
     max-width: calc(100vw - 32px) !important;
     height: auto !important;
+    /* Use dvh (dynamic viewport height) for Safari, with fallbacks */
     max-height: calc(100vh - 76px) !important;
+    max-height: calc(100dvh - 76px - env(safe-area-inset-bottom)) !important;
     z-index: 3000 !important;
     overflow-y: auto !important;
     -webkit-overflow-scrolling: touch;
