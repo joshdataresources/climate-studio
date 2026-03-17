@@ -652,7 +652,10 @@ export default function WaterAccessView() {
   const { theme } = useTheme()
 
   // Use sidebar context for hiding/showing panels
-  const { panelsCollapsed } = useSidebar()
+  const { panelsCollapsed, isTablet } = useSidebar()
+  const [tabletViewsOpen, setTabletViewsOpen] = useState(false)
+  const [tabletClimateOpen, setTabletClimateOpen] = useState(true)
+  const [tabletActiveTab, setTabletActiveTab] = useState<'layers' | 'features'>('layers')
 
   // Use layer context for climate widget
   const { getEnabledLayersForView } = useLayer()
@@ -690,7 +693,7 @@ export default function WaterAccessView() {
   const [showRiversLayer, setShowRiversLayer] = useState(true) // Default ON
   const [showCanalsLayer, setShowCanalsLayer] = useState(true) // Default ON - shows water infrastructure risk
   const [showAquifersLayer, setShowAquifersLayer] = useState(false)
-  const [showDamsLayer, setShowDamsLayer] = useState(false)
+  const [showDamsLayer, setShowDamsLayer] = useState(true) // Default ON - shows dam infrastructure
   const [showMetroHumidityLayer, setShowMetroHumidityLayer] = useState(true) // Default ON
   const [showGroundwaterLayer, setShowGroundwaterLayer] = useState(false)
   const [showFactoriesLayer, setShowFactoriesLayer] = useState(true)
@@ -727,7 +730,7 @@ export default function WaterAccessView() {
     metroWeather: true,
     factories: true,
     aiDataCenters: true,
-    dams: false,
+    dams: true,
     rivers: true,
     canals: true,
     seaLevel: false,
@@ -4373,7 +4376,7 @@ export default function WaterAccessView() {
         }
         if (loadingLayers.length === 0) return null
         return (
-          <div style={{
+          <div className="loading-toast" style={{
             position: 'absolute',
             top: 12,
             left: '50%',
@@ -4402,10 +4405,10 @@ export default function WaterAccessView() {
               borderRadius: '50%',
               animation: 'spin 0.8s linear infinite'
             }} />
-            <span>
-              Warming up Earth Engine{' '}
-              <span style={{ color: '#94a3b8' }}>
-                &mdash; loading {loadingLayers.join(' & ')}
+            <span style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.4 }}>
+              <span>Warming up Earth Engine</span>
+              <span style={{ color: '#94a3b8', fontSize: 11 }}>
+                loading {loadingLayers.join(' & ')}
               </span>
             </span>
             <style>{`
@@ -4438,7 +4441,7 @@ export default function WaterAccessView() {
       )}
 
       {/* Left Sidebar - Search & Views */}
-      {!panelsCollapsed && (
+      {!panelsCollapsed && !isTablet && (
         <aside className="absolute left-[92px] top-4 z-[1000] flex h-[calc(100vh-32px)] w-[352px] flex-col gap-4 pointer-events-none">
           <div className="pointer-events-auto flex-shrink-0">
             <SearchAndViewsPanel
@@ -4447,6 +4450,11 @@ export default function WaterAccessView() {
               activeLayerIds={[]}
               controls={controls}
             />
+          </div>
+
+          {/* Mobile-only: Climate Projections shown when layers drawer is open */}
+          <div className="mobile-climate-projections pointer-events-auto flex-shrink-0">
+            <ClimateProjectionsWidget />
           </div>
 
           {/* Water Access Layers Panel */}
@@ -4998,8 +5006,8 @@ export default function WaterAccessView() {
         </aside>
       )}
 
-      {/* Right Sidebar - Climate Projections Widget & Layer Controls */}
-      {!panelsCollapsed && (() => {
+      {/* Right Sidebar - Climate Projections Widget & Layer Controls (desktop only) */}
+      {!panelsCollapsed && !isTablet && (() => {
         // Check if Climate Projections widget should be shown
         const enabledLayers = getEnabledLayersForView('waterAccess')
         const enabledLayerIds = enabledLayers.map(l => l.id)
@@ -5965,10 +5973,301 @@ export default function WaterAccessView() {
 
 
 
+      {/* ═══ TABLET: Separate floating widgets in a single column ═══ */}
+      {!panelsCollapsed && isTablet && (() => {
+        const enabledLayers = getEnabledLayersForView('waterAccess')
+        const enabledLayerIds = enabledLayers.map(l => l.id)
+        const showClimateWidget = shouldShowClimateWidget(enabledLayerIds)
+
+        return (
+          <aside className="tablet-combined-panel absolute left-[92px] top-4 z-[1000] flex h-[calc(100vh-32px)] w-[352px] flex-col gap-3 pointer-events-none overflow-y-auto overflow-x-hidden" style={{ scrollbarWidth: 'none' }}>
+
+            {/* ── 1. Views / Bookmarks ── */}
+            <div className="pointer-events-auto flex-shrink-0 overflow-hidden">
+              {tabletViewsOpen ? (
+                <SearchAndViewsPanel
+                  viewType="waterAccess"
+                  searchPlaceholder="Search for a city, state, or country"
+                  activeLayerIds={[]}
+                  controls={controls}
+                  searchExtra={
+                    <button
+                      className="flex-shrink-0 p-1 hover:bg-black/5 rounded transition-colors border-none bg-transparent cursor-pointer"
+                      onClick={() => setTabletViewsOpen(false)}
+                    >
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  }
+                />
+              ) : (
+                <div className="widget-container">
+                  <div
+                    className="flex items-center justify-between cursor-pointer"
+                    onClick={() => setTabletViewsOpen(true)}
+                  >
+                    <h3 className="text-sm font-semibold">Views</h3>
+                    <ChevronDown className="h-4 w-4 -rotate-90 transition-transform" />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ── 2. Climate Projections ── */}
+            <div className="pointer-events-auto flex-shrink-0 overflow-hidden">
+              {tabletClimateOpen ? (
+                <div className="relative">
+                  <ClimateProjectionsWidget />
+                  {/* Overlay accordion toggle on the widget header */}
+                  <button
+                    className="absolute top-3 right-3 p-1 rounded hover:bg-black/5 transition-colors border-none bg-transparent cursor-pointer"
+                    onClick={() => setTabletClimateOpen(false)}
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="widget-container">
+                  <div
+                    className="flex items-center justify-between cursor-pointer"
+                    onClick={() => setTabletClimateOpen(true)}
+                  >
+                    <h3 className="text-sm font-semibold">Climate Projections</h3>
+                    <ChevronDown className="h-4 w-4 -rotate-90 transition-transform" />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ── 3. Layers | Features Tabs ── */}
+            <div className="widget-container pointer-events-auto flex-1 min-h-[200px] flex flex-col overflow-hidden">
+
+              {/* Layers tab content */}
+              {tabletActiveTab === 'layers' && (
+                <div className="flex flex-col flex-1 min-h-0 overflow-hidden -mx-4 -mt-4 -mb-4">
+                  {/* Header row: tab pills + Manage Layers */}
+                  <div className="flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0">
+                    <div className="flex gap-1.5">
+                      <button
+                        className="px-3 py-1 text-[11px] font-semibold rounded-full transition-all"
+                        style={{ backgroundColor: '#5a7cec', color: '#fff' }}
+                        onClick={() => setTabletActiveTab('layers')}
+                      >
+                        Layers
+                      </button>
+                      <button
+                        className="px-3 py-1 text-[11px] font-semibold rounded-full transition-all bg-black/[0.04]"
+                        onClick={() => setTabletActiveTab('features')}
+                      >
+                        Features
+                      </button>
+                    </div>
+                    <div className="relative" ref={manageLayersDropdownRef}>
+                      <button
+                        onClick={() => setShowManageLayersDropdown(!showManageLayersDropdown)}
+                        className="flex items-center gap-1 text-[#5a7cec] hover:text-[#4a6cd6] transition-colors bg-transparent border-none"
+                      >
+                        <Layers className="h-4 w-4" />
+                        <span className="text-[11px] font-semibold">Manage Layers</span>
+                        <ChevronDown className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Layers list */}
+                  <div className="border-t border-border/100 flex flex-col flex-1 min-h-0 overflow-hidden">
+                    <div className="space-y-2 overflow-y-auto flex-1 py-3 px-4">
+                      {layersInWidget.metroWeather && (
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showMetroHumidityLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowMetroHumidityLayer(!showMetroHumidityLayer)}>
+                          <MapPin className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Metro Weather</span></div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, metroWeather: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.factories && (
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showFactoriesLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowFactoriesLayer(!showFactoriesLayer)}>
+                          <Factory className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Factories</span></div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, factories: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.aiDataCenters && (
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showAIDataCentersLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowAIDataCentersLayer(!showAIDataCentersLayer)}>
+                          <Zap className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">AI Data Centers</span></div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, aiDataCenters: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.rivers && (
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showRiversLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowRiversLayer(!showRiversLayer)}>
+                          <Waves className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">River Flow Status</span></div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, rivers: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.canals && (
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showCanalsLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowCanalsLayer(!showCanalsLayer)}>
+                          <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Canals & Aqueducts</span></div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, canals: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.wetBulb && (
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isWetBulbActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleWetBulb()}>
+                          <CloudRain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Wet Bulb Temperature</span></div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, wetBulb: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.temperature && (
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isTemperatureProjectionActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleTemperatureProjection()}>
+                          <TrendingUp className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Future Temperature Anomaly</span></div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, temperature: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.topographic && (
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showTopographicRelief ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowTopographicRelief(!showTopographicRelief)}>
+                          <Mountain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Topographic Relief</span></div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, topographic: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* View All / Sources footer */}
+                  <div className="flex items-center justify-between px-4 py-2 border-t border-border/100 flex-shrink-0">
+                    <button
+                      className="text-[11px] font-semibold text-[#5a7cec] hover:text-[#4a6cd6] bg-transparent border-none cursor-pointer"
+                      onClick={() => {
+                        if (selectAllLayers) {
+                          setLayersInWidget({ metroWeather: false, factories: false, aiDataCenters: false, dams: false, rivers: false, canals: false, seaLevel: false, aquifers: false, groundwater: false, precipitation: false, wetBulb: false, temperature: false, topographic: false, metroPopulation: false })
+                        } else {
+                          setLayersInWidget({ metroWeather: true, factories: true, aiDataCenters: true, dams: true, rivers: true, canals: true, seaLevel: true, aquifers: true, groundwater: true, precipitation: true, wetBulb: true, temperature: true, topographic: true, metroPopulation: true })
+                        }
+                      }}
+                    >{selectAllLayers ? 'Remove All Layers' : 'View All Layers'}</button>
+                    <div className="flex items-center gap-1">
+                      <span className="text-[11px] text-muted-foreground">Sources</span>
+                      <button
+                        onClick={() => setShowSourceInfo(!showSourceInfo)}
+                        className={`relative inline-flex h-[18px] w-[32px] flex-shrink-0 items-center rounded-[10px] transition-colors duration-200 ${showSourceInfo ? 'bg-[#c8d0f5]' : 'bg-[#D0D5DD]'}`}
+                      >
+                        <span className={`inline-block h-[14px] w-[14px] transform rounded-[10px] shadow-sm transition-transform duration-200 ${showSourceInfo ? 'translate-x-[16px] bg-[#5a7cec]' : 'translate-x-[2px] bg-[#94a3b8]'}`} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Features tab content */}
+              {tabletActiveTab === 'features' && (
+                <div className="flex flex-col flex-1 min-h-0 overflow-hidden -mx-4 -mt-4 -mb-4">
+                  <div className="flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0">
+                    <div className="flex gap-1.5">
+                      <button
+                        className="px-3 py-1 text-[11px] font-semibold rounded-full transition-all bg-black/[0.04]"
+                        onClick={() => setTabletActiveTab('layers')}
+                      >
+                        Layers
+                      </button>
+                      <button
+                        className="px-3 py-1 text-[11px] font-semibold rounded-full transition-all"
+                        style={{ backgroundColor: '#5a7cec', color: '#fff' }}
+                        onClick={() => setTabletActiveTab('features')}
+                      >
+                        Features
+                      </button>
+                    </div>
+                  </div>
+                  <div className="space-y-2 overflow-y-auto flex-1 px-4 py-3 border-t border-border/100">
+                    {/* Metro Weather Controls */}
+                    {layersInWidget.metroWeather && showMetroHumidityLayer && (
+                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('metroWeather') ? n.delete('metroWeather') : n.add('metroWeather'); setCollapsedFeatures(n) }}>
+                          <h4 className="text-[13px] font-semibold">Metro Weather</h4>
+                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('metroWeather') ? '-rotate-90' : ''}`} />
+                        </div>
+                        {!collapsedFeatures.has('metroWeather') && (
+                          <div className="space-y-3">
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox" className="h-4 w-4 accent-blue-500" checked={showHumidityWetBulb} onChange={() => setShowHumidityWetBulb(!showHumidityWetBulb)} />
+                              <span className="text-[13px] text-foreground">Humidity & Wet Bulb Events</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox" className="h-4 w-4 accent-blue-500" checked={showTempHumidity} onChange={() => setShowTempHumidity(!showTempHumidity)} />
+                              <span className="text-[13px] text-foreground">Temperature & Humidity</span>
+                            </label>
+                            <label className="flex items-center gap-2 cursor-pointer">
+                              <input type="checkbox" className="h-4 w-4 accent-blue-500" checked={showAverageTemperatures} onChange={() => setShowAverageTemperatures(!showAverageTemperatures)} />
+                              <span className="text-[13px] text-foreground">Average Temperature</span>
+                            </label>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Factory Filters */}
+                    {layersInWidget.factories && showFactoriesLayer && (
+                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('factories') ? n.delete('factories') : n.add('factories'); setCollapsedFeatures(n) }}>
+                          <h4 className="text-[13px] font-semibold">Factory Filters</h4>
+                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('factories') ? '-rotate-90' : ''}`} />
+                        </div>
+                        {!collapsedFeatures.has('factories') && (
+                          <>
+                            <div className="mb-4">
+                              <h4 className="text-xs font-semibold mb-2 text-muted-foreground">Status</h4>
+                              <div className="space-y-2">
+                                <label className="flex items-center gap-2"><input type="checkbox" className="accent-blue-500" defaultChecked /><span className="text-[13px]">Operational</span></label>
+                                <label className="flex items-center gap-2"><input type="checkbox" className="accent-blue-500" defaultChecked /><span className="text-[13px]">Under Construction</span></label>
+                                <label className="flex items-center gap-2"><input type="checkbox" className="accent-blue-500" defaultChecked /><span className="text-[13px]">Planned</span></label>
+                              </div>
+                            </div>
+                            <div>
+                              <h4 className="text-xs font-semibold mb-2 text-muted-foreground">Climate Risk</h4>
+                              <div className="space-y-2">
+                                <label className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-500"></div><input type="checkbox" className="accent-blue-500" defaultChecked /><span className="text-[13px]">Low (0-3)</span></label>
+                                <label className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-yellow-500"></div><input type="checkbox" className="accent-blue-500" defaultChecked /><span className="text-[13px]">Medium (4-6)</span></label>
+                                <label className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-orange-500"></div><input type="checkbox" className="accent-blue-500" defaultChecked /><span className="text-[13px]">High (7-10)</span></label>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    {/* River Flow Status */}
+                    {layersInWidget.rivers && showRiversLayer && (
+                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('rivers') ? n.delete('rivers') : n.add('rivers'); setCollapsedFeatures(n) }}>
+                          <h4 className="text-[13px] font-semibold">River Flow Status</h4>
+                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('rivers') ? '-rotate-90' : ''}`} />
+                        </div>
+                        {!collapsedFeatures.has('rivers') && (
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs text-muted-foreground">River Opacity</label>
+                              <span className="text-xs font-medium">{Math.round(riverOpacity * 100)}%</span>
+                            </div>
+                            <Slider value={[Math.round(riverOpacity * 100)]} min={10} max={100} step={5} onValueChange={(value) => setRiverOpacity(value[0] / 100)} />
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+          </aside>
+        )
+      })()}
+
       {/* Groundwater Details Panel - Bottom Center */}
       {
         selectedAquifer && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto" style={{ width: '640px' }}>
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel">
             <GroundwaterDetailsPanel
               selectedAquifer={selectedAquifer}
               projectionYear={projectionYear}
@@ -5981,7 +6280,7 @@ export default function WaterAccessView() {
       {/* Factory Details Panel - Bottom Center */}
       {
         selectedFactory && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto" style={{ width: '640px' }}>
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel">
             <FactoryDetailPanel
               factory={selectedFactory}
               onClose={() => setSelectedFactory(null)}
@@ -5993,7 +6292,7 @@ export default function WaterAccessView() {
       {/* AI Data Center Details Panel - Bottom Center */}
       {
         selectedDataCenter && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto" style={{ width: '640px' }}>
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel">
             <AIDataCenterDetailPanel
               datacenter={selectedDataCenter}
               onClose={() => setSelectedDataCenter(null)}
@@ -6005,7 +6304,7 @@ export default function WaterAccessView() {
       {/* Dam Details Panel - Bottom Center */}
       {
         selectedDam && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto" style={{ width: '640px' }}>
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel">
             <DamDetailsPanel
               selectedDam={selectedDam}
               onClose={() => setSelectedDam(null)}

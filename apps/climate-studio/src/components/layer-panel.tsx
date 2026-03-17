@@ -621,12 +621,12 @@ export function LayerPanel({ layerStates = {} }: LayerPanelProps) {
                   {showDescriptions ? (
                     <>
                       <p className="text-xs text-muted-foreground">{layer.description}</p>
-                      <p className="text-[11px] text-muted-foreground/80">
+                      <p className="layer-source text-[11px] text-muted-foreground/80">
                         Source: <span className="font-medium text-foreground">{layer.source.name}</span>
                       </p>
                     </>
                   ) : (
-                    <p className="text-[11px] text-muted-foreground/80 truncate">
+                    <p className="layer-source text-[11px] text-muted-foreground/80 truncate">
                       Source: <span className="font-medium text-foreground">{layer.source.name}</span>
                     </p>
                   )}
