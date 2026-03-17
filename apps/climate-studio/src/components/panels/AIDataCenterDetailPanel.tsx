@@ -301,7 +301,7 @@ export function AIDataCenterDetailPanel({ datacenter, onClose }: AIDataCenterDet
         </div>
 
         {/* RIGHT COLUMN - Supporting Info */}
-        <div className="flex-1 flex flex-col gap-3">
+        <div className="flex-1 flex flex-col gap-3 detail-popup-right-col">
           {/* Row 1: Investment + Investment per Job */}
           <div className="flex gap-3">
             <div

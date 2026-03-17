@@ -191,6 +191,8 @@ export interface SearchAndViewsPanelProps {
   }>
   // Optional custom click handler for custom search results
   onCustomResultClick?: (result: { id: string; display_name: string; location?: { lat: number; lon: number } }) => void
+  // Optional extra element to render inline with the search form (e.g. collapse chevron)
+  searchExtra?: React.ReactNode
 }
 
 export function SearchAndViewsPanel({
@@ -201,6 +203,7 @@ export function SearchAndViewsPanel({
   onCustomSearch,
   customSearchResults,
   onCustomResultClick,
+  searchExtra,
 }: SearchAndViewsPanelProps) {
   const { theme } = useTheme()
   const {
@@ -316,24 +319,27 @@ export function SearchAndViewsPanel({
   return (
     <div className="widget-container">
       {/* Search Form */}
-      <form className="flex gap-2" onSubmit={handleSearchSubmit}>
-        <div className="relative flex-1">
-          <Input
-            value={searchTerm}
-            onChange={event => setSearchTerm(event.target.value)}
-            placeholder={searchPlaceholder}
-            className="pr-10"
-          />
-          <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        </div>
-        <Button
-          type="submit"
-          variant="secondary"
-          disabled={isSearching}
-        >
-          {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
-        </Button>
-      </form>
+      <div className="flex gap-2 items-center">
+        <form className="flex gap-2 flex-1" onSubmit={handleSearchSubmit}>
+          <div className="relative flex-1">
+            <Input
+              value={searchTerm}
+              onChange={event => setSearchTerm(event.target.value)}
+              placeholder={searchPlaceholder}
+              className="pr-10"
+            />
+            <Search className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          </div>
+          <Button
+            type="submit"
+            variant="secondary"
+            disabled={isSearching}
+          >
+            {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : "Search"}
+          </Button>
+        </form>
+        {searchExtra}
+      </div>
 
       {/* Search Results */}
       {displayResults.length > 0 && (
