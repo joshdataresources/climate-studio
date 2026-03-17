@@ -196,15 +196,15 @@ export function GISAnalysisApp() {
       <BackendHealthIndicator />
 
       <main className="absolute inset-0 h-full w-full">
-        {/* Climate Projections Widget - Top Right */}
-        {showClimateWidget && !panelsCollapsed && (
+        {/* Desktop: Climate Projections Widget - Top Right */}
+        {!isMobile && showClimateWidget && !panelsCollapsed && (
           <div className="absolute top-4 right-4 z-[1100] w-80 pointer-events-auto transition-all duration-300 animate-in fade-in slide-in-from-right-10">
             <ClimateProjectionsWidget />
           </div>
         )}
 
-        {/* Layer Controls Panel - Below Climate Widget if both visible */}
-        {hasLayerControls && !panelsCollapsed && (
+        {/* Desktop: Layer Controls Panel - Below Climate Widget if both visible */}
+        {!isMobile && hasLayerControls && !panelsCollapsed && (
           <div className={`absolute right-4 z-[1100] w-80 pointer-events-auto space-y-4 transition-all duration-300 animate-in fade-in slide-in-from-right-10 ${showClimateWidget ? 'top-[340px]' : 'top-4'}`}>
             <LayerControlsPanel layerStates={layerStates} />
           </div>
@@ -229,6 +229,7 @@ export function GISAnalysisApp() {
         )}
       </main>
 
+      {/* Side panels — CSS repositions these into the mobile layers drawer */}
       {!panelsCollapsed && (
         <aside className="absolute left-[92px] top-4 z-[1000] w-[352px] pointer-events-none transition-all duration-300 animate-in fade-in slide-in-from-left-10">
           <div className="space-y-4 pointer-events-auto">

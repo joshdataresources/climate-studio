@@ -26,7 +26,14 @@
       "Bash(docker-compose up:*)",
       "Bash(node -e:*)",
       "Bash(node:*)",
-      "Bash(pip show:*)"
+      "Bash(pip show:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git reset:*)",
+      "Bash(git stash:*)",
+      "Bash(git checkout:*)",
+      "Bash(git push:*)",
+      "mcp__Claude_Preview__preview_start"
     ],
     "deny": [],
     "ask": []

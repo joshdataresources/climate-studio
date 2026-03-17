@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { climateLayers, ClimateLayerDefinition } from '@climate-studio/core/config'
 import { useClimate } from '@climate-studio/core'
+import { useSidebar } from '../contexts/SidebarContext'
 import { GripVertical, Settings, X, ChevronDown } from 'lucide-react'
 import { Button } from './ui/button'
 import { Switch } from './ui/switch'
@@ -20,6 +21,7 @@ interface LayerPaletteProps {
 
 export function LayerPalette({ className = '' }: LayerPaletteProps) {
   const { activeLayerIds, toggleLayer } = useClimate()
+  const { isMobile } = useSidebar()
 
   // State for which layers are visible in the palette (not the same as enabled/active)
   const [visibleLayers, setVisibleLayers] = useState<Set<string>>(() =>
@@ -70,8 +72,8 @@ export function LayerPalette({ className = '' }: LayerPaletteProps) {
     }
   }
 
-  // Calculate max height based on number of layers
-  const maxHeight = displayedLayers.length > 6 ? '400px' : 'auto'
+  // Calculate max height based on number of layers and screen size
+  const maxHeight = displayedLayers.length > 6 ? (isMobile ? '250px' : '400px') : 'auto'
 
   return (
     <div

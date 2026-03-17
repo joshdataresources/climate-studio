@@ -252,7 +252,7 @@ export function FactoryDetailPanel({ factory, onClose }: FactoryDetailPanelProps
         </div>
 
         {/* RIGHT COLUMN - Supporting Info */}
-        <div className="flex-1 flex flex-col gap-3 self-stretch">
+        <div className="flex-1 flex flex-col gap-3 self-stretch detail-popup-right-col">
           {/* Top Row */}
           <div className="flex flex-1 gap-3 items-center w-full">
             <div

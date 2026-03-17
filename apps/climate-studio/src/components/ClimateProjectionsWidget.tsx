@@ -135,19 +135,19 @@ export function ClimateProjectionsWidget({ className = "" }: ClimateProjectionsW
               {projected.actualTemp.toFixed(1)}°C
             </span>
           </div>
-          <div className="flex flex-col space-y-1">
+          <div className="climate-metrics-secondary flex flex-col space-y-1">
             <span className="text-muted-foreground">Precipitation</span>
             <span className="font-semibold text-blue-400">
               {projected.precipitation.toFixed(0)}mm
             </span>
           </div>
-          <div className="flex flex-col space-y-1">
+          <div className="climate-metrics-secondary flex flex-col space-y-1">
             <span className="text-muted-foreground">Drought Index</span>
             <span className="font-semibold text-yellow-400">
               {projected.droughtIndex.toFixed(1)}
             </span>
           </div>
-          <div className="flex flex-col space-y-1">
+          <div className="climate-metrics-secondary flex flex-col space-y-1">
             <span className="text-muted-foreground">Soil Moisture</span>
             <span className="font-semibold text-green-400">
               {projected.soilMoisture.toFixed(0)}%

@@ -374,7 +374,7 @@ select:focus-visible {
 /* Button Styles - Default button styling */
 /* Apply to buttons that don't have explicit background colors set */
 /* Exclude accordion buttons, text buttons (bg-transparent or border-0), and unstyled buttons */
-button:not([class*="bg-primary"]):not([class*="bg-destructive"]):not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-[rgba"]):not([class*="bg-transparent"]):not([class*="border-0"]):not(.accordion-trigger):not(.unstyled-btn) {
+button:not([class*="bg-primary"]):not([class*="bg-destructive"]):not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-[rgba"]):not([class*="bg-transparent"]):not([class*="border-0"]):not(.accordion-trigger):not(.unstyled-btn):not(.mobile-header-icon) {
   border-radius: var(--button-border-radius);
   border: 1px solid var(--button-border);
   background: var(--button-bg);
@@ -758,9 +758,9 @@ span[data-radix-slider-track] {
   /* Make icons black/dark */
 }
 
-/* Remove shadows from buttons and form elements in light theme */
-[data-theme="light"] button,
-.light button {
+/* Remove shadows from buttons and form elements in light theme (except mobile header icons) */
+[data-theme="light"] button:not(.mobile-header-icon),
+.light button:not(.mobile-header-icon) {
   box-shadow: none !important;
 }
 
@@ -797,3 +797,176 @@ span[data-radix-slider-track] {
   border-left-color: rgba(255, 255, 255, 0.5) !important;
   border-right-color: rgba(255, 255, 255, 0.5) !important;
 }
+
+/* Mobile Climate Projections — hidden by default, only shown on mobile layers drawer */
+.mobile-climate-projections {
+  display: none !important;
+}
+
+/* Detail popup panels (Factory, Dam, Data Center, Groundwater) — base width */
+.detail-popup-panel {
+  width: 640px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * TABLET RESPONSIVE OVERRIDES (769px - 1024px)
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 769px) and (max-width: 1280px) {
+  /* Collapse sidebar to icon-only width */
+  .app-sidebar {
+    width: 76px !important;
+  }
+  .app-sidebar .sidebar-label,
+  .app-sidebar .sidebar-title {
+    display: none;
+  }
+
+  /* Combined tablet panel - single scrollable column */
+  .tablet-combined-panel {
+    left: 76px !important;
+    width: 340px !important;
+    top: 20px !important;
+    bottom: 16px !important;
+    height: auto !important;
+    margin-left: 16px !important;
+  }
+
+  /* Hide the desktop right panel via CSS as backup */
+  div[class*="right-0"][class*="z-\\[1000\\]"][class*="w-\\[361px\\]"] {
+    display: none !important;
+  }
+
+  /* Hide secondary climate metrics (Precipitation, Drought Index, Soil Moisture) on tablet */
+  .climate-metrics-secondary {
+    display: none !important;
+  }
+
+  /* Factory / Dam / Data Center popups — stretchy on tablet */
+  .detail-popup-panel {
+    width: calc(100vw - 76px - 32px) !important;
+    max-width: 640px !important;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * MOBILE RESPONSIVE OVERRIDES
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .widget-container {
+    border-radius: 12px;
+  }
+
+  /* Ensure minimum touch target sizes on mobile */
+  .layer-card {
+    min-height: 44px;
+  }
+
+  /* Push loading toast below mobile header */
+  .loading-toast {
+    top: 68px !important;
+  }
+
+  /* Hide Mapbox navigation (zoom) controls on mobile — use pinch to zoom */
+  .mapboxgl-ctrl-group:has(.mapboxgl-ctrl-zoom-in),
+  .mapboxgl-ctrl-group:has(.mapboxgl-ctrl-compass) {
+    display: none !important;
+  }
+
+  /* ── Left panels: floating over map on mobile ── */
+  aside[class*="left-\[92px\]"] {
+    position: fixed !important;
+    top: 68px !important;
+    right: 16px !important;
+    bottom: auto !important;
+    left: auto !important;
+    width: 320px !important;
+    max-width: calc(100vw - 32px) !important;
+    height: auto !important;
+    max-height: calc(100vh - 76px) !important;
+    z-index: 3000 !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 !important;
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    transform: translateX(calc(100% + 8px)) !important;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  /* Children inside the aside get pointer events + soft shadow */
+  aside[class*="left-\[92px\]"] > * {
+    pointer-events: auto !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+    border-radius: 12px !important;
+  }
+
+  /* Hide Views panel (first child) by default on mobile */
+  aside[class*="left-\[92px\]"] > :first-child {
+    display: none !important;
+  }
+
+  /* Hide Layers panel (widget-container) by default on mobile */
+  aside[class*="left-\[92px\]"] > .widget-container {
+    display: none !important;
+  }
+
+  /* Views drawer open: full width, slide in, show only Views panel */
+  [data-mobile-views-open] aside[class*="left-\[92px\]"] {
+    transform: translateX(0) !important;
+    left: 16px !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+  [data-mobile-views-open] aside[class*="left-\[92px\]"] > :first-child {
+    display: block !important;
+  }
+
+  /* Layers drawer open: slide in, show Climate Projections + Layers panel */
+  [data-mobile-layers-open] aside[class*="left-\[92px\]"] {
+    transform: translateX(0) !important;
+  }
+  [data-mobile-layers-open] aside[class*="left-\[92px\]"] > .mobile-climate-projections {
+    display: block !important;
+  }
+  [data-mobile-layers-open] aside[class*="left-\[92px\]"] > .widget-container {
+    display: flex !important;
+  }
+
+  /* Right-side feature/detail panels → hidden on mobile */
+  div[class*="right-0"][class*="z-\[1000\]"][class*="w-\[361px\]"],
+  div[class*="right-4"][class*="z-\[1100\]"] {
+    display: none !important;
+  }
+
+  /* Hide layer source info on mobile */
+  .layer-source,
+  aside p[class*="text-\[11px\]"][class*="text-muted-foreground"] {
+    display: none !important;
+  }
+
+  /* Factory / Dam / Data Center popups — stretchy on mobile */
+  .detail-popup-panel {
+    width: calc(100vw - 32px) !important;
+    max-width: 640px !important;
+  }
+
+  /* Hide right column (supporting info) in detail popups on mobile */
+  .detail-popup-right-col {
+    display: none !important;
+  }
+
+  /* Hide secondary climate metrics on mobile too */
+  .climate-metrics-secondary {
+    display: none !important;
+  }
+}
+

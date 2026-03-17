@@ -158,7 +158,7 @@ export function DamDetailsPanel({ selectedDam, onClose }: DamDetailsPanelProps) 
         </div>
 
         {/* RIGHT COLUMN - Supporting Info */}
-        <div className="flex-1 flex flex-col gap-3 self-stretch">
+        <div className="flex-1 flex flex-col gap-3 self-stretch detail-popup-right-col">
           {/* Row 1: Year Built + Height */}
           <div className="flex flex-1 gap-3 items-center w-full">
             <div
