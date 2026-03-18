@@ -5018,7 +5018,9 @@ export default function WaterAccessView() {
         const showClimateWidget = shouldShowClimateWidget(enabledLayerIds)
 
         return (
-          <div className="absolute top-0 right-0 bottom-0 z-[1000] w-[361px] pointer-events-none flex flex-col" style={{ paddingLeft: '25px', paddingRight: '16px', paddingTop: '16px', paddingBottom: '16px' }}>
+          <div
+            className="absolute top-0 right-0 bottom-0 z-[1000] w-[361px] pointer-events-none flex flex-col safari-features-panel"
+            style={{ paddingLeft: '25px', paddingRight: '16px', paddingTop: '16px', paddingBottom: '16px' }}>
             {/* Climate Projections Widget - Fixed at top */}
             <div className="flex-shrink-0 pointer-events-auto mb-4">
               <ClimateProjectionsWidget />
