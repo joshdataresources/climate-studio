@@ -868,18 +868,21 @@ span[data-radix-slider-track] {
  * iOS/iPadOS Safari Viewport Fix
  * ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Use custom viewport height for iOS Safari */
-.tablet-combined-panel,
-aside[class*="left-\[92px\]"],
-.safari-panel-height {
-  height: calc(var(--vh, 1vh) * 100 - 100px) !important;
-  max-height: calc(var(--vh, 1vh) * 100 - 100px) !important;
-}
+/* Only apply fixes on actual iOS/iPadOS devices */
+@supports (-webkit-touch-callout: none) {
+  /* iOS/iPadOS only - detected by Safari-specific property */
+  .tablet-combined-panel,
+  aside[class*="left-\[92px\]"],
+  .safari-panel-height {
+    height: calc(var(--vh, 1vh) * 100 - 100px) !important;
+    max-height: calc(var(--vh, 1vh) * 100 - 100px) !important;
+  }
 
-/* Fix for right-side features panel */
-div[class*="absolute"][class*="top-0"][class*="right-0"][class*="bottom-0"] {
-  height: calc(var(--vh, 1vh) * 100 - 100px) !important;
-  max-height: calc(var(--vh, 1vh) * 100 - 100px) !important;
+  /* Fix for right-side features panel */
+  div[class*="absolute"][class*="top-0"][class*="right-0"][class*="bottom-0"] {
+    height: calc(var(--vh, 1vh) * 100 - 100px) !important;
+    max-height: calc(var(--vh, 1vh) * 100 - 100px) !important;
+  }
 }
 
 /* Specific fix for iPad/tablet panels */
@@ -916,20 +919,13 @@ div[class*="absolute"][class*="top-0"][class*="right-0"][class*="bottom-0"] {
     max-height: none !important;
   }
 
-  /* Sidebar rail should maintain relative positioning within its container */
-  .app-sidebar {
-    position: fixed !important;
-    left: 0 !important;
-    top: 0 !important;
-    bottom: 0 !important;
-    width: 76px !important;
-    z-index: 1001 !important;
-  }
-
-  /* The inner sidebar rail div */
-  .safari-sidebar-rail {
-    height: calc(100vh - 32px) !important;
-    height: calc(var(--vh, 1vh) * 100 - 32px) !important;
+  /* Only apply sidebar fixes on Safari/iOS devices */
+  @supports (-webkit-touch-callout: none) {
+    /* The inner sidebar rail div on iOS/iPadOS */
+    .safari-sidebar-rail {
+      height: calc(100vh - 32px) !important;
+      height: calc(var(--vh, 1vh) * 100 - 32px) !important;
+    }
   }
 }
 
