@@ -871,7 +871,8 @@ span[data-radix-slider-track] {
 /* Use custom viewport height for iOS Safari */
 .tablet-combined-panel,
 aside[class*="left-\[92px\]"],
-.safari-panel-height {
+.safari-panel-height,
+.safari-sidebar-rail {
   height: calc(var(--vh, 1vh) * 100 - 100px) !important;
   max-height: calc(var(--vh, 1vh) * 100 - 100px) !important;
 }
@@ -885,8 +886,45 @@ div[class*="absolute"][class*="top-0"][class*="right-0"][class*="bottom-0"] {
 /* Specific fix for iPad/tablet panels */
 @media (min-width: 768px) and (max-width: 1400px) {
   .tablet-combined-panel {
-    height: calc(var(--vh, 1vh) * 100 - 120px) !important;
-    max-height: calc(var(--vh, 1vh) * 100 - 120px) !important;
+    position: fixed !important;
+    top: 20px !important;
+    bottom: 20px !important;
+    height: auto !important;
+    max-height: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Make children flex to fill available space */
+  .tablet-combined-panel > * {
+    flex-shrink: 0;
+  }
+
+  /* Last child (Layers panel) should stretch to fill remaining space */
+  .tablet-combined-panel > *:last-child {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Features panel on the right should also use fixed positioning */
+  div[class*="absolute"][class*="top-0"][class*="right-0"][class*="bottom-0"] {
+    position: fixed !important;
+    top: 16px !important;
+    bottom: 16px !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+
+  /* Sidebar rail fix for iPadOS */
+  .safari-sidebar-rail {
+    position: fixed !important;
+    left: 0 !important;
+    top: 16px !important;
+    bottom: 16px !important;
+    height: auto !important;
+    max-height: none !important;
   }
 }
 
@@ -909,20 +947,10 @@ div[class*="absolute"][class*="top-0"][class*="right-0"][class*="bottom-0"] {
     display: none;
   }
 
-  /* Combined tablet panel - single scrollable column */
+  /* Combined tablet panel - handled by iPad-specific styles */
   .tablet-combined-panel {
-    position: fixed !important;
     left: 92px !important;
     width: 340px !important;
-    top: 20px !important;
-    /* Use fixed height calculation for iPadOS */
-    height: calc(100vh - 40px) !important;
-    height: calc(100dvh - 40px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px)) !important;
-    bottom: auto !important;
-    margin-left: 0 !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
-    -webkit-overflow-scrolling: touch !important;
   }
 
   /* Hide the desktop right panel via CSS as backup */
