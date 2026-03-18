@@ -865,6 +865,30 @@ span[data-radix-slider-track] {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
+ * iOS/iPadOS Safari Viewport Fix
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Use -webkit-fill-available for better iOS support */
+.tablet-combined-panel,
+aside[class*="left-\[92px\]"],
+.safari-panel-height {
+  height: -webkit-fill-available !important;
+  max-height: -webkit-fill-available !important;
+  max-height: calc(100vh - 100px) !important;
+}
+
+/* Fix for right-side features panel */
+div[class*="absolute"][class*="top-0"][class*="right-0"][class*="bottom-0"] {
+  height: -webkit-fill-available !important;
+  max-height: calc(100vh - 100px) !important;
+}
+
+/* Fix for bottom modals/popups */
+.detail-popup-panel {
+  bottom: 80px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
  * TABLET RESPONSIVE OVERRIDES (769px - 1024px)
  * ═══════════════════════════════════════════════════════════════════════════ */
 

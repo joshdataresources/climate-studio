@@ -98,3 +98,4 @@ ee-service-account.json
 *.temp
 
 LINKEDIN_TECH_INVENTORY.md
+.claude/
