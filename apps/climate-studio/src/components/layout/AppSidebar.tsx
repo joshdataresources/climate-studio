@@ -177,7 +177,7 @@ export function AppSidebar() {
   return (
     <aside className={`app-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
     <div 
-      className={`backdrop-blur-[6px] backdrop-filter relative rounded-br-[12px] rounded-tr-[12px] w-[76px] top-[16px] bottom-[16px] h-[calc(100vh-32px)] pointer-events-auto overflow-hidden ${
+      className={`backdrop-blur-[6px] backdrop-filter relative rounded-br-[12px] rounded-tr-[12px] w-[76px] top-[16px] bottom-[16px] h-[calc(100vh-32px)] safari-sidebar-rail pointer-events-auto overflow-hidden ${
         isDark ? 'bg-[rgba(0,0,0,0.90)]' : 'bg-[rgba(255,255,255,0.90)]'
       }`}
       style={{ boxShadow: 'var(--widget-box-shadow)' }}
