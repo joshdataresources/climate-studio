@@ -546,6 +546,32 @@ button[role="combobox"][aria-expanded="true"] {
   .safari-panel-height {
     height: calc(100dvh - 32px - env(safe-area-inset-bottom, 0px)) !important;
   }
+
+  /* iPadOS specific fix for tablet view */
+  @media (min-width: 769px) and (max-width: 1280px) {
+    .safari-panel-height {
+      height: auto !important;
+      max-height: calc(100dvh - 36px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px)) !important;
+    }
+  }
+
+  /* Safari features panel (right side) fix */
+  .safari-features-panel {
+    /* Override bottom: 0 with dynamic calculation */
+    bottom: env(safe-area-inset-bottom, 0px) !important;
+    /* Adjust height to account for Safari UI */
+    height: 100vh !important;
+    height: 100dvh !important;
+  }
+
+  /* iPadOS specific for features panel */
+  @media (min-width: 769px) and (max-width: 1280px) {
+    .safari-features-panel {
+      top: env(safe-area-inset-top, 0px) !important;
+      bottom: env(safe-area-inset-bottom, 0px) !important;
+      height: auto !important;
+    }
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -840,7 +866,12 @@ span[data-radix-slider-track] {
     top: 20px !important;
     bottom: 16px !important;
     height: auto !important;
+    /* Safari iPadOS fix: use calc with dvh and safe area */
+    max-height: calc(100vh - 36px) !important;
+    max-height: calc(100dvh - 36px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px)) !important;
     margin-left: 16px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
   }
 
   /* Hide the desktop right panel via CSS as backup */
