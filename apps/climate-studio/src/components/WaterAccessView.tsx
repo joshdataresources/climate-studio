@@ -6278,7 +6278,7 @@ export default function WaterAccessView() {
       {/* Groundwater Details Panel - Bottom Center */}
       {
         selectedAquifer && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel">
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel safari-modal-fix">
             <GroundwaterDetailsPanel
               selectedAquifer={selectedAquifer}
               projectionYear={projectionYear}
@@ -6291,7 +6291,7 @@ export default function WaterAccessView() {
       {/* Factory Details Panel - Bottom Center */}
       {
         selectedFactory && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel">
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel safari-modal-fix">
             <FactoryDetailPanel
               factory={selectedFactory}
               onClose={() => setSelectedFactory(null)}
@@ -6303,7 +6303,7 @@ export default function WaterAccessView() {
       {/* AI Data Center Details Panel - Bottom Center */}
       {
         selectedDataCenter && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel">
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel safari-modal-fix">
             <AIDataCenterDetailPanel
               datacenter={selectedDataCenter}
               onClose={() => setSelectedDataCenter(null)}
@@ -6315,7 +6315,7 @@ export default function WaterAccessView() {
       {/* Dam Details Panel - Bottom Center */}
       {
         selectedDam && (
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel">
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel safari-modal-fix">
             <DamDetailsPanel
               selectedDam={selectedDam}
               onClose={() => setSelectedDam(null)}
