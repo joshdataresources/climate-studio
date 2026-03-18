@@ -868,19 +868,26 @@ span[data-radix-slider-track] {
  * iOS/iPadOS Safari Viewport Fix
  * ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Use -webkit-fill-available for better iOS support */
+/* Use custom viewport height for iOS Safari */
 .tablet-combined-panel,
 aside[class*="left-\[92px\]"],
 .safari-panel-height {
-  height: -webkit-fill-available !important;
-  max-height: -webkit-fill-available !important;
-  max-height: calc(100vh - 100px) !important;
+  height: calc(var(--vh, 1vh) * 100 - 100px) !important;
+  max-height: calc(var(--vh, 1vh) * 100 - 100px) !important;
 }
 
 /* Fix for right-side features panel */
 div[class*="absolute"][class*="top-0"][class*="right-0"][class*="bottom-0"] {
-  height: -webkit-fill-available !important;
-  max-height: calc(100vh - 100px) !important;
+  height: calc(var(--vh, 1vh) * 100 - 100px) !important;
+  max-height: calc(var(--vh, 1vh) * 100 - 100px) !important;
+}
+
+/* Specific fix for iPad/tablet panels */
+@media (min-width: 768px) and (max-width: 1400px) {
+  .tablet-combined-panel {
+    height: calc(var(--vh, 1vh) * 100 - 120px) !important;
+    max-height: calc(var(--vh, 1vh) * 100 - 120px) !important;
+  }
 }
 
 /* Fix for bottom modals/popups */
