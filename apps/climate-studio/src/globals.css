@@ -872,7 +872,6 @@ span[data-radix-slider-track] {
 @supports (-webkit-touch-callout: none) {
   /* iOS/iPadOS only - detected by Safari-specific property */
   .tablet-combined-panel,
-  aside[class*="left-\[92px\]"],
   .safari-panel-height {
     height: calc(var(--vh, 1vh) * 100 - 100px) !important;
     max-height: calc(var(--vh, 1vh) * 100 - 100px) !important;
@@ -920,11 +919,25 @@ span[data-radix-slider-track] {
   }
 
   /* Only apply sidebar fixes on Safari/iOS devices */
-  @supports (-webkit-touch-callout: none) {
-    /* The inner sidebar rail div on iOS/iPadOS */
+  @supports (-webkit-touch-callout: none) and (min-width: 768px) {
+    /* The inner sidebar rail div on iOS/iPadOS - avoid double application */
     .safari-sidebar-rail {
-      height: calc(100vh - 32px) !important;
+      /* iPad specific height fix */
+      position: fixed !important;
+      left: 0 !important;
+      top: 16px !important;
       height: calc(var(--vh, 1vh) * 100 - 32px) !important;
+      background-clip: padding-box !important;
+    }
+
+    /* Ensure outer wrapper has no background on iPad */
+    .app-sidebar {
+      background: transparent !important;
+      position: fixed !important;
+      left: 0 !important;
+      top: 0 !important;
+      height: 100vh !important;
+      z-index: 40 !important;
     }
   }
 }
@@ -942,6 +955,8 @@ span[data-radix-slider-track] {
   /* Collapse sidebar to icon-only width */
   .app-sidebar {
     width: 76px !important;
+    /* Ensure no background on outer wrapper to prevent double background */
+    background: transparent !important;
   }
   .app-sidebar .sidebar-label,
   .app-sidebar .sidebar-title {
