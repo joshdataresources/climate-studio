@@ -640,6 +640,10 @@ export default function WaterAccessView() {
       }
     }
   }, [])
+
+  // State for microclimate banner
+  const [showMicroclimateBanner, setShowMicroclimateBanner] = useState(false)
+  const [hasShownMicroclimateBanner, setHasShownMicroclimateBanner] = useState(false)
   const [metroHoverInfo, setMetroHoverInfo] = useState<{
     x: number
     y: number
@@ -2049,11 +2053,23 @@ export default function WaterAccessView() {
           west: sw.lng - padding
         })
 
+        const currentZoom = map.getZoom()
+
         // Update shared viewport state
         setViewport({
           center: { lat: map.getCenter().lat, lng: map.getCenter().lng },
-          zoom: map.getZoom()
+          zoom: currentZoom
         })
+
+        // Show microclimate banner when zooming in past level 10
+        if (currentZoom >= 10 && !hasShownMicroclimateBanner) {
+          setShowMicroclimateBanner(true)
+          setHasShownMicroclimateBanner(true)
+          // Hide banner after 5 seconds
+          setTimeout(() => {
+            setShowMicroclimateBanner(false)
+          }, 5000)
+        }
       }, 500)
     })
 
@@ -4443,6 +4459,50 @@ export default function WaterAccessView() {
           </div>
         )
       })()}
+
+      {/* Microclimate zoom banner */}
+      {showMicroclimateBanner && (
+        <div style={{
+          position: 'absolute',
+          top: 70,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.95), rgba(16, 185, 129, 0.95))',
+          backdropFilter: 'blur(12px)',
+          color: 'white',
+          padding: '12px 24px',
+          borderRadius: 12,
+          zIndex: 1100,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          fontSize: 14,
+          fontWeight: 500,
+          fontFamily: 'Inter, system-ui, sans-serif',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+          animation: 'slideInBanner 0.4s ease-out',
+          border: '1px solid rgba(255, 255, 255, 0.2)'
+        }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
+          </svg>
+          <span>
+            <strong>Microclimate View Active</strong> - Street-level environmental data now visible
+          </span>
+          <style>{`
+            @keyframes slideInBanner {
+              from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-12px);
+              }
+              to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+              }
+            }
+          `}</style>
+        </div>
+      )}
 
       {/* Error overlay for map issues */}
       {error && error.includes('Mapbox') && (
