@@ -578,8 +578,8 @@ button[role="combobox"][aria-expanded="true"] {
 
   /* Safari modal fix for bottom-positioned popups */
   .safari-modal-fix {
-    /* Account for Safari's bottom UI on iPadOS */
-    bottom: calc(16px + env(safe-area-inset-bottom, 0px)) !important;
+    /* Account for Safari's bottom UI on iPadOS - standardized to 20px */
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   /* iPadOS specific modal positioning */
@@ -873,14 +873,15 @@ span[data-radix-slider-track] {
   /* iOS/iPadOS only - detected by Safari-specific property */
   .tablet-combined-panel,
   .safari-panel-height {
-    height: calc(var(--vh, 1vh) * 100 - 100px) !important;
-    max-height: calc(var(--vh, 1vh) * 100 - 100px) !important;
+    /* Adjusted to leave 20px at top and 20px at bottom = 40px total */
+    height: calc(var(--vh, 1vh) * 100 - 40px) !important;
+    max-height: calc(var(--vh, 1vh) * 100 - 40px) !important;
   }
 
   /* Fix for right-side features panel */
   div[class*="absolute"][class*="top-0"][class*="right-0"][class*="bottom-0"] {
-    height: calc(var(--vh, 1vh) * 100 - 100px) !important;
-    max-height: calc(var(--vh, 1vh) * 100 - 100px) !important;
+    height: calc(var(--vh, 1vh) * 100 - 40px) !important;
+    max-height: calc(var(--vh, 1vh) * 100 - 40px) !important;
   }
 }
 
@@ -942,9 +943,9 @@ span[data-radix-slider-track] {
   }
 }
 
-/* Fix for bottom modals/popups */
+/* Fix for bottom modals/popups - ensure 20px spacing from bottom */
 .detail-popup-panel {
-  bottom: 80px !important;
+  bottom: 20px !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
