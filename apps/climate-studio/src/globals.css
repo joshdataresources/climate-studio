@@ -840,6 +840,11 @@ span[data-radix-slider-track] {
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 /* Remove Mapbox default popup styles */
+.metro-humidity-popup {
+  /* Ensure popup stays below sidebar (z-index: 2000) on all devices */
+  z-index: 1500 !important;
+}
+
 .metro-humidity-popup .mapboxgl-popup-content {
   background: transparent !important;
   padding: 0 !important;
@@ -852,6 +857,15 @@ span[data-radix-slider-track] {
   border-bottom-color: rgba(255, 255, 255, 0.5) !important;
   border-left-color: rgba(255, 255, 255, 0.5) !important;
   border-right-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* iPad/Tablet specific z-index enforcement */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .metro-humidity-popup,
+  .mapboxgl-popup {
+    z-index: 1500 !important;
+    max-z-index: 1500 !important;
+  }
 }
 
 /* Mobile Climate Projections — hidden by default, only shown on mobile layers drawer */
