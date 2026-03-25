@@ -348,15 +348,14 @@ export function AppSidebar() {
         </div>
       </div>
       
-      {/* Border overlay */}
-      <div 
-        aria-hidden="true" 
-        className={`absolute border-[1px_1px_1px_0px] border-solid top-0 right-0 bottom-0 left-0 pointer-events-none rounded-br-[12px] rounded-tr-[12px] ${
-          isDark 
-            ? 'border-[rgba(255,255,255,0.2)]' 
+      {/* Border overlay - aligned with main sidebar positioning */}
+      <div
+        aria-hidden="true"
+        className={`absolute border-[1px_1px_1px_0px] border-solid top-[16px] right-0 bottom-[16px] left-0 pointer-events-none rounded-br-[12px] rounded-tr-[12px] ${
+          isDark
+            ? 'border-[rgba(255,255,255,0.2)]'
             : 'border-[rgba(255,255,255,0.5)]'
         }`}
-        style={{ boxShadow: 'var(--widget-box-shadow)' }}
       />
     </div>
     </aside>
