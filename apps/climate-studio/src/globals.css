@@ -582,15 +582,7 @@ button[role="combobox"][aria-expanded="true"] {
     bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
   }
 
-  /* iPadOS specific modal positioning */
-  @media (min-width: 769px) and (max-width: 1280px) {
-    .safari-modal-fix {
-      /* Center vertically on iPadOS instead of bottom positioning */
-      bottom: auto !important;
-      top: 50% !important;
-      transform: translate(-50%, -50%) !important;
-    }
-  }
+  /* iPadOS specific modal positioning - REMOVED to keep bottom positioning */
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -873,9 +865,40 @@ span[data-radix-slider-track] {
   display: none !important;
 }
 
-/* Detail popup panels (Factory, Dam, Data Center, Groundwater) — base width */
+/* Detail popup panels (Factory, Dam, Data Center, Groundwater) */
 .detail-popup-panel {
-  width: 640px;
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: min(640px, calc(100vw - 40px)) !important;
+  max-width: calc(100vw - 40px) !important;
+  right: auto !important;
+  top: auto !important;
+  margin: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box !important;
+  z-index: 1000 !important;
+}
+
+/* Higher specificity for safari-modal-fix combination */
+.detail-popup-panel.safari-modal-fix {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  top: auto !important;
+}
+
+/* Even higher specificity to override any Tailwind classes */
+div.detail-popup-panel.safari-modal-fix.z-\[1000\] {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: min(640px, calc(100vw - 40px)) !important;
+  max-width: calc(100vw - 40px) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -978,10 +1001,11 @@ span[data-radix-slider-track] {
     display: none;
   }
 
-  /* Combined tablet panel - handled by iPad-specific styles */
+  /* Combined tablet panel - default positioning for landscape */
   .tablet-combined-panel {
     left: 92px !important;
     width: 340px !important;
+    position: absolute !important;
   }
 
   /* Hide the desktop right panel via CSS as backup */
@@ -994,12 +1018,17 @@ span[data-radix-slider-track] {
     display: none !important;
   }
 
-  /* Factory / Dam / Data Center popups — stretchy on tablet */
-  .detail-popup-panel {
-    width: calc(100vw - 76px - 32px) !important;
-    max-width: 640px !important;
-  }
+  /* Factory / Dam / Data Center popups — removed, handled below */
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * PORTRAIT TABLET OVERRIDES
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* REMOVED portrait centering - widgets should always stay left-aligned in tablet view */
+/* If you need portrait centering for specific devices, use device-specific detection */
+
+/* Tablet-specific adjustments are handled by base styles above */
 
 /* ═══════════════════════════════════════════════════════════════════════════
  * MOBILE RESPONSIVE OVERRIDES
@@ -1122,5 +1151,32 @@ span[data-radix-slider-track] {
   .climate-metrics-secondary {
     display: none !important;
   }
+}
+
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * CRITICAL OVERRIDES - MUST BE LAST FOR HIGHEST PRIORITY
+ * ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Force detail popup panels to center - absolute highest priority */
+.detail-popup-panel,
+div.detail-popup-panel,
+.detail-popup-panel.safari-modal-fix,
+div.detail-popup-panel.safari-modal-fix,
+div.detail-popup-panel.safari-modal-fix.z-\[1000\],
+div.detail-popup-panel.safari-modal-fix.z-\[1000\].pointer-events-auto {
+  position: fixed !important;
+  bottom: 20px !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  width: min(640px, calc(100vw - 40px)) !important;
+  max-width: calc(100vw - 40px) !important;
+  right: auto !important;
+  top: auto !important;
+  margin: 0 !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  box-sizing: border-box !important;
 }
 

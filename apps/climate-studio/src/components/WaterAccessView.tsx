@@ -6072,7 +6072,7 @@ export default function WaterAccessView() {
 
         return (
           <aside
-            className="tablet-combined-panel absolute left-[92px] top-4 z-[1000] flex w-[352px] flex-col gap-3 pointer-events-none overflow-y-auto overflow-x-hidden safari-panel-height"
+            className="tablet-combined-panel absolute top-4 z-[1000] flex flex-col gap-3 pointer-events-none overflow-y-auto overflow-x-hidden safari-panel-height"
             style={{
               height: 'calc(100vh - 32px)',
               scrollbarWidth: 'none'
@@ -6166,6 +6166,83 @@ export default function WaterAccessView() {
                         <span className="text-[11px] font-semibold">Manage Layers</span>
                         <ChevronDown className="h-4 w-4" />
                       </button>
+                      {/* Manage Layers Dropdown */}
+                      {showManageLayersDropdown && (
+                        <div className="absolute top-full right-0 mt-1 w-56 rounded-lg bg-background border border-border shadow-lg z-50 p-3 space-y-3">
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                              checked={layersInWidget.metroWeather}
+                              onChange={() => setLayersInWidget({ ...layersInWidget, metroWeather: !layersInWidget.metroWeather })}
+                            />
+                            <span className="text-xs font-semibold text-foreground">Metro Weather</span>
+                          </label>
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                              checked={layersInWidget.factories}
+                              onChange={() => setLayersInWidget({ ...layersInWidget, factories: !layersInWidget.factories })}
+                            />
+                            <span className="text-xs font-semibold text-foreground">Factories</span>
+                          </label>
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                              checked={layersInWidget.aiDataCenters}
+                              onChange={() => setLayersInWidget({ ...layersInWidget, aiDataCenters: !layersInWidget.aiDataCenters })}
+                            />
+                            <span className="text-xs font-semibold text-foreground">AI Data Centers</span>
+                          </label>
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                              checked={layersInWidget.rivers}
+                              onChange={() => setLayersInWidget({ ...layersInWidget, rivers: !layersInWidget.rivers })}
+                            />
+                            <span className="text-xs font-semibold text-foreground">Rivers</span>
+                          </label>
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                              checked={layersInWidget.canals}
+                              onChange={() => setLayersInWidget({ ...layersInWidget, canals: !layersInWidget.canals })}
+                            />
+                            <span className="text-xs font-semibold text-foreground">Canals</span>
+                          </label>
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                              checked={layersInWidget.wetBulb}
+                              onChange={() => setLayersInWidget({ ...layersInWidget, wetBulb: !layersInWidget.wetBulb })}
+                            />
+                            <span className="text-xs font-semibold text-foreground">Wet Bulb Temperature</span>
+                          </label>
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                              checked={layersInWidget.temperature}
+                              onChange={() => setLayersInWidget({ ...layersInWidget, temperature: !layersInWidget.temperature })}
+                            />
+                            <span className="text-xs font-semibold text-foreground">Temperature Anomaly</span>
+                          </label>
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                              checked={layersInWidget.topographic}
+                              onChange={() => setLayersInWidget({ ...layersInWidget, topographic: !layersInWidget.topographic })}
+                            />
+                            <span className="text-xs font-semibold text-foreground">Topographic Relief</span>
+                          </label>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -6208,14 +6285,14 @@ export default function WaterAccessView() {
                         </div>
                       )}
                       {layersInWidget.wetBulb && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isWetBulbActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleWetBulb()}>
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isWetBulbActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleLayer('wet_bulb')}>
                           <CloudRain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Wet Bulb Temperature</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, wetBulb: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.temperature && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isTemperatureProjectionActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleTemperatureProjection()}>
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isTemperatureProjectionActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleLayer('temperature_projection')}>
                           <TrendingUp className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Future Temperature Anomaly</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, temperature: false }); }}><X className="h-4 w-4" /></button>
@@ -6236,10 +6313,12 @@ export default function WaterAccessView() {
                     <button
                       className="text-[11px] font-semibold text-[#5a7cec] hover:text-[#4a6cd6] bg-transparent border-none cursor-pointer"
                       onClick={() => {
-                        if (selectAllLayers) {
-                          setLayersInWidget({ metroWeather: false, factories: false, aiDataCenters: false, dams: false, rivers: false, canals: false, seaLevel: false, aquifers: false, groundwater: false, precipitation: false, wetBulb: false, temperature: false, topographic: false, metroPopulation: false })
-                        } else {
+                        const newValue = !selectAllLayers
+                        setSelectAllLayers(newValue)
+                        if (newValue) {
                           setLayersInWidget({ metroWeather: true, factories: true, aiDataCenters: true, dams: true, rivers: true, canals: true, seaLevel: true, aquifers: true, groundwater: true, precipitation: true, wetBulb: true, temperature: true, topographic: true, metroPopulation: true })
+                        } else {
+                          setLayersInWidget({ metroWeather: false, factories: false, aiDataCenters: false, dams: false, rivers: false, canals: false, seaLevel: false, aquifers: false, groundwater: false, precipitation: false, wetBulb: false, temperature: false, topographic: false, metroPopulation: false })
                         }
                       }}
                     >{selectAllLayers ? 'Remove All Layers' : 'View All Layers'}</button>
@@ -6363,7 +6442,7 @@ export default function WaterAccessView() {
       {/* Groundwater Details Panel - Bottom Center */}
       {
         selectedAquifer && (
-          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel safari-modal-fix">
+          <div className="detail-popup-panel safari-modal-fix z-[1000] pointer-events-auto">
             <GroundwaterDetailsPanel
               selectedAquifer={selectedAquifer}
               projectionYear={projectionYear}
@@ -6376,7 +6455,7 @@ export default function WaterAccessView() {
       {/* Factory Details Panel - Bottom Center */}
       {
         selectedFactory && (
-          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel safari-modal-fix">
+          <div className="detail-popup-panel safari-modal-fix z-[1000] pointer-events-auto">
             <FactoryDetailPanel
               factory={selectedFactory}
               onClose={() => setSelectedFactory(null)}
@@ -6388,7 +6467,7 @@ export default function WaterAccessView() {
       {/* AI Data Center Details Panel - Bottom Center */}
       {
         selectedDataCenter && (
-          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel safari-modal-fix">
+          <div className="detail-popup-panel safari-modal-fix z-[1000] pointer-events-auto">
             <AIDataCenterDetailPanel
               datacenter={selectedDataCenter}
               onClose={() => setSelectedDataCenter(null)}
@@ -6400,7 +6479,7 @@ export default function WaterAccessView() {
       {/* Dam Details Panel - Bottom Center */}
       {
         selectedDam && (
-          <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[1000] pointer-events-auto detail-popup-panel safari-modal-fix">
+          <div className="detail-popup-panel safari-modal-fix z-[1000] pointer-events-auto">
             <DamDetailsPanel
               selectedDam={selectedDam}
               onClose={() => setSelectedDam(null)}
