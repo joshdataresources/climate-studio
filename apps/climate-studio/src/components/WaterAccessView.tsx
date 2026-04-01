@@ -22,7 +22,7 @@ import { Input } from './ui/input'
 import { Slider } from './ui/slider'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu'
-import { Waves, Droplets, CloudRain, Factory, MapPin, BarChart3, Mountain, TrendingUp, Loader2, GripVertical, X, Layers, ChevronDown, Save, Trash2, Bookmark, MoreHorizontal, Pencil, Zap } from 'lucide-react'
+import { Waves, Droplets, CloudRain, Factory, MapPin, BarChart3, Mountain, TrendingUp, Loader2, GripVertical, X, Layers, ChevronDown, Save, Trash2, Bookmark, MoreHorizontal, Pencil, Zap, Building2, Users } from 'lucide-react'
 import { useLayer } from '../contexts/LayerContext'
 import { shouldShowClimateWidget } from '../config/layerDefinitions'
 import {
@@ -6025,7 +6025,7 @@ export default function WaterAccessView() {
                 </div>{/* end scrollable list */}
 
                 {/* Footer with Collapse/Expand All */}
-                <div className="flex items-center justify-between px-4 py-3 flex-shrink-0 border-t border-border/20">
+                <div className="flex items-center justify-between px-4 py-3 flex-shrink-0 border-t border-border/100">
                   <button
                     className="text-[11px] font-semibold text-[#5a7cec] hover:text-[#4a6cd6] transition-colors bg-transparent border-none cursor-pointer"
                     onClick={() => {
@@ -6241,6 +6241,60 @@ export default function WaterAccessView() {
                             />
                             <span className="text-xs font-semibold text-foreground">Topographic Relief</span>
                           </label>
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                              checked={layersInWidget.dams}
+                              onChange={() => setLayersInWidget({ ...layersInWidget, dams: !layersInWidget.dams })}
+                            />
+                            <span className="text-xs font-semibold text-foreground">Dams</span>
+                          </label>
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                              checked={layersInWidget.seaLevel}
+                              onChange={() => setLayersInWidget({ ...layersInWidget, seaLevel: !layersInWidget.seaLevel })}
+                            />
+                            <span className="text-xs font-semibold text-foreground">Sea Level Rise</span>
+                          </label>
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                              checked={layersInWidget.groundwater}
+                              onChange={() => setLayersInWidget({ ...layersInWidget, groundwater: !layersInWidget.groundwater })}
+                            />
+                            <span className="text-xs font-semibold text-foreground">Groundwater</span>
+                          </label>
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                              checked={layersInWidget.aquifers}
+                              onChange={() => setLayersInWidget({ ...layersInWidget, aquifers: !layersInWidget.aquifers })}
+                            />
+                            <span className="text-xs font-semibold text-foreground">Aquifers</span>
+                          </label>
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                              checked={layersInWidget.precipitation}
+                              onChange={() => setLayersInWidget({ ...layersInWidget, precipitation: !layersInWidget.precipitation })}
+                            />
+                            <span className="text-xs font-semibold text-foreground">Precipitation & Drought</span>
+                          </label>
+                          <label className="flex items-start gap-2 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                              checked={layersInWidget.metroPopulation}
+                              onChange={() => setLayersInWidget({ ...layersInWidget, metroPopulation: !layersInWidget.metroPopulation })}
+                            />
+                            <span className="text-xs font-semibold text-foreground">Metro Population</span>
+                          </label>
                         </div>
                       )}
                     </div>
@@ -6303,6 +6357,48 @@ export default function WaterAccessView() {
                           <Mountain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Topographic Relief</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, topographic: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.dams && (
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showDamsLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowDamsLayer(!showDamsLayer)}>
+                          <Building2 className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Dams</span></div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, dams: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.seaLevel && (
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showSeaLevelRiseLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowSeaLevelRiseLayer(!showSeaLevelRiseLayer)}>
+                          <Waves className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Sea Level Rise</span></div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, seaLevel: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.groundwater && (
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showGroundwaterLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowGroundwaterLayer(!showGroundwaterLayer)}>
+                          <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Groundwater</span></div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, groundwater: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.aquifers && (
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showAquifersLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowAquifersLayer(!showAquifersLayer)}>
+                          <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Aquifers</span></div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, aquifers: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.precipitation && (
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isPrecipitationDroughtActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleLayer('precipitation_drought')}>
+                          <CloudRain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Precipitation & Drought</span></div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, precipitation: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.metroPopulation && (
+                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showMetroDataStatistics ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowMetroDataStatistics(!showMetroDataStatistics)}>
+                          <Users className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Metro Population</span></div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, metroPopulation: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                     </div>
@@ -6382,29 +6478,67 @@ export default function WaterAccessView() {
                       </div>
                     )}
 
+
                     {/* Factory Filters */}
                     {layersInWidget.factories && showFactoriesLayer && (
                       <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
-                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('factories') ? n.delete('factories') : n.add('factories'); setCollapsedFeatures(n) }}>
+                        <div
+                          className="flex items-center justify-between cursor-pointer mb-2.5"
+                          onClick={() => {
+                            const newCollapsed = new Set(collapsedFeatures)
+                            if (newCollapsed.has('factories')) {
+                              newCollapsed.delete('factories')
+                            } else {
+                              newCollapsed.add('factories')
+                            }
+                            setCollapsedFeatures(newCollapsed)
+                          }}
+                        >
                           <h4 className="text-[13px] font-semibold">Factory Filters</h4>
-                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('factories') ? '-rotate-90' : ''}`} />
+                          <ChevronDown
+                            className={`h-4 w-4 transition-transform ${collapsedFeatures.has('factories') ? '-rotate-90' : ''}`}
+                          />
                         </div>
                         {!collapsedFeatures.has('factories') && (
                           <>
+                            {/* Status Filters */}
                             <div className="mb-4">
                               <h4 className="text-xs font-semibold mb-2 text-muted-foreground">Status</h4>
                               <div className="space-y-2">
-                                <label className="flex items-center gap-2"><input type="checkbox" className="accent-blue-500" defaultChecked /><span className="text-[13px]">Operational</span></label>
-                                <label className="flex items-center gap-2"><input type="checkbox" className="accent-blue-500" defaultChecked /><span className="text-[13px]">Under Construction</span></label>
-                                <label className="flex items-center gap-2"><input type="checkbox" className="accent-blue-500" defaultChecked /><span className="text-[13px]">Planned</span></label>
+                                <label className="flex items-center gap-2">
+                                  <input type="checkbox" className="accent-blue-500" defaultChecked />
+                                  <span className="text-sm">Operational</span>
+                                </label>
+                                <label className="flex items-center gap-2">
+                                  <input type="checkbox" className="accent-blue-500" defaultChecked />
+                                  <span className="text-sm">Under Construction</span>
+                                </label>
+                                <label className="flex items-center gap-2">
+                                  <input type="checkbox" className="accent-blue-500" defaultChecked />
+                                  <span className="text-sm">Planned</span>
+                                </label>
                               </div>
                             </div>
+
+                            {/* Climate Risk Filters */}
                             <div>
                               <h4 className="text-xs font-semibold mb-2 text-muted-foreground">Climate Risk</h4>
                               <div className="space-y-2">
-                                <label className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-green-500"></div><input type="checkbox" className="accent-blue-500" defaultChecked /><span className="text-[13px]">Low (0-3)</span></label>
-                                <label className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-yellow-500"></div><input type="checkbox" className="accent-blue-500" defaultChecked /><span className="text-[13px]">Medium (4-6)</span></label>
-                                <label className="flex items-center gap-2"><div className="w-3 h-3 rounded-full bg-orange-500"></div><input type="checkbox" className="accent-blue-500" defaultChecked /><span className="text-[13px]">High (7-10)</span></label>
+                                <label className="flex items-center gap-2">
+                                  <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                                  <input type="checkbox" className="accent-blue-500" defaultChecked />
+                                  <span className="text-sm">Low (0-3)</span>
+                                </label>
+                                <label className="flex items-center gap-2">
+                                  <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                  <input type="checkbox" className="accent-blue-500" defaultChecked />
+                                  <span className="text-sm">Medium (4-6)</span>
+                                </label>
+                                <label className="flex items-center gap-2">
+                                  <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                                  <input type="checkbox" className="accent-blue-500" defaultChecked />
+                                  <span className="text-sm">High (7-10)</span>
+                                </label>
                               </div>
                             </div>
                           </>
@@ -6415,21 +6549,517 @@ export default function WaterAccessView() {
                     {/* River Flow Status */}
                     {layersInWidget.rivers && showRiversLayer && (
                       <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
-                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('rivers') ? n.delete('rivers') : n.add('rivers'); setCollapsedFeatures(n) }}>
+                        <div
+                          className="flex items-center justify-between cursor-pointer mb-2.5"
+                          onClick={() => {
+                            const newCollapsed = new Set(collapsedFeatures)
+                            if (newCollapsed.has('rivers')) {
+                              newCollapsed.delete('rivers')
+                            } else {
+                              newCollapsed.add('rivers')
+                            }
+                            setCollapsedFeatures(newCollapsed)
+                          }}
+                        >
                           <h4 className="text-[13px] font-semibold">River Flow Status</h4>
-                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('rivers') ? '-rotate-90' : ''}`} />
+                          <ChevronDown
+                            className={`h-4 w-4 transition-transform ${collapsedFeatures.has('rivers') ? '-rotate-90' : ''}`}
+                          />
                         </div>
                         {!collapsedFeatures.has('rivers') && (
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                              <label className="text-xs text-muted-foreground">River Opacity</label>
-                              <span className="text-xs font-medium">{Math.round(riverOpacity * 100)}%</span>
+                          <>
+                            {/* Opacity Slider */}
+                            <div className="space-y-2 mb-4">
+                              <div className="flex items-center justify-between">
+                                <label className="text-xs text-muted-foreground">River Opacity</label>
+                                <span className="text-xs font-medium">{Math.round(riverOpacity * 100)}%</span>
+                              </div>
+                              <Slider
+                                value={[Math.round(riverOpacity * 100)]}
+                                min={10}
+                                max={100}
+                                step={5}
+                                onValueChange={(value) => setRiverOpacity(value[0] / 100)}
+                              />
                             </div>
-                            <Slider value={[Math.round(riverOpacity * 100)]} min={10} max={100} step={5} onValueChange={(value) => setRiverOpacity(value[0] / 100)} />
+
+                            {/* Legend */}
+                            <div className="space-y-1.5">
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-1 rounded" style={{ backgroundColor: '#dc2626' }}></div>
+                                <span className="text-[11px] text-foreground/70">Dry - Complete diversion</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-1 rounded" style={{ backgroundColor: '#f59e0b' }}></div>
+                                <span className="text-[11px] text-foreground/70">Seasonal - Wet season only</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-1 rounded" style={{ backgroundColor: '#fbbf24' }}></div>
+                                <span className="text-[11px] text-foreground/70">Reduced - 50%+ reduction</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-1 rounded" style={{ backgroundColor: '#3b82f6' }}></div>
+                                <span className="text-[11px] text-foreground/70">Natural - Unimpacted flow</span>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Canals & Aqueducts */}
+                    {layersInWidget.canals && showCanalsLayer && (
+                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                        <div
+                          className="flex items-center justify-between cursor-pointer mb-2.5"
+                          onClick={() => {
+                            const newCollapsed = new Set(collapsedFeatures)
+                            if (newCollapsed.has('canals')) {
+                              newCollapsed.delete('canals')
+                            } else {
+                              newCollapsed.add('canals')
+                            }
+                            setCollapsedFeatures(newCollapsed)
+                          }}
+                        >
+                          <h4 className="text-[13px] font-semibold">Canals & Aqueducts</h4>
+                          <ChevronDown
+                            className={`h-4 w-4 transition-transform ${collapsedFeatures.has('canals') ? '-rotate-90' : ''}`}
+                          />
+                        </div>
+                        {!collapsedFeatures.has('canals') && (
+                          <>
+                            {/* Description */}
+                            <div className="mb-3">
+                              <p className="text-xs text-muted-foreground">
+                                Major water transport infrastructure including canals, aqueducts, and water conveyance systems
+                              </p>
+                            </div>
+                            {/* Legend */}
+                            <div className="space-y-1.5">
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-1 rounded" style={{ backgroundColor: '#dc2626' }}></div>
+                                <span className="text-[11px] text-foreground/70">Non-operational / Dry</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-1 rounded" style={{ backgroundColor: '#f59e0b' }}></div>
+                                <span className="text-[11px] text-foreground/70">Limited capacity</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-1 rounded" style={{ backgroundColor: '#fbbf24' }}></div>
+                                <span className="text-[11px] text-foreground/70">Reduced flow</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="w-5 h-1 rounded" style={{ backgroundColor: '#3b82f6' }}></div>
+                                <span className="text-[11px] text-foreground/70">Full capacity / Operational</span>
+                              </div>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Future Temperature Anomaly */}
+                    {isTemperatureProjectionActive && (
+                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                        <div
+                          className="flex items-center justify-between cursor-pointer mb-2.5"
+                          onClick={() => {
+                            const newCollapsed = new Set(collapsedFeatures)
+                            if (newCollapsed.has('temperature')) {
+                              newCollapsed.delete('temperature')
+                            } else {
+                              newCollapsed.add('temperature')
+                            }
+                            setCollapsedFeatures(newCollapsed)
+                          }}
+                        >
+                          <h4 className="text-[13px] font-semibold">Future Temperature Anomaly</h4>
+                          <ChevronDown
+                            className={`h-4 w-4 transition-transform ${collapsedFeatures.has('temperature') ? '-rotate-90' : ''}`}
+                          />
+                        </div>
+                        {!collapsedFeatures.has('temperature') && (
+                          <div className="pt-2">
+                            {/* Status Indicator */}
+                            {temperatureProjectionStatus === 'loading' && (
+                              <div className="space-y-2 rounded-md border border-orange-500/30 bg-orange-500/10 p-3 mb-3">
+                                <div className="flex items-center gap-2">
+                                  <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
+                                  <p className="text-xs text-foreground">Loading temperature data...</p>
+                                </div>
+                              </div>
+                            )}
+
+                            {temperatureProjectionStatus === 'success' && (
+                              <div className="space-y-2 rounded-md border border-green-500/30 bg-green-500/10 p-2 mb-3">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-2 w-2 rounded-full bg-green-500" />
+                                  <p className="text-xs text-green-600 font-medium">✓ Real NASA climate data (Earth Engine)</p>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Temperature Mode Toggle */}
+                            <div className="space-y-2 mb-4">
+                              <h4 className="text-xs font-semibold text-foreground mb-2">Temperature Display</h4>
+                              <div className="space-y-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name="temperatureModeTablet"
+                                    value="anomaly"
+                                    checked={controls.temperatureMode === 'anomaly'}
+                                    onChange={() => setTemperatureMode('anomaly')}
+                                    className="h-4 w-4"
+                                  />
+                                  <span className="text-sm text-foreground">Temperature Anomaly (Change)</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name="temperatureModeTablet"
+                                    value="actual"
+                                    checked={controls.temperatureMode === 'actual'}
+                                    onChange={() => setTemperatureMode('actual')}
+                                    className="h-4 w-4"
+                                  />
+                                  <span className="text-sm text-foreground">Actual Temperature</span>
+                                </label>
+                              </div>
+                            </div>
+
+                            {/* Opacity Control */}
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <label className="text-xs font-semibold text-foreground">Layer Opacity</label>
+                                <span className="text-xs text-muted-foreground">{Math.round((controls.projectionOpacity ?? 0.6) * 100)}%</span>
+                              </div>
+                              <Slider
+                                min={0}
+                                max={1}
+                                step={0.05}
+                                value={[controls.projectionOpacity ?? 0.6]}
+                                onValueChange={(value) => setProjectionOpacity(value[0])}
+                              />
+                            </div>
+
+                            {/* Temperature Legend */}
+                            <div className="mt-4 space-y-2">
+                              <h4 className="text-xs font-semibold text-foreground">
+                                {controls.temperatureMode === 'anomaly' ? 'Temperature Anomaly' : 'Temperature'}
+                              </h4>
+                              <div className="h-3 w-full rounded" style={{
+                                background: 'linear-gradient(to right, #0571b0 0%, #92c5de 25%, #ffffbf 50%, #f4a582 75%, #ca0020 100%)'
+                              }} />
+                              <div className="flex justify-between text-[9px] text-muted-foreground">
+                                <span>0°</span>
+                                <span>1°</span>
+                                <span>2°</span>
+                                <span>3°</span>
+                                <span>4°</span>
+                                <span>5°</span>
+                                <span>6°</span>
+                                <span>8°+</span>
+                              </div>
+                            </div>
                           </div>
                         )}
                       </div>
                     )}
+
+                    {/* Aquifers Controls */}
+                    {showAquifersLayer && (
+                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('aquifers') ? n.delete('aquifers') : n.add('aquifers'); setCollapsedFeatures(n) }}>
+                          <h4 className="text-[13px] font-semibold">Aquifers</h4>
+                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('aquifers') ? '-rotate-90' : ''}`} />
+                        </div>
+                        {!collapsedFeatures.has('aquifers') && (
+                          <div className="space-y-3">
+                            {/* Opacity Slider */}
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                                <span className="text-xs font-medium">{Math.round(aquiferOpacity * 100)}%</span>
+                              </div>
+                              <Slider
+                                value={[Math.round(aquiferOpacity * 100)]}
+                                min={10}
+                                max={100}
+                                step={5}
+                                onValueChange={(value) => setAquiferOpacity(value[0] / 100)}
+                                className="w-full"
+                              />
+                            </div>
+                            {/* Aquifer Legend */}
+                            <div className="space-y-2">
+                              <div className="text-xs font-semibold mb-1">Depletion Status</div>
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2 text-[11px]">
+                                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#006837' }}></div>
+                                  <span>Sustainable (&lt;10%)</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-[11px]">
+                                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#ffffcc' }}></div>
+                                  <span>Moderate (10-30%)</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-[11px]">
+                                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#feb24c' }}></div>
+                                  <span>Critical (30-50%)</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-[11px]">
+                                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#d7191c' }}></div>
+                                  <span>Severe (&gt;50%)</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Historic Groundwater Baseline Controls */}
+                    {showGroundwaterLayer && (
+                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('graceGroundwater') ? n.delete('graceGroundwater') : n.add('graceGroundwater'); setCollapsedFeatures(n) }}>
+                          <h4 className="text-[13px] font-semibold">Historic Groundwater Baseline</h4>
+                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('graceGroundwater') ? '-rotate-90' : ''}`} />
+                        </div>
+                        {!collapsedFeatures.has('graceGroundwater') && (
+                          <div className="space-y-3">
+                            {/* Transparency Control */}
+                            <div className="space-y-2">
+                              <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
+                              <Slider
+                                min={0}
+                                max={1}
+                                step={0.05}
+                                value={[graceOpacity]}
+                                onValueChange={(value) => setGraceOpacity(value[0])}
+                                className="w-full"
+                              />
+                              <div className="text-[11px] text-muted-foreground">
+                                {Math.round((1 - graceOpacity) * 100)}% transparent
+                              </div>
+                            </div>
+                            {/* Data Source */}
+                            <div className="mt-3 p-2 bg-background/50 rounded">
+                              <div className="text-[11px] font-semibold mb-1">Data Source</div>
+                              <div className="text-[10px] text-muted-foreground">
+                                NASA GRACE satellite measurements showing groundwater depletion from 2002-2022
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Precipitation & Drought Controls */}
+                    {isPrecipitationDroughtActive && (
+                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('precipitation') ? n.delete('precipitation') : n.add('precipitation'); setCollapsedFeatures(n) }}>
+                          <h4 className="text-[13px] font-semibold">Precipitation & Drought</h4>
+                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('precipitation') ? '-rotate-90' : ''}`} />
+                        </div>
+                        {!collapsedFeatures.has('precipitation') && (
+                          <div className="space-y-3">
+                            {/* Drought Metric Toggle */}
+                            <div>
+                              <h4 className="text-xs font-semibold text-foreground mb-2">Drought Metric</h4>
+                              <div className="space-y-2">
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name="droughtMetricTablet"
+                                    value="precipitation"
+                                    checked={controls.droughtMetric === 'precipitation'}
+                                    onChange={() => setDroughtMetric('precipitation')}
+                                    className="h-4 w-4"
+                                  />
+                                  <span className="text-sm text-foreground">Precipitation</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name="droughtMetricTablet"
+                                    value="drought_index"
+                                    checked={controls.droughtMetric === 'drought_index'}
+                                    onChange={() => setDroughtMetric('drought_index')}
+                                    className="h-4 w-4"
+                                  />
+                                  <span className="text-sm text-foreground">Drought Index</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <input
+                                    type="radio"
+                                    name="droughtMetricTablet"
+                                    value="soil_moisture"
+                                    checked={controls.droughtMetric === 'soil_moisture'}
+                                    onChange={() => setDroughtMetric('soil_moisture')}
+                                    className="h-4 w-4"
+                                  />
+                                  <span className="text-sm text-foreground">Soil Moisture</span>
+                                </label>
+                              </div>
+                            </div>
+                            {/* Opacity Control */}
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                                <span className="text-xs font-medium">{Math.round((controls.droughtOpacity || 0.7) * 100)}%</span>
+                              </div>
+                              <Slider
+                                value={[(controls.droughtOpacity || 0.7)]}
+                                min={0.1}
+                                max={1}
+                                step={0.05}
+                                onValueChange={(value) => setDroughtOpacity(value[0])}
+                                className="w-full"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Wet Bulb Temperature Controls */}
+                    {isWetBulbActive && (
+                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('wetbulb') ? n.delete('wetbulb') : n.add('wetbulb'); setCollapsedFeatures(n) }}>
+                          <h4 className="text-[13px] font-semibold">Wet Bulb Temperature</h4>
+                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('wetbulb') ? '-rotate-90' : ''}`} />
+                        </div>
+                        {!collapsedFeatures.has('wetbulb') && (
+                          <div className="space-y-3">
+                            {/* Opacity Control */}
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                                <span className="text-xs font-medium">{Math.round((controls.wetBulbOpacity || 0.7) * 100)}%</span>
+                              </div>
+                              <Slider
+                                value={[(controls.wetBulbOpacity || 0.7)]}
+                                min={0.1}
+                                max={1}
+                                step={0.05}
+                                onValueChange={(value) => setWetBulbOpacity(value[0])}
+                                className="w-full"
+                              />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Sea Level Rise Controls */}
+                    {showSeaLevelRiseLayer && (
+                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('sealevel') ? n.delete('sealevel') : n.add('sealevel'); setCollapsedFeatures(n) }}>
+                          <h4 className="text-[13px] font-semibold">Sea Level Rise</h4>
+                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('sealevel') ? '-rotate-90' : ''}`} />
+                        </div>
+                        {!collapsedFeatures.has('sealevel') && (
+                          <div className="space-y-3">
+                            {/* Sea Level Settings */}
+                            <div className="space-y-2">
+                              <div className="text-xs font-semibold mb-1">Projection Settings</div>
+                              <div className="text-[11px] text-muted-foreground">
+                                Based on {controls.scenario.toUpperCase()} scenario for year {controls.projectionYear}
+                              </div>
+                            </div>
+                            {/* Sea Level Legend */}
+                            <div className="space-y-2">
+                              <div className="text-xs font-semibold mb-1">Inundation Levels</div>
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2 text-[11px]">
+                                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#deebf7' }}></div>
+                                  <span>0-1 meter</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-[11px]">
+                                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#9ecae1' }}></div>
+                                  <span>1-2 meters</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-[11px]">
+                                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#4292c6' }}></div>
+                                  <span>2-3 meters</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-[11px]">
+                                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#08519c' }}></div>
+                                  <span>&gt;3 meters</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Metro Population Controls */}
+                    {showMetroDataStatistics && (
+                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('metroPopulation') ? n.delete('metroPopulation') : n.add('metroPopulation'); setCollapsedFeatures(n) }}>
+                          <h4 className="text-[13px] font-semibold">Metro Population Change</h4>
+                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('metroPopulation') ? '-rotate-90' : ''}`} />
+                        </div>
+                        {!collapsedFeatures.has('metroPopulation') && (
+                          <div className="space-y-3">
+                            {/* Opacity Slider */}
+                            <div className="space-y-2">
+                              <div className="flex items-center justify-between">
+                                <label className="text-xs text-muted-foreground">Layer Opacity</label>
+                                <span className="text-xs font-medium">{Math.round(metroDataOpacity * 100)}%</span>
+                              </div>
+                              <Slider
+                                value={[Math.round(metroDataOpacity * 100)]}
+                                min={10}
+                                max={100}
+                                step={5}
+                                onValueChange={(value) => setMetroDataOpacity(value[0] / 100)}
+                                className="w-full"
+                              />
+                            </div>
+                            {/* Legend */}
+                            <div className="space-y-2">
+                              <div className="text-xs font-semibold mb-1">Population Change</div>
+                              <div className="space-y-1">
+                                <div className="flex items-center gap-2 text-[11px]">
+                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#d73027' }}></div>
+                                  <span>Declining (&lt;0%)</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-[11px]">
+                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ffffbf' }}></div>
+                                  <span>Stable (0-10%)</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-[11px]">
+                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#1a9850' }}></div>
+                                  <span>Growing (&gt;10%)</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Collapse/Expand All Features Button */}
+                  <div className="px-4 py-3 border-t border-border/100">
+                    <button
+                      className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                      onClick={() => {
+                        if (collapsedFeatures.size === 0) {
+                          // Collapse all
+                          const allFeatures = new Set(['metroWeather', 'factories', 'rivers', 'canals', 'temperature', 'precipitation', 'wetbulb', 'aquifers', 'graceGroundwater', 'sealevel', 'metroPopulation'])
+                          setCollapsedFeatures(allFeatures)
+                        } else {
+                          // Expand all
+                          setCollapsedFeatures(new Set())
+                        }
+                      }}
+                    >
+                      {collapsedFeatures.size === 0 ? 'Collapse All Features' : 'Expand All Features'}
+                    </button>
                   </div>
                 </div>
               )}
