@@ -1,0 +1,1651 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Climate Studio — Design Demo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  /* Tokens — mirrors apps/climate-studio/src/design-system/tokens.css */
+  :root {
+    --cs-neutral-0:#000; --cs-neutral-50:#0a0a0a; --cs-neutral-100:#141414;
+    --cs-neutral-150:#1e1e1e; --cs-neutral-200:#282828; --cs-neutral-300:#3f3f3f;
+    --cs-neutral-400:#525252; --cs-neutral-500:#737373; --cs-neutral-600:#a3a3a3;
+    --cs-neutral-700:#d4d4d4; --cs-neutral-800:#e5e5e5; --cs-neutral-900:#f5f5f5;
+    --cs-neutral-950:#fafafa; --cs-neutral-1000:#fff;
+    --cs-brand-primary:#437efc; --cs-brand-primary-light:#6b9bff;
+    --cs-brand-primary-dark:#2a5fd4; --cs-brand-primary-muted:rgba(67,126,252,.25);
+    --cs-success-text:#10b981; --cs-success-bg:rgba(16,185,129,.15); --cs-success-border:rgba(16,185,129,.3);
+    --cs-warning-text:#fbbf24; --cs-warning-bg:rgba(251,191,36,.15); --cs-warning-border:rgba(251,191,36,.3);
+    --cs-error-text:#ef4444;   --cs-error-bg:rgba(239,68,68,.15);    --cs-error-border:rgba(239,68,68,.3);
+    --cs-info-text:#3b82f6;    --cs-info-bg:rgba(59,130,246,.15);    --cs-info-border:rgba(59,130,246,.3);
+    --cs-data-sea:#0ea5e9; --cs-data-heat:#f97316; --cs-data-cold:#3b82f6;
+    --cs-data-drought:#eab308; --cs-data-rain:#06b6d4; --cs-data-growth:#10b981;
+    --cs-data-decline:#ef4444; --cs-data-urban:#8b5cf6; --cs-data-forest:#22c55e; --cs-data-terrain:#78716c;
+    --cs-surface-base:var(--cs-neutral-100);
+    --cs-surface-elevated:var(--cs-neutral-150);
+    --cs-surface-overlay:rgba(30,30,30,.85);
+    --cs-surface-sunken:var(--cs-neutral-50);
+    --cs-text-primary:var(--cs-neutral-900);
+    --cs-text-secondary:var(--cs-neutral-600);
+    --cs-text-tertiary:var(--cs-neutral-500);
+    --cs-text-disabled:var(--cs-neutral-400);
+    --cs-border-default:var(--cs-neutral-300);
+    --cs-border-muted:var(--cs-neutral-200);
+    --cs-border-strong:var(--cs-neutral-400);
+    --cs-interactive-hover:rgba(255,255,255,.10);
+    --cs-interactive-active:rgba(255,255,255,.15);
+    --cs-interactive-selected:var(--cs-brand-primary-muted);
+    --cs-font-sans:'Inter',system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+    --cs-font-mono:'JetBrains Mono','Fira Code',Consolas,monospace;
+    --cs-radius-sm:.25rem; --cs-radius-md:.375rem; --cs-radius-DEFAULT:.5rem;
+    --cs-radius-lg:.75rem; --cs-radius-xl:1rem; --cs-radius-2xl:1.5rem; --cs-radius-full:9999px;
+    --cs-shadow-sm:0 1px 2px 0 rgba(0,0,0,.05);
+    --cs-shadow-DEFAULT:0 1px 3px 0 rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1);
+    --cs-shadow-md:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);
+    --cs-shadow-lg:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);
+    --cs-shadow-panel:0 8px 32px rgba(0,0,0,.4);
+    --cs-glow-sm:0 0 10px rgba(67,126,252,.3);
+    --cs-glow-md:0 0 20px rgba(67,126,252,.4);
+    --widget-bg:rgba(30,30,30,.75);
+    --widget-border:rgba(255,255,255,.06);
+    --widget-radius:1rem;
+    --widget-padding:1rem;
+    --widget-blur:blur(10px);
+    --widget-shadow:0 4px 25px 0 rgba(0,0,0,.10);
+  }
+
+  [data-theme="light"] {
+    --cs-surface-base:#f1f5f9;
+    --cs-surface-elevated:#fff;
+    --cs-surface-overlay:rgba(255,255,255,.6);
+    --cs-surface-sunken:#e2e8f0;
+    --cs-text-primary:#0f172a;
+    --cs-text-secondary:#475569;
+    --cs-text-tertiary:#64748b;
+    --cs-text-disabled:#94a3b8;
+    --cs-border-default:#ffffff;
+    --cs-border-muted:#f1f5f9;
+    --cs-border-strong:#cbd5e1;
+    --cs-interactive-hover:rgba(0,0,0,.04);
+    --cs-interactive-active:rgba(0,0,0,.08);
+    --cs-interactive-selected:rgba(67,126,252,.12);
+    --cs-success-text:#059669; --cs-warning-text:#d97706;
+    --cs-error-text:#dc2626;  --cs-info-text:#2563eb;
+    --widget-bg:rgba(255,255,255,.6);
+    --widget-border:#ffffff;
+    --widget-shadow:0 10px 30px rgba(15,23,42,.10), 0 2px 6px rgba(15,23,42,.04);
+    --widget-blur:blur(20px);
+    --cs-shadow-panel:0 16px 48px rgba(15,23,42,.12), 0 2px 8px rgba(15,23,42,.04);
+    --cs-glow-sm:0 0 10px rgba(67,126,252,.15);
+    --cs-glow-md:0 0 20px rgba(67,126,252,.2);
+  }
+  [data-theme="light"] body{
+    background:
+      radial-gradient(60% 50% at 80% -10%, rgba(67,126,252,.10), transparent 60%),
+      radial-gradient(50% 40% at 0% 30%,  rgba(168,85,247,.08), transparent 60%),
+      radial-gradient(70% 50% at 100% 80%, rgba(14,165,233,.08), transparent 60%),
+      var(--cs-surface-base);
+    background-attachment:fixed;
+  }
+
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:var(--cs-font-sans);
+    background:var(--cs-surface-base);
+    color:var(--cs-text-primary);
+    -webkit-font-smoothing:antialiased;
+    line-height:1.5;
+  }
+  h1,h2,h3,h4,p{margin:0}
+  code{font-family:var(--cs-font-mono)}
+  a{color:inherit}
+  button{font:inherit;color:inherit;cursor:pointer}
+
+  .page{max-width:1180px;margin:0 auto;padding:0 1.5rem 4rem}
+
+  .topbar{
+    position:sticky;top:0;z-index:50;
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    background:color-mix(in srgb, var(--cs-surface-base) 80%, transparent);
+    border-bottom:1px solid var(--widget-border);
+  }
+  [data-theme="light"] .topbar{
+    background:rgba(255,255,255,.6);
+    border-bottom:1px solid #ffffff;
+    box-shadow:0 1px 0 0 rgba(15,23,42,.04);
+  }
+  .topbar-inner{
+    max-width:1180px;margin:0 auto;padding:1rem 1.5rem;
+    display:flex;align-items:center;justify-content:space-between;gap:1rem;
+  }
+  .brand{display:flex;align-items:center;gap:1rem}
+  .brand-mark{
+    width:40px;height:40px;border-radius:.75rem;
+    background:var(--cs-brand-primary);
+    display:grid;place-items:center;color:#fff;
+  }
+  .brand h1{font-size:1.25rem;font-weight:700;letter-spacing:-0.02em}
+  .brand p{font-size:.875rem;color:var(--cs-text-tertiary)}
+
+  .theme-toggle{
+    position:relative;width:56px;height:28px;border-radius:9999px;
+    border:1px solid var(--cs-border-strong);background:transparent;
+    transition:border-color .3s ease;
+  }
+  .theme-toggle:hover{border-color:var(--cs-text-tertiary)}
+  .theme-toggle .knob{
+    position:absolute;top:2px;width:24px;height:24px;border-radius:9999px;
+    display:grid;place-items:center;
+    transition:left .3s cubic-bezier(0,0,.2,1),background .3s ease,border-color .3s ease;
+    background:rgba(67,126,252,.2);border:1px solid rgba(67,126,252,.4);
+    left:calc(100% - 26px);
+  }
+  [data-theme="light"] .theme-toggle .knob{
+    left:2px;background:#fef3c7;border-color:#fde68a;
+  }
+  .theme-toggle svg{width:14px;height:14px}
+  .theme-toggle .icon-sun{display:none;color:#f59e0b}
+  .theme-toggle .icon-moon{display:block;color:#60a5fa}
+  [data-theme="light"] .theme-toggle .icon-sun{display:block}
+  [data-theme="light"] .theme-toggle .icon-moon{display:none}
+
+  .intro{padding:3rem 0 2.5rem;max-width:640px}
+  .intro h2{font-size:2.25rem;font-weight:700;letter-spacing:-0.025em;margin-bottom:.75rem}
+  .intro p{font-size:1.125rem;color:var(--cs-text-secondary);line-height:1.625}
+  .theme-pill{
+    margin-top:1.5rem;display:inline-flex;align-items:center;gap:.5rem;
+    padding:.5rem 1rem;border-radius:9999px;font-size:.875rem;font-weight:500;
+    background:rgba(59,130,246,.2);color:#93c5fd;
+  }
+  [data-theme="light"] .theme-pill{background:#fef3c7;color:#92400e}
+  .theme-pill svg{width:16px;height:16px}
+
+  .section{margin-bottom:3rem}
+  .section-head{
+    display:flex;align-items:center;gap:.75rem;
+    margin-bottom:1.5rem;padding-bottom:.75rem;
+    border-bottom:1px solid var(--widget-border);
+  }
+  .section-head .icon-tile{
+    padding:.5rem;border-radius:.5rem;color:var(--cs-brand-primary);
+    background:rgba(67,126,252,.2);display:grid;place-items:center;
+  }
+  [data-theme="light"] .section-head .icon-tile{background:rgba(67,126,252,.1)}
+  .section-head h3{font-size:1.25rem;font-weight:700;letter-spacing:-0.02em}
+  .eyebrow{
+    font-size:.75rem;font-weight:600;color:var(--cs-text-tertiary);
+    text-transform:uppercase;letter-spacing:.05em;margin:1.5rem 0 .75rem;
+  }
+  .section > .eyebrow:first-of-type, .grid > div > .eyebrow:first-child{margin-top:0}
+
+  /* Widget container — production class */
+  .widget-container{
+    background:var(--widget-bg);
+    backdrop-filter:var(--widget-blur);-webkit-backdrop-filter:var(--widget-blur);
+    border:1px solid var(--widget-border);
+    border-radius:var(--widget-radius);
+    padding:var(--widget-padding);
+    box-shadow:var(--widget-shadow);
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  .widget-container:hover{border-color:color-mix(in srgb, var(--widget-border) 100%, white 6%)}
+  [data-theme="light"] .widget-container:hover{
+    border-color:#ffffff;
+    box-shadow:0 14px 36px rgba(15,23,42,.12), 0 2px 8px rgba(15,23,42,.05);
+  }
+  .widget-title{font-size:.875rem;font-weight:600;letter-spacing:-0.01em;margin-bottom:.75rem}
+
+  .grid{display:grid;gap:1.5rem}
+  .grid-2{grid-template-columns:1fr}
+  .grid-3{grid-template-columns:1fr}
+  @media (min-width:880px){
+    .grid-2{grid-template-columns:1fr 1fr}
+    .grid-3{grid-template-columns:1fr 1fr 1fr}
+  }
+
+  .swatch{display:flex;align-items:center;gap:.75rem;padding:.5rem;border-radius:.5rem;transition:background .15s ease}
+  .swatch:hover{background:var(--cs-interactive-hover)}
+  .swatch .chip{width:48px;height:48px;border-radius:.5rem;flex-shrink:0;border:1px solid rgba(255,255,255,.2);box-shadow:var(--cs-shadow-sm)}
+  [data-theme="light"] .swatch .chip{border-color:#e2e8f0}
+  .swatch .meta{min-width:0;flex:1}
+  .swatch .name{font-size:.875rem;font-weight:500}
+  .swatch .var{font-size:.75rem;font-family:var(--cs-font-mono);color:var(--cs-text-tertiary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+  .type-row + .type-row{margin-top:1.25rem}
+  .type-row .eyebrow{margin:0 0 .25rem 0}
+  .display{font-size:2.25rem;font-weight:700;letter-spacing:-0.025em}
+  .h1{font-size:1.875rem;font-weight:700}
+  .h2{font-size:1.5rem;font-weight:600}
+  .h3{font-size:1.25rem;font-weight:600}
+  .body-lg{font-size:1rem}
+  .body{font-size:.875rem}
+  .caption{font-size:.75rem;color:var(--cs-text-tertiary)}
+  .codeblock{display:inline-block;font-family:var(--cs-font-mono);font-size:.875rem;padding:.25rem .5rem;border-radius:.25rem;background:var(--cs-neutral-200)}
+  [data-theme="light"] .codeblock{background:#f1f5f9;color:#0f172a}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+    white-space:nowrap;border-radius:var(--cs-radius-md);
+    font-size:.875rem;font-weight:500;height:36px;padding:.5rem 1rem;
+    border:1px solid transparent;background:transparent;color:var(--cs-text-primary);
+    transition:background-color .2s ease, border-color .2s ease, color .2s ease, box-shadow .2s ease;
+  }
+  .btn:focus-visible{outline:none;border-color:var(--cs-brand-primary);box-shadow:0 0 0 1px rgba(59,130,246,.5)}
+  .btn[disabled]{opacity:.5;pointer-events:none}
+  .btn svg{width:16px;height:16px}
+  .btn-default,.btn-secondary{background:var(--cs-surface-elevated);border-color:var(--cs-border-default);box-shadow:var(--cs-shadow-sm)}
+  .btn-default:hover,.btn-secondary:hover{background:var(--cs-interactive-hover)}
+  .btn-destructive{background:#f97316;color:#fff}
+  .btn-destructive:hover{background:#ea580c}
+  .btn-outline{background:var(--cs-surface-base);border-color:var(--cs-border-default);box-shadow:var(--cs-shadow-sm)}
+  .btn-outline:hover{background:var(--cs-interactive-hover)}
+  .btn-ghost{background:transparent}
+  .btn-ghost:hover{background:var(--cs-interactive-hover)}
+  .btn-text{background:transparent;border:0}
+  .btn-text:hover{background:var(--cs-interactive-hover)}
+  .btn-link{background:transparent;border:0;color:var(--cs-brand-primary);text-underline-offset:4px}
+  .btn-link:hover{text-decoration:underline}
+  .btn-primary-action{background:#3b82f6;color:#fff;border-color:transparent}
+  .btn-primary-action:hover{background:#2563eb}
+  .btn-success-action{background:#16a34a;color:#fff;border-color:transparent}
+  .btn-success-action:hover{background:#15803d}
+  .btn-sm{height:32px;padding:0 .75rem;font-size:.75rem;border-radius:var(--cs-radius-md)}
+  .btn-lg{height:40px;padding:0 2rem;border-radius:var(--cs-radius-md)}
+  .btn-icon{height:36px;width:36px;padding:0}
+  .row{display:flex;flex-wrap:wrap;gap:1rem;align-items:center}
+
+  .label{display:block;font-size:.75rem;font-weight:500;color:var(--cs-text-tertiary);margin-bottom:.25rem}
+  .field{
+    display:flex;align-items:center;height:36px;width:100%;
+    padding:.25rem .75rem;border-radius:var(--cs-radius-md);
+    border:1px solid var(--cs-border-default);
+    background:var(--cs-neutral-200);color:var(--cs-text-primary);font-size:.875rem;
+    box-shadow:var(--cs-shadow-sm);
+    transition:background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  [data-theme="light"] .field{background:#fff}
+  .field:hover{background:var(--cs-interactive-hover)}
+  .field:focus,.field:focus-visible{outline:none;border-color:var(--cs-brand-primary);box-shadow:0 0 0 1px rgba(59,130,246,.5)}
+  .field::placeholder{color:var(--cs-text-tertiary)}
+  .field[disabled]{opacity:.5;cursor:not-allowed}
+
+  .select{position:relative;display:inline-block;width:100%}
+  .select .trigger{
+    display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+    height:36px;width:100%;padding:.5rem .75rem;
+    border-radius:var(--cs-radius-md);border:1px solid var(--cs-border-default);
+    background:rgba(64,64,64,1);color:var(--cs-text-primary);
+    font-size:.875rem;box-shadow:var(--cs-shadow-sm);
+    transition:background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  [data-theme="light"] .select .trigger{background:#fff}
+  .select .trigger:hover{background:var(--cs-interactive-hover)}
+  .select.open .trigger,.select .trigger:focus-visible{outline:none;border-color:var(--cs-brand-primary);box-shadow:0 0 0 1px rgba(59,130,246,.5)}
+  .select .chev{transition:transform .2s ease;opacity:.5;width:16px;height:16px}
+  .select.open .chev{transform:rotate(180deg)}
+  .select .content{
+    position:absolute;left:0;right:0;top:calc(100% + 4px);z-index:1000;
+    background:var(--cs-surface-elevated);color:var(--cs-text-primary);
+    border:1px solid var(--cs-border-default);border-radius:var(--cs-radius-md);
+    box-shadow:var(--cs-shadow-md);padding:.25rem;display:none;
+    animation:popIn .15s ease-out;
+  }
+  @keyframes popIn{from{opacity:0;transform:translateY(-4px) scale(.97)}to{opacity:1;transform:none}}
+  .select.open .content{display:block}
+  .select .item{position:relative;display:flex;align-items:center;width:100%;padding:.375rem 2rem .375rem .5rem;border-radius:var(--cs-radius-sm);font-size:.875rem;cursor:pointer}
+  .select .item:hover{background:var(--cs-interactive-hover)}
+  .select .item .check{position:absolute;right:.5rem;width:14px;height:14px;color:var(--cs-brand-primary);display:none}
+  .select .item.selected .check{display:block}
+
+  .check-row{display:flex;align-items:center;gap:.75rem;cursor:pointer}
+  .check-row input{accent-color:var(--cs-brand-primary);width:16px;height:16px}
+  .divider{height:1px;background:rgba(255,255,255,.10);margin:.5rem 0}
+  [data-theme="light"] .divider{background:#e2e8f0}
+
+  .slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;background:transparent}
+  .slider::-webkit-slider-runnable-track{height:6px;border-radius:9999px;background:linear-gradient(to right,#3b82f6 0%,#60a5fa var(--val,50%),rgba(63,63,63,1) var(--val,50%),rgba(63,63,63,1) 100%)}
+  [data-theme="light"] .slider::-webkit-slider-runnable-track{background:linear-gradient(to right,#3b82f6 0%,#60a5fa var(--val,50%),rgba(67,126,252,.25) var(--val,50%),rgba(67,126,252,.25) 100%)}
+  .slider::-moz-range-track{height:6px;border-radius:9999px;background:rgba(63,63,63,1)}
+  .slider::-moz-range-progress{height:6px;border-radius:9999px;background:linear-gradient(to right,#3b82f6,#60a5fa)}
+  .slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:16px;height:16px;border-radius:9999px;background:var(--cs-neutral-700);border:2px solid #60a5fa;box-shadow:0 8px 16px rgba(59,130,246,.20);margin-top:-5px;cursor:pointer;transition:transform .15s ease,border-color .15s ease}
+  .slider::-moz-range-thumb{width:16px;height:16px;border-radius:9999px;background:var(--cs-neutral-700);border:2px solid #60a5fa;box-shadow:0 8px 16px rgba(59,130,246,.20);cursor:pointer}
+  .slider:hover::-webkit-slider-thumb{transform:scale(1.1);border-color:#93c5fd}
+  .slider:focus-visible{outline:none}
+  .slider:focus-visible::-webkit-slider-thumb{transform:scale(1.1);box-shadow:0 0 0 4px rgba(59,130,246,.5)}
+
+  .card{
+    border-radius:var(--cs-radius-xl);
+    border:1px solid var(--cs-border-default);
+    background:color-mix(in srgb, var(--cs-surface-elevated) 50%, transparent);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    box-shadow:var(--cs-shadow-DEFAULT);color:var(--cs-text-primary);
+  }
+  [data-theme="light"] .card{
+    background:rgba(255,255,255,.6);border:1px solid #ffffff;
+    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    box-shadow:0 10px 30px rgba(15,23,42,.10), 0 2px 6px rgba(15,23,42,.04);
+  }
+  .card-head{display:flex;flex-direction:column;gap:.375rem;padding:1.5rem}
+  .card-title{display:flex;align-items:center;gap:.5rem;font-weight:600;letter-spacing:-0.02em}
+  .card-desc{font-size:.875rem;color:var(--cs-text-tertiary)}
+  .card-body{padding:0 1.5rem 1.5rem}
+  .icon-tile-sm{padding:.375rem;border-radius:.375rem;display:grid;place-items:center}
+  .icon-tile-sm svg{width:16px;height:16px}
+  .icon-tile-sm.sky{background:rgba(14,165,233,.2);color:#38bdf8}
+  .icon-tile-sm.orange{background:rgba(249,115,22,.2);color:#fb923c}
+  .icon-tile-sm.emerald{background:rgba(16,185,129,.2);color:#34d399}
+  [data-theme="light"] .icon-tile-sm.sky{color:#0284c7}
+  [data-theme="light"] .icon-tile-sm.orange{color:#ea580c}
+  [data-theme="light"] .icon-tile-sm.emerald{color:#059669}
+  .metric{font-size:1.875rem;font-weight:700}
+  .metric.sky{color:#38bdf8} .metric.orange{color:#fb923c} .metric.emerald{color:#34d399}
+  [data-theme="light"] .metric.sky{color:#0284c7}
+  [data-theme="light"] .metric.orange{color:#ea580c}
+  [data-theme="light"] .metric.emerald{color:#059669}
+
+  .layer-card{
+    display:flex;align-items:center;gap:.75rem;
+    border-radius:.75rem;border:1px solid rgba(255,255,255,.08);
+    padding:.875rem;cursor:pointer;background:rgba(255,255,255,.02);
+    transition:all .2s cubic-bezier(.4,0,.2,1);
+  }
+  .layer-card:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12)}
+  .layer-card.active{
+    background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.06));
+    border-color:rgba(59,130,246,.4);box-shadow:0 0 20px rgba(59,130,246,.1);
+  }
+  [data-theme="light"] .layer-card{
+    background:rgba(255,255,255,.55);border:1px solid #ffffff;
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    box-shadow:0 4px 14px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.04);
+  }
+  [data-theme="light"] .layer-card:hover{
+    background:rgba(255,255,255,.75);border-color:#ffffff;
+    box-shadow:0 8px 20px rgba(15,23,42,.10), 0 1px 3px rgba(15,23,42,.05);
+  }
+  [data-theme="light"] .layer-card.active{
+    background:rgba(239,246,255,.7);border:1px solid #ffffff;
+    box-shadow:0 0 0 1px #3b82f6, 0 0 20px rgba(59,130,246,.20);
+  }
+  .layer-card .label{font-size:.875rem;font-weight:500}
+
+  .feature-card{
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+    border-radius:.5rem;padding:.75rem;
+    box-shadow:0 0 8px 0 rgba(0,0,0,.03);transition:border-color .2s ease;
+  }
+  [data-theme="light"] .feature-card{
+    background:rgba(255,255,255,.55);border:1px solid #ffffff;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:0 4px 12px rgba(15,23,42,.05), 0 1px 2px rgba(15,23,42,.03);
+  }
+  .feature-card-title{font-size:.75rem;font-weight:600;letter-spacing:-0.01em;margin-bottom:.625rem}
+
+  .metric-badge{
+    display:inline-flex;align-items:center;gap:.375rem;
+    padding:.25rem .625rem;border-radius:9999px;
+    font-size:.6875rem;font-weight:600;letter-spacing:.02em;text-transform:uppercase;
+  }
+  .metric-badge svg{width:12px;height:12px}
+  .metric-badge.success{background:var(--cs-success-bg);color:#34d399}
+  .metric-badge.warning{background:var(--cs-warning-bg);color:#fbbf24}
+  .metric-badge.error  {background:var(--cs-error-bg);color:#f87171}
+  .metric-badge.info   {background:var(--cs-info-bg);color:#60a5fa}
+  [data-theme="light"] .metric-badge.success{color:#059669}
+  [data-theme="light"] .metric-badge.warning{color:#b45309}
+  [data-theme="light"] .metric-badge.error{color:#dc2626}
+  [data-theme="light"] .metric-badge.info{color:#2563eb}
+
+  .callout{display:flex;align-items:center;gap:.75rem;padding:.75rem;border-radius:.5rem;border:1px solid}
+  .callout + .callout{margin-top:1rem}
+  .callout .disc{width:24px;height:24px;border-radius:9999px;display:grid;place-items:center;flex-shrink:0}
+  .callout .disc svg{width:14px;height:14px;color:#fff}
+  .callout .meta .title{font-size:.875rem;font-weight:500;line-height:1.2}
+  .callout .meta .sub{font-size:.75rem;color:var(--cs-text-tertiary);margin-top:.125rem}
+  .callout.success{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.1)}
+  .callout.success .disc{background:#10b981}
+  .callout.success .title{color:#34d399}
+  .callout.warning{border-color:rgba(234,179,8,.3);background:rgba(234,179,8,.1)}
+  .callout.warning .disc{background:#eab308}
+  .callout.warning .disc svg{color:#000}
+  .callout.warning .title{color:#fde047}
+  .callout.error{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.1)}
+  .callout.error .disc{background:#ef4444}
+  .callout.error .title{color:#f87171}
+  .callout.info{border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.1)}
+  .callout.info .disc{background:#3b82f6}
+  .callout.info .title{color:#60a5fa}
+  [data-theme="light"] .callout.success{background:#ecfdf5;border-color:#a7f3d0}
+  [data-theme="light"] .callout.success .title{color:#047857}
+  [data-theme="light"] .callout.warning{background:#fefce8;border-color:#fef08a}
+  [data-theme="light"] .callout.warning .title{color:#a16207}
+  [data-theme="light"] .callout.error{background:#fef2f2;border-color:#fecaca}
+  [data-theme="light"] .callout.error .title{color:#b91c1c}
+  [data-theme="light"] .callout.info{background:#eff6ff;border-color:#bfdbfe}
+  [data-theme="light"] .callout.info .title{color:#1d4ed8}
+
+  .spinner{width:20px;height:20px;border-radius:9999px;border:2px solid #3b82f6;border-top-color:transparent;animation:spin .8s linear infinite;flex-shrink:0}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .progress{height:8px;background:rgba(255,255,255,.10);border-radius:9999px;overflow:hidden}
+  [data-theme="light"] .progress{background:#e2e8f0}
+  .progress-bar{height:100%;background:#3b82f6;border-radius:9999px;transition:width .3s ease}
+
+  .accordion-stack{display:flex;flex-direction:column;gap:.75rem;max-width:440px}
+  .acc{
+    background:var(--widget-bg);backdrop-filter:var(--widget-blur);-webkit-backdrop-filter:var(--widget-blur);
+    border:1px solid var(--widget-border);border-radius:var(--widget-radius);
+    box-shadow:var(--widget-shadow);overflow:hidden;
+  }
+  .acc-trigger{
+    display:flex;align-items:center;justify-content:space-between;
+    width:100%;padding:.875rem 1rem;background:transparent;border:0;text-align:left;
+    transition:background .2s ease;
+  }
+  .acc-trigger:hover{background:rgba(255,255,255,.04)}
+  [data-theme="light"] .acc-trigger:hover{background:rgba(0,0,0,.03)}
+  .acc-trigger h4{font-size:.875rem;font-weight:600;letter-spacing:-0.01em}
+  .acc-chev{width:24px;height:24px;border-radius:.375rem;display:grid;place-items:center;background:rgba(255,255,255,.04);transition:background .2s ease}
+  .acc.open .acc-chev{background:rgba(59,130,246,.1)}
+  .acc-chev svg{width:14px;height:14px;color:var(--cs-text-tertiary);transition:transform .2s ease, color .2s ease}
+  .acc.open .acc-chev svg{transform:rotate(180deg);color:#60a5fa}
+  [data-theme="light"] .acc.open .acc-chev svg{color:#2563eb}
+  .acc-body{display:grid;grid-template-rows:0fr;opacity:0;transition:grid-template-rows .2s ease-out, opacity .2s ease-out}
+  .acc.open .acc-body{grid-template-rows:1fr;opacity:1}
+  .acc-body > div{overflow:hidden}
+  .acc-content{padding:.25rem 1rem 1rem;display:flex;flex-direction:column;gap:.75rem;font-size:.875rem}
+  .acc-row{display:flex;align-items:center;justify-content:space-between}
+  .acc-row .k{font-size:.75rem;color:var(--cs-text-tertiary)}
+  .acc-row .v{font-weight:500}
+  .acc-row .v.warn{color:#fb923c}
+  [data-theme="light"] .acc-row .v.warn{color:#ea580c}
+
+  .gradient-bar{height:16px;border-radius:9999px}
+  .gradient-temp-anomaly{background:linear-gradient(to right,#ffffff,#fef9c3,#fde047,#facc15,#f59e0b,#fb923c,#f97316,#ea580c,#dc2626,#7f1d1d)}
+  .gradient-temp-actual{background:linear-gradient(to right,#1e3a8a,#3b82f6,#fef08a,#fb923c,#ef4444,#7f1d1d)}
+  .gradient-precip{background:linear-gradient(to right,#ffffff,#e3f2fd,#90caf9,#42a5f5,#1e88e5,#0d47a1)}
+  [data-theme="light"] .gradient-precip{background:linear-gradient(to right,#f1f5f9,#e3f2fd,#90caf9,#42a5f5,#1e88e5,#0d47a1)}
+  .gradient-population{background:linear-gradient(to right,#dc2626 0%,#ef4444 10%,#f97316 20%,#eab308 30%,#a855f7 40%,#8b5cf6 50%,#3b82f6 60%,#0ea5e9 70%,#06b6d4 85%,#10b981 100%)}
+  .gradient-meta{display:flex;justify-content:space-between;font-size:.75rem;color:var(--cs-text-tertiary);margin-top:.5rem}
+
+  .shadow-tile{background:var(--cs-surface-elevated);border-radius:.5rem;padding:1rem;font-family:var(--cs-font-mono);font-size:.75rem;color:var(--cs-text-tertiary)}
+  .shadow-tile.sm{box-shadow:var(--cs-shadow-sm)}
+  .shadow-tile.def{box-shadow:var(--cs-shadow-DEFAULT)}
+  .shadow-tile.md{box-shadow:var(--cs-shadow-md)}
+  .shadow-tile.lg{box-shadow:var(--cs-shadow-lg)}
+  .shadow-tile.panel{box-shadow:var(--cs-shadow-panel)}
+  .shadow-tile.glow{box-shadow:var(--cs-glow-md);border:1px solid rgba(67,126,252,.3)}
+  [data-theme="light"] .shadow-tile{background:rgba(255,255,255,.6);border:1px solid #ffffff;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  [data-theme="light"] .shadow-tile.glow{box-shadow:var(--cs-glow-md);border-color:rgba(67,126,252,.3)}
+
+  footer{margin-top:4rem;padding-top:2rem;border-top:1px solid var(--widget-border);text-align:center;font-size:.875rem;color:var(--cs-text-tertiary)}
+  /* Layer composition section */
+  .layer-list{}
+  .layer-row{
+    display:flex;align-items:center;gap:.5rem;
+    padding:8px 12px;border-radius:var(--cs-radius-md);
+    border:1px solid rgba(255,255,255,.08);
+    background:rgba(255,255,255,.02);
+    transition:background-color .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  .layer-row:hover{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.12)}
+  .layer-row.active{
+    background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(59,130,246,.06));
+    border-color:rgba(59,130,246,.4);
+  }
+  [data-theme="light"] .layer-row{
+    background:rgba(255,255,255,.55);border:1px solid #ffffff;
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:0 2px 8px rgba(15,23,42,.04);
+  }
+  [data-theme="light"] .layer-row:hover{
+    background:rgba(255,255,255,.75);
+    box-shadow:0 4px 12px rgba(15,23,42,.06);
+  }
+  [data-theme="light"] .layer-row.active{
+    background:rgba(239,246,255,.7);border:1px solid #ffffff;
+    box-shadow:0 0 0 1px #3b82f6, 0 0 16px rgba(59,130,246,.18);
+  }
+  .layer-row .grip{
+    color:var(--cs-text-tertiary);cursor:grab;display:grid;place-items:center;
+    width:16px;height:16px;flex-shrink:0;
+  }
+  .layer-row .grip:hover{color:var(--cs-text-secondary)}
+  .layer-row .grip svg{width:16px;height:16px}
+  .layer-row .layer-icon{
+    display:grid;place-items:center;width:24px;height:24px;border-radius:.375rem;flex-shrink:0;
+  }
+  .layer-row .layer-icon[data-tone="sky"]{background:rgba(14,165,233,.18);color:#38bdf8}
+  .layer-row .layer-icon[data-tone="orange"]{background:rgba(249,115,22,.18);color:#fb923c}
+  .layer-row .layer-icon[data-tone="stone"]{background:rgba(120,113,108,.20);color:#a8a29e}
+  .layer-row .layer-icon[data-tone="violet"]{background:rgba(139,92,246,.18);color:#a78bfa}
+  .layer-row .layer-icon[data-tone="amber"]{background:rgba(245,158,11,.18);color:#fbbf24}
+  .layer-row .layer-icon[data-tone="emerald"]{background:rgba(16,185,129,.18);color:#34d399}
+  [data-theme="light"] .layer-row .layer-icon[data-tone="sky"]{color:#0284c7}
+  [data-theme="light"] .layer-row .layer-icon[data-tone="orange"]{color:#ea580c}
+  [data-theme="light"] .layer-row .layer-icon[data-tone="stone"]{color:#57534e}
+  [data-theme="light"] .layer-row .layer-icon[data-tone="violet"]{color:#7c3aed}
+  [data-theme="light"] .layer-row .layer-icon[data-tone="amber"]{color:#b45309}
+  [data-theme="light"] .layer-row .layer-icon[data-tone="emerald"]{color:#059669}
+  .layer-row .layer-meta{flex:1;min-width:0}
+  .layer-row .layer-meta .title{font-size:.875rem;font-weight:500;color:var(--cs-text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .layer-row .layer-meta .source{font-size:.75rem;color:var(--cs-text-tertiary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .layer-row .layer-actions{display:flex;gap:2px}
+  .layer-row .layer-action{
+    width:24px;height:24px;display:grid;place-items:center;
+    background:transparent;border:0;border-radius:.25rem;
+    color:var(--cs-text-tertiary);transition:background .15s ease, color .15s ease;
+  }
+  .layer-row .layer-action:hover{background:var(--cs-interactive-hover);color:var(--cs-text-primary)}
+  .layer-row .layer-action svg{width:13px;height:13px}
+
+  /* Custom switch (Sources) */
+  .cs-switch{
+    position:relative;display:inline-block;width:32px;height:18px;
+    border-radius:9999px;background:rgba(255,255,255,.10);
+    transition:background .2s ease;cursor:pointer;
+  }
+  [data-theme="light"] .cs-switch{background:#cbd5e1}
+  .cs-switch-knob{
+    position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:9999px;
+    background:#fff;transition:left .2s ease;box-shadow:0 1px 2px rgba(0,0,0,.2);
+  }
+  .cs-switch[data-on="true"]{background:#3b82f6}
+  .cs-switch[data-on="true"] .cs-switch-knob{left:16px}
+
+  /* Impact metrics grid (global Projection Year readout) */
+  .impact-grid{
+    margin-top:.875rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.625rem .75rem;
+  }
+  .impact{display:flex;flex-direction:column;gap:.125rem}
+  .impact .k{font-size:.6875rem;color:var(--cs-text-tertiary)}
+  .impact .v{font-size:.8125rem;font-weight:600}
+  .impact .v.sky{color:#38bdf8} [data-theme="light"] .impact .v.sky{color:#0284c7}
+  .impact .v.orange{color:#fb923c} [data-theme="light"] .impact .v.orange{color:#ea580c}
+  .impact .v.red{color:#f87171} [data-theme="light"] .impact .v.red{color:#dc2626}
+  .impact .v.blue{color:#60a5fa} [data-theme="light"] .impact .v.blue{color:#2563eb}
+  .impact .v.yellow{color:#fbbf24} [data-theme="light"] .impact .v.yellow{color:#b45309}
+  .impact .v.green{color:#34d399} [data-theme="light"] .impact .v.green{color:#059669}
+
+  /* Accordion stack — per-layer controls */
+  .grid-2 > .acc{align-self:start}
+  .layer-icon-sm{display:grid;place-items:center;width:20px;height:20px;border-radius:.25rem;flex-shrink:0}
+  .layer-icon-sm[data-tone="sky"]{background:rgba(14,165,233,.18);color:#38bdf8}
+  .layer-icon-sm[data-tone="orange"]{background:rgba(249,115,22,.18);color:#fb923c}
+  .layer-icon-sm[data-tone="stone"]{background:rgba(120,113,108,.20);color:#a8a29e}
+  .layer-icon-sm[data-tone="violet"]{background:rgba(139,92,246,.18);color:#a78bfa}
+  .layer-icon-sm[data-tone="amber"]{background:rgba(245,158,11,.18);color:#fbbf24}
+  .layer-icon-sm[data-tone="emerald"]{background:rgba(16,185,129,.18);color:#34d399}
+  [data-theme="light"] .layer-icon-sm[data-tone="sky"]{color:#0284c7}
+  [data-theme="light"] .layer-icon-sm[data-tone="orange"]{color:#ea580c}
+  [data-theme="light"] .layer-icon-sm[data-tone="stone"]{color:#57534e}
+  [data-theme="light"] .layer-icon-sm[data-tone="violet"]{color:#7c3aed}
+  [data-theme="light"] .layer-icon-sm[data-tone="amber"]{color:#b45309}
+  [data-theme="light"] .layer-icon-sm[data-tone="emerald"]{color:#059669}
+
+  .control{display:flex;flex-direction:column;gap:.5rem}
+  .control + .control{margin-top:1rem}
+  .control-label{font-size:.6875rem;font-weight:600;color:var(--cs-text-tertiary);text-transform:uppercase;letter-spacing:.04em}
+  .control-value{font-size:.6875rem;font-weight:500;color:var(--cs-text-primary)}
+
+  /* Legend */
+  .legend-row + .legend-row{margin-top:.875rem}
+  .legend-row .legend-title{font-size:.8125rem;font-weight:600;margin-bottom:.375rem;color:var(--cs-text-primary)}
+  .legend-row .legend-bar{height:16px;border-radius:.375rem;border:1px solid rgba(255,255,255,.12)}
+  [data-theme="light"] .legend-row .legend-bar{border-color:#e2e8f0}
+  .legend-row .legend-range{font-size:.6875rem;color:var(--cs-text-tertiary);margin-top:.25rem;text-align:center}
+
+  /* Layer status rows */
+  .layer-status{display:flex;align-items:center;gap:.625rem;padding:.625rem;border-radius:.5rem;border:1px solid}
+  .layer-status + .layer-status{margin-top:.625rem}
+  .layer-status .status-glyph{font-size:1.125rem;line-height:1}
+  .layer-status .status-meta .title{font-size:.8125rem;font-weight:500}
+  .layer-status .status-meta .sub{font-size:.6875rem;color:var(--cs-text-tertiary);margin-top:.125rem}
+  .layer-status.loading{background:rgba(59,130,246,.10);border-color:rgba(59,130,246,.3)}
+  .layer-status.loading .title{color:#60a5fa}
+  .layer-status.success{background:rgba(16,185,129,.10);border-color:rgba(16,185,129,.3)}
+  .layer-status.success .title{color:#34d399}
+  .layer-status.fallback{background:rgba(251,191,36,.10);border-color:rgba(251,191,36,.3)}
+  .layer-status.fallback .title{color:#fbbf24}
+  .layer-status.error{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.3)}
+  .layer-status.error .title{color:#f87171}
+  [data-theme="light"] .layer-status.loading{background:#eff6ff;border-color:#bfdbfe}
+  [data-theme="light"] .layer-status.loading .title{color:#1d4ed8}
+  [data-theme="light"] .layer-status.success{background:#ecfdf5;border-color:#a7f3d0}
+  [data-theme="light"] .layer-status.success .title{color:#047857}
+  [data-theme="light"] .layer-status.fallback{background:#fefce8;border-color:#fef08a}
+  [data-theme="light"] .layer-status.fallback .title{color:#a16207}
+  [data-theme="light"] .layer-status.error{background:#fef2f2;border-color:#fecaca}
+  [data-theme="light"] .layer-status.error .title{color:#b91c1c}
+
+  /* Error overlay preview (inline, not modal) */
+  .error-overlay{
+    background:rgba(127,29,29,.95);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    border:2px solid #ef4444;border-radius:.75rem;
+    box-shadow:0 25px 50px -12px rgba(0,0,0,.25);
+    padding:1.25rem;color:#fff;display:flex;gap:.875rem;align-items:flex-start;
+  }
+  .error-overlay-icon{color:#fca5a5;flex-shrink:0;margin-top:2px}
+  .error-overlay-body{flex:1}
+  .error-overlay-title{font-size:1rem;font-weight:600;margin-bottom:.625rem}
+  .error-overlay-block{background:rgba(69,10,10,.5);border-radius:.5rem;padding:.75rem;color:#fee2e2}
+
+  /* Icon grid (LayerIcons set) */
+  .icon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.875rem}
+  .icon-slot{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.375rem;padding:.625rem;border-radius:.5rem;border:1px solid var(--widget-border);background:rgba(255,255,255,.02)}
+  [data-theme="light"] .icon-slot{background:rgba(255,255,255,.55);border-color:#ffffff;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .icon-slot .icon-label{font-size:.75rem;font-weight:600;font-family:var(--cs-font-mono)}
+  .icon-slot .icon-use{font-size:.6875rem;color:var(--cs-text-tertiary)}
+  .icon-slot .layer-icon-sm{width:32px;height:32px;border-radius:.5rem}
+  .icon-slot .layer-icon-sm svg{width:20px;height:20px}
+
+</style>
+</head>
+<body>
+
+<!-- ─────────────────────────────── Top bar ─────────────────────────────── -->
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="22" height="22">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9 9 0 008.7-6.7M12 21a9 9 0 01-8.7-6.7M12 21c2.5 0 4.5-4 4.5-9S14.5 3 12 3m0 18c-2.5 0-4.5-4-4.5-9S9.5 3 12 3m0 0a9 9 0 017.8 4.6M12 3a9 9 0 00-7.8 4.6m15.7 0A12 12 0 0112 10.5c-3 0-5.7-1.1-7.8-2.9m15.6 0A9 9 0 0121 12c0 .8-.1 1.5-.3 2.3M3.3 14.3A9 9 0 013 12c0-1.6.4-3.1 1.2-4.4" />
+        </svg>
+      </div>
+      <div>
+        <h1>Climate Studio</h1>
+        <p>Design System Demo • v1.0</p>
+      </div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:.75rem">
+      <span id="themeLabel" style="font-size:.75rem;font-weight:500;color:var(--cs-text-tertiary)">Dark</span>
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+        <span class="knob">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="page">
+  <!-- Intro -->
+  <section class="intro">
+    <h2>Design System</h2>
+    <p>A comprehensive collection of design tokens, components, and patterns that power the Climate Studio interface. Built for consistency, accessibility, and beautiful data visualization.</p>
+    <span class="theme-pill" id="themePill">
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:block"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      <span id="themePillLabel">Currently viewing: Dark Theme</span>
+    </span>
+  </section>
+
+  <!-- ────────────── Color ────────────── -->
+  <section class="section">
+    <div class="section-head">
+      <div class="icon-tile">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2a10 10 0 100 20 1 1 0 001-1v-1a2 2 0 014 0v1a10 10 0 00-5-19z"/></svg>
+      </div>
+      <h3>Color System</h3>
+    </div>
+
+    <div class="grid grid-2">
+      <div>
+        <div class="eyebrow">Neutral Scale</div>
+        <div class="widget-container" id="swatch-neutral"></div>
+        <div class="eyebrow">Brand</div>
+        <div class="widget-container" id="swatch-brand"></div>
+      </div>
+      <div>
+        <div class="eyebrow">Semantic</div>
+        <div class="widget-container" id="swatch-semantic"></div>
+        <div class="eyebrow">Data Visualization</div>
+        <div class="widget-container" id="swatch-data"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────── Typography ────────────── -->
+  <section class="section">
+    <div class="section-head">
+      <div class="icon-tile">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+      </div>
+      <h3>Typography</h3>
+    </div>
+    <div class="widget-container">
+      <div class="type-row"><div class="eyebrow">Display</div><div class="display">Climate Studio</div></div>
+      <div class="type-row"><div class="eyebrow">Heading 1</div><div class="h1">Sea Level Rise Analysis</div></div>
+      <div class="type-row"><div class="eyebrow">Heading 2</div><div class="h2">Temperature Projections</div></div>
+      <div class="type-row"><div class="eyebrow">Heading 3</div><div class="h3">Urban Heat Island</div></div>
+      <div class="type-row"><div class="eyebrow">Body Large</div><div class="body-lg">Analyze climate data across multiple dimensions with real-time NASA Earth Engine integration.</div></div>
+      <div class="type-row"><div class="eyebrow">Body</div><div class="body">The projected temperature anomaly for RCP 8.5 scenario shows significant warming trends in urban centers.</div></div>
+      <div class="type-row"><div class="eyebrow">Caption</div><div class="caption">Source: NASA Global Climate Modeling • Last updated: Dec 2025</div></div>
+      <div class="type-row"><div class="eyebrow">Code</div><code class="codeblock">const projection = getClimateData(2050, 'rcp85')</code></div>
+    </div>
+  </section>
+
+  <!-- ────────────── Buttons ────────────── -->
+  <section class="section">
+    <div class="section-head">
+      <div class="icon-tile">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      </div>
+      <h3>Buttons</h3>
+    </div>
+
+    <div class="eyebrow">Variants</div>
+    <div class="widget-container" style="margin-bottom:2rem">
+      <div class="row">
+        <button class="btn btn-default">Default</button>
+        <button class="btn btn-secondary">Secondary</button>
+        <button class="btn btn-destructive">Destructive</button>
+        <button class="btn btn-outline">Outline</button>
+        <button class="btn btn-ghost">Ghost</button>
+        <button class="btn btn-text">Text</button>
+        <button class="btn btn-link">Link</button>
+      </div>
+    </div>
+
+    <div class="eyebrow">Sizes</div>
+    <div class="widget-container" style="margin-bottom:2rem">
+      <div class="row">
+        <button class="btn btn-default btn-sm">Small</button>
+        <button class="btn btn-default">Default</button>
+        <button class="btn btn-default btn-lg">Large</button>
+        <button class="btn btn-default btn-icon" aria-label="Sun">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="eyebrow">States</div>
+    <div class="widget-container">
+      <div class="row">
+        <button class="btn btn-default">Normal</button>
+        <button class="btn btn-default" disabled>Disabled</button>
+        <button class="btn btn-primary-action">Primary Action</button>
+        <button class="btn btn-success-action">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          Success
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────── Form elements ────────────── -->
+  <section class="section">
+    <div class="section-head">
+      <div class="icon-tile">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      </div>
+      <h3>Form Elements</h3>
+    </div>
+
+    <div class="grid grid-2">
+      <div>
+        <div class="eyebrow">Text Inputs</div>
+        <div class="widget-container" style="margin-bottom:1.5rem">
+          <div style="display:flex;flex-direction:column;gap:1rem">
+            <div><label class="label">Default Input</label><input class="field" placeholder="Enter location..." /></div>
+            <div><label class="label">With Value</label><input class="field" value="New York City" /></div>
+            <div><label class="label">Disabled</label><input class="field" placeholder="Disabled input" disabled /></div>
+          </div>
+        </div>
+
+        <div class="eyebrow">Select</div>
+        <div class="widget-container">
+          <label class="label">Climate Scenario</label>
+          <div class="select" id="scenarioSelect">
+            <button class="trigger" type="button">
+              <span id="scenarioValue">RCP 4.5 (Moderate)</span>
+              <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="content" role="listbox">
+              <div class="item" data-value="rcp26">RCP 2.6 (Low)<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="item selected" data-value="rcp45">RCP 4.5 (Moderate)<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+              <div class="item" data-value="rcp85">RCP 8.5 (High)<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="eyebrow">Slider</div>
+        <div class="widget-container" style="margin-bottom:1.5rem">
+          <div style="display:flex;flex-direction:column;gap:1.5rem">
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+                <label class="label" style="margin:0">Projection Year</label>
+                <span class="body" style="color:#fb923c;font-weight:500" id="yearLabel">2063</span>
+              </div>
+              <input id="yearSlider" type="range" class="slider" min="0" max="100" value="50" style="--val:50%" />
+              <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--cs-text-tertiary);margin-top:.25rem">
+                <span>2025</span><span>2100</span>
+              </div>
+            </div>
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+                <label class="label" style="margin:0">Layer Opacity</label>
+                <span class="body" style="font-weight:500" id="opacityLabel">70%</span>
+              </div>
+              <input id="opacitySlider" type="range" class="slider" min="0" max="100" step="5" value="70" style="--val:70%" />
+            </div>
+          </div>
+        </div>
+
+        <div class="eyebrow">Checkbox &amp; Radio</div>
+        <div class="widget-container">
+          <div style="display:flex;flex-direction:column;gap:.75rem">
+            <label class="check-row"><input type="checkbox" checked /><span class="body">Show temperature anomaly</span></label>
+            <label class="check-row"><input type="checkbox" /><span class="body">Enable auto-animation</span></label>
+            <div class="divider"></div>
+            <label class="check-row"><input type="radio" name="mode" checked /><span class="body">Temperature Anomaly</span></label>
+            <label class="check-row"><input type="radio" name="mode" /><span class="body">Actual Temperature</span></label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────── Cards & widgets ────────────── -->
+  <section class="section">
+    <div class="section-head">
+      <div class="icon-tile">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15 8 22 9 17 14 18 21 12 17.8 6 21 7 14 2 9 9 8 12 2"/></svg>
+      </div>
+      <h3>Cards &amp; Panels</h3>
+    </div>
+
+    <div class="grid grid-3">
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <span class="icon-tile-sm sky">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+            </span>
+            Sea Level Rise
+          </div>
+          <div class="card-desc">NOAA Coastal Flood Projection</div>
+        </div>
+        <div class="card-body">
+          <div class="metric sky">+3.2 ft</div>
+          <div class="caption" style="margin-top:.25rem">Projected by 2100 (RCP 8.5)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <span class="icon-tile-sm orange">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01"/></svg>
+            </span>
+            Temperature
+          </div>
+          <div class="card-desc">Global Anomaly Projection</div>
+        </div>
+        <div class="card-body">
+          <div class="metric orange">+4.8°C</div>
+          <div class="caption" style="margin-top:.25rem">Above pre-industrial baseline</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">
+            <span class="icon-tile-sm emerald">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </span>
+            Data Status
+          </div>
+          <div class="card-desc">Earth Engine Connection</div>
+        </div>
+        <div class="card-body">
+          <div class="h3 emerald" style="font-weight:600">Connected</div>
+          <div class="caption" style="margin-top:.25rem">Real NASA climate data active</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:2rem">
+      <div class="eyebrow">Widget Container (with layer cards)</div>
+      <div class="widget-container" style="max-width:440px">
+        <h4 class="widget-title">Climate Layers</h4>
+        <div style="display:flex;flex-direction:column;gap:.5rem">
+          <label class="layer-card active"><input type="checkbox" checked style="accent-color:#3b82f6"/><span class="label" style="margin:0">Sea Level Rise</span></label>
+          <label class="layer-card"><input type="checkbox" style="accent-color:#3b82f6"/><span class="label" style="margin:0">Temperature Projection</span></label>
+          <label class="layer-card"><input type="checkbox" style="accent-color:#3b82f6"/><span class="label" style="margin:0">Precipitation</span></label>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="eyebrow">Feature Cards (inset)</div>
+      <div class="grid grid-3" style="gap:.75rem">
+        <div class="feature-card">
+          <div class="feature-card-title">Earth Engine</div>
+          <div class="caption">NASA Earth Engine v2.34 — 1.2s last query</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card-title">Tile Cache</div>
+          <div class="caption">98% hit rate · 14k tiles</div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card-title">Region</div>
+          <div class="caption">North Atlantic Megaregion</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────── Accordion ────────────── -->
+  <section class="section">
+    <div class="section-head">
+      <div class="icon-tile">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      </div>
+      <h3>Accordions</h3>
+    </div>
+
+    <div class="accordion-stack">
+      <div class="acc open">
+        <button class="acc-trigger" type="button">
+          <h4>Climate Projections</h4>
+          <span class="acc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="acc-body"><div><div class="acc-content">
+          <div class="acc-row"><span class="k">Scenario</span><span class="v">RCP 4.5</span></div>
+          <div class="acc-row"><span class="k">Year</span><span class="v warn">2050</span></div>
+        </div></div></div>
+      </div>
+
+      <div class="acc">
+        <button class="acc-trigger" type="button">
+          <h4>Sea Level Rise</h4>
+          <span class="acc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="acc-body"><div><div class="acc-content">
+          <div class="acc-row"><span class="k">Layer Opacity</span><span class="v">70%</span></div>
+          <input type="range" class="slider" min="10" max="100" value="70" step="5" style="--val:70%"/>
+        </div></div></div>
+      </div>
+
+      <div class="acc">
+        <button class="acc-trigger" type="button">
+          <h4>Temperature</h4>
+          <span class="acc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="acc-body"><div><div class="acc-content">
+          <div class="caption">Temperature layer controls will appear here.</div>
+        </div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────── Status + Loading ────────────── -->
+  <section class="section">
+    <div class="section-head">
+      <div class="icon-tile">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+      </div>
+      <h3>Status &amp; Feedback</h3>
+    </div>
+
+    <div class="grid grid-2">
+      <div>
+        <div class="eyebrow">Status Callouts</div>
+        <div class="widget-container">
+          <div class="callout success">
+            <div class="disc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+            <div class="meta"><div class="title">Success</div><div class="sub">Operation completed successfully</div></div>
+          </div>
+          <div class="callout warning">
+            <div class="disc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0zM12 9v4M12 17h.01"/></svg></div>
+            <div class="meta"><div class="title">Warning</div><div class="sub">Data may be outdated</div></div>
+          </div>
+          <div class="callout error">
+            <div class="disc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
+            <div class="meta"><div class="title">Error</div><div class="sub">Failed to load climate data</div></div>
+          </div>
+          <div class="callout info">
+            <div class="disc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></div>
+            <div class="meta"><div class="title">Info</div><div class="sub">Zoom in for detailed data</div></div>
+          </div>
+        </div>
+
+        <div class="eyebrow">Metric Badges</div>
+        <div class="widget-container">
+          <div class="row">
+            <span class="metric-badge success">+24%</span>
+            <span class="metric-badge warning">RCP 4.5</span>
+            <span class="metric-badge error">-7°C</span>
+            <span class="metric-badge info">2050</span>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="eyebrow">Loading States</div>
+        <div class="widget-container">
+          <div class="callout info">
+            <div class="spinner"></div>
+            <div class="meta"><div class="title" style="color:var(--cs-text-primary)">Loading NASA data...</div><div class="sub">Connecting to Earth Engine</div></div>
+          </div>
+          <div class="callout" style="border-color:rgba(168,85,247,.3);background:rgba(168,85,247,.1)">
+            <div class="spinner" style="border-color:#a855f7;border-top-color:transparent"></div>
+            <div class="meta"><div class="title" style="color:var(--cs-text-primary)">Waking Render Instance...</div><div class="sub">This can take up to 60s</div></div>
+          </div>
+          <div style="margin-top:1rem">
+            <div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:.5rem">
+              <span style="color:var(--cs-text-tertiary)">Processing tiles</span>
+              <span style="font-weight:500">67%</span>
+            </div>
+            <div class="progress"><div class="progress-bar" style="width:67%"></div></div>
+          </div>
+        </div>
+
+        <div class="eyebrow">Shadow Scale</div>
+        <div class="widget-container">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+            <div class="shadow-tile sm">--cs-shadow-sm</div>
+            <div class="shadow-tile def">--cs-shadow-DEFAULT</div>
+            <div class="shadow-tile md">--cs-shadow-md</div>
+            <div class="shadow-tile lg">--cs-shadow-lg</div>
+            <div class="shadow-tile panel">--cs-shadow-panel</div>
+            <div class="shadow-tile glow">--cs-glow-md</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────── Data viz gradients ────────────── -->
+  <section class="section">
+    <div class="section-head">
+      <div class="icon-tile">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="10.5" r="2.5"/><circle cx="8.5" cy="7.5" r="2.5"/><circle cx="6.5" cy="12.5" r="2.5"/><path d="M12 2a10 10 0 100 20 1 1 0 001-1v-1a2 2 0 014 0v1a10 10 0 00-5-19z"/></svg>
+      </div>
+      <h3>Data Visualization Gradients</h3>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="widget-container">
+        <h4 class="widget-title">Temperature Anomaly</h4>
+        <div class="gradient-bar gradient-temp-anomaly"></div>
+        <div class="gradient-meta"><span>0°C</span><span>2°C</span><span>4°C</span><span>6°C</span><span>8°C+</span></div>
+      </div>
+      <div class="widget-container">
+        <h4 class="widget-title">Actual Temperature</h4>
+        <div class="gradient-bar gradient-temp-actual"></div>
+        <div class="gradient-meta"><span>10°</span><span>20°</span><span>30°</span><span>40°+</span></div>
+      </div>
+      <div class="widget-container">
+        <h4 class="widget-title">Precipitation</h4>
+        <div class="gradient-bar gradient-precip"></div>
+        <div class="gradient-meta"><span>0</span><span>2</span><span>4</span><span>6</span><span>10 mm/day</span></div>
+      </div>
+      <div class="widget-container">
+        <h4 class="widget-title">Population Growth</h4>
+        <div class="gradient-bar gradient-population"></div>
+        <div class="gradient-meta"><span>-5%</span><span>0%</span><span>+5%</span><span>+10%</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────── Climate Layer Composition ────────────── -->
+  <section class="section">
+    <div class="section-head">
+      <div class="icon-tile">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+      </div>
+      <h3>Climate Layer Composition</h3>
+    </div>
+
+    <p style="color:var(--cs-text-secondary);font-size:.9375rem;margin-bottom:1.5rem;max-width:760px;line-height:1.6">
+      Everything above is the foundation. The Studio's real layer UI is composed from a registry of 7 climate layers, each declaring its own control set, that resolves through a switch to the primitives above.
+    </p>
+
+    <div class="grid grid-2">
+      <!-- ── Layer Palette ── -->
+      <div>
+        <div class="eyebrow">Layer Palette</div>
+        <div class="widget-container" style="padding:0;max-width:480px">
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 16px 0">
+            <h3 style="font-size:.875rem;font-weight:600;color:var(--cs-text-primary)">Layers</h3>
+            <div class="select" id="manageLayersSelect" style="width:auto">
+              <button class="trigger" type="button" style="height:28px;padding:0 .5rem;font-size:.75rem;background:transparent;border-color:transparent;box-shadow:none;color:var(--cs-text-secondary)">
+                Manage Layers
+                <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;margin-left:2px"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div class="content" role="listbox" style="left:auto;right:0;min-width:14rem">
+                <div class="item selected" data-value="sea_level_rise">Sea Level Rise<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="item selected" data-value="urban_heat_island">Urban Heat Island<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="item selected" data-value="temperature_projection">Future Temperature Anomaly<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="item selected" data-value="precipitation_drought">Precipitation &amp; Drought<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="item selected" data-value="topographic_relief">Topographic Relief<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="item" data-value="megaregion_timeseries">Metro Data Statistics<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                <div class="item" data-value="wet_bulb">Wet Bulb Temperature<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="layer-list" style="padding:.75rem 16px 12px;display:flex;flex-direction:column;gap:.5rem;border-bottom:1px solid var(--widget-border)">
+            <div class="layer-row active">
+              <span class="grip" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/></svg>
+              </span>
+              <span class="layer-icon" data-tone="sky">
+                <svg viewBox="0 -960 960 960" fill="currentColor" width="16" height="16"><path d="M96-155v-72q30 0 49-9.5t37-21q18-11.5 42-21t64-9.5q41 0 64.5 9.5t41.5 21q18 11.5 37 21t49 9.5q31 0 49.5-9.5t36.5-21q18-11.5 42-21t64-9.5q41 0 64.5 9.5t41.5 21q18 11.5 37 21t49 9.5v72q-40 0-64-9.5t-42-21q-18-11.5-37-21t-49-9.5q-31 0-49.5 9.5t-36.5 21q-18 11.5-41.5 21T480-155q-40 0-64-9.5t-42-21q-18-11.5-37-21t-49-9.5q-30 0-49 9.5t-37 21q-18 11.5-41.5 21T96-155Zm0-172v-72q30 0 49-9.5t37-21q18-11.5 42-21t64-9.5q41 0 64.5 9.5t41.5 21q18 11.5 37 21t49 9.5q31 0 49.5-9.5t36.5-21q18-11.5 41.5-21T672-460q41 0 64.5 9.5t41.5 21q18 11.5 37 21t49 9.5v72q-40 0-64-9.5t-42-21q-18-11.5-37-21t-49-9.5q-31 0-49.5 9.5t-36.5 21q-18 11.5-41.5 21T480-327q-40 0-64-9.5t-42-21q-18-11.5-37-21t-49-9.5q-30 0-49 9.5t-37 21q-18 11.5-41.5 21T96-327Z"/></svg>
+              </span>
+              <div class="layer-meta">
+                <div class="title">Sea Level Rise</div>
+                <div class="source">Source: NOAA Sea Level Rise Viewer</div>
+              </div>
+              <div class="layer-actions">
+                <button class="layer-action" aria-label="Settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09A1.65 1.65 0 0 0 15 4.6a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82 1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+                <button class="layer-action" aria-label="Remove"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+              </div>
+            </div>
+
+            <div class="layer-row active">
+              <span class="grip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>
+              <span class="layer-icon" data-tone="orange">
+                <svg viewBox="0 -960 960 960" fill="currentColor" width="16" height="16"><path d="M713-153q-5 5-11 7t-14 3q-7 0-14-3t-11-9q-38-42-56-84t-18-89q0-34 10-71t36-103q23-54 31-82t8-52q0-32-14-61t-44-54q-5-5-8-12t-3-13q0-7 2-13t8-12q6-5 13-8t14-3q7 0 13 3t11 7q40 38 60 80t20 88q0 32-10 68t-34 96q-23 54-31 85t-8 58q0 35 13 66t41 61q5 6 8 12t3 14q0 7-3 13t-9 11Z"/></svg>
+              </span>
+              <div class="layer-meta">
+                <div class="title">Urban Heat Island</div>
+                <div class="source">Source: Yale YCEO Summer UHI v4</div>
+              </div>
+              <div class="layer-actions">
+                <button class="layer-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button>
+                <button class="layer-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+              </div>
+            </div>
+
+            <div class="layer-row">
+              <span class="grip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>
+              <span class="layer-icon" data-tone="stone">
+                <svg viewBox="0 -960 960 960" fill="currentColor" width="16" height="16"><path d="m48-240 240-320 186 248h294L552-600 450-464l-45-60 147-196 360 480H48Z"/></svg>
+              </span>
+              <div class="layer-meta">
+                <div class="title">Topographic Relief</div>
+                <div class="source">Source: Copernicus DEM</div>
+              </div>
+              <div class="layer-actions">
+                <button class="layer-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button>
+                <button class="layer-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+              </div>
+            </div>
+
+            <div class="layer-row">
+              <span class="grip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="18" r="1"/><circle cx="15" cy="6" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="18" r="1"/></svg></span>
+              <span class="layer-icon" data-tone="violet">
+                <svg viewBox="0 -960 960 960" fill="currentColor" width="16" height="16"><path d="M480-144q-120 0-204-84t-84-204q0-54 19-103t55-89l214-240 214 240q36 40 55 89t19 103q0 120-84 204t-204 84Z"/></svg>
+              </span>
+              <div class="layer-meta">
+                <div class="title">Precipitation &amp; Drought</div>
+                <div class="source">Source: CHIRPS via Earth Engine</div>
+              </div>
+              <div class="layer-actions">
+                <button class="layer-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></button>
+                <button class="layer-action"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+              </div>
+            </div>
+          </div>
+
+          <div style="padding:12px 16px 16px;display:flex;justify-content:space-between;align-items:center">
+            <label class="check-row" style="font-size:.75rem;font-weight:500">
+              <input type="checkbox" checked />
+              Select All
+            </label>
+            <div style="display:flex;align-items:center;gap:.5rem">
+              <span style="font-size:.75rem;color:var(--cs-text-tertiary)">Sources</span>
+              <span class="cs-switch" data-on="true" id="sourcesSwitch"><span class="cs-switch-knob"></span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Climate Impact Metrics (global header) ── -->
+      <div>
+        <div class="eyebrow">Global Controls + Climate Impact Metrics</div>
+        <div class="widget-container">
+          <div style="display:flex;flex-direction:column;gap:1.25rem">
+            <div>
+              <label class="label">Climate Scenario</label>
+              <div class="select" id="globalScenario">
+                <button class="trigger" type="button">
+                  <span>RCP 4.5 (Moderate)</span>
+                  <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <div class="content" role="listbox">
+                  <div class="item" data-value="rcp26">RCP 2.6 (Low)<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="item selected" data-value="rcp45">RCP 4.5 (Moderate)<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                  <div class="item" data-value="rcp85">RCP 8.5 (High)<svg class="check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></div>
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.5rem">
+                <label class="label" style="margin:0">Projection Year</label>
+                <span class="body" style="color:#fb923c;font-weight:500" id="projectionYearVal">2050</span>
+              </div>
+              <input id="projectionYear" type="range" class="slider" min="2025" max="2100" step="5" value="2050" style="--val:33%" />
+              <div style="display:flex;justify-content:space-between;font-size:.75rem;color:var(--cs-text-tertiary);margin-top:.25rem">
+                <span>2025</span><span>2100</span>
+              </div>
+
+              <div class="impact-grid">
+                <div class="impact"><span class="k">Sea Level Rise</span><span class="v sky" id="impactSea">~3 ft</span></div>
+                <div class="impact"><span class="k">Temp. Anomaly</span><span class="v orange" id="impactAnomaly">+1.8°C</span></div>
+                <div class="impact"><span class="k">Actual Temp.</span><span class="v red" id="impactActual">16.3°C</span></div>
+                <div class="impact"><span class="k">Precipitation</span><span class="v blue" id="impactPrecip">850 mm</span></div>
+                <div class="impact"><span class="k">Drought Index</span><span class="v yellow" id="impactDrought">1.2</span></div>
+                <div class="impact"><span class="k">Soil Moisture</span><span class="v green" id="impactSoil">54%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Per-layer control matrix ── -->
+    <div class="eyebrow" style="margin-top:2.5rem">Per-Layer Control Matrix (Accordion Stack)</div>
+    <div class="grid grid-2">
+      <!-- Urban Heat Island -->
+      <div class="acc open">
+        <button class="acc-trigger" type="button">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span class="layer-icon-sm" data-tone="orange">
+              <svg viewBox="0 -960 960 960" fill="currentColor" width="14" height="14"><path d="M713-153q-5 5-11 7t-14 3q-7 0-14-3t-11-9q-38-42-56-84t-18-89q0-34 10-71t36-103q23-54 31-82t8-52q0-32-14-61t-44-54q-5-5-8-12t-3-13q0-7 2-13t8-12q6-5 13-8t14-3q7 0 13 3t11 7q40 38 60 80t20 88q0 32-10 68t-34 96q-23 54-31 85t-8 58q0 35 13 66t41 61q5 6 8 12t3 14q0 7-3 13t-9 11Z"/></svg>
+            </span>
+            <h4>Urban Heat Island</h4>
+          </div>
+          <span class="acc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="acc-body"><div><div class="acc-content">
+          <div class="control">
+            <label class="control-label">Season</label>
+            <div class="select"><button class="trigger" type="button"><span>Summer (Jun-Aug)</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button></div>
+          </div>
+          <div class="control">
+            <label class="control-label">Color Scheme</label>
+            <div class="select"><button class="trigger" type="button"><span>Temperature (Blue-Red)</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button></div>
+          </div>
+          <div class="control">
+            <div style="display:flex;justify-content:space-between"><label class="control-label">Layer Opacity</label><span class="control-value">70%</span></div>
+            <input type="range" class="slider" min="10" max="100" step="5" value="70" style="--val:70%"/>
+          </div>
+        </div></div></div>
+      </div>
+
+      <!-- Topographic Relief -->
+      <div class="acc open">
+        <button class="acc-trigger" type="button">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span class="layer-icon-sm" data-tone="stone">
+              <svg viewBox="0 -960 960 960" fill="currentColor" width="14" height="14"><path d="m48-240 240-320 186 248h294L552-600 450-464l-45-60 147-196 360 480H48Z"/></svg>
+            </span>
+            <h4>Topographic Relief</h4>
+          </div>
+          <span class="acc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="acc-body"><div><div class="acc-content">
+          <div class="control">
+            <label class="control-label">Hillshade Style</label>
+            <div class="select"><button class="trigger" type="button"><span>Dramatic Shadows</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button></div>
+          </div>
+          <div class="control">
+            <div style="display:flex;justify-content:space-between"><label class="control-label">Layer Opacity</label><span class="control-value">60%</span></div>
+            <input type="range" class="slider" min="10" max="100" step="5" value="60" style="--val:60%"/>
+          </div>
+        </div></div></div>
+      </div>
+
+      <!-- Future Temperature Anomaly -->
+      <div class="acc">
+        <button class="acc-trigger" type="button">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span class="layer-icon-sm" data-tone="orange">
+              <svg viewBox="0 -960 960 960" fill="currentColor" width="14" height="14"><path d="M444-745v-144h72v144h-72Zm249 102-51-51 102-103 51 52-102 102Zm51 198v-72h144v72H744Zm-1 278L643-270l49-50 103 101-52 52ZM267-643 166-745l50-51 103 102-52 51Zm213 499q-79.68 0-135.84-56.43Q288-256.87 288-336.93 288-417 344.16-472.5T480-528q80 0 136 55.71T672-336q0 80-56.43 136Q559.13-144 480-144Z"/></svg>
+            </span>
+            <h4>Future Temperature Anomaly</h4>
+          </div>
+          <span class="acc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="acc-body"><div><div class="acc-content">
+          <div class="control">
+            <label class="control-label">Temperature Display</label>
+            <div style="display:flex;flex-direction:column;gap:.5rem">
+              <label class="check-row" style="font-size:.75rem"><input type="radio" name="tempMode" checked />Temperature Anomaly (Change)</label>
+              <label class="check-row" style="font-size:.75rem"><input type="radio" name="tempMode" />Actual Temperature</label>
+            </div>
+          </div>
+          <div class="control">
+            <div style="display:flex;justify-content:space-between"><label class="control-label">Layer Opacity</label><span class="control-value">60%</span></div>
+            <input type="range" class="slider" min="10" max="100" step="5" value="60" style="--val:60%"/>
+          </div>
+        </div></div></div>
+      </div>
+
+      <!-- Precipitation & Drought -->
+      <div class="acc">
+        <button class="acc-trigger" type="button">
+          <div style="display:flex;align-items:center;gap:.5rem">
+            <span class="layer-icon-sm" data-tone="violet">
+              <svg viewBox="0 -960 960 960" fill="currentColor" width="14" height="14"><path d="M480-144q-120 0-204-84t-84-204q0-54 19-103t55-89l214-240 214 240q36 40 55 89t19 103q0 120-84 204t-204 84Z"/></svg>
+            </span>
+            <h4>Precipitation &amp; Drought</h4>
+          </div>
+          <span class="acc-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></span>
+        </button>
+        <div class="acc-body"><div><div class="acc-content">
+          <div class="control">
+            <label class="control-label">Metric Type</label>
+            <div class="select"><button class="trigger" type="button"><span>Drought Index</span><svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></button></div>
+          </div>
+          <div class="control">
+            <div style="display:flex;justify-content:space-between"><label class="control-label">Layer Opacity</label><span class="control-value">75%</span></div>
+            <input type="range" class="slider" min="10" max="100" step="5" value="75" style="--val:75%"/>
+          </div>
+        </div></div></div>
+      </div>
+    </div>
+
+    <!-- ── Legend & Status ── -->
+    <div class="grid grid-2" style="margin-top:2rem">
+      <div>
+        <div class="eyebrow">Legend / Colorbar (4 variants)</div>
+        <div class="widget-container">
+          <div class="legend-row">
+            <div class="legend-title">Precipitation</div>
+            <div class="legend-bar" style="background:linear-gradient(90deg,#F5ED53 0%,#F5F3CE 50%,#6B9AF3 75%,#2357D2 100%)"></div>
+            <div class="legend-range">0 – 10 mm/day</div>
+          </div>
+          <div class="legend-row">
+            <div class="legend-title">Drought Index</div>
+            <div class="legend-bar" style="background:linear-gradient(to right,#8b4513,#d2691e,#f4a460,#ffffff,#90ee90,#32cd32,#228b22)"></div>
+            <div class="legend-range">−2 (dry) to +2 (wet)</div>
+          </div>
+          <div class="legend-row">
+            <div class="legend-title">Soil Moisture</div>
+            <div class="legend-bar" style="background:linear-gradient(to right,#8b4513,#daa520,#f0e68c,#adff2f,#7cfc00,#32cd32)"></div>
+            <div class="legend-range">0 – 10 mm</div>
+          </div>
+          <div class="legend-row">
+            <div class="legend-title">Population Growth Rate</div>
+            <div class="legend-bar" style="background:linear-gradient(to right,#dc2626,#ef4444,#f97316,#eab308,#a855f7,#8b5cf6,#3b82f6,#0ea5e9,#06b6d4,#10b981)"></div>
+            <div class="legend-range">−5% (decline) to +10% (growth)</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="eyebrow">Layer Status States</div>
+        <div class="widget-container">
+          <div class="layer-status loading">
+            <span class="status-glyph">⏳</span>
+            <div class="status-meta"><div class="title">Loading…</div><div class="sub">Sea Level Rise — Connecting to NOAA</div></div>
+          </div>
+          <div class="layer-status success">
+            <span class="status-glyph">✅</span>
+            <div class="status-meta"><div class="title">Real NASA data (1,248 features)</div><div class="sub">Future Temperature Anomaly · NEX-GDDP-CMIP6</div></div>
+          </div>
+          <div class="layer-status fallback">
+            <span class="status-glyph">⚠️</span>
+            <div class="status-meta"><div class="title">Fallback data (Earth Engine timeout)</div><div class="sub">Precipitation &amp; Drought · CHIRPS</div></div>
+          </div>
+          <div class="layer-status error">
+            <span class="status-glyph">❌</span>
+            <div class="status-meta"><div class="title">Error: HTTP 503 — service unavailable</div><div class="sub">Urban Heat Island · Yale YCEO</div></div>
+          </div>
+        </div>
+
+        <div class="eyebrow" style="margin-top:1.5rem">Error Overlay (modal)</div>
+        <div class="error-overlay">
+          <div class="error-overlay-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="22" height="22"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          </div>
+          <div class="error-overlay-body">
+            <div class="error-overlay-title">Layer Loading Failed</div>
+            <div class="error-overlay-block">
+              <div style="font-weight:500;margin-bottom:.25rem">Sea Level Rise</div>
+              <div style="font-size:.75rem;opacity:.8">Network timeout after 30s — try again or dismiss for this session.</div>
+              <div style="display:flex;gap:.5rem;margin-top:.625rem">
+                <button class="btn btn-sm" style="background:#dc2626;color:#fff;border-color:transparent">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                  Refresh
+                </button>
+                <button class="btn btn-sm" style="background:transparent;border:1px solid rgba(255,255,255,.2);color:#fff">
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Icon set ── -->
+    <div class="eyebrow" style="margin-top:2.5rem">Layer Icon Set</div>
+    <div class="widget-container">
+      <div class="icon-grid">
+        <div class="icon-slot"><span class="layer-icon-sm" data-tone="sky"><svg viewBox="0 -960 960 960" fill="currentColor" width="20" height="20"><path d="M96-155v-72q30 0 49-9.5t37-21q18-11.5 42-21t64-9.5q41 0 64.5 9.5t41.5 21q18 11.5 37 21t49 9.5q31 0 49.5-9.5t36.5-21q18-11.5 42-21t64-9.5q41 0 64.5 9.5t41.5 21q18 11.5 37 21t49 9.5v72q-40 0-64-9.5t-42-21q-18-11.5-37-21t-49-9.5q-31 0-49.5 9.5t-36.5 21q-18 11.5-41.5 21T480-155q-40 0-64-9.5t-42-21q-18-11.5-37-21t-49-9.5q-30 0-49 9.5t-37 21q-18 11.5-41.5 21T96-155Z"/></svg></span><div class="icon-label">WaveIcon</div><div class="icon-use">sea level · precipitation</div></div>
+        <div class="icon-slot"><span class="layer-icon-sm" data-tone="orange"><svg viewBox="0 -960 960 960" fill="currentColor" width="20" height="20"><path d="M713-153q-5 5-11 7t-14 3q-7 0-14-3t-11-9q-38-42-56-84t-18-89q0-34 10-71t36-103q23-54 31-82t8-52q0-32-14-61t-44-54q-5-5-8-12t-3-13q0-7 2-13t8-12q6-5 13-8t14-3q7 0 13 3t11 7q40 38 60 80t20 88q0 32-10 68t-34 96q-23 54-31 85t-8 58q0 35 13 66t41 61q5 6 8 12t3 14q0 7-3 13t-9 11Z"/></svg></span><div class="icon-label">HeatIcon</div><div class="icon-use">urban heat · wet bulb</div></div>
+        <div class="icon-slot"><span class="layer-icon-sm" data-tone="stone"><svg viewBox="0 -960 960 960" fill="currentColor" width="20" height="20"><path d="m48-240 240-320 186 248h294L552-600 450-464l-45-60 147-196 360 480H48Z"/></svg></span><div class="icon-label">MountainIcon</div><div class="icon-use">topographic relief</div></div>
+        <div class="icon-slot"><span class="layer-icon-sm" data-tone="amber"><svg viewBox="0 -960 960 960" fill="currentColor" width="20" height="20"><path d="M444-745v-144h72v144h-72Zm249 102-51-51 102-103 51 52-102 102Zm51 198v-72h144v72H744Zm-1 278L643-270l49-50 103 101-52 52ZM267-643 166-745l50-51 103 102-52 51Zm213 499q-79.68 0-135.84-56.43Q288-256.87 288-336.93 288-417 344.16-472.5T480-528q80 0 136 55.71T672-336q0 80-56.43 136Q559.13-144 480-144Z"/></svg></span><div class="icon-label">WeatherIcon</div><div class="icon-use">temperature projection</div></div>
+        <div class="icon-slot"><span class="layer-icon-sm" data-tone="violet"><svg viewBox="0 -960 960 960" fill="currentColor" width="20" height="20"><path d="M480-144q-120 0-204-84t-84-204q0-54 19-103t55-89l214-240 214 240q36 40 55 89t19 103q0 120-84 204t-204 84Z"/></svg></span><div class="icon-label">DropIcon</div><div class="icon-use">groundwater (hidden)</div></div>
+        <div class="icon-slot"><span class="layer-icon-sm" data-tone="emerald"><svg viewBox="0 -960 960 960" fill="currentColor" width="20" height="20"><path d="M588-144q-45 0-76.5-31.5T480-252q0-45 31.5-76.5T588-360q45 0 76.5 31.5T696-252q0 45-31.5 76.5T588-144Zm72.22-264Q575-408 515.5-467.28T456-611.78q0-85.22 59.28-144.72t144.5-59.5q85.22 0 144.72 59.28t59.5 144.5q0 85.22-59.28 144.72T660.22-408ZM289.13-240q-59.86 0-102.5-42Q144-324 144-384t42-102q42-42 102-42t102 42q42 42 42 102t-41.5 102q-41.5 42-101.37 42Z"/></svg></span><div class="icon-label">PopulationIcon</div><div class="icon-use">metro / megaregion</div></div>
+      </div>
+    </div>
+  </section>
+
+
+  <footer>
+    Climate Studio Design System • Generated from <code>tokens.css</code>, <code>DesignSystemPage.tsx</code>, and the underlying <code>components/ui</code> primitives.
+  </footer>
+</main>
+
+<script>
+  // ───── Theme toggle ─────
+  const root = document.documentElement;
+  const themeToggle = document.getElementById('themeToggle');
+  const themeLabel = document.getElementById('themeLabel');
+  const themePillLabel = document.getElementById('themePillLabel');
+  const themePill = document.getElementById('themePill');
+
+  function setTheme(mode){
+    root.setAttribute('data-theme', mode);
+    themeLabel.textContent = mode === 'light' ? 'Light' : 'Dark';
+    themePillLabel.textContent = `Currently viewing: ${mode === 'light' ? 'Light' : 'Dark'} Theme`;
+    // swap pill icon
+    themePill.querySelector('svg')?.remove();
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns,'svg');
+    svg.setAttribute('viewBox','0 0 24 24'); svg.setAttribute('fill','none');
+    svg.setAttribute('stroke','currentColor'); svg.setAttribute('stroke-width','2');
+    svg.setAttribute('width','16'); svg.setAttribute('height','16');
+    if (mode === 'light') {
+      svg.innerHTML = '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>';
+    } else {
+      svg.innerHTML = '<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>';
+    }
+    themePill.prepend(svg);
+  }
+  themeToggle.addEventListener('click', () => {
+    setTheme(root.getAttribute('data-theme') === 'light' ? 'dark' : 'light');
+  });
+
+  // ───── Swatches ─────
+  const neutralDark = [
+    ['Neutral 0','--cs-neutral-0','#000000'],
+    ['Neutral 100','--cs-neutral-100','#141414'],
+    ['Neutral 200','--cs-neutral-200','#282828'],
+    ['Neutral 300','--cs-neutral-300','#3f3f3f'],
+    ['Neutral 500','--cs-neutral-500','#737373'],
+    ['Neutral 700','--cs-neutral-700','#d4d4d4'],
+    ['Neutral 900','--cs-neutral-900','#f5f5f5'],
+    ['Neutral 1000','--cs-neutral-1000','#ffffff'],
+  ];
+  const brand = [
+    ['Brand Primary','--cs-brand-primary','#437efc'],
+    ['Brand Light','--cs-brand-primary-light','#6b9bff'],
+    ['Brand Dark','--cs-brand-primary-dark','#2a5fd4'],
+  ];
+  const semantic = [
+    ['Success','--cs-success-text','#10b981'],
+    ['Warning','--cs-warning-text','#fbbf24'],
+    ['Error','--cs-error-text','#ef4444'],
+    ['Info','--cs-info-text','#3b82f6'],
+  ];
+  const dataViz = [
+    ['Sea Level','--cs-data-sea','#0ea5e9'],
+    ['Heat','--cs-data-heat','#f97316'],
+    ['Cold','--cs-data-cold','#3b82f6'],
+    ['Drought','--cs-data-drought','#eab308'],
+    ['Rain','--cs-data-rain','#06b6d4'],
+    ['Growth','--cs-data-growth','#10b981'],
+    ['Decline','--cs-data-decline','#ef4444'],
+    ['Urban','--cs-data-urban','#8b5cf6'],
+  ];
+  function renderSwatches(id, list){
+    const el = document.getElementById(id);
+    el.innerHTML = list.map(([name, v, hex]) => `
+      <div class="swatch">
+        <div class="chip" style="background:${hex}"></div>
+        <div class="meta">
+          <div class="name">${name}</div>
+          <div class="var">${v}  ${hex}</div>
+        </div>
+      </div>`).join('');
+  }
+  renderSwatches('swatch-neutral', neutralDark);
+  renderSwatches('swatch-brand', brand);
+  renderSwatches('swatch-semantic', semantic);
+  renderSwatches('swatch-data', dataViz);
+
+  // ───── Sliders ─────
+  function bindSlider(id, onChange){
+    const el = document.getElementById(id);
+    const update = () => {
+      const v = (el.value - el.min) / (el.max - el.min) * 100;
+      el.style.setProperty('--val', v + '%');
+      onChange && onChange(+el.value);
+    };
+    el.addEventListener('input', update);
+    update();
+  }
+  bindSlider('yearSlider', v => {
+    document.getElementById('yearLabel').textContent = 2025 + Math.round(v * 0.75);
+  });
+  bindSlider('opacitySlider', v => {
+    document.getElementById('opacityLabel').textContent = Math.round(v) + '%';
+  });
+  document.querySelectorAll('.acc .slider').forEach(el => {
+    const update = () => {
+      const v = (el.value - el.min) / (el.max - el.min) * 100;
+      el.style.setProperty('--val', v + '%');
+    };
+    el.addEventListener('input', update); update();
+  });
+
+  // ───── Select ─────
+  const sel = document.getElementById('scenarioSelect');
+  const trig = sel.querySelector('.trigger');
+  const valEl = document.getElementById('scenarioValue');
+  trig.addEventListener('click', e => {
+    e.stopPropagation();
+    sel.classList.toggle('open');
+  });
+  sel.querySelectorAll('.item').forEach(it => {
+    it.addEventListener('click', () => {
+      sel.querySelectorAll('.item').forEach(o => o.classList.remove('selected'));
+      it.classList.add('selected');
+      valEl.textContent = it.firstChild.textContent.trim();
+      sel.classList.remove('open');
+    });
+  });
+  document.addEventListener('click', () => sel.classList.remove('open'));
+
+  // ───── Accordions ─────
+  document.querySelectorAll('.acc-trigger').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('.acc').classList.toggle('open');
+    });
+  });
+
+  // ───── Layer cards (toggle active state from the inner checkbox) ─────
+  document.querySelectorAll('.layer-card input[type=checkbox]').forEach(cb => {
+    const card = cb.closest('.layer-card');
+    cb.addEventListener('change', () => card.classList.toggle('active', cb.checked));
+  });
+
+  // ───── Layer rows: toggle active state on row click (except gear/X) ─────
+  document.querySelectorAll('.layer-row').forEach(row => {
+    row.addEventListener('click', (e) => {
+      if (e.target.closest('.layer-action')) return;
+      row.classList.toggle('active');
+    });
+  });
+
+  // ───── Sources switch ─────
+  const sourcesSwitch = document.getElementById('sourcesSwitch');
+  if (sourcesSwitch) {
+    sourcesSwitch.addEventListener('click', () => {
+      const on = sourcesSwitch.dataset.on === 'true';
+      sourcesSwitch.dataset.on = (!on).toString();
+      document.querySelectorAll('.layer-row .source').forEach(el => {
+        el.style.display = on ? 'none' : '';
+      });
+    });
+  }
+
+  // ───── Global scenario + projection year impact metrics ─────
+  const tempBands = { rcp26: [1.0, 1.0], rcp45: [1.5, 1.7], rcp85: [2.0, 2.8] };
+  const precipBands = { rcp26: 20, rcp45: 50, rcp85: 100 };
+  const droughtBands = { rcp26: 0.1, rcp45: 0.3, rcp85: 0.5 };
+  const soilBands = { rcp26: 5, rcp45: 10, rcp85: 15 };
+
+  function updateImpact() {
+    const y = +document.getElementById('projectionYear').value;
+    const sel = document.getElementById('globalScenario');
+    const active = sel.querySelector('.item.selected');
+    const scenario = active ? active.dataset.value : 'rcp45';
+    const yp = (y - 2025) / (2100 - 2025);
+    const feet = y <= 2025 ? 1 : y >= 2100 ? 10 : Math.round(1 + yp * 9);
+    const [t0, dt] = tempBands[scenario];
+    const anomaly = t0 + yp * dt;
+    const actual = 14.5 + anomaly;
+    const precip = 800 + yp * precipBands[scenario];
+    const drought = 1.0 + yp * droughtBands[scenario];
+    const soil = 60 - yp * soilBands[scenario];
+    document.getElementById('impactSea').textContent = '~' + feet + ' ft';
+    document.getElementById('impactAnomaly').textContent = '+' + anomaly.toFixed(1) + '°C';
+    document.getElementById('impactActual').textContent = actual.toFixed(1) + '°C';
+    document.getElementById('impactPrecip').textContent = precip.toFixed(0) + ' mm';
+    document.getElementById('impactDrought').textContent = drought.toFixed(1);
+    document.getElementById('impactSoil').textContent = soil.toFixed(0) + '%';
+    document.getElementById('projectionYearVal').textContent = y;
+  }
+  const ySlider = document.getElementById('projectionYear');
+  if (ySlider) {
+    ySlider.addEventListener('input', () => {
+      const v = (ySlider.value - ySlider.min) / (ySlider.max - ySlider.min) * 100;
+      ySlider.style.setProperty('--val', v + '%');
+      updateImpact();
+    });
+    // Reflect scenario selection clicks
+    document.querySelectorAll('#globalScenario .item').forEach(it => {
+      it.addEventListener('click', updateImpact);
+    });
+    updateImpact();
+  }
+
+</script>
+</body>
+</html>
