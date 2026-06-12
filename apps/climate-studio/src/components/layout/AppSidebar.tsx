@@ -4,6 +4,7 @@ import { useTheme } from '../../contexts/ThemeContext'
 import { LayoutGrid, ZoomIn, ZoomOut } from 'lucide-react'
 import { useContext } from 'react'
 import { MapContext, type MapContextValue } from '../../contexts/MapContext'
+import { features } from '../../config/features'
 
 // SVG path data for all icons
 const SVG_PATHS = {
@@ -15,10 +16,11 @@ const SVG_PATHS = {
   lightUI: "M11 5V1H13V5H11ZM17.65 7.75L16.275 6.375L19.075 3.5L20.475 4.925L17.65 7.75ZM19 13V11H23V13H19ZM11 23V19H13V23H11ZM6.35 7.7L3.5 4.925L4.925 3.525L7.75 6.35L6.35 7.7ZM19.05 20.5L16.275 17.625L17.625 16.275L20.475 19.025L19.05 20.5ZM1 13V11H5V13H1ZM4.925 20.5L3.525 19.075L6.325 16.275L7.05 16.95L7.775 17.65L4.925 20.5ZM12 18C10.3333 18 8.91667 17.4167 7.75 16.25C6.58333 15.0833 6 13.6667 6 12C6 10.3333 6.58333 8.91667 7.75 7.75C8.91667 6.58333 10.3333 6 12 6C13.6667 6 15.0833 6.58333 16.25 7.75C17.4167 8.91667 18 10.3333 18 12C18 13.6667 17.4167 15.0833 16.25 16.25C15.0833 17.4167 13.6667 18 12 18ZM12 16C13.1 16 14.0417 15.6083 14.825 14.825C15.6083 14.0417 16 13.1 16 12C16 10.9 15.6083 9.95833 14.825 9.175C14.0417 8.39167 13.1 8 12 8C10.9 8 9.95833 8.39167 9.175 9.175C8.39167 9.95833 8 10.9 8 12C8 13.1 8.39167 14.0417 9.175 14.825C9.95833 15.6083 10.9 16 12 16Z",
   darkUI: "M12.0777 21.6C10.7362 21.6 9.47858 21.3445 8.30475 20.8335C7.13108 20.3225 6.109 19.6318 5.2385 18.7615C4.36817 17.891 3.6775 16.8689 3.1665 15.6953C2.6555 14.5214 2.4 13.2638 2.4 11.9223C2.4 9.59075 3.13333 7.52917 4.6 5.7375C6.06667 3.94583 7.96667 2.83333 10.3 2.4C10.0167 4.05 10.1125 5.61667 10.5875 7.1C11.0625 8.58333 11.875 9.9 13.025 11.05C14.1417 12.1667 15.4583 12.9583 16.975 13.425C18.4917 13.8917 20.0333 13.9833 21.6 13.7C21.2 16 20.0958 17.8917 18.2875 19.375C16.4792 20.8583 14.4092 21.6 12.0777 21.6ZM12.075 19.8C13.5417 19.8 14.9083 19.425 16.175 18.675C17.4417 17.925 18.4 16.9083 19.05 15.625C17.6667 15.5417 16.3458 15.2125 15.0875 14.6375C13.8292 14.0625 12.7083 13.2833 11.725 12.3C10.725 11.3 9.94167 10.175 9.375 8.925C8.80833 7.675 8.475 6.35 8.375 4.95C7.09167 5.63333 6.075 6.6015 5.325 7.8545C4.575 9.10767 4.2 10.4645 4.2 11.925C4.2 14.1125 4.96567 15.9718 6.497 17.503C8.02817 19.0343 9.8875 19.8 12.075 19.8Z",
   designSystem: "M3 3h8v8H3V3zm0 10h8v8H3v-8zM13 3h8v8h-8V3zm0 10h8v8h-8v-8z",
+  dashboard: "M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z",
   settings: "M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94L14.4 2.81c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z",
 }
 
-type MenuItemId = 'climateSuite' | 'designSystem' | 'settings'
+type MenuItemId = 'climateSuite' | 'dashboard' | 'designSystem' | 'settings'
 
 interface MenuItemProps {
   id: MenuItemId
@@ -149,6 +151,9 @@ export function AppSidebar() {
     if (location.pathname === '/settings') {
       return 'settings'
     }
+    if (location.pathname === '/dashboard') {
+      return 'dashboard'
+    }
     return 'climateSuite' // Default to Climate Suite for /
   }
 
@@ -158,6 +163,8 @@ export function AppSidebar() {
   const handleMenuItemClick = (item: MenuItemId) => {
     if (item === 'climateSuite') {
       navigate('/')
+    } else if (item === 'dashboard') {
+      navigate('/dashboard')
     } else if (item === 'designSystem') {
       navigate('/design-system')
     } else if (item === 'settings') {
@@ -172,12 +179,20 @@ export function AppSidebar() {
       label: 'Climate Suite',
       path: '/'
     },
+    ...(features.locationDashboard
+      ? [{
+          id: 'dashboard' as MenuItemId,
+          icon: SVG_PATHS.dashboard,
+          label: 'Dashboard',
+          path: '/dashboard'
+        }]
+      : []),
   ]
 
   return (
     <aside className={`app-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
     <div 
-      className={`backdrop-blur-[6px] backdrop-filter relative rounded-br-[12px] rounded-tr-[12px] w-[76px] top-[16px] bottom-[16px] h-[calc(100vh-32px)] safari-sidebar-rail pointer-events-auto overflow-hidden ${
+      className={`backdrop-blur-[6px] backdrop-filter relative rounded-br-[12px] rounded-tr-[12px] w-[76px] top-[16px] h-[calc(100vh-32px)] safari-sidebar-rail pointer-events-auto overflow-hidden ${
         isDark ? 'bg-[rgba(0,0,0,0.90)]' : 'bg-[rgba(255,255,255,0.90)]'
       }`}
       style={{ boxShadow: 'var(--widget-box-shadow)' }}
@@ -295,12 +310,12 @@ export function AppSidebar() {
             </p>
           </button> */}
 
-          {/* Divider - hidden until dark theme is complete */}
-          {/* <div className="h-px relative shrink-0 w-full">
+          {/* Divider above theme toggle */}
+          <div className="h-px relative shrink-0 w-full">
             <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 60 1">
               <path d="M60 0V1H0V0H60Z" fill={isDark ? '#FFFFFF' : '#D7D7D7'} fillOpacity={isDark ? '0.15' : '0.45'} />
             </svg>
-          </div> */}
+          </div>
 
           {/* Panels toggle - Hide/Show panels */}
           <button
@@ -337,23 +352,22 @@ export function AppSidebar() {
             </p>
           </button>
 
-          {/* UI Mode toggle - hidden until dark theme is complete */}
-          {/* <ToggleItem
-            icon={theme === 'light' ? SVG_PATHS.lightUI : SVG_PATHS.darkUI}
-            label={theme === 'light' ? 'Light UI' : 'Dark UI'}
+          {/* UI Mode toggle — single button, switches dark <-> light */}
+          <ToggleItem
+            icon={theme === 'light' ? SVG_PATHS.darkUI : SVG_PATHS.lightUI}
+            label={theme === 'light' ? 'Dark' : 'Light'}
             isActive={false}
             onClick={toggleTheme}
-            disabled={isDesignSystemPage}
-          /> */}
+          />
         </div>
       </div>
       
-      {/* Border overlay - aligned with main sidebar positioning */}
+      {/* Border overlay — flush with rail edges (inset was creating a double-rail artifact in dark mode) */}
       <div
         aria-hidden="true"
-        className={`absolute border-[1px_1px_1px_0px] border-solid top-[16px] right-0 bottom-[16px] left-0 pointer-events-none rounded-br-[12px] rounded-tr-[12px] ${
+        className={`pointer-events-none absolute inset-0 rounded-br-[12px] rounded-tr-[12px] border border-solid border-l-0 ${
           isDark
-            ? 'border-[rgba(255,255,255,0.2)]'
+            ? 'border-[rgba(255,255,255,0.12)]'
             : 'border-[rgba(255,255,255,0.5)]'
         }`}
       />

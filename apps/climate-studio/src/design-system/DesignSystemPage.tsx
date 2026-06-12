@@ -2,7 +2,8 @@
  * Climate Studio Design System
  * ============================
  * A comprehensive showcase of all design tokens, components, and patterns.
- * Access this page at /design-system (hidden from main navigation).
+ * Mirrors design-demo.html 1:1 — both are generated from tokens.css and
+ * the components/ui primitives. Access this page at /design-system.
  */
 
 import React, { useState } from 'react'
@@ -12,10 +13,37 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../co
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select'
 import { Slider } from '../components/ui/slider'
 import { AccordionItem } from '../components/ui/accordion'
-import { 
-  CheckCircle2, 
-  AlertCircle, 
-  Info, 
+import { Badge } from '../components/ui/badge'
+import { Switch } from '../components/ui/switch'
+import { Callout } from '../components/ui/callout'
+import { Spinner } from '../components/ui/spinner'
+import { Progress } from '../components/ui/progress'
+import { IconTile, type IconTileTone } from '../components/ui/icon-tile'
+import { FeatureCard } from '../components/ui/feature-card'
+import { LayerToggleCard } from '../components/ui/layer-toggle-card'
+import { LayerRow } from '../components/ui/layer-row'
+import { GradientBar, LegendRow, climateGradients } from '../components/ui/legend'
+import { LayerStatus } from '../components/ui/layer-status'
+import { ImpactGrid, ImpactMetric } from '../components/ui/impact-grid'
+import { ErrorOverlay } from '../components/ui/error-overlay'
+import { ThemeToggle } from '../components/ui/theme-toggle'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuCheckboxItem,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu'
+import {
+  WaveIcon,
+  HeatIcon,
+  MountainIcon,
+  WeatherIcon,
+  DropIcon,
+  PopulationIcon,
+} from '../components/LayerIcons'
+import {
+  CheckCircle2,
+  AlertCircle,
   AlertTriangle,
   Palette,
   Type,
@@ -25,50 +53,32 @@ import {
   Sun,
   Moon,
   Copy,
-  Check
+  Check,
+  ChevronDown,
 } from 'lucide-react'
 
-interface ColorSwatchProps {
-  name: string
-  variable: string
-  value: string
-  theme?: 'dark' | 'light'
+/* ─────────────────────────── Page chrome helpers ─────────────────────────── */
+
+const eyebrowClass =
+  'text-xs font-semibold uppercase tracking-wider text-[var(--cs-text-tertiary)] mb-3'
+
+function Eyebrow({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+  return <h3 className={`${eyebrowClass} ${className}`}>{children}</h3>
 }
 
-function ColorSwatch({ name, variable, value, theme = 'dark' }: ColorSwatchProps) {
-  const [copied, setCopied] = useState(false)
-  
-  const handleCopy = () => {
-    navigator.clipboard.writeText(variable)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-  
+function FieldLabel({ children, className = '' }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className={`group flex items-center gap-3 p-2 rounded-lg transition-colors ${
-      theme === 'light' ? 'hover:bg-slate-100' : 'hover:bg-white/5'
-    }`}>
-      <div 
-        className={`w-12 h-12 rounded-lg shadow-sm flex-shrink-0 ${
-          theme === 'light' ? 'border border-slate-200' : 'border border-white/20'
-        }`}
-        style={{ backgroundColor: value }}
-      />
-      <div className="flex-1 min-w-0">
-        <div className="text-sm font-medium truncate">{name}</div>
-        <div className={`text-xs font-mono truncate ${
-          theme === 'light' ? 'text-slate-500' : 'text-muted-foreground'
-        }`}>{variable}</div>
-      </div>
-      <button
-        onClick={handleCopy}
-        className={`opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-md ${
-          theme === 'light' ? 'hover:bg-slate-200' : 'hover:bg-white/10'
-        }`}
-      >
-        {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-      </button>
-    </div>
+    <label className={`block text-xs font-medium text-[var(--cs-text-tertiary)] mb-1 ${className}`}>
+      {children}
+    </label>
+  )
+}
+
+function ControlLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <label className="text-[11px] font-semibold uppercase tracking-[0.04em] text-[var(--cs-text-tertiary)]">
+      {children}
+    </label>
   )
 }
 
@@ -76,22 +86,13 @@ interface SectionProps {
   title: string
   icon: React.ReactNode
   children: React.ReactNode
-  theme?: 'dark' | 'light'
 }
 
-function Section({ title, icon, children, theme = 'dark' }: SectionProps) {
+function Section({ title, icon, children }: SectionProps) {
   return (
     <section className="mb-12">
-      <div className={`flex items-center gap-3 mb-6 pb-3 border-b ${
-        theme === 'light' ? 'border-slate-200' : 'border-white/10'
-      }`}>
-        <div className={`p-2 rounded-lg ${
-          theme === 'light' 
-            ? 'bg-[#437efc]/10 text-[#437efc]' 
-            : 'bg-[#437efc]/20 text-[#437efc]'
-        }`}>
-          {icon}
-        </div>
+      <div className="flex items-center gap-3 mb-6 pb-3 border-b border-[var(--widget-border)]">
+        <div className="p-2 rounded-lg bg-[#437efc]/20 text-[#437efc]">{icon}</div>
         <h2 className="text-xl font-bold tracking-tight">{title}</h2>
       </div>
       {children}
@@ -99,132 +100,116 @@ function Section({ title, icon, children, theme = 'dark' }: SectionProps) {
   )
 }
 
-interface LayerCheckboxProps {
-  label: string
-  defaultChecked?: boolean
-  theme?: 'dark' | 'light'
+interface ColorSwatchProps {
+  name: string
+  variable: string
+  value: string
 }
 
-function LayerCheckbox({ label, defaultChecked = false, theme = 'dark' }: LayerCheckboxProps) {
-  const [checked, setChecked] = useState(defaultChecked)
-  
-  const getClassName = () => {
-    if (theme === 'light') {
-      return checked 
-        ? 'border-blue-500 bg-blue-50' 
-        : 'border-slate-200 bg-slate-50 hover:bg-slate-100'
-    }
-    return checked 
-      ? 'border-blue-500/60 bg-blue-500/10' 
-      : 'border-border/60 bg-muted/20 hover:bg-muted/40'
+function ColorSwatch({ name, variable, value }: ColorSwatchProps) {
+  const [copied, setCopied] = useState(false)
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(variable)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
-  
+
   return (
-    <label className={`
-      flex items-center gap-3 rounded-lg border p-3 cursor-pointer transition-all duration-200
-      ${getClassName()}
-    `}>
-      <input 
-        type="checkbox" 
-        className="h-4 w-4 accent-blue-500" 
-        checked={checked}
-        onChange={(e) => setChecked(e.target.checked)}
+    <div className="group flex items-center gap-3 p-2 rounded-lg transition-colors hover:bg-[var(--cs-interactive-hover)]">
+      <div
+        className="w-12 h-12 rounded-lg shadow-sm flex-shrink-0 border border-[var(--cs-swatch-chip-border)]"
+        style={{ backgroundColor: value }}
       />
-      <span className="text-sm font-medium">{label}</span>
-    </label>
+      <div className="flex-1 min-w-0">
+        <div className="text-sm font-medium truncate">{name}</div>
+        <div className="text-xs font-mono truncate text-[var(--cs-text-tertiary)]">
+          {variable}  {value}
+        </div>
+      </div>
+      <button
+        onClick={handleCopy}
+        className="opacity-0 group-hover:opacity-100 transition-opacity p-2 rounded-md hover:bg-[var(--cs-interactive-hover)]"
+      >
+        {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+      </button>
+    </div>
   )
 }
 
-function ColorPalette({ theme = 'dark' }: { theme?: 'dark' | 'light' }) {
-  const neutralColors = theme === 'light' ? [
-    { name: 'Neutral 1000', variable: '--cs-surface-elevated', value: '#ffffff' },
-    { name: 'Neutral 950', variable: '--cs-surface-base', value: '#f8fafc' },
-    { name: 'Neutral 900', variable: '--cs-surface-sunken', value: '#f1f5f9' },
-    { name: 'Neutral 800', variable: '--cs-border-default', value: '#e2e8f0' },
-    { name: 'Neutral 600', variable: '--cs-text-disabled', value: '#94a3b8' },
-    { name: 'Neutral 500', variable: '--cs-text-tertiary', value: '#64748b' },
-    { name: 'Neutral 400', variable: '--cs-text-secondary', value: '#475569' },
-    { name: 'Neutral 100', variable: '--cs-text-primary', value: '#0f172a' },
-  ] : [
-    { name: 'Neutral 0', variable: '--cs-neutral-0', value: '#000000' },
-    { name: 'Neutral 100', variable: '--cs-neutral-100', value: '#141414' },
-    { name: 'Neutral 200', variable: '--cs-neutral-200', value: '#282828' },
-    { name: 'Neutral 300', variable: '--cs-neutral-300', value: '#3f3f3f' },
-    { name: 'Neutral 500', variable: '--cs-neutral-500', value: '#737373' },
-    { name: 'Neutral 700', variable: '--cs-neutral-700', value: '#d4d4d4' },
-    { name: 'Neutral 900', variable: '--cs-neutral-900', value: '#f5f5f5' },
-    { name: 'Neutral 1000', variable: '--cs-neutral-1000', value: '#ffffff' },
-  ]
-  
-  const brandColors = [
-    { name: 'Brand Primary', variable: '--cs-brand-primary', value: '#437efc' },
-    { name: 'Brand Light', variable: '--cs-brand-primary-light', value: '#6b9bff' },
-    { name: 'Brand Dark', variable: '--cs-brand-primary-dark', value: '#2a5fd4' },
-  ]
-  
-  const semanticColors = [
-    { name: 'Success', variable: '--cs-success-400', value: theme === 'light' ? '#059669' : '#10b981' },
-    { name: 'Warning', variable: '--cs-warning-400', value: theme === 'light' ? '#d97706' : '#f59e0b' },
-    { name: 'Error', variable: '--cs-error-400', value: theme === 'light' ? '#dc2626' : '#ef4444' },
-    { name: 'Info', variable: '--cs-info-400', value: theme === 'light' ? '#2563eb' : '#3b82f6' },
-  ]
-  
-  const dataVizColors = [
-    { name: 'Sea Level', variable: '--cs-data-sea', value: '#0ea5e9' },
-    { name: 'Heat', variable: '--cs-data-heat', value: '#f97316' },
-    { name: 'Cold', variable: '--cs-data-cold', value: '#3b82f6' },
-    { name: 'Drought', variable: '--cs-data-drought', value: '#eab308' },
-    { name: 'Rain', variable: '--cs-data-rain', value: '#06b6d4' },
-    { name: 'Growth', variable: '--cs-data-growth', value: '#10b981' },
-    { name: 'Decline', variable: '--cs-data-decline', value: '#ef4444' },
-    { name: 'Urban', variable: '--cs-data-urban', value: '#8b5cf6' },
-  ]
-  
-  const widgetClass = theme === 'light' 
-    ? 'bg-white rounded-xl border border-slate-200 p-4 shadow-sm' 
-    : 'widget-container'
-  const labelClass = theme === 'light' 
-    ? 'text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3' 
-    : 'text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-3'
-  
+/* ──────────────────────────────── Sections ──────────────────────────────── */
+
+const neutralColors = [
+  { name: 'Neutral 0', variable: '--cs-neutral-0', value: '#000000' },
+  { name: 'Neutral 100', variable: '--cs-neutral-100', value: '#141414' },
+  { name: 'Neutral 200', variable: '--cs-neutral-200', value: '#282828' },
+  { name: 'Neutral 300', variable: '--cs-neutral-300', value: '#3f3f3f' },
+  { name: 'Neutral 500', variable: '--cs-neutral-500', value: '#737373' },
+  { name: 'Neutral 700', variable: '--cs-neutral-700', value: '#d4d4d4' },
+  { name: 'Neutral 900', variable: '--cs-neutral-900', value: '#f5f5f5' },
+  { name: 'Neutral 1000', variable: '--cs-neutral-1000', value: '#ffffff' },
+]
+
+const brandColors = [
+  { name: 'Brand Primary', variable: '--cs-brand-primary', value: '#437efc' },
+  { name: 'Brand Light', variable: '--cs-brand-primary-light', value: '#6b9bff' },
+  { name: 'Brand Dark', variable: '--cs-brand-primary-dark', value: '#2a5fd4' },
+]
+
+const semanticColors = [
+  { name: 'Success', variable: '--cs-success-text', value: '#10b981' },
+  { name: 'Warning', variable: '--cs-warning-text', value: '#fbbf24' },
+  { name: 'Error', variable: '--cs-error-text', value: '#ef4444' },
+  { name: 'Info', variable: '--cs-info-text', value: '#3b82f6' },
+]
+
+const dataVizColors = [
+  { name: 'Sea Level', variable: '--cs-data-sea', value: '#0ea5e9' },
+  { name: 'Heat', variable: '--cs-data-heat', value: '#f97316' },
+  { name: 'Cold', variable: '--cs-data-cold', value: '#3b82f6' },
+  { name: 'Drought', variable: '--cs-data-drought', value: '#eab308' },
+  { name: 'Rain', variable: '--cs-data-rain', value: '#06b6d4' },
+  { name: 'Growth', variable: '--cs-data-growth', value: '#10b981' },
+  { name: 'Decline', variable: '--cs-data-decline', value: '#ef4444' },
+  { name: 'Urban', variable: '--cs-data-urban', value: '#8b5cf6' },
+]
+
+function ColorPalette() {
   return (
-    <Section title="Color System" icon={<Palette className="h-5 w-5" />} theme={theme}>
+    <Section title="Color System" icon={<Palette className="h-5 w-5" />}>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
           <div>
-            <h3 className={labelClass}>Neutral Scale</h3>
-            <div className={`${widgetClass} space-y-1`}>
+            <Eyebrow>Neutral Scale</Eyebrow>
+            <div className="widget-container space-y-1">
               {neutralColors.map(color => (
-                <ColorSwatch key={color.variable} {...color} theme={theme} />
+                <ColorSwatch key={color.variable} {...color} />
               ))}
             </div>
           </div>
-          
           <div>
-            <h3 className={labelClass}>Brand Colors</h3>
-            <div className={`${widgetClass} space-y-1`}>
+            <Eyebrow>Brand</Eyebrow>
+            <div className="widget-container space-y-1">
               {brandColors.map(color => (
-                <ColorSwatch key={color.variable} {...color} theme={theme} />
+                <ColorSwatch key={color.variable} {...color} />
               ))}
             </div>
           </div>
         </div>
-        
         <div className="space-y-6">
           <div>
-            <h3 className={labelClass}>Semantic Colors</h3>
-            <div className={`${widgetClass} space-y-1`}>
+            <Eyebrow>Semantic</Eyebrow>
+            <div className="widget-container space-y-1">
               {semanticColors.map(color => (
-                <ColorSwatch key={color.variable} {...color} theme={theme} />
+                <ColorSwatch key={color.variable} {...color} />
               ))}
             </div>
           </div>
-          
           <div>
-            <h3 className={labelClass}>Data Visualization</h3>
-            <div className={`${widgetClass} space-y-1`}>
+            <Eyebrow>Data Visualization</Eyebrow>
+            <div className="widget-container space-y-1">
               {dataVizColors.map(color => (
-                <ColorSwatch key={color.variable} {...color} theme={theme} />
+                <ColorSwatch key={color.variable} {...color} />
               ))}
             </div>
           </div>
@@ -234,75 +219,64 @@ function ColorPalette({ theme = 'dark' }: { theme?: 'dark' | 'light' }) {
   )
 }
 
-function Typography({ theme = 'dark' }: { theme?: 'dark' | 'light' }) {
-  const widgetClass = theme === 'light' 
-    ? 'bg-white rounded-xl border border-slate-200 p-6 shadow-sm' 
-    : 'widget-container'
-  const labelClass = theme === 'light' 
-    ? 'text-xs text-slate-500 uppercase tracking-wider' 
-    : 'text-xs text-muted-foreground uppercase tracking-wider'
-  const captionClass = theme === 'light'
-    ? 'text-xs text-slate-500'
-    : 'text-xs text-muted-foreground'
-  const codeClass = theme === 'light'
-    ? 'text-sm font-mono bg-slate-100 px-2 py-1 rounded text-slate-800'
-    : 'text-sm font-mono bg-neutral-800 px-2 py-1 rounded'
-    
+function Typography() {
+  const rowLabelClass = `${eyebrowClass} mb-1`
   return (
-    <Section title="Typography" icon={<Type className="h-5 w-5" />} theme={theme}>
-      <div className={`${widgetClass} space-y-6`}>
+    <Section title="Typography" icon={<Type className="h-5 w-5" />}>
+      <div className="widget-container space-y-5">
         <div>
-          <span className={labelClass}>Display</span>
+          <span className={rowLabelClass}>Display</span>
           <p className="text-4xl font-bold tracking-tight">Climate Studio</p>
         </div>
         <div>
-          <span className={labelClass}>Heading 1</span>
+          <span className={rowLabelClass}>Heading 1</span>
           <p className="text-3xl font-bold">Sea Level Rise Analysis</p>
         </div>
         <div>
-          <span className={labelClass}>Heading 2</span>
+          <span className={rowLabelClass}>Heading 2</span>
           <p className="text-2xl font-semibold">Temperature Projections</p>
         </div>
         <div>
-          <span className={labelClass}>Heading 3</span>
+          <span className={rowLabelClass}>Heading 3</span>
           <p className="text-xl font-semibold">Urban Heat Island</p>
         </div>
         <div>
-          <span className={labelClass}>Body Large</span>
-          <p className="text-base">Analyze climate data across multiple dimensions with real-time NASA Earth Engine integration.</p>
+          <span className={rowLabelClass}>Body Large</span>
+          <p className="text-base">
+            Analyze climate data across multiple dimensions with real-time NASA Earth Engine integration.
+          </p>
         </div>
         <div>
-          <span className={labelClass}>Body</span>
-          <p className="text-sm">The projected temperature anomaly for RCP 8.5 scenario shows significant warming trends in urban centers.</p>
+          <span className={rowLabelClass}>Body</span>
+          <p className="text-sm">
+            The projected temperature anomaly for RCP 8.5 scenario shows significant warming trends in urban centers.
+          </p>
         </div>
         <div>
-          <span className={labelClass}>Caption</span>
-          <p className={captionClass}>Source: NASA Global Climate Modeling • Last updated: Dec 2025</p>
+          <span className={rowLabelClass}>Caption</span>
+          <p className="text-xs text-[var(--cs-text-tertiary)]">
+            Source: NASA Global Climate Modeling • Last updated: Dec 2025
+          </p>
         </div>
         <div>
-          <span className={labelClass}>Code</span>
-          <code className={codeClass}>const projection = getClimateData(2050, 'rcp85')</code>
+          <span className={rowLabelClass}>Code</span>
+          <code className="inline-block text-sm font-mono px-2 py-1 rounded bg-[var(--cs-surface-sunken)] text-[var(--cs-text-primary)]">
+            const projection = getClimateData(2050, 'rcp85')
+          </code>
         </div>
       </div>
     </Section>
   )
 }
 
-function Buttons({ theme = 'dark' }: { theme?: 'dark' | 'light' }) {
-  const widgetClass = theme === 'light' 
-    ? 'bg-white rounded-xl border border-slate-200 p-4 shadow-sm' 
-    : 'widget-container'
-  const labelClass = theme === 'light' 
-    ? 'text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4' 
-    : 'text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4'
-    
+function Buttons() {
   return (
-    <Section title="Buttons" icon={<Box className="h-5 w-5" />} theme={theme}>
+    <Section title="Buttons" icon={<Box className="h-5 w-5" />}>
       <div className="space-y-8">
         <div>
-          <h3 className={labelClass}>Variants</h3>
-          <div className={widgetClass}>
-            <div className="flex flex-wrap gap-4">
+          <Eyebrow>Variants</Eyebrow>
+          <div className="widget-container">
+            <div className="flex flex-wrap items-center gap-4">
               <Button>Default</Button>
               <Button variant="secondary">Secondary</Button>
               <Button variant="destructive">Destructive</Button>
@@ -313,28 +287,26 @@ function Buttons({ theme = 'dark' }: { theme?: 'dark' | 'light' }) {
             </div>
           </div>
         </div>
-        
         <div>
-          <h3 className={labelClass}>Sizes</h3>
-          <div className={widgetClass}>
+          <Eyebrow>Sizes</Eyebrow>
+          <div className="widget-container">
             <div className="flex flex-wrap items-center gap-4">
               <Button size="sm">Small</Button>
               <Button size="default">Default</Button>
               <Button size="lg">Large</Button>
-              <Button size="icon"><Sun className="h-4 w-4" /></Button>
+              <Button size="icon" aria-label="Sun"><Sun className="h-4 w-4" /></Button>
             </div>
           </div>
         </div>
-        
         <div>
-          <h3 className={labelClass}>States</h3>
-          <div className={widgetClass}>
-            <div className="flex flex-wrap gap-4">
+          <Eyebrow>States</Eyebrow>
+          <div className="widget-container">
+            <div className="flex flex-wrap items-center gap-4">
               <Button>Normal</Button>
               <Button disabled>Disabled</Button>
-              <Button className="bg-blue-500 hover:bg-blue-600 text-white">Primary Action</Button>
-              <Button className="bg-green-600 hover:bg-green-700 text-white">
-                <CheckCircle2 className="h-4 w-4 mr-2" />
+              <Button variant="primary">Primary Action</Button>
+              <Button variant="success">
+                <CheckCircle2 className="h-4 w-4" />
                 Success
               </Button>
             </div>
@@ -345,114 +317,89 @@ function Buttons({ theme = 'dark' }: { theme?: 'dark' | 'light' }) {
   )
 }
 
-function FormElements({ theme = 'dark' }: { theme?: 'dark' | 'light' }) {
-  const [sliderValue, setSliderValue] = useState([50])
-  
-  const widgetClass = theme === 'light' 
-    ? 'bg-white rounded-xl border border-slate-200 p-4 shadow-sm' 
-    : 'widget-container'
-  const labelClass = theme === 'light' 
-    ? 'text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4' 
-    : 'text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4'
-  const inputLabelClass = theme === 'light'
-    ? 'text-xs font-medium text-slate-500 mb-1 block'
-    : 'text-xs font-medium text-muted-foreground mb-1 block'
-  const dividerClass = theme === 'light' ? 'h-px bg-slate-200 my-2' : 'h-px bg-white/10 my-2'
-  
+function FormElements() {
+  const [yearValue, setYearValue] = useState([50])
+  const [opacityValue, setOpacityValue] = useState([70])
+
   return (
-    <Section title="Form Elements" icon={<Layers className="h-5 w-5" />} theme={theme}>
+    <Section title="Form Elements" icon={<Layers className="h-5 w-5" />}>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="space-y-6">
           <div>
-            <h3 className={labelClass}>Text Inputs</h3>
-            <div className={`${widgetClass} space-y-4`}>
+            <Eyebrow>Text Inputs</Eyebrow>
+            <div className="widget-container space-y-4">
               <div>
-                <label className={inputLabelClass}>Default Input</label>
-                <Input placeholder="Enter location..." className={theme === 'light' ? 'bg-slate-50 border-slate-200' : ''} />
+                <FieldLabel>Default Input</FieldLabel>
+                <Input placeholder="Enter location..." />
               </div>
               <div>
-                <label className={inputLabelClass}>With Value</label>
-                <Input defaultValue="New York City" className={theme === 'light' ? 'bg-slate-50 border-slate-200' : ''} />
+                <FieldLabel>With Value</FieldLabel>
+                <Input defaultValue="New York City" />
               </div>
               <div>
-                <label className={inputLabelClass}>Disabled</label>
-                <Input disabled placeholder="Disabled input" className={theme === 'light' ? 'bg-slate-100 border-slate-200' : ''} />
+                <FieldLabel>Disabled</FieldLabel>
+                <Input disabled placeholder="Disabled input" />
               </div>
             </div>
           </div>
-          
+
           <div>
-            <h3 className={labelClass}>Select</h3>
-            <div className={`${widgetClass} space-y-4`}>
-              <div>
-                <label className={inputLabelClass}>Climate Scenario</label>
-                <Select defaultValue="rcp45">
-                  <SelectTrigger className={theme === 'light' ? 'bg-slate-50 border-slate-200' : ''}>
-                    <SelectValue placeholder="Select scenario" />
-                  </SelectTrigger>
-                  <SelectContent className={theme === 'light' ? 'bg-white border-slate-200' : ''}>
-                    <SelectItem value="rcp26">RCP 2.6 (Low)</SelectItem>
-                    <SelectItem value="rcp45">RCP 4.5 (Moderate)</SelectItem>
-                    <SelectItem value="rcp85">RCP 8.5 (High)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <Eyebrow>Select</Eyebrow>
+            <div className="widget-container">
+              <FieldLabel>Climate Scenario</FieldLabel>
+              <Select defaultValue="rcp45">
+                <SelectTrigger>
+                  <SelectValue placeholder="Select scenario" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="rcp26">RCP 2.6 (Low)</SelectItem>
+                  <SelectItem value="rcp45">RCP 4.5 (Moderate)</SelectItem>
+                  <SelectItem value="rcp85">RCP 8.5 (High)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-6">
           <div>
-            <h3 className={labelClass}>Slider</h3>
-            <div className={`${widgetClass} space-y-4`}>
+            <Eyebrow>Slider</Eyebrow>
+            <div className="widget-container space-y-6">
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className={inputLabelClass}>Projection Year</label>
-                  <span className={`text-sm font-medium ${theme === 'light' ? 'text-orange-600' : 'text-orange-400'}`}>
-                    {2025 + Math.round(sliderValue[0] * 0.75)}
+                  <FieldLabel className="mb-0">Projection Year</FieldLabel>
+                  <span className="text-sm font-medium text-[var(--cs-tone-orange-text)]">
+                    {2025 + Math.round(yearValue[0] * 0.75)}
                   </span>
                 </div>
-                <Slider 
-                  value={sliderValue} 
-                  onValueChange={setSliderValue}
-                  min={0}
-                  max={100}
-                  step={1}
-                />
-                <div className={`flex justify-between text-xs mt-1 ${theme === 'light' ? 'text-slate-500' : 'text-muted-foreground'}`}>
+                <Slider value={yearValue} onValueChange={setYearValue} min={0} max={100} step={1} />
+                <div className="flex justify-between text-xs mt-1 text-[var(--cs-text-tertiary)]">
                   <span>2025</span>
                   <span>2100</span>
                 </div>
               </div>
-              
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className={inputLabelClass}>Layer Opacity</label>
-                  <span className="text-sm font-medium">{Math.round(sliderValue[0])}%</span>
+                  <FieldLabel className="mb-0">Layer Opacity</FieldLabel>
+                  <span className="text-sm font-medium">{Math.round(opacityValue[0])}%</span>
                 </div>
-                <Slider 
-                  value={sliderValue} 
-                  onValueChange={setSliderValue}
-                  min={0}
-                  max={100}
-                  step={5}
-                />
+                <Slider value={opacityValue} onValueChange={setOpacityValue} min={0} max={100} step={5} />
               </div>
             </div>
           </div>
-          
+
           <div>
-            <h3 className={labelClass}>Checkbox & Radio</h3>
-            <div className={`${widgetClass} space-y-3`}>
+            <Eyebrow>Checkbox &amp; Radio</Eyebrow>
+            <div className="widget-container space-y-3">
               <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" className="h-4 w-4 accent-blue-500 rounded" defaultChecked />
+                <input type="checkbox" className="h-4 w-4 accent-blue-500" defaultChecked />
                 <span className="text-sm">Show temperature anomaly</span>
               </label>
               <label className="flex items-center gap-3 cursor-pointer">
-                <input type="checkbox" className="h-4 w-4 accent-blue-500 rounded" />
+                <input type="checkbox" className="h-4 w-4 accent-blue-500" />
                 <span className="text-sm">Enable auto-animation</span>
               </label>
-              <div className={dividerClass} />
+              <div className="h-px bg-[var(--cs-divider-color)] my-2" />
               <label className="flex items-center gap-3 cursor-pointer">
                 <input type="radio" name="mode" className="h-4 w-4 accent-blue-500" defaultChecked />
                 <span className="text-sm">Temperature Anomaly</span>
@@ -469,397 +416,685 @@ function FormElements({ theme = 'dark' }: { theme?: 'dark' | 'light' }) {
   )
 }
 
-function Cards({ theme = 'dark' }: { theme?: 'dark' | 'light' }) {
-  const cardClass = theme === 'light' 
-    ? 'bg-white border border-slate-200 shadow-sm' 
-    : 'bg-card/50 backdrop-blur'
-  const descClass = theme === 'light' ? 'text-slate-500' : ''
-  const labelClass = theme === 'light' 
-    ? 'text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4' 
-    : 'text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4'
-  const widgetClass = theme === 'light' 
-    ? 'bg-white rounded-xl border border-slate-200 p-4 shadow-sm max-w-md' 
-    : 'widget-container max-w-md'
-    
+function Cards() {
   return (
-    <Section title="Cards & Panels" icon={<Sparkles className="h-5 w-5" />} theme={theme}>
+    <Section title="Cards & Panels" icon={<Sparkles className="h-5 w-5" />}>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className={cardClass}>
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <div className="p-1.5 rounded-md bg-sky-500/20">
-                <Sun className={`h-4 w-4 ${theme === 'light' ? 'text-sky-600' : 'text-sky-400'}`} />
-              </div>
+              <IconTile tone="sky" className="h-7 w-7 [&_svg]:h-4 [&_svg]:w-4">
+                <Sun />
+              </IconTile>
               Sea Level Rise
             </CardTitle>
-            <CardDescription className={descClass}>NOAA Coastal Flood Projection</CardDescription>
+            <CardDescription>NOAA Coastal Flood Projection</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className={`text-3xl font-bold ${theme === 'light' ? 'text-sky-600' : 'text-sky-400'}`}>+3.2 ft</div>
-            <p className={`text-xs mt-1 ${theme === 'light' ? 'text-slate-500' : 'text-muted-foreground'}`}>Projected by 2100 (RCP 8.5)</p>
+            <div className="text-3xl font-bold text-[var(--cs-tone-sky-text)]">+3.2 ft</div>
+            <p className="text-xs mt-1 text-[var(--cs-text-tertiary)]">Projected by 2100 (RCP 8.5)</p>
           </CardContent>
         </Card>
-        
-        <Card className={cardClass}>
+
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <div className="p-1.5 rounded-md bg-orange-500/20">
-                <AlertTriangle className={`h-4 w-4 ${theme === 'light' ? 'text-orange-600' : 'text-orange-400'}`} />
-              </div>
+              <IconTile tone="orange" className="h-7 w-7 [&_svg]:h-4 [&_svg]:w-4">
+                <AlertTriangle />
+              </IconTile>
               Temperature
             </CardTitle>
-            <CardDescription className={descClass}>Global Anomaly Projection</CardDescription>
+            <CardDescription>Global Anomaly Projection</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className={`text-3xl font-bold ${theme === 'light' ? 'text-orange-600' : 'text-orange-400'}`}>+4.8°C</div>
-            <p className={`text-xs mt-1 ${theme === 'light' ? 'text-slate-500' : 'text-muted-foreground'}`}>Above pre-industrial baseline</p>
+            <div className="text-3xl font-bold text-[var(--cs-tone-orange-text)]">+4.8°C</div>
+            <p className="text-xs mt-1 text-[var(--cs-text-tertiary)]">Above pre-industrial baseline</p>
           </CardContent>
         </Card>
-        
-        <Card className={cardClass}>
+
+        <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <div className="p-1.5 rounded-md bg-emerald-500/20">
-                <CheckCircle2 className={`h-4 w-4 ${theme === 'light' ? 'text-emerald-600' : 'text-emerald-400'}`} />
-              </div>
+              <IconTile tone="emerald" className="h-7 w-7 [&_svg]:h-4 [&_svg]:w-4">
+                <CheckCircle2 />
+              </IconTile>
               Data Status
             </CardTitle>
-            <CardDescription className={descClass}>Earth Engine Connection</CardDescription>
+            <CardDescription>Earth Engine Connection</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className={`text-lg font-semibold ${theme === 'light' ? 'text-emerald-600' : 'text-emerald-400'}`}>Connected</div>
-            <p className={`text-xs mt-1 ${theme === 'light' ? 'text-slate-500' : 'text-muted-foreground'}`}>Real NASA climate data active</p>
+            <div className="text-xl font-semibold text-[var(--cs-tone-emerald-text)]">Connected</div>
+            <p className="text-xs mt-1 text-[var(--cs-text-tertiary)]">Real NASA climate data active</p>
           </CardContent>
         </Card>
       </div>
-      
+
       <div className="mt-8">
-        <h3 className={labelClass}>Widget Container</h3>
-        <div className={widgetClass}>
-          <h4 className="text-sm font-semibold mb-3">Climate Layers</h4>
+        <Eyebrow>Widget Container (with layer cards)</Eyebrow>
+        <div className="widget-container max-w-md">
+          <h4 className="text-sm font-semibold tracking-[-0.01em] mb-3">Climate Layers</h4>
           <div className="space-y-2">
-            <LayerCheckbox label="Sea Level Rise" defaultChecked theme={theme} />
-            <LayerCheckbox label="Temperature Projection" theme={theme} />
+            <LayerToggleCard label="Sea Level Rise" defaultChecked />
+            <LayerToggleCard label="Temperature Projection" />
+            <LayerToggleCard label="Precipitation" />
           </div>
+        </div>
+      </div>
+
+      <div className="mt-8">
+        <Eyebrow>Feature Cards (inset)</Eyebrow>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          <FeatureCard title="Earth Engine">
+            <p className="text-xs text-[var(--cs-text-tertiary)]">NASA Earth Engine v2.34 — 1.2s last query</p>
+          </FeatureCard>
+          <FeatureCard title="Tile Cache">
+            <p className="text-xs text-[var(--cs-text-tertiary)]">98% hit rate · 14k tiles</p>
+          </FeatureCard>
+          <FeatureCard title="Region">
+            <p className="text-xs text-[var(--cs-text-tertiary)]">North Atlantic Megaregion</p>
+          </FeatureCard>
         </div>
       </div>
     </Section>
   )
 }
 
-function StatusIndicators({ theme = 'dark' }: { theme?: 'dark' | 'light' }) {
-  const widgetClass = theme === 'light' 
-    ? 'bg-white rounded-xl border border-slate-200 p-4 shadow-sm' 
-    : 'widget-container'
-  const labelClass = theme === 'light' 
-    ? 'text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4' 
-    : 'text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4'
-  const mutedClass = theme === 'light' ? 'text-slate-500' : 'text-muted-foreground'
-  const progressBgClass = theme === 'light' ? 'bg-slate-200' : 'bg-white/10'
-  
-  return (
-    <Section title="Status & Feedback" icon={<AlertCircle className="h-5 w-5" />} theme={theme}>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div>
-          <h3 className={labelClass}>Status Badges</h3>
-          <div className={`${widgetClass} space-y-4`}>
-            <div className={`flex items-center gap-3 p-3 rounded-lg border ${theme === 'light' ? 'border-green-200 bg-green-50' : 'border-green-500/30 bg-green-500/10'}`}>
-              <div className="p-1 rounded-full bg-green-500">
-                <CheckCircle2 className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <p className={`text-sm font-medium ${theme === 'light' ? 'text-green-700' : 'text-green-400'}`}>Success</p>
-                <p className={`text-xs ${mutedClass}`}>Operation completed successfully</p>
-              </div>
-            </div>
-            
-            <div className={`flex items-center gap-3 p-3 rounded-lg border ${theme === 'light' ? 'border-yellow-200 bg-yellow-50' : 'border-yellow-500/30 bg-yellow-500/10'}`}>
-              <div className="p-1 rounded-full bg-yellow-500">
-                <AlertTriangle className="h-4 w-4 text-black" />
-              </div>
-              <div>
-                <p className={`text-sm font-medium ${theme === 'light' ? 'text-yellow-700' : 'text-yellow-400'}`}>Warning</p>
-                <p className={`text-xs ${mutedClass}`}>Data may be outdated</p>
-              </div>
-            </div>
-            
-            <div className={`flex items-center gap-3 p-3 rounded-lg border ${theme === 'light' ? 'border-red-200 bg-red-50' : 'border-red-500/30 bg-red-500/10'}`}>
-              <div className="p-1 rounded-full bg-red-500">
-                <AlertCircle className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <p className={`text-sm font-medium ${theme === 'light' ? 'text-red-700' : 'text-red-400'}`}>Error</p>
-                <p className={`text-xs ${mutedClass}`}>Failed to load climate data</p>
-              </div>
-            </div>
-            
-            <div className={`flex items-center gap-3 p-3 rounded-lg border ${theme === 'light' ? 'border-blue-200 bg-blue-50' : 'border-blue-500/30 bg-blue-500/10'}`}>
-              <div className="p-1 rounded-full bg-blue-500">
-                <Info className="h-4 w-4 text-white" />
-              </div>
-              <div>
-                <p className={`text-sm font-medium ${theme === 'light' ? 'text-blue-700' : 'text-blue-400'}`}>Info</p>
-                <p className={`text-xs ${mutedClass}`}>Zoom in for detailed data</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div>
-          <h3 className={labelClass}>Loading States</h3>
-          <div className={`${widgetClass} space-y-4`}>
-            <div className={`flex items-center gap-3 p-3 rounded-lg border ${theme === 'light' ? 'border-blue-200 bg-blue-50' : 'border-blue-500/30 bg-blue-500/10'}`}>
-              <div className="h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-              <div>
-                <p className="text-sm font-medium">Loading NASA data...</p>
-                <p className={`text-xs ${mutedClass}`}>Connecting to Earth Engine</p>
-              </div>
-            </div>
-            
-            <div className={`flex items-center gap-3 p-3 rounded-lg border ${theme === 'light' ? 'border-purple-200 bg-purple-50' : 'border-purple-500/30 bg-purple-500/10'}`}>
-              <div className="h-5 w-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
-              <div>
-                <p className="text-sm font-medium">Waking Render Instance...</p>
-                <p className={`text-xs ${mutedClass}`}>This can take up to 60s</p>
-              </div>
-            </div>
-            
-            <div className="space-y-2">
-              <div className="flex justify-between text-xs">
-                <span className={mutedClass}>Processing tiles</span>
-                <span className="font-medium">67%</span>
-              </div>
-              <div className={`h-2 ${progressBgClass} rounded-full overflow-hidden`}>
-                <div className="h-full w-2/3 bg-blue-500 rounded-full transition-all duration-300" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Section>
-  )
-}
+function AccordionSection() {
+  const [opacity, setOpacity] = useState([70])
 
-function AccordionSection({ theme = 'dark' }: { theme?: 'dark' | 'light' }) {
-  const widgetClass = theme === 'light' 
-    ? 'widget-container-no-padding overflow-hidden bg-white border border-slate-200 shadow-sm' 
-    : 'widget-container widget-container-no-padding overflow-hidden'
-  const mutedClass = theme === 'light' ? 'text-slate-500' : 'text-muted-foreground'
-  
   return (
-    <Section title="Accordions" icon={<Layers className="h-5 w-5" />} theme={theme}>
-      <div className={`max-w-md space-y-3 ${widgetClass} rounded-xl`}>
+    <Section title="Accordions" icon={<Layers className="h-5 w-5" />}>
+      <div className="max-w-md space-y-3">
         <AccordionItem title="Climate Projections" defaultOpen={true}>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className={`text-xs ${mutedClass}`}>Scenario</span>
+              <span className="text-xs text-[var(--cs-text-tertiary)]">Scenario</span>
               <span className="text-sm font-medium">RCP 4.5</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className={`text-xs ${mutedClass}`}>Year</span>
-              <span className={`text-sm font-medium ${theme === 'light' ? 'text-orange-600' : 'text-orange-400'}`}>2050</span>
+              <span className="text-xs text-[var(--cs-text-tertiary)]">Year</span>
+              <span className="text-sm font-medium text-[var(--cs-tone-orange-text)]">2050</span>
             </div>
           </div>
         </AccordionItem>
-        
+
         <AccordionItem title="Sea Level Rise" defaultOpen={false}>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className={`text-xs ${mutedClass}`}>Layer Opacity</span>
-              <span className="text-sm font-medium">70%</span>
+              <span className="text-xs text-[var(--cs-text-tertiary)]">Layer Opacity</span>
+              <span className="text-sm font-medium">{opacity[0]}%</span>
             </div>
-            <Slider value={[70]} min={10} max={100} step={5} />
+            <Slider value={opacity} onValueChange={setOpacity} min={10} max={100} step={5} />
           </div>
         </AccordionItem>
-        
+
         <AccordionItem title="Temperature" defaultOpen={false}>
-          <p className={`text-xs ${mutedClass}`}>Temperature layer controls will appear here.</p>
+          <p className="text-xs text-[var(--cs-text-tertiary)]">Temperature layer controls will appear here.</p>
         </AccordionItem>
       </div>
     </Section>
   )
 }
 
-function DataVizGradients({ theme = 'dark' }: { theme?: 'dark' | 'light' }) {
-  const widgetClass = theme === 'light' 
-    ? 'bg-white rounded-xl border border-slate-200 p-4 shadow-sm space-y-4' 
-    : 'widget-container space-y-4'
-  const mutedClass = theme === 'light' ? 'text-slate-500' : 'text-muted-foreground'
-  
+function StatusIndicators() {
   return (
-    <Section title="Data Visualization Gradients" icon={<Palette className="h-5 w-5" />} theme={theme}>
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className={widgetClass}>
-          <h4 className="text-sm font-semibold">Temperature Anomaly</h4>
-          <div className="h-4 w-full rounded-full bg-gradient-to-r from-white via-[#fef9c3] via-[#fde047] via-[#facc15] via-[#f59e0b] via-[#fb923c] via-[#f97316] via-[#ea580c] via-[#dc2626] to-[#7f1d1d]" />
-          <div className={`flex justify-between text-xs ${mutedClass}`}>
-            <span>0°C</span>
-            <span>2°C</span>
-            <span>4°C</span>
-            <span>6°C</span>
-            <span>8°C+</span>
+    <Section title="Status & Feedback" icon={<AlertCircle className="h-5 w-5" />}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-6">
+          <div>
+            <Eyebrow>Status Callouts</Eyebrow>
+            <div className="widget-container space-y-4">
+              <Callout status="success" title="Success" description="Operation completed successfully" />
+              <Callout status="warning" title="Warning" description="Data may be outdated" />
+              <Callout status="error" title="Error" description="Failed to load climate data" />
+              <Callout status="info" title="Info" description="Zoom in for detailed data" />
+            </div>
+          </div>
+
+          <div>
+            <Eyebrow>Metric Badges</Eyebrow>
+            <div className="widget-container">
+              <div className="flex flex-wrap items-center gap-4">
+                <Badge variant="success">+24%</Badge>
+                <Badge variant="warning">RCP 4.5</Badge>
+                <Badge variant="error">-7°C</Badge>
+                <Badge variant="info">2050</Badge>
+              </div>
+            </div>
           </div>
         </div>
-        
-        <div className={widgetClass}>
-          <h4 className="text-sm font-semibold">Actual Temperature</h4>
-          <div className="h-4 w-full rounded-full bg-gradient-to-r from-[#1e3a8a] via-[#3b82f6] via-[#fef08a] via-[#fb923c] via-[#ef4444] to-[#7f1d1d]" />
-          <div className={`flex justify-between text-xs ${mutedClass}`}>
-            <span>10°</span>
-            <span>20°</span>
-            <span>30°</span>
-            <span>40°+</span>
+
+        <div className="space-y-6">
+          <div>
+            <Eyebrow>Loading States</Eyebrow>
+            <div className="widget-container space-y-4">
+              <Callout
+                status="info"
+                icon={<Spinner />}
+                title="Loading NASA data..."
+                titleClassName="text-[var(--cs-text-primary)]"
+                description="Connecting to Earth Engine"
+              />
+              <Callout
+                status="info"
+                icon={<Spinner className="border-purple-500 border-t-transparent" />}
+                title="Waking Render Instance..."
+                titleClassName="text-[var(--cs-text-primary)]"
+                description="This can take up to 60s"
+                className="border-purple-500/30 bg-purple-500/10"
+              />
+              <div className="space-y-2 pt-2">
+                <div className="flex justify-between text-xs">
+                  <span className="text-[var(--cs-text-tertiary)]">Processing tiles</span>
+                  <span className="font-medium">67%</span>
+                </div>
+                <Progress value={67} />
+              </div>
+            </div>
           </div>
-        </div>
-        
-        <div className={widgetClass}>
-          <h4 className="text-sm font-semibold">Precipitation</h4>
-          <div className={`h-4 w-full rounded-full bg-gradient-to-r ${theme === 'light' ? 'from-[#f1f5f9]' : 'from-[#ffffff]'} via-[#e3f2fd] via-[#90caf9] via-[#42a5f5] via-[#1e88e5] to-[#0d47a1]`} />
-          <div className={`flex justify-between text-xs ${mutedClass}`}>
-            <span>0</span>
-            <span>2</span>
-            <span>4</span>
-            <span>6</span>
-            <span>10 mm/day</span>
-          </div>
-        </div>
-        
-        <div className={widgetClass}>
-          <h4 className="text-sm font-semibold">Population Growth</h4>
-          <div className="h-4 w-full rounded-full" style={{
-            background: 'linear-gradient(to right, #dc2626 0%, #ef4444 10%, #f97316 20%, #eab308 30%, #a855f7 40%, #8b5cf6 50%, #3b82f6 60%, #0ea5e9 70%, #06b6d4 85%, #10b981 100%)'
-          }} />
-          <div className={`flex justify-between text-xs ${mutedClass}`}>
-            <span>-5%</span>
-            <span>0%</span>
-            <span>+5%</span>
-            <span>+10%</span>
+
+          <div>
+            <Eyebrow>Shadow Scale</Eyebrow>
+            <div className="widget-container">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="rounded-lg bg-[var(--cs-surface-elevated)] p-4 font-mono text-xs text-[var(--cs-text-tertiary)] shadow-[var(--cs-shadow-sm)]">--cs-shadow-sm</div>
+                <div className="rounded-lg bg-[var(--cs-surface-elevated)] p-4 font-mono text-xs text-[var(--cs-text-tertiary)] shadow-[var(--cs-shadow-DEFAULT)]">--cs-shadow-DEFAULT</div>
+                <div className="rounded-lg bg-[var(--cs-surface-elevated)] p-4 font-mono text-xs text-[var(--cs-text-tertiary)] shadow-[var(--cs-shadow-md)]">--cs-shadow-md</div>
+                <div className="rounded-lg bg-[var(--cs-surface-elevated)] p-4 font-mono text-xs text-[var(--cs-text-tertiary)] shadow-[var(--cs-shadow-lg)]">--cs-shadow-lg</div>
+                <div className="rounded-lg bg-[var(--cs-surface-elevated)] p-4 font-mono text-xs text-[var(--cs-text-tertiary)] shadow-[var(--cs-shadow-panel)]">--cs-shadow-panel</div>
+                <div className="rounded-lg bg-[var(--cs-surface-elevated)] p-4 font-mono text-xs text-[var(--cs-text-tertiary)] shadow-[var(--cs-glow-md)] border border-[rgba(67,126,252,0.3)]">--cs-glow-md</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </Section>
   )
 }
+
+function DataVizGradients() {
+  return (
+    <Section title="Data Visualization Gradients" icon={<Palette className="h-5 w-5" />}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="widget-container space-y-3">
+          <h4 className="text-sm font-semibold tracking-[-0.01em]">Temperature Anomaly</h4>
+          <GradientBar gradient={climateGradients.tempAnomaly} />
+          <div className="flex justify-between text-xs text-[var(--cs-text-tertiary)]">
+            <span>0°C</span><span>2°C</span><span>4°C</span><span>6°C</span><span>8°C+</span>
+          </div>
+        </div>
+        <div className="widget-container space-y-3">
+          <h4 className="text-sm font-semibold tracking-[-0.01em]">Actual Temperature</h4>
+          <GradientBar gradient={climateGradients.tempActual} />
+          <div className="flex justify-between text-xs text-[var(--cs-text-tertiary)]">
+            <span>10°</span><span>20°</span><span>30°</span><span>40°+</span>
+          </div>
+        </div>
+        <div className="widget-container space-y-3">
+          <h4 className="text-sm font-semibold tracking-[-0.01em]">Precipitation</h4>
+          <GradientBar gradient={climateGradients.precip} />
+          <div className="flex justify-between text-xs text-[var(--cs-text-tertiary)]">
+            <span>0</span><span>2</span><span>4</span><span>6</span><span>10 mm/day</span>
+          </div>
+        </div>
+        <div className="widget-container space-y-3">
+          <h4 className="text-sm font-semibold tracking-[-0.01em]">Population Growth</h4>
+          <GradientBar gradient={climateGradients.population} />
+          <div className="flex justify-between text-xs text-[var(--cs-text-tertiary)]">
+            <span>-5%</span><span>0%</span><span>+5%</span><span>+10%</span>
+          </div>
+        </div>
+      </div>
+    </Section>
+  )
+}
+
+/* ──────────────────── Climate Layer Composition section ──────────────────── */
+
+interface PaletteLayer {
+  id: string
+  title: string
+  source: string
+  tone: IconTileTone
+  icon: React.ReactNode
+}
+
+const paletteLayers: PaletteLayer[] = [
+  { id: 'sea_level_rise', title: 'Sea Level Rise', source: 'Source: NOAA Sea Level Rise Viewer', tone: 'sky', icon: <WaveIcon /> },
+  { id: 'urban_heat_island', title: 'Urban Heat Island', source: 'Source: Yale YCEO Summer UHI v4', tone: 'orange', icon: <HeatIcon /> },
+  { id: 'temperature_projection', title: 'Future Temperature Anomaly', source: 'Source: NASA NEX-GDDP-CMIP6', tone: 'amber', icon: <WeatherIcon /> },
+  { id: 'precipitation_drought', title: 'Precipitation & Drought', source: 'Source: CHIRPS via Earth Engine', tone: 'violet', icon: <DropIcon /> },
+  { id: 'topographic_relief', title: 'Topographic Relief', source: 'Source: Copernicus DEM', tone: 'stone', icon: <MountainIcon /> },
+  { id: 'megaregion_timeseries', title: 'Metro Data Statistics', source: 'Source: US Census + NASA', tone: 'emerald', icon: <PopulationIcon /> },
+  { id: 'wet_bulb', title: 'Wet Bulb Temperature', source: 'Source: NASA NEX-GDDP-CMIP6', tone: 'orange', icon: <HeatIcon /> },
+]
+
+function LayerPaletteDemo() {
+  const [visibleIds, setVisibleIds] = useState<Set<string>>(
+    () => new Set(['sea_level_rise', 'urban_heat_island', 'topographic_relief', 'precipitation_drought'])
+  )
+  const [activeIds, setActiveIds] = useState<Set<string>>(
+    () => new Set(['sea_level_rise', 'urban_heat_island'])
+  )
+  const [showSources, setShowSources] = useState(true)
+
+  const displayedLayers = paletteLayers.filter(l => visibleIds.has(l.id))
+  const allActive = displayedLayers.length > 0 && displayedLayers.every(l => activeIds.has(l.id))
+
+  const toggleVisible = (id: string) => {
+    setVisibleIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleActive = (id: string) => {
+    setActiveIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const handleSelectAll = (checked: boolean) => {
+    setActiveIds(checked ? new Set(displayedLayers.map(l => l.id)) : new Set())
+  }
+
+  return (
+    <div className="widget-container widget-container-no-padding max-w-[480px]">
+      <div className="flex items-center justify-between px-4 pt-4">
+        <h3 className="text-sm font-semibold text-[var(--cs-text-primary)]">Layers</h3>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="inline-flex h-7 items-center gap-0.5 rounded-md border-0 bg-transparent px-2 text-xs text-[var(--cs-text-secondary)] transition-colors hover:bg-[var(--cs-interactive-hover)]">
+              Manage Layers
+              <ChevronDown className="h-3 w-3" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-56">
+            {paletteLayers.map(layer => (
+              <DropdownMenuCheckboxItem
+                key={layer.id}
+                checked={visibleIds.has(layer.id)}
+                onCheckedChange={() => toggleVisible(layer.id)}
+              >
+                {layer.title}
+              </DropdownMenuCheckboxItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      <div className="flex flex-col gap-2 border-b border-[var(--widget-border)] px-4 pb-3 pt-3">
+        {displayedLayers.map(layer => (
+          <LayerRow
+            key={layer.id}
+            icon={<IconTile tone={layer.tone} size="md">{layer.icon}</IconTile>}
+            title={layer.title}
+            source={layer.source}
+            showSource={showSources}
+            active={activeIds.has(layer.id)}
+            onClick={() => toggleActive(layer.id)}
+            onSettings={() => {}}
+            onRemove={() => toggleVisible(layer.id)}
+          />
+        ))}
+      </div>
+
+      <div className="flex items-center justify-between px-4 pb-4 pt-3">
+        <label className="flex cursor-pointer items-center gap-3 text-xs font-medium">
+          <input
+            type="checkbox"
+            className="h-4 w-4 accent-blue-500"
+            checked={allActive}
+            onChange={e => handleSelectAll(e.target.checked)}
+          />
+          Select All
+        </label>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-[var(--cs-text-tertiary)]">Sources</span>
+          <Switch checked={showSources} onCheckedChange={setShowSources} />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+type Scenario = 'rcp26' | 'rcp45' | 'rcp85'
+
+const tempBands: Record<Scenario, [number, number]> = { rcp26: [1.0, 1.0], rcp45: [1.5, 1.7], rcp85: [2.0, 2.8] }
+const precipBands: Record<Scenario, number> = { rcp26: 20, rcp45: 50, rcp85: 100 }
+const droughtBands: Record<Scenario, number> = { rcp26: 0.1, rcp45: 0.3, rcp85: 0.5 }
+const soilBands: Record<Scenario, number> = { rcp26: 5, rcp45: 10, rcp85: 15 }
+
+function GlobalControlsDemo() {
+  const [scenario, setScenario] = useState<Scenario>('rcp45')
+  const [year, setYear] = useState([2050])
+
+  const y = year[0]
+  const yp = (y - 2025) / (2100 - 2025)
+  const feet = y <= 2025 ? 1 : y >= 2100 ? 10 : Math.round(1 + yp * 9)
+  const [t0, dt] = tempBands[scenario]
+  const anomaly = t0 + yp * dt
+  const actual = 14.5 + anomaly
+  const precip = 800 + yp * precipBands[scenario]
+  const drought = 1.0 + yp * droughtBands[scenario]
+  const soil = 60 - yp * soilBands[scenario]
+
+  return (
+    <div className="widget-container">
+      <div className="flex flex-col gap-5">
+        <div>
+          <FieldLabel>Climate Scenario</FieldLabel>
+          <Select value={scenario} onValueChange={v => setScenario(v as Scenario)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="rcp26">RCP 2.6 (Low)</SelectItem>
+              <SelectItem value="rcp45">RCP 4.5 (Moderate)</SelectItem>
+              <SelectItem value="rcp85">RCP 8.5 (High)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <FieldLabel className="mb-0">Projection Year</FieldLabel>
+            <span className="text-sm font-medium text-[var(--cs-tone-orange-text)]">{y}</span>
+          </div>
+          <Slider value={year} onValueChange={setYear} min={2025} max={2100} step={5} />
+          <div className="mt-1 flex justify-between text-xs text-[var(--cs-text-tertiary)]">
+            <span>2025</span>
+            <span>2100</span>
+          </div>
+
+          <ImpactGrid className="mt-3.5">
+            <ImpactMetric label="Sea Level Rise" value={`~${feet} ft`} tone="sky" />
+            <ImpactMetric label="Temp. Anomaly" value={`+${anomaly.toFixed(1)}°C`} tone="orange" />
+            <ImpactMetric label="Actual Temp." value={`${actual.toFixed(1)}°C`} tone="red" />
+            <ImpactMetric label="Precipitation" value={`${precip.toFixed(0)} mm`} tone="blue" />
+            <ImpactMetric label="Drought Index" value={drought.toFixed(1)} tone="yellow" />
+            <ImpactMetric label="Soil Moisture" value={`${soil.toFixed(0)}%`} tone="green" />
+          </ImpactGrid>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function OpacityControl({ defaultValue }: { defaultValue: number }) {
+  const [value, setValue] = useState([defaultValue])
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex justify-between">
+        <ControlLabel>Layer Opacity</ControlLabel>
+        <span className="text-[11px] font-medium text-[var(--cs-text-primary)]">{value[0]}%</span>
+      </div>
+      <Slider value={value} onValueChange={setValue} min={10} max={100} step={5} />
+    </div>
+  )
+}
+
+function PerLayerControls() {
+  return (
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <AccordionItem
+        title="Urban Heat Island"
+        defaultOpen={true}
+        icon={<IconTile tone="orange" size="sm"><HeatIcon /></IconTile>}
+      >
+        <div className="flex flex-col gap-2">
+          <ControlLabel>Season</ControlLabel>
+          <Select defaultValue="summer">
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="summer">Summer (Jun-Aug)</SelectItem>
+              <SelectItem value="winter">Winter (Dec-Feb)</SelectItem>
+              <SelectItem value="annual">Annual Average</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="flex flex-col gap-2">
+          <ControlLabel>Color Scheme</ControlLabel>
+          <Select defaultValue="temp">
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="temp">Temperature (Blue-Red)</SelectItem>
+              <SelectItem value="heat">Heat Intensity</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <OpacityControl defaultValue={70} />
+      </AccordionItem>
+
+      <AccordionItem
+        title="Topographic Relief"
+        defaultOpen={true}
+        icon={<IconTile tone="stone" size="sm"><MountainIcon /></IconTile>}
+      >
+        <div className="flex flex-col gap-2">
+          <ControlLabel>Hillshade Style</ControlLabel>
+          <Select defaultValue="dramatic">
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="dramatic">Dramatic Shadows</SelectItem>
+              <SelectItem value="subtle">Subtle Shading</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <OpacityControl defaultValue={60} />
+      </AccordionItem>
+
+      <AccordionItem
+        title="Future Temperature Anomaly"
+        defaultOpen={false}
+        icon={<IconTile tone="orange" size="sm"><WeatherIcon /></IconTile>}
+      >
+        <div className="flex flex-col gap-2">
+          <ControlLabel>Temperature Display</ControlLabel>
+          <div className="flex flex-col gap-2">
+            <label className="flex cursor-pointer items-center gap-3 text-xs">
+              <input type="radio" name="tempMode" className="h-4 w-4 accent-blue-500" defaultChecked />
+              Temperature Anomaly (Change)
+            </label>
+            <label className="flex cursor-pointer items-center gap-3 text-xs">
+              <input type="radio" name="tempMode" className="h-4 w-4 accent-blue-500" />
+              Actual Temperature
+            </label>
+          </div>
+        </div>
+        <OpacityControl defaultValue={60} />
+      </AccordionItem>
+
+      <AccordionItem
+        title="Precipitation & Drought"
+        defaultOpen={false}
+        icon={<IconTile tone="violet" size="sm"><DropIcon /></IconTile>}
+      >
+        <div className="flex flex-col gap-2">
+          <ControlLabel>Metric Type</ControlLabel>
+          <Select defaultValue="drought">
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="drought">Drought Index</SelectItem>
+              <SelectItem value="precip">Precipitation</SelectItem>
+              <SelectItem value="soil">Soil Moisture</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <OpacityControl defaultValue={75} />
+      </AccordionItem>
+    </div>
+  )
+}
+
+const iconSet = [
+  { label: 'WaveIcon', use: 'sea level · precipitation', tone: 'sky' as const, icon: <WaveIcon /> },
+  { label: 'HeatIcon', use: 'urban heat · wet bulb', tone: 'orange' as const, icon: <HeatIcon /> },
+  { label: 'MountainIcon', use: 'topographic relief', tone: 'stone' as const, icon: <MountainIcon /> },
+  { label: 'WeatherIcon', use: 'temperature projection', tone: 'amber' as const, icon: <WeatherIcon /> },
+  { label: 'DropIcon', use: 'groundwater (hidden)', tone: 'violet' as const, icon: <DropIcon /> },
+  { label: 'PopulationIcon', use: 'metro / megaregion', tone: 'emerald' as const, icon: <PopulationIcon /> },
+]
+
+function LayerComposition() {
+  return (
+    <Section title="Climate Layer Composition" icon={<Layers className="h-5 w-5" />}>
+      <p className="mb-6 max-w-3xl text-[15px] leading-relaxed text-[var(--cs-text-secondary)]">
+        Everything above is the foundation. The Studio's real layer UI is composed from a registry of 7
+        climate layers, each declaring its own control set, that resolves through a switch to the
+        primitives above.
+      </p>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <Eyebrow>Layer Palette</Eyebrow>
+          <LayerPaletteDemo />
+        </div>
+        <div>
+          <Eyebrow>Global Controls + Climate Impact Metrics</Eyebrow>
+          <GlobalControlsDemo />
+        </div>
+      </div>
+
+      <Eyebrow className="mt-10">Per-Layer Control Matrix (Accordion Stack)</Eyebrow>
+      <PerLayerControls />
+
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div>
+          <Eyebrow>Legend / Colorbar (4 variants)</Eyebrow>
+          <div className="widget-container space-y-3.5">
+            <LegendRow title="Precipitation" gradient={climateGradients.precipLegend} range="0 – 10 mm/day" />
+            <LegendRow title="Drought Index" gradient={climateGradients.drought} range="−2 (dry) to +2 (wet)" />
+            <LegendRow title="Soil Moisture" gradient={climateGradients.soil} range="0 – 10 mm" />
+            <LegendRow title="Population Growth Rate" gradient={climateGradients.population} range="−5% (decline) to +10% (growth)" />
+          </div>
+        </div>
+
+        <div>
+          <Eyebrow>Layer Status States</Eyebrow>
+          <div className="widget-container space-y-2.5">
+            <LayerStatus status="loading" title="Loading…" sub="Sea Level Rise — Connecting to NOAA" />
+            <LayerStatus status="success" title="Real NASA data (1,248 features)" sub="Future Temperature Anomaly · NEX-GDDP-CMIP6" />
+            <LayerStatus status="fallback" title="Fallback data (Earth Engine timeout)" sub="Precipitation & Drought · CHIRPS" />
+            <LayerStatus status="error" title="Error: HTTP 503 — service unavailable" sub="Urban Heat Island · Yale YCEO" />
+          </div>
+
+          <Eyebrow className="mt-6">Error Overlay (modal)</Eyebrow>
+          <ErrorOverlay
+            layerName="Sea Level Rise"
+            message="Network timeout after 30s — try again or dismiss for this session."
+            onRefresh={() => {}}
+            onDismiss={() => {}}
+          />
+        </div>
+      </div>
+
+      <Eyebrow className="mt-10">Layer Icon Set</Eyebrow>
+      <div className="widget-container">
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-3.5">
+          {iconSet.map(item => (
+            <div
+              key={item.label}
+              className="flex flex-col items-center gap-1.5 rounded-lg border border-[var(--cs-feature-card-border)] bg-[var(--cs-feature-card-background)] p-2.5 text-center [backdrop-filter:var(--cs-feature-card-blur)] [-webkit-backdrop-filter:var(--cs-feature-card-blur)]"
+            >
+              <IconTile tone={item.tone} size="lg">{item.icon}</IconTile>
+              <div className="font-mono text-xs font-semibold">{item.label}</div>
+              <div className="text-[11px] text-[var(--cs-text-tertiary)]">{item.use}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Section>
+  )
+}
+
+/* ────────────────────────────────── Page ────────────────────────────────── */
 
 export default function DesignSystemPage() {
   const [theme, setTheme] = useState<'dark' | 'light'>('dark')
-  
+
   const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark')
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))
   }
-  
+
   return (
-    <div 
-      className={`h-full w-full overflow-y-auto ${
-        theme === 'light' 
-          ? 'bg-[#f8fafc] text-[#0f172a]' 
-          : 'bg-background text-foreground'
-      }`}
+    <div
+      className="cs-canvas h-full w-full overflow-y-auto text-[var(--cs-text-primary)]"
       data-theme={theme}
     >
       {/* Header */}
-      <header className={`sticky top-0 z-50 backdrop-blur-xl border-b ${
-        theme === 'light'
-          ? 'bg-white/80 border-slate-200'
-          : 'bg-background/80 border-white/10'
-      }`}>
-        <div className="max-w-7xl mx-auto px-6 py-4">
+      <header className="sticky top-0 z-50 border-b border-[var(--widget-border)] bg-[color-mix(in_srgb,var(--cs-surface-base)_80%,transparent)] backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="p-2 rounded-xl bg-[#437efc]">
+              <div className="grid h-10 w-10 place-items-center rounded-xl bg-[var(--cs-brand-primary)]">
                 <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.36 17.36 0 01-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
                 </svg>
               </div>
               <div>
                 <h1 className="text-xl font-bold tracking-tight">Climate Studio</h1>
-                <p className={`text-sm ${theme === 'light' ? 'text-slate-500' : 'text-muted-foreground'}`}>
-                  Design System v1.0
-                </p>
+                <p className="text-sm text-[var(--cs-text-tertiary)]">Design System Demo • v1.0</p>
               </div>
             </div>
-            
-            {/* Theme Toggle */}
+
             <div className="flex items-center gap-3">
-              <span className={`text-xs font-medium ${theme === 'light' ? 'text-slate-500' : 'text-muted-foreground'}`}>
+              <span className="text-xs font-medium text-[var(--cs-text-tertiary)]">
                 {theme === 'light' ? 'Light' : 'Dark'}
               </span>
-              <button
-                onClick={toggleTheme}
-                className={`
-                  relative w-14 h-7 rounded-full transition-all duration-300 border
-                  ${theme === 'light' 
-                    ? 'bg-transparent border-slate-300 hover:border-slate-400' 
-                    : 'bg-transparent border-neutral-600 hover:border-neutral-500'
-                  }
-                `}
-              >
-                <div className={`
-                  absolute top-0.5 w-6 h-6 rounded-full 
-                  flex items-center justify-center
-                  transition-all duration-300 ease-out
-                  ${theme === 'light'
-                    ? 'left-0.5 bg-amber-100 border border-amber-200'
-                    : 'left-[30px] bg-blue-500/20 border border-blue-500/40'
-                  }
-                `}>
-                  {theme === 'light' 
-                    ? <Sun className="h-3.5 w-3.5 text-amber-500" />
-                    : <Moon className="h-3.5 w-3.5 text-blue-400" />
-                  }
-                </div>
-              </button>
+              <ThemeToggle theme={theme} onToggle={toggleTheme} />
             </div>
           </div>
         </div>
       </header>
-      
+
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-6 py-12">
+      <main className="mx-auto max-w-7xl px-6 py-12">
         {/* Intro */}
         <div className="mb-16">
           <div className="max-w-2xl">
-            <h2 className="text-4xl font-bold tracking-tight mb-4">
-              Design System
-            </h2>
-            <p className={`text-lg leading-relaxed ${theme === 'light' ? 'text-slate-600' : 'text-muted-foreground'}`}>
-              A comprehensive collection of design tokens, components, and patterns that power the 
+            <h2 className="mb-4 text-4xl font-bold tracking-tight">Design System</h2>
+            <p className="text-lg leading-relaxed text-[var(--cs-text-secondary)]">
+              A comprehensive collection of design tokens, components, and patterns that power the
               Climate Studio interface. Built for consistency, accessibility, and beautiful data visualization.
             </p>
           </div>
-          
-          {/* Theme indicator badge */}
-          <div className={`
-            mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium
-            ${theme === 'light' 
-              ? 'bg-amber-100 text-amber-800' 
-              : 'bg-blue-500/20 text-blue-300'
-            }
-          `}>
+
+          {/* Theme indicator badge — content is theme-dependent by definition */}
+          <div
+            className={`mt-6 inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium ${
+              theme === 'light' ? 'bg-amber-100 text-amber-800' : 'bg-blue-500/20 text-blue-300'
+            }`}
+          >
             {theme === 'light' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             Currently viewing: {theme === 'light' ? 'Light Theme' : 'Dark Theme'}
           </div>
         </div>
-        
-        <ColorPalette theme={theme} />
-        <Typography theme={theme} />
-        <Buttons theme={theme} />
-        <FormElements theme={theme} />
-        <Cards theme={theme} />
-        <AccordionSection theme={theme} />
-        <StatusIndicators theme={theme} />
-        <DataVizGradients theme={theme} />
-        
+
+        <ColorPalette />
+        <Typography />
+        <Buttons />
+        <FormElements />
+        <Cards />
+        <AccordionSection />
+        <StatusIndicators />
+        <DataVizGradients />
+        <LayerComposition />
+
         {/* Footer */}
-        <footer className={`mt-16 pt-8 border-t text-center ${
-          theme === 'light' ? 'border-slate-200' : 'border-white/10'
-        }`}>
-          <p className={`text-sm ${theme === 'light' ? 'text-slate-500' : 'text-muted-foreground'}`}>
-            Climate Studio Design System • Built with React, Tailwind CSS, and Radix UI
+        <footer className="mt-16 border-t border-[var(--widget-border)] pt-8 text-center">
+          <p className="text-sm text-[var(--cs-text-tertiary)]">
+            Climate Studio Design System • Generated from{' '}
+            <code className="font-mono">tokens.css</code> and the{' '}
+            <code className="font-mono">components/ui</code> primitives
           </p>
         </footer>
       </main>
     </div>
   )
 }
-

@@ -96,7 +96,7 @@ function SortableViewItem({
 
   if (isEditing) {
     return (
-      <li ref={setNodeRef} className="flex items-center gap-2 p-2 rounded-md border border-border/60 bg-background/50">
+      <li ref={setNodeRef} className="feature-card flex items-center gap-2">
         <Input
           value={editingViewName}
           onChange={e => setEditingViewName(e.target.value)}
@@ -130,7 +130,7 @@ function SortableViewItem({
   }
 
   return (
-    <li ref={setNodeRef} style={style} className="flex gap-2 rounded-lg px-3 py-2 transition-colors border border-solid border-white/90 bg-white/25 items-center">
+    <li ref={setNodeRef} style={style} className="feature-card flex items-center gap-2">
       <div
         {...attributes}
         {...listeners}
@@ -145,7 +145,7 @@ function SortableViewItem({
         <Bookmark className="h-4 w-4 text-muted-foreground flex-shrink-0" />
         <div className="flex-1 min-w-0 flex flex-col gap-1">
           <div className="flex items-center justify-between gap-2">
-            <h4 className="text-xs font-semibold">{view.name}</h4>
+            <h4 className="text-[13px] font-semibold text-[var(--cs-text-primary)]">{view.name}</h4>
           </div>
         </div>
       </button>
@@ -406,7 +406,7 @@ export function SearchAndViewsPanel({
                 items={savedViews.map(v => v.id)}
                 strategy={verticalListSortingStrategy}
               >
-                <ul className="space-y-1">
+                <ul className="space-y-2">
                   {savedViews.map(view => (
                     <SortableViewItem
                       key={view.id}
@@ -425,7 +425,7 @@ export function SearchAndViewsPanel({
                   ))}
 
                   {showSaveDialog && (
-                    <li className="flex items-center gap-2 p-2 rounded-md border border-border/60 bg-background/50">
+                    <li className="feature-card flex items-center gap-2">
                       <Input
                         value={newViewName}
                         onChange={e => setNewViewName(e.target.value)}
