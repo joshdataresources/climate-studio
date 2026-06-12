@@ -15,9 +15,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     // Check localStorage first, then system preference
     const stored = localStorage.getItem('cs-theme') as Theme | null
     if (stored) return stored
-    
-    // Default to light theme for this app
-    return 'light'
+
+    return 'dark'
   })
   
   useEffect(() => {

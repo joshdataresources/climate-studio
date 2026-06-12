@@ -4,21 +4,7 @@ import { useClimate } from "@climate-studio/core";
 import { LatLngBoundsLiteral } from '../types/geography';
 import { layerStatusMonitor } from '../agents/LayerStatusMonitor';
 import { climateLayerReliability } from '../services/climateLayerReliability';
-
-type FetchStatus = 'idle' | 'loading' | 'success' | 'error';
-
-export interface LayerFetchState {
-  status: FetchStatus;
-  data: any | null;
-  metadata?: any;
-  error?: string;
-  updatedAt?: number;
-}
-
-export type LayerStateMap = Partial<Record<ClimateLayerId, LayerFetchState>>;
-
-const BACKEND_BASE_URL =
-  import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001';
+import { BACKEND_BASE_URL } from '../config/backend';
 
 const buildQueryString = (params: Record<string, string | number | boolean>) => {
   const search = new URLSearchParams();

@@ -1,6 +1,5 @@
 // Water Access View - Groundwater, Rivers, Lakes, Metro Humidity
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { createRoot, Root } from 'react-dom/client'
 import { Link } from 'react-router-dom'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -25,6 +24,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Waves, Droplets, CloudRain, Factory, MapPin, BarChart3, Mountain, TrendingUp, Loader2, GripVertical, X, Layers, ChevronDown, Save, Trash2, Bookmark, MoreHorizontal, Pencil, Zap, Building2, Users } from 'lucide-react'
 import { useLayer } from '../contexts/LayerContext'
 import { shouldShowClimateWidget } from '../config/layerDefinitions'
+import { BACKEND_BASE_URL } from '../config/backend'
 import {
   DndContext,
   closestCenter,
@@ -73,9 +73,6 @@ import serviceAreasData from '../data/water-service-areas.json'
 // Use environment variable or fallback to the token
 const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1Ijoiam9zaHVhYmJ1dGxlciIsImEiOiJjbWcwNXpyNXUwYTdrMmtva2tiZ2NjcGxhIn0.Fc3d_CloJGiw9-BE4nI_Kw'
 mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
-
-// Backend API base URL
-const API_BASE = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
 // Helper: create a StyleImageInterface for Mapbox GL v3 symbol layers
 function createIconImage(size: number, draw: (ctx: CanvasRenderingContext2D, s: number) => void): { width: number; height: number; data: Uint8ClampedArray } {
@@ -613,7 +610,6 @@ export default function WaterAccessView() {
   const selectedFeatureIdRef = useRef<string | number | null>(null) // Ref to track selection in event handlers
   const aquiferDataRef = useRef<GeoJSON.FeatureCollection | null>(null) // Ref to persist aquifer data across style changes
   const manageLayersDropdownRef = useRef<HTMLDivElement>(null)
-  const metroMarkersRef = useRef<Array<{ marker: mapboxgl.Marker; root: Root }>>([]) // Store metro humidity markers and React roots
   const [, forceUpdate] = useState(0) // Force re-render when map moves to update marker positions
 
   // iOS Safari viewport height fix
@@ -1037,7 +1033,7 @@ export default function WaterAccessView() {
   const fetchAquiferData = useCallback(async (bounds?: { north: number; south: number; east: number; west: number }) => {
     setError(null)
 
-    let url = `${API_BASE}/api/usgs/aquifers`
+    let url = `${BACKEND_BASE_URL}/api/usgs/aquifers`
     const params = new URLSearchParams()
 
     if (bounds) {
@@ -2888,7 +2884,7 @@ export default function WaterAccessView() {
 
     if (showSeaLevelRiseLayer) {
       // Construct tile URL using the working NOAA tile endpoint
-      const tileUrl = `${API_BASE}/api/tiles/noaa-slr/${seaLevelRiseFeet}/{z}/{x}/{y}.png`
+      const tileUrl = `${BACKEND_BASE_URL}/api/tiles/noaa-slr/${seaLevelRiseFeet}/{z}/{x}/{y}.png`
 
       console.log(`🌊 Adding sea level rise layer: ${seaLevelRiseFeet}ft`)
 
@@ -3036,7 +3032,7 @@ export default function WaterAccessView() {
       }
 
       const rawTileUrl = data.tile_url
-      const nodeBackendBase = import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001'
+      const nodeBackendBase = BACKEND_BASE_URL
       const tileUrl = rawTileUrl.startsWith('/') ? `${nodeBackendBase}${rawTileUrl}` : rawTileUrl
 
       if (!map.getSource('temperature-tiles')) {
@@ -3468,195 +3464,6 @@ export default function WaterAccessView() {
       }
     }
   }, [mapLoaded, showMetroHumidityLayer])
-
-  // Metro Humidity React Markers - Create and manage tooltip bubbles (DISABLED - using React overlay instead)
-  useEffect(() => {
-    if (!mapRef.current || !mapLoaded) return
-    const map = mapRef.current
-
-    console.log('🎯 Metro Humidity Markers useEffect (DISABLED)', { showMetroHumidityLayer, projectionYear })
-
-    // Clean up existing markers
-    metroMarkersRef.current.forEach(({ marker, root }) => {
-      root.unmount()
-      marker.remove()
-    })
-    metroMarkersRef.current = []
-
-    // If layer is not visible, don't create markers
-    if (!showMetroHumidityLayer) {
-      console.log('⏭️ Metro Humidity layer not visible, skipping marker creation')
-      return
-    }
-
-    // Helper function to get humidity data for a specific year (with interpolation)
-    const getHumidityDataForYear = (projections: any, year: number) => {
-      const yearStr = year.toString()
-      if (projections[yearStr]) {
-        return projections[yearStr]
-      }
-
-      const years = Object.keys(projections).map(Number).sort((a, b) => a - b)
-      let lowerYear = years[0]
-      let upperYear = years[years.length - 1]
-
-      for (let i = 0; i < years.length - 1; i++) {
-        if (years[i] <= year && years[i + 1] >= year) {
-          lowerYear = years[i]
-          upperYear = years[i + 1]
-          break
-        }
-      }
-
-      if (year <= lowerYear) return projections[lowerYear.toString()]
-      if (year >= upperYear) return projections[upperYear.toString()]
-
-      const ratio = (year - lowerYear) / (upperYear - lowerYear)
-      const lower = projections[lowerYear.toString()]
-      const upper = projections[upperYear.toString()]
-
-      return {
-        peak_humidity: Math.round(lower.peak_humidity + (upper.peak_humidity - lower.peak_humidity) * ratio),
-        wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
-        days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
-        days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
-        estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
-        casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
-        extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
-      }
-    }
-
-    // Helper to get temperature data for a city and year
-    const getTemperatureData = (cityName: string, year: number) => {
-      // Find city in temperature data (case-insensitive, handle variations)
-      const normalizedCity = cityName.toLowerCase().trim()
-
-      // Try exact match first, then partial match
-      const tempCity = Object.values(metroTemperatureData).find((city: any) => {
-        const tempCityName = city.name.toLowerCase().trim()
-
-        // Exact match
-        if (tempCityName === normalizedCity) return true
-
-        // Handle "City, ST" format - extract just the city name
-        const cityBase = normalizedCity.split(',')[0].trim()
-        const tempCityBase = tempCityName.split(',')[0].trim()
-
-        // Match on base city name
-        if (cityBase === tempCityBase) return true
-
-        // Partial matching as fallback
-        if (tempCityName.includes(cityBase) || cityBase.includes(tempCityBase)) return true
-
-        return false
-      }) as any
-
-      if (!tempCity?.projections) {
-        console.warn(`⚠️ No temperature data found for "${cityName}"`)
-        return null
-      }
-
-      // Map scenario names: RCP to SSP
-      // rcp26 -> ssp126, rcp45 -> ssp245, rcp60 -> ssp370, rcp85 -> ssp585
-      let mappedScenario = controls.scenario
-      if (controls.scenario === 'rcp26') mappedScenario = 'ssp126'
-      else if (controls.scenario === 'rcp45') mappedScenario = 'ssp245'
-      else if (controls.scenario === 'rcp60') mappedScenario = 'ssp370'
-      else if (controls.scenario === 'rcp85') mappedScenario = 'ssp585'
-
-      // Try the mapped scenario, fall back to ssp245 (moderate) as default
-      const scenarioData = tempCity.projections[mappedScenario] || tempCity.projections['ssp245']
-
-      if (!scenarioData) {
-        console.warn(`⚠️ No temperature data for "${cityName}" in scenario ${mappedScenario}`)
-        return null
-      }
-
-      // Find closest decade
-      const decades = Object.keys(scenarioData).map(Number).sort((a, b) => a - b)
-
-      if (decades.length === 0) {
-        console.warn(`⚠️ No decade data for "${cityName}" in scenario ${mappedScenario}`)
-        return null
-      }
-
-      const closestDecade = decades.reduce((prev, curr) =>
-        Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
-      )
-
-      const decadeData = scenarioData[closestDecade]
-
-      if (!decadeData) {
-        console.warn(`⚠️ No data for decade ${closestDecade} for "${cityName}"`)
-        return null
-      }
-
-      return decadeData
-    }
-
-      // Create markers for each metro city
-      ; (metroHumidityData as any).features.forEach((feature: any) => {
-        const { city, lat, lng, humidity_projections } = feature.properties
-        const humidityData = getHumidityDataForYear(humidity_projections, projectionYear)
-        const tempData = getTemperatureData(city, projectionYear)
-
-        // Debug: Log temperature data for first city
-        if (city === 'Phoenix' || city === 'Phoenix, AZ') {
-          console.log('🌡️ Phoenix Temperature Data:', {
-            city,
-            projectionYear,
-            scenario: controls.scenario,
-            tempData,
-            showAverageTemperatures,
-            summerAvg: tempData?.summer_avg ? `${tempData.summer_avg.toFixed(1)}°F` : undefined,
-            winterAvg: tempData?.winter_avg ? `${tempData.winter_avg.toFixed(1)}°F` : undefined
-          })
-        }
-
-        // Create marker element
-        const el = document.createElement('div')
-        el.style.width = '0px'
-        el.style.height = '0px'
-
-        // Create React root and render MetroHumidityBubble
-        const root = createRoot(el)
-        root.render(
-          <MetroHumidityBubble
-            metroName={city}
-            year={projectionYear}
-            peakHumidity={`${humidityData.peak_humidity}%`}
-            wetBulbEvents={`${humidityData.wet_bulb_events}`}
-            humidTemp={`${humidityData.days_over_95F || 0}°`}
-            daysOver100={`${humidityData.days_over_100F || 0}`}
-            visible={true}
-            showHumidityWetBulb={showHumidityWetBulb}
-            showTempHumidity={showTempHumidity}
-            showAverageTemperatures={showAverageTemperatures}
-            summerAvg={tempData?.summer_avg ? `${tempData.summer_avg.toFixed(1)}°F` : undefined}
-            winterAvg={tempData?.winter_avg ? `${tempData.winter_avg.toFixed(1)}°F` : undefined}
-            onClose={() => { }}
-          />
-        )
-
-        // Create Mapbox marker
-        const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
-          .setLngLat([lng, lat])
-          .addTo(map)
-
-        metroMarkersRef.current.push({ marker, root })
-      })
-
-    console.log(`✅ Created ${metroMarkersRef.current.length} metro humidity markers`)
-
-    // Cleanup function
-    return () => {
-      metroMarkersRef.current.forEach(({ marker, root }) => {
-        root.unmount()
-        marker.remove()
-      })
-      metroMarkersRef.current = []
-    }
-  }, [showMetroHumidityLayer, projectionYear, showHumidityWetBulb, showTempHumidity, showAverageTemperatures, mapLoaded, theme, controls.scenario])
 
   // Factories Layer - Map Visualization
   useEffect(() => {
@@ -4162,7 +3969,7 @@ export default function WaterAccessView() {
       }
 
       const rawPrecipTileUrl = precipitationDroughtData.tile_url
-      const precipBackendBase = import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001'
+      const precipBackendBase = BACKEND_BASE_URL
       const tileUrl = rawPrecipTileUrl.startsWith('/') ? `${precipBackendBase}${rawPrecipTileUrl}` : rawPrecipTileUrl
 
       // Add or update source

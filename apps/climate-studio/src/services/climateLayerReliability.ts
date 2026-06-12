@@ -432,9 +432,7 @@ export class ClimateLayerReliabilityService {
   }
 }
 
-// Singleton instance
-const BACKEND_BASE_URL =
-  import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001';
+import { BACKEND_BASE_URL } from '../config/backend';
 
 export const climateLayerReliability = new ClimateLayerReliabilityService(BACKEND_BASE_URL);
 
