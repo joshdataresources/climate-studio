@@ -1,7 +1,7 @@
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useSidebar } from '../../contexts/SidebarContext'
 import { useTheme } from '../../contexts/ThemeContext'
-import { LayoutGrid, ZoomIn, ZoomOut } from 'lucide-react'
+import { LayoutGrid, ZoomIn, ZoomOut, Map, BarChart3, type LucideIcon } from 'lucide-react'
 import { useContext } from 'react'
 import { MapContext, type MapContextValue } from '../../contexts/MapContext'
 import { features } from '../../config/features'
@@ -24,7 +24,8 @@ type MenuItemId = 'climateSuite' | 'dashboard' | 'designSystem' | 'settings'
 
 interface MenuItemProps {
   id: MenuItemId
-  icon: string
+  icon?: string
+  LucideIcon?: LucideIcon
   label: string
   path: string
 }
@@ -38,7 +39,7 @@ interface ToggleItemProps {
 }
 
 // Menu item component (mutually exclusive selection)
-function MenuItem({ icon, label, path }: MenuItemProps) {
+function MenuItem({ icon, LucideIcon, label, path }: MenuItemProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
 
@@ -54,25 +55,33 @@ function MenuItem({ icon, label, path }: MenuItemProps) {
         }`
       }
     >
-      {({ isActive }) => (
-        <>
-          <div className="relative shrink-0 size-[24px]">
-            <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">
-              <path
-                d={icon}
-                fill={isActive ? '#5A7CEC' : isDark ? '#D1D5DB' : '#697487'}
-              />
-            </svg>
-          </div>
-          <p
-            className={`font-['Inter',sans-serif] font-semibold leading-[normal] not-italic relative shrink-0 text-[10px] text-center w-[50px] ${
-              isActive ? 'text-[#5a7cec]' : isDark ? 'text-white' : 'text-black'
-            }`}
-          >
-            {label}
-          </p>
-        </>
-      )}
+      {({ isActive }) => {
+        const iconColor = isActive ? '#5A7CEC' : isDark ? '#D1D5DB' : '#697487'
+        return (
+          <>
+            <div className="relative shrink-0 size-[24px]">
+              {LucideIcon ? (
+                <LucideIcon
+                  className="block size-full"
+                  strokeWidth={2}
+                  style={{ color: iconColor }}
+                />
+              ) : (
+                <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">
+                  <path d={icon!} fill={iconColor} />
+                </svg>
+              )}
+            </div>
+            <p
+              className={`font-['Inter',sans-serif] font-semibold leading-[normal] not-italic relative shrink-0 text-[10px] text-center w-[50px] ${
+                isActive ? 'text-[#5a7cec]' : isDark ? 'text-white' : 'text-black'
+              }`}
+            >
+              {label}
+            </p>
+          </>
+        )
+      }}
     </NavLink>
   )
 }
@@ -179,14 +188,14 @@ export function AppSidebar() {
   const menuItems = [
     {
       id: 'climateSuite' as MenuItemId,
-      icon: SVG_PATHS.climate,
+      LucideIcon: Map,
       label: 'Map',
       path: '/'
     },
     ...(features.locationDashboard
       ? [{
           id: 'dashboard' as MenuItemId,
-          icon: SVG_PATHS.dashboard,
+          LucideIcon: BarChart3,
           label: 'Charts',
           path: '/dashboard'
         }]
@@ -220,12 +229,13 @@ export function AppSidebar() {
               </svg>
             </div>
 
-            {/* Menu items - Climate Suite */}
+            {/* Menu items */}
             {menuItems.map(item => (
               <MenuItem
                 key={item.id}
                 id={item.id}
                 icon={item.icon}
+                LucideIcon={item.LucideIcon}
                 label={item.label}
                 path={item.path}
               />

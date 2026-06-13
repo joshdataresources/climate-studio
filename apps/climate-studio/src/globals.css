@@ -244,6 +244,13 @@
   padding: 1rem 1rem 2rem;
 }
 
+/* Mobile: clear floating logo + Map/Charts nav cluster */
+@media (max-width: 768px) {
+  .dashboard-page-inner {
+    padding-top: calc(12px + 44px + 8px + 44px + 16px);
+  }
+}
+
 /* Desktop: span from sidebar rail to right edge with consistent gutter */
 @media (min-width: 768px) {
   .dashboard-page-inner {
