@@ -1,4 +1,5 @@
 import riverFlowProjections from '../data/river-flow-projections.json'
+import riversData from '../data/rivers.json'
 import type { MetroDataBundle, MetroRecord, WetBulbRecord } from './metroResolver'
 import { findRiversForMetro } from './riverMetroConnections'
 import type { SspScenario } from './scenarioMapping'
@@ -42,20 +43,143 @@ export interface ChartDataPoint {
   [key: string]: number | string
 }
 
-function projectionYears(temperature: MetroRecord, scenario: SspScenario): number[] {
-  const data = temperature.projections?.[scenario]
-  if (!data) return []
-  return Object.keys(data)
-    .map(Number)
-    .sort((a, b) => a - b)
+export interface MetroChartInput {
+  metroKey: string
+  metroName: string
+  temperature: MetroRecord | null
+  wetBulb: WetBulbRecord | null
 }
 
-function rowAtYear(
-  temperature: MetroRecord,
+/** Distinct line colors for multi-metro charts (up to 8 cities). */
+export const METRO_CHART_COLORS = [
+  '#ef4444',
+  '#3b82f6',
+  '#22c55e',
+  '#f97316',
+  '#8b5cf6',
+  '#06b6d4',
+  '#eab308',
+  '#ec4899',
+] as const
+
+function metroSeriesKey(metroKey: string): string {
+  return metroKey.replace(/[^a-zA-Z0-9_]/g, '_')
+}
+
+function unionProjectionYears(
+  metros: MetroChartInput[],
   scenario: SspScenario,
-  year: number
-): ProjectionRow | undefined {
-  return temperature.projections?.[scenario]?.[String(year)]
+  preferWetBulb = false
+): number[] {
+  const yearSet = new Set<number>()
+  for (const metro of metros) {
+    if (preferWetBulb && metro.wetBulb?.projections) {
+      wetBulbYears(metro.wetBulb).forEach(y => yearSet.add(y))
+    } else if (metro.temperature) {
+      projectionYears(metro.temperature, scenario).forEach(y => yearSet.add(y))
+    }
+  }
+  return [...yearSet].sort((a, b) => a - b)
+}
+
+function buildMultiCitySeries(
+  metros: MetroChartInput[],
+  years: number[],
+  getValue: (metro: MetroChartInput, year: number) => number | undefined
+): { data: ChartDataPoint[]; series: { key: string; label: string; color: string }[] } {
+  const series = metros.map((metro, index) => ({
+    key: metroSeriesKey(metro.metroKey),
+    label: metro.metroName,
+    color: METRO_CHART_COLORS[index % METRO_CHART_COLORS.length],
+  }))
+
+  const data = years.map(year => {
+    const row: ChartDataPoint = { year }
+    for (const metro of metros) {
+      const value = getValue(metro, year)
+      if (value != null) {
+        row[metroSeriesKey(metro.metroKey)] = value
+      }
+    }
+    return row
+  })
+
+  return { data, series }
+}
+
+export function buildMultiCityTemperatureTrajectory(
+  metros: MetroChartInput[],
+  scenario: SspScenario
+): { data: ChartDataPoint[]; series: { key: string; label: string; color: string }[] } {
+  const years = unionProjectionYears(metros, scenario)
+  return buildMultiCitySeries(metros, years, (metro, year) => {
+    if (!metro.temperature) return undefined
+    return rowAtYear(metro.temperature, scenario, year)?.annual_avg
+  })
+}
+
+export function buildMultiCitySummerSeries(
+  metros: MetroChartInput[],
+  scenario: SspScenario
+): { data: ChartDataPoint[]; series: { key: string; label: string; color: string }[] } {
+  const years = unionProjectionYears(metros, scenario)
+  return buildMultiCitySeries(metros, years, (metro, year) => {
+    if (!metro.temperature?.baseline_1995_2014) return undefined
+    const baseline = resolveSummerBaseline(metro.temperature.baseline_1995_2014)
+    return rowAtYear(metro.temperature, scenario, year)?.summer_avg ?? baseline
+  })
+}
+
+export function buildMultiCityWinterSeries(
+  metros: MetroChartInput[],
+  scenario: SspScenario
+): { data: ChartDataPoint[]; series: { key: string; label: string; color: string }[] } {
+  const years = unionProjectionYears(metros, scenario)
+  return buildMultiCitySeries(metros, years, (metro, year) => {
+    if (!metro.temperature?.baseline_1995_2014) return undefined
+    const baseline = resolveWinterBaseline(metro.temperature.baseline_1995_2014)
+    return rowAtYear(metro.temperature, scenario, year)?.winter_avg ?? baseline
+  })
+}
+
+export function buildMultiCityDaysOver100Series(
+  metros: MetroChartInput[],
+  scenario: SspScenario
+): { data: ChartDataPoint[]; series: { key: string; label: string; color: string }[] } {
+  const years = unionProjectionYears(metros, scenario, true)
+  return buildMultiCitySeries(metros, years, (metro, year) => {
+    if (metro.wetBulb?.projections?.[String(year)]) {
+      const row = metro.wetBulb.projections[String(year)] as Record<string, number>
+      return row.days_over_100F
+    }
+    if (!metro.temperature) return undefined
+    return rowAtYear(metro.temperature, scenario, year)?.days_over_100
+  })
+}
+
+export function buildMultiCityWetBulbSeries(
+  metros: MetroChartInput[]
+): { data: ChartDataPoint[]; series: { key: string; label: string; color: string }[] } {
+  const years = unionProjectionYears(metros, 'ssp245', true)
+  return buildMultiCitySeries(metros, years, (metro, year) => {
+    const row = metro.wetBulb?.projections?.[String(year)] as Record<string, number> | undefined
+    return row?.wet_bulb_events
+  })
+}
+
+export function metrosToChartInputs(
+  locations: { metroKey: string; metroName: string }[],
+  loadBundle: (key: string) => MetroDataBundle
+): MetroChartInput[] {
+  return locations.map(loc => {
+    const bundle = loadBundle(loc.metroKey)
+    return {
+      metroKey: loc.metroKey,
+      metroName: loc.metroName,
+      temperature: bundle.temperature,
+      wetBulb: bundle.wetBulb,
+    }
+  })
 }
 
 function wetBulbYears(wetBulb: WetBulbRecord): number[] {
@@ -78,6 +202,77 @@ function resolveSummerBaseline(baseline: Record<string, number>): number {
 
 function resolveWinterBaseline(baseline: Record<string, number>): number {
   return (baseline.winter_avg as number) ?? (baseline.avg_winter_min as number) ?? 0
+}
+
+/** Approximate SSP1-2.6 warming as a fraction of SSP2-4.5 (~1.5°C vs ~2.7°C). */
+const LOW_SCENARIO_WARMING_RATIO = 1.5 / 2.7
+
+function scaleLowScenarioValue(
+  baseline: number | undefined,
+  moderate: number | undefined,
+  roundInt = false
+): number | undefined {
+  if (baseline == null || moderate == null) return moderate
+  const scaled = baseline + (moderate - baseline) * LOW_SCENARIO_WARMING_RATIO
+  return roundInt ? Math.round(scaled) : Math.round(scaled * 10) / 10
+}
+
+function deriveLowScenarioRow(
+  baseline: Record<string, number>,
+  moderateRow: ProjectionRow
+): ProjectionRow {
+  const summerBaseline = resolveSummerBaseline(baseline)
+  const winterBaseline = resolveWinterBaseline(baseline)
+  return {
+    annual_avg: scaleLowScenarioValue(baseline.avg_annual as number, moderateRow.annual_avg),
+    summer_avg: scaleLowScenarioValue(summerBaseline, moderateRow.summer_avg),
+    winter_avg: scaleLowScenarioValue(winterBaseline, moderateRow.winter_avg),
+    days_over_100: scaleLowScenarioValue(
+      baseline.days_over_100 as number,
+      moderateRow.days_over_100,
+      true
+    ),
+    days_over_110: scaleLowScenarioValue(
+      baseline.days_over_110 as number,
+      moderateRow.days_over_110,
+      true
+    ),
+  }
+}
+
+export function hasTemperatureScenario(
+  temperature: MetroRecord | null | undefined,
+  scenario: SspScenario
+): boolean {
+  if (!temperature?.projections || !temperature.baseline_1995_2014) return false
+  if (temperature.projections[scenario]) return true
+  return scenario === 'ssp126' && Boolean(temperature.projections.ssp245)
+}
+
+function projectionYears(temperature: MetroRecord, scenario: SspScenario): number[] {
+  const data =
+    temperature.projections?.[scenario] ??
+    (scenario === 'ssp126' ? temperature.projections?.ssp245 : undefined)
+  if (!data) return []
+  return Object.keys(data)
+    .map(Number)
+    .sort((a, b) => a - b)
+}
+
+function rowAtYear(
+  temperature: MetroRecord,
+  scenario: SspScenario,
+  year: number
+): ProjectionRow | undefined {
+  const direct = temperature.projections?.[scenario]?.[String(year)]
+  if (direct) return direct
+
+  if (scenario === 'ssp126' && temperature.baseline_1995_2014) {
+    const moderate = temperature.projections?.ssp245?.[String(year)]
+    if (moderate) return deriveLowScenarioRow(temperature.baseline_1995_2014, moderate)
+  }
+
+  return undefined
 }
 
 function resolveDaysOver100Baseline(
@@ -110,7 +305,7 @@ export function buildTemperatureTrajectory(
   temperature: MetroRecord | null,
   scenario: SspScenario
 ): ChartDataPoint[] {
-  if (!temperature?.projections?.[scenario] || !temperature.baseline_1995_2014) return []
+  if (!hasTemperatureScenario(temperature, scenario)) return []
 
   const baseline = temperature.baseline_1995_2014.avg_annual as number
   return projectionYears(temperature, scenario).map(year => {
@@ -127,7 +322,7 @@ export function buildSeasonalTemperatureSeries(
   temperature: MetroRecord | null,
   scenario: SspScenario
 ): ChartDataPoint[] {
-  if (!temperature?.projections?.[scenario] || !temperature.baseline_1995_2014) return []
+  if (!hasTemperatureScenario(temperature, scenario)) return []
 
   const b = temperature.baseline_1995_2014
   const summerBaseline = resolveSummerBaseline(b)
@@ -141,6 +336,40 @@ export function buildSeasonalTemperatureSeries(
       winter: row.winter_avg ?? winterBaseline,
       summerBaseline,
       winterBaseline,
+    }
+  })
+}
+
+export function buildSummerTemperatureSeries(
+  temperature: MetroRecord | null,
+  scenario: SspScenario
+): ChartDataPoint[] {
+  if (!hasTemperatureScenario(temperature, scenario)) return []
+
+  const summerBaseline = resolveSummerBaseline(temperature.baseline_1995_2014)
+  return projectionYears(temperature, scenario).map(year => {
+    const row = rowAtYear(temperature, scenario, year)!
+    return {
+      year,
+      summer: row.summer_avg ?? summerBaseline,
+      baseline: summerBaseline,
+    }
+  })
+}
+
+export function buildWinterTemperatureSeries(
+  temperature: MetroRecord | null,
+  scenario: SspScenario
+): ChartDataPoint[] {
+  if (!hasTemperatureScenario(temperature, scenario)) return []
+
+  const winterBaseline = resolveWinterBaseline(temperature.baseline_1995_2014)
+  return projectionYears(temperature, scenario).map(year => {
+    const row = rowAtYear(temperature, scenario, year)!
+    return {
+      year,
+      winter: row.winter_avg ?? winterBaseline,
+      baseline: winterBaseline,
     }
   })
 }
@@ -164,7 +393,7 @@ export function buildDaysOver100Series(
     })
   }
 
-  if (!temperature?.projections?.[scenario]) return []
+  if (!hasTemperatureScenario(temperature, scenario)) return []
 
   return projectionYears(temperature, scenario).map(year => {
     const row = rowAtYear(temperature, scenario, year)!
@@ -180,7 +409,7 @@ export function buildExtremeHeatSeries(
   temperature: MetroRecord | null,
   scenario: SspScenario
 ): ChartDataPoint[] {
-  if (!temperature?.projections?.[scenario]) return []
+  if (!hasTemperatureScenario(temperature, scenario)) return []
 
   return projectionYears(temperature, scenario).map(year => {
     const row = rowAtYear(temperature, scenario, year)!
@@ -209,7 +438,7 @@ export function getTemperatureStats(
   projectionYear: number,
   wetBulb: WetBulbRecord | null = null
 ): TemperatureStats | null {
-  if (!temperature?.projections?.[scenario] || !temperature.baseline_1995_2014) return null
+  if (!hasTemperatureScenario(temperature, scenario)) return null
 
   const years = projectionYears(temperature, scenario)
   const yearKey = years.includes(nearestProjectionYear(projectionYear))
@@ -323,6 +552,102 @@ interface RiverFlowEntry {
   >
 }
 
+const RIVER_FLOW_PROJECTION_KEYS = Object.keys(
+  (riverFlowProjections as { rivers: Record<string, RiverFlowEntry> }).rivers
+)
+
+function normalizeRiverProjectionKey(riverName: string): string | null {
+  if (RIVER_FLOW_PROJECTION_KEYS.includes(riverName)) return riverName
+  const stripped = riverName.replace(/\s+River$/i, '').trim()
+  if (RIVER_FLOW_PROJECTION_KEYS.includes(stripped)) return stripped
+  const firstWord = stripped.split(/\s+/)[0]
+  if (RIVER_FLOW_PROJECTION_KEYS.includes(firstWord)) return firstWord
+  return null
+}
+
+function flowPercentageFromRiversGeo(riverName: string): Record<string, number> | null {
+  const feature = riversData.features.find(f => f.properties?.name === riverName)
+  const projections = feature?.properties?.flow_projections as Record<string, number> | undefined
+  const baseline = projections?.['2025']
+  if (!projections || !baseline) return null
+
+  const flow_percentage: Record<string, number> = {}
+  for (const [year, flow] of Object.entries(projections)) {
+    flow_percentage[year] = Math.round((flow / baseline) * 1000) / 10
+  }
+  return flow_percentage
+}
+
+function resolveRiverFlowPercentage(
+  riverName: string,
+  scenario: SspScenario
+): Record<string, number> | null {
+  const rivers = (riverFlowProjections as { rivers: Record<string, RiverFlowEntry> }).rivers
+  const projectionKey = normalizeRiverProjectionKey(riverName)
+  if (projectionKey) {
+    const scenarioData = rivers[projectionKey]?.scenarios?.[scenario]
+    if (scenarioData?.flow_percentage) return scenarioData.flow_percentage
+  }
+  return flowPercentageFromRiversGeo(riverName)
+}
+
+function riverHasFlowData(riverName: string, scenario: SspScenario): boolean {
+  return resolveRiverFlowPercentage(riverName, scenario) != null
+}
+
+/** Linear interpolation onto the dashboard decade grid (2025–2095). */
+function interpolateFlowAtYear(
+  flowPercentage: Record<string, number>,
+  year: number
+): number | null {
+  const availableYears = Object.keys(flowPercentage)
+    .map(Number)
+    .sort((a, b) => a - b)
+  if (!availableYears.length) return null
+
+  if (flowPercentage[String(year)] != null) {
+    return flowPercentage[String(year)]
+  }
+
+  let lowerYear = availableYears[0]
+  let upperYear = availableYears[availableYears.length - 1]
+
+  if (year <= lowerYear) return flowPercentage[String(lowerYear)]
+  if (year >= upperYear) return flowPercentage[String(upperYear)]
+
+  for (let i = 0; i < availableYears.length - 1; i++) {
+    if (availableYears[i] <= year && availableYears[i + 1] >= year) {
+      lowerYear = availableYears[i]
+      upperYear = availableYears[i + 1]
+      break
+    }
+  }
+
+  const lowerFlow = flowPercentage[String(lowerYear)]
+  const upperFlow = flowPercentage[String(upperYear)]
+  const ratio = (year - lowerYear) / (upperYear - lowerYear)
+  return Math.round((lowerFlow + (upperFlow - lowerFlow) * ratio) * 10) / 10
+}
+
+function normalizeFlowToProjectionYears(
+  flowPercentage: Record<string, number>
+): Record<string, number> {
+  const normalized: Record<string, number> = {}
+  for (const year of PROJECTION_YEARS) {
+    const value = interpolateFlowAtYear(flowPercentage, year)
+    if (value != null) normalized[String(year)] = value
+  }
+  return normalized
+}
+
+function getPrimaryRiverConnection(metroName: string, scenario: SspScenario) {
+  const connections = findRiversForMetro(metroName)
+  if (!connections.length) return null
+
+  const sorted = [...connections].sort((a, b) => b.dependencyPercent - a.dependencyPercent)
+  return sorted.find(c => riverHasFlowData(c.riverName, scenario)) ?? sorted[0]
+}
+
 export interface DroughtStats {
   riverName: string
   flowPct: number
@@ -338,17 +663,15 @@ export function getDroughtStats(
   projectionYear: number,
   climateRisk?: string
 ): DroughtStats | null {
-  const connections = findRiversForMetro(metroName)
-  if (!connections.length) return null
+  const primary = getPrimaryRiverConnection(metroName, scenario)
+  if (!primary) return null
 
-  const primary = [...connections].sort((a, b) => b.dependencyPercent - a.dependencyPercent)[0]
-  const rivers = (riverFlowProjections as { rivers: Record<string, RiverFlowEntry> }).rivers
-  const scenarioData = rivers[primary.riverName]?.scenarios?.[scenario]
-  if (!scenarioData?.flow_percentage) return null
+  const flowPercentage = resolveRiverFlowPercentage(primary.riverName, scenario)
+  if (!flowPercentage) return null
 
   const yearKey = String(nearestProjectionYear(projectionYear))
-  const flowPct = scenarioData.flow_percentage[yearKey] ?? scenarioData.flow_percentage['2025']
-  const status = scenarioData.flow_status?.[yearKey] ?? 'unknown'
+  const flowPct = flowPercentage[yearKey] ?? flowPercentage['2025']
+  const status = 'unknown'
 
   return {
     riverName: primary.riverName,
@@ -361,21 +684,132 @@ export function getDroughtStats(
 }
 
 export function buildDroughtSeries(metroName: string, scenario: SspScenario): ChartDataPoint[] {
-  const connections = findRiversForMetro(metroName)
-  if (!connections.length) return []
+  const primary = getPrimaryRiverConnection(metroName, scenario)
+  if (!primary) return []
 
-  const primary = [...connections].sort((a, b) => b.dependencyPercent - a.dependencyPercent)[0]
-  const scenarioData =
-    (riverFlowProjections as { rivers: Record<string, RiverFlowEntry> }).rivers[primary.riverName]
-      ?.scenarios?.[scenario]
-  if (!scenarioData?.flow_percentage) return []
+  const raw = resolveRiverFlowPercentage(primary.riverName, scenario)
+  if (!raw) return []
 
-  return Object.keys(scenarioData.flow_percentage)
-    .map(Number)
-    .sort((a, b) => a - b)
-    .map(year => ({
-      year,
-      flowPct: scenarioData.flow_percentage![String(year)],
-      droughtIndex: Math.round(100 - scenarioData.flow_percentage![String(year)]),
+  const flowPercentage = normalizeFlowToProjectionYears(raw)
+
+  return PROJECTION_YEARS.map(year => ({
+    year,
+    flowPct: flowPercentage[String(year)],
+    droughtIndex: Math.round(100 - flowPercentage[String(year)]),
+  }))
+}
+
+export function getPrimaryRiverName(metroName: string, scenario: SspScenario = 'ssp245'): string | null {
+  return getPrimaryRiverConnection(metroName, scenario)?.riverName ?? null
+}
+
+function buildMultiCityRiverMetricSeries(
+  locations: { metroKey: string; metroName: string }[],
+  scenario: SspScenario,
+  valueKey: 'flowPct' | 'droughtIndex'
+): { data: ChartDataPoint[]; series: { key: string; label: string; color: string }[] } {
+  const perMetro = locations
+    .map((loc, index) => ({
+      loc,
+      color: METRO_CHART_COLORS[index % METRO_CHART_COLORS.length],
+      points: buildDroughtSeries(loc.metroName, scenario),
     }))
+    .filter(entry => entry.points.length > 0)
+
+  if (!perMetro.length) return { data: [], series: [] }
+
+  const years = [...PROJECTION_YEARS]
+
+  const series = perMetro.map(({ loc, color }) => ({
+    key: metroSeriesKey(loc.metroKey),
+    label: loc.metroName,
+    color,
+  }))
+
+  const data = years.map(year => {
+    const row: ChartDataPoint = { year }
+    for (const { loc, points } of perMetro) {
+      const point = points.find(p => p.year === year)
+      if (point && point[valueKey] != null) {
+        row[metroSeriesKey(loc.metroKey)] = point[valueKey] as number
+      }
+    }
+    return row
+  })
+
+  return { data, series }
+}
+
+export function buildMultiCityRiverFlowSeries(
+  locations: { metroKey: string; metroName: string }[],
+  scenario: SspScenario
+) {
+  return buildMultiCityRiverMetricSeries(locations, scenario, 'flowPct')
+}
+
+export function buildMultiCityDroughtStressSeries(
+  locations: { metroKey: string; metroName: string }[],
+  scenario: SspScenario
+) {
+  return buildMultiCityRiverMetricSeries(locations, scenario, 'droughtIndex')
+}
+
+const PRECIP_BASELINE_YEAR = 2025
+
+export function buildProjectedPrecipitationSeries(
+  metroName: string,
+  baselinePrecipMm: number,
+  scenario: SspScenario
+): ChartDataPoint[] {
+  const flowSeries = buildDroughtSeries(metroName, scenario)
+  if (!flowSeries.length || baselinePrecipMm <= 0) return []
+
+  const baseFlow =
+    (flowSeries.find(p => p.year === PRECIP_BASELINE_YEAR)?.flowPct as number | undefined) ??
+    (flowSeries[0].flowPct as number)
+
+  if (!baseFlow) return []
+
+  return flowSeries.map(p => ({
+    year: p.year,
+    precip: Math.round(baselinePrecipMm * ((p.flowPct as number) / baseFlow) * 100) / 100,
+    baseline: baselinePrecipMm,
+  }))
+}
+
+export function buildMultiCityProjectedPrecipitation(
+  locations: { metroKey: string; metroName: string }[],
+  scenario: SspScenario,
+  baselines: Record<string, number>
+): { data: ChartDataPoint[]; series: { key: string; label: string; color: string }[] } {
+  const perMetro = locations
+    .map((loc, index) => ({
+      loc,
+      color: METRO_CHART_COLORS[index % METRO_CHART_COLORS.length],
+      points: baselines[loc.metroKey]
+        ? buildProjectedPrecipitationSeries(loc.metroName, baselines[loc.metroKey], scenario)
+        : [],
+    }))
+    .filter(entry => entry.points.length > 0)
+
+  if (!perMetro.length) return { data: [], series: [] }
+
+  const years = [...PROJECTION_YEARS]
+
+  const series = perMetro.map(({ loc, color }) => ({
+    key: metroSeriesKey(loc.metroKey),
+    label: loc.metroName,
+    color,
+  }))
+
+  const data = years.map(year => {
+    const row: ChartDataPoint = { year }
+    for (const { loc, points } of perMetro) {
+      const point = points.find(p => p.year === year)
+      if (point?.precip != null) row[metroSeriesKey(loc.metroKey)] = point.precip as number
+    }
+    return row
+  })
+
+  return { data, series }
 }

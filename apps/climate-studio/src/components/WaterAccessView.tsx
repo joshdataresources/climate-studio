@@ -25,6 +25,7 @@ import { Waves, Droplets, CloudRain, Factory, MapPin, BarChart3, Mountain, Trend
 import { useLayer } from '../contexts/LayerContext'
 import { shouldShowClimateWidget } from '../config/layerDefinitions'
 import { BACKEND_BASE_URL, resolveClimateTileUrl } from '../config/backend'
+import { destroyMap, isMapUsable, safeGetLayer, safeRemoveLayer, safeRemoveSource } from '../utils/mapboxHelpers'
 import {
   DndContext,
   closestCenter,
@@ -614,6 +615,57 @@ function SortableViewItem({
   )
 }
 
+type LayersInWidgetState = {
+  metroWeather: boolean
+  metroPopulation: boolean
+  factories: boolean
+  aiDataCenters: boolean
+  dams: boolean
+  rivers: boolean
+  canals: boolean
+  seaLevel: boolean
+  aquifers: boolean
+  groundwater: boolean
+  precipitation: boolean
+  wetBulb: boolean
+  temperature: boolean
+  topographic: boolean
+}
+
+const ALL_LAYERS_IN_WIDGET: LayersInWidgetState = {
+  metroWeather: true,
+  metroPopulation: true,
+  factories: true,
+  aiDataCenters: true,
+  dams: true,
+  rivers: true,
+  canals: true,
+  seaLevel: true,
+  aquifers: true,
+  groundwater: true,
+  precipitation: true,
+  wetBulb: true,
+  temperature: true,
+  topographic: true,
+}
+
+const NO_LAYERS_IN_WIDGET: LayersInWidgetState = {
+  metroWeather: false,
+  metroPopulation: false,
+  factories: false,
+  aiDataCenters: false,
+  dams: false,
+  rivers: false,
+  canals: false,
+  seaLevel: false,
+  aquifers: false,
+  groundwater: false,
+  precipitation: false,
+  wetBulb: false,
+  temperature: false,
+  topographic: false,
+}
+
 export default function WaterAccessView() {
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
@@ -752,7 +804,7 @@ export default function WaterAccessView() {
   // Climate Suite panel controls
   const [showManageLayersDropdown, setShowManageLayersDropdown] = useState(false)
   const [showSourceInfo, setShowSourceInfo] = useState(true)
-  const [selectAllLayers, setSelectAllLayers] = useState(false)
+  const [selectAllLayers, setSelectAllLayers] = useState(true)
 
   // Close Manage Layers dropdown when clicking outside
   useEffect(() => {
@@ -767,20 +819,8 @@ export default function WaterAccessView() {
   }, [showManageLayersDropdown])
 
   // Which layers are IN the widget (visible in the list) - separate from whether they're active
-  const [layersInWidget, setLayersInWidget] = useState({
-    metroWeather: true,
-    factories: true,
-    aiDataCenters: true,
-    dams: true,
-    rivers: true,
-    canals: true,
-    seaLevel: false,
-    aquifers: false,
-    groundwater: false,
-    precipitation: false,
-    wetBulb: true,
-    temperature: true,
-    topographic: true
+  const [layersInWidget, setLayersInWidget] = useState<LayersInWidgetState>({
+    ...ALL_LAYERS_IN_WIDGET,
   })
 
   // Climate context for precipitation & drought layer
@@ -1968,14 +2008,19 @@ export default function WaterAccessView() {
     if (!mapContainer.current) return
 
     if (mapRef.current) {
-      // Map already exists, just update viewport
-      try {
-        mapRef.current.setCenter([viewport.center.lng, viewport.center.lat])
-        mapRef.current.setZoom(viewport.zoom)
-      } catch (e) {
-        // Map might be in bad state
+      if (mapRef.current._removed) {
+        mapRef.current = null
+      } else {
+        // Map already exists, just update viewport
+        try {
+          mapRef.current.setCenter([viewport.center.lng, viewport.center.lat])
+          mapRef.current.setZoom(viewport.zoom)
+        } catch (e) {
+          // Map might be in bad state — recreate on next pass
+          mapRef.current = null
+        }
+        return
       }
-      return
     }
 
     const container = mapContainer.current
@@ -2461,20 +2506,13 @@ export default function WaterAccessView() {
       if (moveTimeout) clearTimeout(moveTimeout)
       isMountedRef.current = false
 
-      // Clean up resize handlers
       window.removeEventListener('resize', handleResize)
       resizeObserver.disconnect()
 
-      if (mapRef.current === map) {
-        if (!mapContainer.current) {
-          try {
-            mapRef.current.remove()
-          } catch (e) {
-            // Ignore
-          }
-          mapRef.current = null
-        }
-      }
+      const mapInstance = mapRef.current
+      mapRef.current = null
+      setMapLoaded(false)
+      destroyMap(mapInstance)
     }
   }, []) // Only run once on mount
 
@@ -2535,11 +2573,12 @@ export default function WaterAccessView() {
 
     // Function to restore everything after style loads with retry logic
     const restoreLayersAndData = (retryCount = 0) => {
+      if (!isMountedRef.current) return
       const maxRetries = 5
 
       try {
         // Check if map is ready
-        if (!map.isStyleLoaded()) {
+        if (!isMapUsable(map)) {
           if (retryCount < maxRetries) {
             console.log(`⏳ Style not fully loaded, retrying (${retryCount + 1}/${maxRetries})...`)
             setTimeout(() => restoreLayersAndData(retryCount + 1), 200)
@@ -3163,9 +3202,10 @@ export default function WaterAccessView() {
     console.log('🔵 Metro Humidity Heatmap useEffect running', { showMetroHumidityLayer, mapLoaded })
 
     const map = mapRef.current
+    if (!isMapUsable(map)) return
 
     // Show the heatmap layer for wet bulb danger zone visualization
-    if (map.getLayer('metro-humidity-heatmap-layer')) {
+    if (safeGetLayer(map, 'metro-humidity-heatmap-layer')) {
       const visibility = showMetroHumidityLayer ? 'visible' : 'none'
       console.log(`🎨 Setting metro-humidity-heatmap-layer visibility to ${visibility}`)
       map.setLayoutProperty('metro-humidity-heatmap-layer', 'visibility', visibility)
@@ -3179,7 +3219,7 @@ export default function WaterAccessView() {
     if (!mapRef.current || !mapLoaded) return
 
     const map = mapRef.current
-    if (!map || map._removed) return // Safety check
+    if (!isMapUsable(map)) return // Safety check
 
     const sourceId = 'wet-bulb-danger-zones'
     const layerId = 'wet-bulb-layer'
@@ -3349,7 +3389,7 @@ export default function WaterAccessView() {
         console.log(`🗺️ GeoJSON data:`, geojsonData)
 
         // FORCE REBUILD: Remove existing layer and source to ensure clean update
-        if (map.getLayer(layerId)) {
+        if (safeGetLayer(map, layerId)) {
           console.log('🗑️ Removing existing layer for rebuild...')
           map.removeLayer(layerId)
         }
@@ -3369,8 +3409,8 @@ export default function WaterAccessView() {
         console.log('🎨 Adding Wet Bulb danger zones layer...')
         // Insert below labels but above base map
         let beforeId: string | undefined = 'waterway-label'
-        if (!map.getLayer(beforeId)) beforeId = undefined
-        if (!beforeId && map.getLayer('river-lines-casing')) beforeId = 'river-lines-casing'
+        if (!safeGetLayer(map, beforeId)) beforeId = undefined
+        if (!beforeId && safeGetLayer(map, 'river-lines-casing')) beforeId = 'river-lines-casing'
 
         const layerConfig = {
           id: layerId,
@@ -3389,7 +3429,7 @@ export default function WaterAccessView() {
 
       // Toggle visibility based on active state
       const visibility = isWetBulbActive ? 'visible' : 'none'
-      if (map.getLayer(layerId)) {
+      if (safeGetLayer(map, layerId)) {
         map.setLayoutProperty(layerId, 'visibility', visibility)
         console.log(`👁️ Wet Bulb layer visibility set to: ${visibility}`)
       }
@@ -3510,12 +3550,12 @@ export default function WaterAccessView() {
   useEffect(() => {
     if (!mapRef.current || !mapLoaded || !showFactoriesLayer) {
       // Remove factory layers if they exist
-      if (mapRef.current && mapLoaded) {
+      if (mapRef.current && mapLoaded && isMapUsable(mapRef.current)) {
         const map = mapRef.current
-        if (map.getLayer('factory-circles')) map.removeLayer('factory-circles')
-        if (map.getLayer('factory-icons')) map.removeLayer('factory-icons')
-        if (map.getLayer('factory-labels')) map.removeLayer('factory-labels')
-        if (map.getSource('factories')) map.removeSource('factories')
+        safeRemoveLayer(map, 'factory-circles')
+        safeRemoveLayer(map, 'factory-icons')
+        safeRemoveLayer(map, 'factory-labels')
+        safeRemoveSource(map, 'factories')
       }
       return
     }
@@ -3653,10 +3693,10 @@ export default function WaterAccessView() {
     console.log('✅ Factory layer added successfully')
 
     return () => {
-      if (map.getLayer('factory-circles')) map.removeLayer('factory-circles')
-      if (map.getLayer('factory-icons')) map.removeLayer('factory-icons')
-      if (map.getLayer('factory-labels')) map.removeLayer('factory-labels')
-      if (map.getSource('factories')) map.removeSource('factories')
+      safeRemoveLayer(map, 'factory-circles')
+      safeRemoveLayer(map, 'factory-icons')
+      safeRemoveLayer(map, 'factory-labels')
+      safeRemoveSource(map, 'factories')
     }
   }, [mapLoaded, showFactoriesLayer])
 
@@ -3664,13 +3704,13 @@ export default function WaterAccessView() {
   useEffect(() => {
     if (!mapRef.current || !mapLoaded || !showAIDataCentersLayer) {
       // Remove data center layers if they exist
-      if (mapRef.current && mapLoaded) {
+      if (mapRef.current && mapLoaded && isMapUsable(mapRef.current)) {
         const map = mapRef.current
-        if (map.getLayer('datacenter-labels')) map.removeLayer('datacenter-labels')
-        if (map.getLayer('datacenter-zap')) map.removeLayer('datacenter-zap')
-        if (map.getLayer('datacenter-circle')) map.removeLayer('datacenter-circle')
-        if (map.getLayer('datacenter-glow')) map.removeLayer('datacenter-glow')
-        if (map.getSource('ai-datacenters')) map.removeSource('ai-datacenters')
+        safeRemoveLayer(map, 'datacenter-labels')
+        safeRemoveLayer(map, 'datacenter-zap')
+        safeRemoveLayer(map, 'datacenter-circle')
+        safeRemoveLayer(map, 'datacenter-glow')
+        safeRemoveSource(map, 'ai-datacenters')
       }
       return
     }
@@ -3832,11 +3872,11 @@ export default function WaterAccessView() {
     console.log('⚡ AI Data Centers layer added successfully with', geojson.features.length, 'data centers')
 
     return () => {
-      if (map.getLayer('datacenter-labels')) map.removeLayer('datacenter-labels')
-      if (map.getLayer('datacenter-zap')) map.removeLayer('datacenter-zap')
-      if (map.getLayer('datacenter-circle')) map.removeLayer('datacenter-circle')
-      if (map.getLayer('datacenter-glow')) map.removeLayer('datacenter-glow')
-      if (map.getSource('ai-datacenters')) map.removeSource('ai-datacenters')
+      safeRemoveLayer(map, 'datacenter-labels')
+      safeRemoveLayer(map, 'datacenter-zap')
+      safeRemoveLayer(map, 'datacenter-circle')
+      safeRemoveLayer(map, 'datacenter-glow')
+      safeRemoveSource(map, 'ai-datacenters')
     }
   }, [mapLoaded, showAIDataCentersLayer])
 
@@ -3845,11 +3885,12 @@ export default function WaterAccessView() {
     if (!mapRef.current || !mapLoaded || !showMetroDataStatistics) return
 
     const map = mapRef.current
+    if (!isMapUsable(map)) return
 
     // Remove existing layers/source if present
-    if (map.getLayer('metro-circles')) map.removeLayer('metro-circles')
-    if (map.getLayer('metro-labels')) map.removeLayer('metro-labels')
-    if (map.getSource('metro-data')) map.removeSource('metro-data')
+    safeRemoveLayer(map, 'metro-circles')
+    safeRemoveLayer(map, 'metro-labels')
+    safeRemoveSource(map, 'metro-data')
 
     const data = megaregionData as { metros: Array<{ name: string; lat: number; lon: number; climate_risk: string; populations: Record<string, number> }> }
 
@@ -3940,9 +3981,9 @@ export default function WaterAccessView() {
     console.log('✅ Metro Population Change layer added successfully')
 
     return () => {
-      if (map.getLayer('metro-circles')) map.removeLayer('metro-circles')
-      if (map.getLayer('metro-labels')) map.removeLayer('metro-labels')
-      if (map.getSource('metro-data')) map.removeSource('metro-data')
+      safeRemoveLayer(map, 'metro-circles')
+      safeRemoveLayer(map, 'metro-labels')
+      safeRemoveSource(map, 'metro-data')
     }
   }, [mapLoaded, showMetroDataStatistics])
 
@@ -3951,11 +3992,12 @@ export default function WaterAccessView() {
     if (!mapRef.current || !mapLoaded || !showTopographicRelief) return
 
     const map = mapRef.current
+    if (!isMapUsable(map)) return
 
     // Remove existing layers if present
-    if (map.getLayer('hillshade')) map.removeLayer('hillshade')
-    if (map.getLayer('contours')) map.removeLayer('contours')
-    if (map.getSource('mapbox-dem')) map.removeSource('mapbox-dem')
+    safeRemoveLayer(map, 'hillshade')
+    safeRemoveLayer(map, 'contours')
+    safeRemoveSource(map, 'mapbox-dem')
 
     // Add DEM source for hillshading
     map.addSource('mapbox-dem', {
@@ -3980,9 +4022,9 @@ export default function WaterAccessView() {
     console.log('✅ Topographic Relief layer added successfully')
 
     return () => {
-      if (map.getLayer('hillshade')) map.removeLayer('hillshade')
-      if (map.getLayer('contours')) map.removeLayer('contours')
-      if (map.getSource('mapbox-dem')) map.removeSource('mapbox-dem')
+      safeRemoveLayer(map, 'hillshade')
+      safeRemoveLayer(map, 'contours')
+      safeRemoveSource(map, 'mapbox-dem')
     }
   }, [mapLoaded, showTopographicRelief])
 
@@ -4892,37 +4934,9 @@ export default function WaterAccessView() {
                   setSelectAllLayers(newValue)
                   if (newValue) {
                     setShowSourceInfo(false)
-                    setLayersInWidget({
-                      metroWeather: true,
-                      factories: true,
-                      aiDataCenters: true,
-                      dams: true,
-                      rivers: true,
-                      canals: true,
-                      seaLevel: true,
-                      groundwater: true,
-                      aquifers: true,
-                      precipitation: true,
-                      wetBulb: true,
-                      temperature: true,
-                      topographic: true
-                    })
+                    setLayersInWidget({ ...ALL_LAYERS_IN_WIDGET })
                   } else {
-                    setLayersInWidget({
-                      metroWeather: false,
-                      factories: false,
-                      aiDataCenters: false,
-                      dams: false,
-                      rivers: false,
-                      canals: false,
-                      seaLevel: false,
-                      groundwater: false,
-                      aquifers: false,
-                      precipitation: false,
-                      wetBulb: false,
-                      temperature: false,
-                      topographic: false
-                    })
+                    setLayersInWidget({ ...NO_LAYERS_IN_WIDGET })
                   }
                 }}
               >{selectAllLayers ? 'Remove All Layers' : 'View All Layers'}</button>
@@ -6257,9 +6271,9 @@ export default function WaterAccessView() {
                         const newValue = !selectAllLayers
                         setSelectAllLayers(newValue)
                         if (newValue) {
-                          setLayersInWidget({ metroWeather: true, factories: true, aiDataCenters: true, dams: true, rivers: true, canals: true, seaLevel: true, aquifers: true, groundwater: true, precipitation: true, wetBulb: true, temperature: true, topographic: true, metroPopulation: true })
+                          setLayersInWidget({ ...ALL_LAYERS_IN_WIDGET })
                         } else {
-                          setLayersInWidget({ metroWeather: false, factories: false, aiDataCenters: false, dams: false, rivers: false, canals: false, seaLevel: false, aquifers: false, groundwater: false, precipitation: false, wetBulb: false, temperature: false, topographic: false, metroPopulation: false })
+                          setLayersInWidget({ ...NO_LAYERS_IN_WIDGET })
                         }
                       }}
                     >{selectAllLayers ? 'Remove All Layers' : 'View All Layers'}</button>

@@ -2,8 +2,10 @@ import React, { useMemo } from 'react'
 import { loadMetroBundle } from '../../utils/metroResolver'
 import { getTemperatureStats, getWetBulbStats } from '../../utils/metroChartData'
 import { ImpactGrid, ImpactMetric } from '../ui/impact-grid'
+import { LocationMultiCityCharts } from './LocationMultiCityCharts'
 import type { SspScenario } from '../../utils/scenarioMapping'
 import type { LocationSelection } from './LocationSearchBar'
+import { cn } from '../../lib/utils'
 
 interface LocationCompareViewProps {
   locations: LocationSelection[]
@@ -45,11 +47,12 @@ export function LocationCompareView({
   }, [locations, scenario, projectionYear])
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4">
       <div className="widget-container">
-        <h3 className="widget-title">City Comparison</h3>
+        <h2 className="cs-h2 mb-4">City Comparison</h2>
         <p className="mb-4 text-xs text-[var(--cs-text-tertiary)]">
-          Side-by-side metrics at projection year {projectionYear}
+          Side-by-side metrics at projection year {projectionYear}. Line charts for all cities are
+          below — one line per city, no baseline.
         </p>
 
         <div className="overflow-x-auto">
@@ -87,7 +90,13 @@ export function LocationCompareView({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div
+        className={cn(
+          'grid gap-3',
+          'grid-cols-1 sm:grid-cols-2',
+          locations.length >= 4 ? 'lg:grid-cols-4' : 'xl:grid-cols-3'
+        )}
+      >
         {locations.map(loc => {
           const bundle = loadMetroBundle(loc.metroKey)
           const temp = getTemperatureStats(bundle.temperature, scenario, projectionYear, bundle.wetBulb)
@@ -95,7 +104,7 @@ export function LocationCompareView({
 
           return (
             <div key={loc.metroKey} className="widget-container">
-              <h4 className="widget-title">{loc.metroName}</h4>
+              <h4 className="widget-title mb-3">{loc.metroName}</h4>
               <ImpactGrid>
                 <ImpactMetric
                   label="Temp Δ"
@@ -135,6 +144,10 @@ export function LocationCompareView({
             </div>
           )
         })}
+      </div>
+
+      <div className="dashboard-shadow-bleed pt-4">
+        <LocationMultiCityCharts locations={locations} scenario={scenario} embedded />
       </div>
     </div>
   )

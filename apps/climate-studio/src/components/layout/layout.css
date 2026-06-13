@@ -6,7 +6,79 @@
   height: 100vh;
   display: flex;
   overflow: hidden;
-  background: var(--cs-neutral-50, #0a0a0a);
+  background: var(--cs-canvas-mesh), var(--cs-neutral-50, #0a0a0a);
+  background-attachment: fixed;
+  position: relative;
+  isolation: isolate;
+}
+
+/* Undulating atmospheric glow — temp-anomaly palette, dark theme only */
+@keyframes cs-atmosphere-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1) rotate(0deg);
+  }
+
+  25% {
+    transform: translate3d(4%, -3%, 0) scale(1.08) rotate(0.6deg);
+  }
+
+  50% {
+    transform: translate3d(-3.5%, 4%, 0) scale(0.94) rotate(-0.4deg);
+  }
+
+  75% {
+    transform: translate3d(2.5%, 2%, 0) scale(1.05) rotate(0.3deg);
+  }
+}
+
+@keyframes cs-atmosphere-breathe {
+  0%,
+  100% {
+    opacity: var(--cs-atmosphere-opacity-min, 0.52);
+  }
+
+  50% {
+    opacity: var(--cs-atmosphere-opacity-max, 0.72);
+  }
+}
+
+@keyframes cs-atmosphere-shift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1.02);
+    filter: blur(52px) hue-rotate(0deg);
+  }
+
+  50% {
+    transform: translate3d(-3%, 2.5%, 0) scale(1.1);
+    filter: blur(64px) hue-rotate(8deg);
+  }
+}
+
+[data-theme="dark"] .app-layout::before {
+  content: '';
+  position: fixed;
+  inset: -22%;
+  pointer-events: none;
+  z-index: 0;
+  background: var(--cs-atmosphere-layer-a);
+  filter: blur(48px);
+  animation: cs-atmosphere-drift 24s ease-in-out infinite;
+  will-change: transform;
+}
+
+[data-theme="dark"] .app-layout::after {
+  content: '';
+  position: fixed;
+  inset: -16%;
+  pointer-events: none;
+  z-index: 0;
+  background: var(--cs-atmosphere-layer-b);
+  animation:
+    cs-atmosphere-shift 32s ease-in-out infinite,
+    cs-atmosphere-breathe 14s ease-in-out infinite;
+  will-change: transform, opacity, filter;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -41,6 +113,7 @@
   height: 100vh;
   overflow: hidden;
   position: relative;
+  z-index: 1;
 }
 
 .app-main > * {
@@ -261,7 +334,8 @@
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 [data-theme="light"] .app-layout {
-  background: #f8fafc;
+  background: var(--cs-canvas-mesh), var(--cs-surface-base);
+  background-attachment: fixed;
 }
 
 [data-theme="light"] .app-sidebar {

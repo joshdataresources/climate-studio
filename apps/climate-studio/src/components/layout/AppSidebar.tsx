@@ -1,4 +1,4 @@
-import { useNavigate, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useSidebar } from '../../contexts/SidebarContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { LayoutGrid, ZoomIn, ZoomOut } from 'lucide-react'
@@ -27,8 +27,6 @@ interface MenuItemProps {
   icon: string
   label: string
   path: string
-  isActive: boolean
-  onClick: () => void
 }
 
 interface ToggleItemProps {
@@ -40,36 +38,42 @@ interface ToggleItemProps {
 }
 
 // Menu item component (mutually exclusive selection)
-function MenuItem({ icon, label, isActive, onClick }: MenuItemProps) {
+function MenuItem({ icon, label, path }: MenuItemProps) {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
-  
+
   return (
-    <button
-      onClick={onClick}
-      className={`content-stretch flex flex-col gap-[4px] items-center justify-center px-[5px] py-[10px] relative rounded-[8px] shrink-0 transition-colors ${
-        isActive 
-          ? 'bg-[rgba(90,124,236,0.1)] border border-[#5a7cec]' 
-          : 'hover:bg-[rgba(90,124,236,0.05)]'
-      }`}
-      aria-pressed={isActive}
+    <NavLink
+      to={path}
+      end={path === '/'}
+      className={({ isActive }) =>
+        `content-stretch flex flex-col gap-[4px] items-center justify-center px-[5px] py-[10px] relative rounded-[8px] shrink-0 transition-colors ${
+          isActive
+            ? 'bg-[rgba(90,124,236,0.1)] border border-[#5a7cec]'
+            : 'hover:bg-[rgba(90,124,236,0.05)]'
+        }`
+      }
     >
-      <div className="relative shrink-0 size-[24px]">
-        <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">
-          <path 
-            d={icon} 
-            fill={isActive ? '#5A7CEC' : (isDark ? '#D1D5DB' : '#697487')} 
-          />
-        </svg>
-      </div>
-      <p 
-        className={`font-['Inter',sans-serif] font-semibold leading-[normal] not-italic relative shrink-0 text-[10px] text-center w-[50px] ${
-          isActive ? 'text-[#5a7cec]' : (isDark ? 'text-white' : 'text-black')
-        }`}
-      >
-        {label}
-      </p>
-    </button>
+      {({ isActive }) => (
+        <>
+          <div className="relative shrink-0 size-[24px]">
+            <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 24 24">
+              <path
+                d={icon}
+                fill={isActive ? '#5A7CEC' : isDark ? '#D1D5DB' : '#697487'}
+              />
+            </svg>
+          </div>
+          <p
+            className={`font-['Inter',sans-serif] font-semibold leading-[normal] not-italic relative shrink-0 text-[10px] text-center w-[50px] ${
+              isActive ? 'text-[#5a7cec]' : isDark ? 'text-white' : 'text-black'
+            }`}
+          >
+            {label}
+          </p>
+        </>
+      )}
+    </NavLink>
   )
 }
 
@@ -217,15 +221,13 @@ export function AppSidebar() {
             </div>
 
             {/* Menu items - Climate Suite */}
-            {menuItems.map((item) => (
+            {menuItems.map(item => (
               <MenuItem
                 key={item.id}
                 id={item.id}
                 icon={item.icon}
                 label={item.label}
                 path={item.path}
-                isActive={activeMenuItem === item.id}
-                onClick={() => handleMenuItemClick(item.id)}
               />
             ))}
           </div>

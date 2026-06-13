@@ -3,9 +3,10 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "../../lib/utils"
 
-const impactValueVariants = cva("text-[13px] font-semibold", {
+const impactValueVariants = cva("text-[13px] font-semibold leading-tight", {
   variants: {
     tone: {
+      neutral: "text-[var(--cs-text-primary)]",
       sky: "text-[var(--cs-tone-sky-text)]",
       orange: "text-[var(--cs-tone-orange-text)]",
       stone: "text-[var(--cs-tone-stone-text)]",
@@ -28,14 +29,25 @@ export interface ImpactMetricProps
     VariantProps<typeof impactValueVariants> {
   label: React.ReactNode
   value: React.ReactNode
+  caption?: React.ReactNode
 }
 
 /** Single label/value impact readout (demo `.impact`). */
-export function ImpactMetric({ label, value, tone, className, ...props }: ImpactMetricProps) {
+export function ImpactMetric({
+  label,
+  value,
+  caption,
+  tone,
+  className,
+  ...props
+}: ImpactMetricProps) {
   return (
-    <div className={cn("flex flex-col gap-0.5", className)} {...props}>
+    <div className={cn("flex min-h-[72px] flex-col gap-0.5", className)} {...props}>
       <span className="text-[11px] text-[var(--cs-text-tertiary)]">{label}</span>
       <span className={impactValueVariants({ tone })}>{value}</span>
+      {caption && (
+        <span className="text-[10px] text-[var(--cs-text-tertiary)]">{caption}</span>
+      )}
     </div>
   )
 }

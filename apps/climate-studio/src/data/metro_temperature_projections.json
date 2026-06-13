@@ -7392,5 +7392,151 @@
         }
       }
     }
+  },
+  "Duluth": {
+    "name": "Duluth",
+    "lat": 46.7867,
+    "lon": -92.1005,
+    "baseline_1995_2014": {
+      "avg_summer_max": 75.0,
+      "avg_winter_min": 20.0,
+      "avg_annual": 48.0,
+      "summer_avg": 68.0,
+      "winter_avg": 28.0
+    },
+    "projections": {
+      "ssp245": {
+        "2025": {
+          "summer_max": 75.0,
+          "winter_min": 20.0,
+          "annual_avg": 48.0,
+          "summer_avg": 68.0,
+          "winter_avg": 28.0,
+          "models_used": 4
+        },
+        "2035": {
+          "summer_max": 75.3,
+          "winter_min": 20.2,
+          "annual_avg": 48.3,
+          "summer_avg": 68.3,
+          "winter_avg": 28.2,
+          "models_used": 4
+        },
+        "2045": {
+          "summer_max": 75.6,
+          "winter_min": 20.5,
+          "annual_avg": 48.6,
+          "summer_avg": 68.6,
+          "winter_avg": 28.5,
+          "models_used": 4
+        },
+        "2055": {
+          "summer_max": 75.9,
+          "winter_min": 20.7,
+          "annual_avg": 48.9,
+          "summer_avg": 68.9,
+          "winter_avg": 28.7,
+          "models_used": 4
+        },
+        "2065": {
+          "summer_max": 76.2,
+          "winter_min": 21.0,
+          "annual_avg": 49.2,
+          "summer_avg": 69.2,
+          "winter_avg": 29.0,
+          "models_used": 4
+        },
+        "2075": {
+          "summer_max": 76.5,
+          "winter_min": 21.2,
+          "annual_avg": 49.5,
+          "summer_avg": 69.5,
+          "winter_avg": 29.2,
+          "models_used": 4
+        },
+        "2085": {
+          "summer_max": 76.8,
+          "winter_min": 21.4,
+          "annual_avg": 49.8,
+          "summer_avg": 69.8,
+          "winter_avg": 29.4,
+          "models_used": 4
+        },
+        "2095": {
+          "summer_max": 77.1,
+          "winter_min": 21.7,
+          "annual_avg": 50.1,
+          "summer_avg": 70.1,
+          "winter_avg": 29.7,
+          "models_used": 4
+        }
+      },
+      "ssp585": {
+        "2025": {
+          "summer_max": 75.0,
+          "winter_min": 20.0,
+          "annual_avg": 48.0,
+          "summer_avg": 68.0,
+          "winter_avg": 28.0,
+          "models_used": 4
+        },
+        "2035": {
+          "summer_max": 75.5,
+          "winter_min": 20.4,
+          "annual_avg": 48.5,
+          "summer_avg": 68.5,
+          "winter_avg": 28.4,
+          "models_used": 4
+        },
+        "2045": {
+          "summer_max": 76.0,
+          "winter_min": 20.8,
+          "annual_avg": 49.0,
+          "summer_avg": 69.0,
+          "winter_avg": 28.8,
+          "models_used": 4
+        },
+        "2055": {
+          "summer_max": 76.5,
+          "winter_min": 21.2,
+          "annual_avg": 49.5,
+          "summer_avg": 69.5,
+          "winter_avg": 29.2,
+          "models_used": 4
+        },
+        "2065": {
+          "summer_max": 77.0,
+          "winter_min": 21.6,
+          "annual_avg": 50.0,
+          "summer_avg": 70.0,
+          "winter_avg": 29.6,
+          "models_used": 4
+        },
+        "2075": {
+          "summer_max": 77.5,
+          "winter_min": 22.0,
+          "annual_avg": 50.5,
+          "summer_avg": 70.5,
+          "winter_avg": 30.0,
+          "models_used": 4
+        },
+        "2085": {
+          "summer_max": 78.0,
+          "winter_min": 22.4,
+          "annual_avg": 51.0,
+          "summer_avg": 71.0,
+          "winter_avg": 30.4,
+          "models_used": 4
+        },
+        "2095": {
+          "summer_max": 78.5,
+          "winter_min": 22.8,
+          "annual_avg": 51.5,
+          "summer_avg": 71.5,
+          "winter_avg": 30.8,
+          "models_used": 4
+        }
+      }
+    }
   }
 }
