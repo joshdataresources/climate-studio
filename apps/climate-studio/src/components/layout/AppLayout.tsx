@@ -2,7 +2,7 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useSidebar } from '../../contexts/SidebarContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { AppSidebar } from './AppSidebar'
-import { Layers, Bookmark, LayoutDashboard, Map } from 'lucide-react'
+import { Layers, Bookmark, BarChart3, Map } from 'lucide-react'
 import { features } from '../../config/features'
 import './layout.css'
 
@@ -46,41 +46,43 @@ export function AppLayout() {
       {/* Mobile: top header bar replaces sidebar */}
       {isMobile && (
         <header className="mobile-header">
-          {/* Logo */}
-          <div className="mobile-header-logo">
-            <svg width="28" height="28" viewBox="14 14 30 30" fill="none">
-              <path d={LOGO_PATH} fill="#5A7CEC" />
-            </svg>
+          <div className="mobile-header-left">
+            <div className="mobile-header-logo" aria-hidden>
+              <svg width="28" height="28" viewBox="14 14 30 30" fill="none">
+                <path d={LOGO_PATH} fill="#5A7CEC" />
+              </svg>
+            </div>
+
+            {features.locationDashboard && (
+              <div className="mobile-header-nav" role="navigation" aria-label="Main views">
+                <button
+                  type="button"
+                  className={`mobile-header-icon ${!isDashboard ? 'active' : ''}`}
+                  onClick={() => navigate('/')}
+                  aria-label="Map"
+                  aria-current={!isDashboard ? 'page' : undefined}
+                >
+                  <Map className="w-5 h-5" />
+                </button>
+                <button
+                  type="button"
+                  className={`mobile-header-icon ${isDashboard ? 'active' : ''}`}
+                  onClick={() => navigate('/dashboard')}
+                  aria-label="Charts"
+                  aria-current={isDashboard ? 'page' : undefined}
+                >
+                  <BarChart3 className="w-5 h-5" />
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Spacer */}
           <div className="flex-1" />
 
-          {/* Dashboard / Climate Suite nav (dashboard hidden until feature flag enabled) */}
-          {features.locationDashboard && (
-            isDashboard ? (
-              <button
-                className="mobile-header-icon"
-                onClick={() => navigate('/')}
-                aria-label="Go to Climate Suite"
-              >
-                <Map className="w-5 h-5" />
-              </button>
-            ) : (
-              <button
-                className="mobile-header-icon"
-                onClick={() => navigate('/dashboard')}
-                aria-label="Go to Dashboard"
-              >
-                <LayoutDashboard className="w-5 h-5" />
-              </button>
-            )
-          )}
-
-          {/* Views + Layers only on map views */}
           {!isDashboard && (
             <>
               <button
+                type="button"
                 className={`mobile-header-icon ${mobileViewsOpen ? 'active' : ''}`}
                 onClick={toggleViews}
                 aria-label={mobileViewsOpen ? 'Close views' : 'Open views'}
@@ -89,6 +91,7 @@ export function AppLayout() {
               </button>
 
               <button
+                type="button"
                 className={`mobile-header-icon ${mobileLayersOpen ? 'active' : ''}`}
                 onClick={toggleLayers}
                 aria-label={mobileLayersOpen ? 'Close layers' : 'Open layers'}

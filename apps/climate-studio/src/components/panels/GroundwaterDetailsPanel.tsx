@@ -192,8 +192,8 @@ export function GroundwaterDetailsPanel({ selectedAquifer, projectionYear, onClo
         </Button>
       </div>
 
-      {/* Two Column Layout */}
-      <div className="flex gap-4">
+      {/* Two Column Layout — stacks on mobile like dam detail */}
+      <div className="flex flex-col md:flex-row gap-4">
         {/* Left Column - Warning & Projection */}
         <div className="flex-1 flex flex-col gap-3">
           {/* Status Warning Badge */}
@@ -263,7 +263,7 @@ export function GroundwaterDetailsPanel({ selectedAquifer, projectionYear, onClo
           </div>
         </div>
 
-        {/* Right Column - Supporting Info */}
+        {/* Right Column - Supporting Info (below projection on mobile) */}
         <div className="flex-1 flex flex-col gap-3 self-stretch">
           {/* Top Row */}
           <div className="flex flex-1 gap-3 items-start w-full">

@@ -180,14 +180,14 @@ export function AppSidebar() {
     {
       id: 'climateSuite' as MenuItemId,
       icon: SVG_PATHS.climate,
-      label: 'Climate Suite',
+      label: 'Map',
       path: '/'
     },
     ...(features.locationDashboard
       ? [{
           id: 'dashboard' as MenuItemId,
           icon: SVG_PATHS.dashboard,
-          label: 'Dashboard',
+          label: 'Charts',
           path: '/dashboard'
         }]
       : []),
