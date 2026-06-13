@@ -35,6 +35,7 @@ jobs:
         env:
           VITE_BASE_PATH: /climate-studio/
           VITE_ENABLE_LOCATION_DASHBOARD: 'true'
+          VITE_MAPBOX_ACCESS_TOKEN: ${{ secrets.VITE_MAPBOX_ACCESS_TOKEN }}
           VITE_NODE_BACKEND_URL: ${{ secrets.VITE_NODE_BACKEND_URL }}
           VITE_BACKEND_URL: ${{ secrets.VITE_BACKEND_URL }}
         run: npm run build:studio
