@@ -21,9 +21,10 @@ interface ServerStatus {
 const isLocalDev = typeof window !== 'undefined' && 
   (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
 
+import { getBackendBaseUrl } from '../config/backend'
+
 // Use the same backend URL as the layers to ensure consistency
-const BACKEND_BASE_URL =
-  import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001'
+const BACKEND_BASE_URL = getBackendBaseUrl()
 
 export function EarthEngineStatus() {
   const { theme } = useTheme()
@@ -39,8 +40,8 @@ export function EarthEngineStatus() {
     const wakeUpStartTime = Date.now()
     
     try {
-      // Shorter initial timeout, we'll retry anyway
-      const timeout = retryCountRef.current < 2 ? 8000 : 5000
+      // Render free tier cold starts can take 15–60s after a restart
+      const timeout = retryCountRef.current < 2 ? 25000 : 10000
       // Use BACKEND_BASE_URL to match the same backend the layers use
       const response = await fetch(`${BACKEND_BASE_URL}/api/climate/status`, {
         signal: AbortSignal.timeout(timeout),

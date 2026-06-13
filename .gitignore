@@ -96,6 +96,7 @@ ee-service-account.json
 # Temporary files
 *.tmp
 *.temp
+vite.config.js.timestamp-*.mjs
 
 LINKEDIN_TECH_INVENTORY.md
 .claude/

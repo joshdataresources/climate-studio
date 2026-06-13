@@ -6,7 +6,7 @@
   height: 100vh;
   display: flex;
   overflow: hidden;
-  background: var(--cs-neutral-100, #141414);
+  background: var(--cs-neutral-50, #0a0a0a);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

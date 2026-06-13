@@ -9,7 +9,8 @@
 @custom-variant dark (&:is(.dark *));
 
 /* Shared Global Styles - Widget Container Variables */
-:root {
+:root,
+[data-theme="dark"] {
   --background: hsl(0 0% 8%);
   --foreground: hsl(0 0% 95%);
   --card: hsl(0 0% 12%);
@@ -44,10 +45,10 @@
   --sidebar-border: hsl(0 0% 25%);
   --sidebar-ring: hsl(264 100% 65%);
 
-  /* Widget Container Variables - Global style for all widget panels */
+  /* Widget Container Variables - Global style for all widget panels (matches design-demo.html) */
   --widget-bg: rgba(30, 30, 30, 0.75);
   --widget-bg-panel: rgba(30, 30, 30, 0.75);
-  --widget-border: rgba(255, 255, 255, 0.89);
+  --widget-border: rgba(255, 255, 255, 0.06);
   --widget-border-radius: 16px;
   --widget-padding: 1rem;
   --widget-backdrop-blur: blur(10px);
@@ -203,6 +204,57 @@
   letter-spacing: -0.01em;
 }
 
+/* Dashboard page — full width beside sidebar, scroll without clipping widget shadows */
+.dashboard-page {
+  background: var(--cs-surface-base);
+  color: var(--cs-text-primary);
+  height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.dashboard-page-inner {
+  width: 100%;
+  min-height: 100%;
+  box-sizing: border-box;
+  padding: 1rem 1rem 2rem;
+}
+
+/* Desktop: span from sidebar rail to right edge with consistent gutter */
+@media (min-width: 768px) {
+  .dashboard-page-inner {
+    padding: 1.25rem 1.5rem 2.5rem calc(76px + 1.25rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-page-inner {
+    padding: 1.5rem 2rem 2.5rem calc(76px + 1.5rem);
+  }
+}
+
+/* Extra inset so widget box-shadows are not clipped by overflow scrollers */
+.dashboard-shadow-bleed {
+  padding: 6px;
+  margin: -6px;
+}
+
+.dashboard-tabs-list {
+  gap: 8px;
+  padding: 8px;
+}
+
+[data-theme="light"] .dashboard-page,
+.light .dashboard-page {
+  background:
+    radial-gradient(60% 50% at 80% -10%, rgba(67, 126, 252, 0.1), transparent 60%),
+    radial-gradient(50% 40% at 0% 30%, rgba(168, 85, 247, 0.08), transparent 60%),
+    radial-gradient(70% 50% at 100% 80%, rgba(14, 165, 233, 0.08), transparent 60%),
+    var(--cs-surface-base);
+  background-attachment: fixed;
+}
+
 /* Widget content sections */
 .widget-section {
   padding: 0.75rem 0;
@@ -220,24 +272,32 @@
   display: flex;
   cursor: pointer;
   gap: 0.75rem;
-  border-radius: 0.75rem;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 0.875rem;
+  border-radius: var(--cs-layer-card-radius);
+  border: 1px solid var(--cs-layer-card-border);
+  padding: var(--cs-layer-card-padding);
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--cs-layer-card-background);
+  -webkit-backdrop-filter: var(--cs-layer-card-blur);
+  backdrop-filter: var(--cs-layer-card-blur);
+  box-shadow: var(--cs-layer-card-shadow);
 }
 
 .layer-card:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.12);
+  background: var(--cs-layer-card-background-hover);
+  border-color: var(--cs-layer-card-border-hover);
+  box-shadow: var(--cs-layer-card-shadow-hover);
 }
 
 .layer-card.active {
-  background: linear-gradient(135deg,
-      rgba(59, 130, 246, 0.12) 0%,
-      rgba(59, 130, 246, 0.06) 100%);
-  border-color: rgba(59, 130, 246, 0.4);
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+  background: var(--cs-layer-card-background-active);
+  border-color: var(--cs-layer-card-border-active);
+  box-shadow: var(--cs-layer-card-shadow-active);
+}
+
+/* Room for card borders/glow inside scrollable layer lists */
+.layer-list-scroll {
+  padding-inline: 8px;
+  margin-inline: -8px;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -245,16 +305,14 @@
  * ═══════════════════════════════════════════════════════════════════════════ */
 
 .feature-card {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.03);
+  background: var(--cs-feature-card-background);
+  border: 1px solid var(--cs-feature-card-border);
+  border-radius: var(--cs-feature-card-radius);
+  padding: var(--cs-feature-card-padding);
+  box-shadow: var(--cs-feature-card-shadow);
+  -webkit-backdrop-filter: var(--cs-feature-card-blur);
+  backdrop-filter: var(--cs-feature-card-blur);
   transition: border-color 0.2s ease;
-}
-
-.feature-card:hover {
-  border-color: rgba(255, 255, 255, 0.14);
 }
 
 .feature-card-title {
@@ -306,14 +364,15 @@
   color: #60a5fa;
 }
 
-/* Input/Form Control Styles - Text boxes, combo boxes, dropdowns */
-input[type="text"],
-input[type="number"],
-input[type="email"],
-input[type="password"],
-input[type="search"],
-textarea,
-select {
+/* Input/Form Control Styles - Text boxes, combo boxes, dropdowns.
+   Token-styled inputs (bg-[var(--cs-...)]) style themselves. */
+input[type="text"]:not([class*="bg-[var(--cs-"]),
+input[type="number"]:not([class*="bg-[var(--cs-"]),
+input[type="email"]:not([class*="bg-[var(--cs-"]),
+input[type="password"]:not([class*="bg-[var(--cs-"]),
+input[type="search"]:not([class*="bg-[var(--cs-"]),
+textarea:not([class*="bg-[var(--cs-"]),
+select:not([class*="bg-[var(--cs-"]) {
   border-radius: var(--input-border-radius);
   border: 1px solid var(--input-border);
   background: var(--input-bg);
@@ -351,21 +410,21 @@ select:focus-visible {
   box-shadow: 0 0 0 1px var(--input-focus-ring);
 }
 
-/* Radix UI Select Trigger styling */
-[data-radix-select-trigger] {
+/* Radix UI Select Trigger styling (token-styled triggers excluded) */
+[data-radix-select-trigger]:not([class*="bg-[var(--cs-"]) {
   border-radius: var(--input-border-radius) !important;
   border: 1px solid var(--input-border) !important;
   background: var(--input-bg) !important;
   transition: all 0.2s ease !important;
 }
 
-[data-radix-select-trigger]:hover {
+[data-radix-select-trigger]:not([class*="bg-[var(--cs-"]):hover {
   background: var(--input-hover-bg) !important;
   border-color: var(--input-hover-border) !important;
 }
 
-[data-radix-select-trigger]:focus,
-[data-radix-select-trigger][data-state="open"] {
+[data-radix-select-trigger]:not([class*="bg-[var(--cs-"]):focus,
+[data-radix-select-trigger]:not([class*="bg-[var(--cs-"])[data-state="open"] {
   background: var(--input-focus-bg) !important;
   border-color: var(--input-focus-border) !important;
   box-shadow: 0 0 0 1px var(--input-focus-ring) !important;
@@ -374,21 +433,21 @@ select:focus-visible {
 /* Button Styles - Default button styling */
 /* Apply to buttons that don't have explicit background colors set */
 /* Exclude accordion buttons, text buttons (bg-transparent or border-0), and unstyled buttons */
-button:not([class*="bg-primary"]):not([class*="bg-destructive"]):not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-[rgba"]):not([class*="bg-transparent"]):not([class*="border-0"]):not(.accordion-trigger):not(.unstyled-btn):not(.mobile-header-icon) {
+button:not([class*="bg-primary"]):not([class*="bg-destructive"]):not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-[rgba"]):not([class*="bg-[var(--cs-"]):not([class*="bg-transparent"]):not([class*="border-0"]):not(.accordion-trigger):not(.unstyled-btn):not(.mobile-header-icon) {
   border-radius: var(--button-border-radius);
   border: 1px solid var(--button-border);
   background: var(--button-bg);
   transition: all 0.2s ease;
 }
 
-button:not([class*="bg-primary"]):not([class*="bg-destructive"]):not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-[rgba"]):not([class*="bg-transparent"]):not([class*="border-0"]):not(.accordion-trigger):not(.unstyled-btn):hover:not(:disabled) {
+button:not([class*="bg-primary"]):not([class*="bg-destructive"]):not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-[rgba"]):not([class*="bg-[var(--cs-"]):not([class*="bg-transparent"]):not([class*="border-0"]):not(.accordion-trigger):not(.unstyled-btn):hover:not(:disabled) {
   background: var(--button-hover-bg);
   border-color: var(--button-hover-border);
 }
 
-button:not([class*="bg-primary"]):not([class*="bg-destructive"]):not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-[rgba"]):not([class*="bg-transparent"]):not([class*="border-0"]):not(.accordion-trigger):not(.unstyled-btn):focus,
-button:not([class*="bg-primary"]):not([class*="bg-destructive"]):not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-[rgba"]):not([class*="bg-transparent"]):not([class*="border-0"]):not(.accordion-trigger):not(.unstyled-btn):focus-visible,
-button:not([class*="bg-primary"]):not([class*="bg-destructive"]):not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-[rgba"]):not([class*="bg-transparent"]):not([class*="border-0"]):not(.accordion-trigger):not(.unstyled-btn)[aria-expanded="true"] {
+button:not([class*="bg-primary"]):not([class*="bg-destructive"]):not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-[rgba"]):not([class*="bg-[var(--cs-"]):not([class*="bg-transparent"]):not([class*="border-0"]):not(.accordion-trigger):not(.unstyled-btn):focus,
+button:not([class*="bg-primary"]):not([class*="bg-destructive"]):not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-[rgba"]):not([class*="bg-[var(--cs-"]):not([class*="bg-transparent"]):not([class*="border-0"]):not(.accordion-trigger):not(.unstyled-btn):focus-visible,
+button:not([class*="bg-primary"]):not([class*="bg-destructive"]):not([class*="bg-blue"]):not([class*="bg-green"]):not([class*="bg-red"]):not([class*="bg-[rgba"]):not([class*="bg-[var(--cs-"]):not([class*="bg-transparent"]):not([class*="border-0"]):not(.accordion-trigger):not(.unstyled-btn)[aria-expanded="true"] {
   border-color: var(--button-focus-border);
   outline: none;
   box-shadow: 0 0 0 1px var(--button-focus-ring);
@@ -401,27 +460,28 @@ button:not([class*="bg-primary"]):not([class*="bg-destructive"]):not([class*="bg
   box-shadow: none !important;
 }
 
-/* Radix UI Select Trigger (button) styling - Override inline styles */
-[data-radix-select-trigger],
-button[role="combobox"] {
+/* Radix UI Select Trigger (button) styling - Override inline styles.
+   Token-styled triggers (bg-[var(--cs-...)]) are excluded — they style themselves. */
+[data-radix-select-trigger]:not([class*="bg-[var(--cs-"]),
+button[role="combobox"]:not([class*="bg-[var(--cs-"]) {
   border-radius: var(--button-border-radius) !important;
   border: 1px solid var(--button-border) !important;
   background: var(--button-bg) !important;
   transition: all 0.2s ease !important;
 }
 
-[data-radix-select-trigger]:hover:not(:disabled),
-button[role="combobox"]:hover:not(:disabled) {
+[data-radix-select-trigger]:not([class*="bg-[var(--cs-"]):hover:not(:disabled),
+button[role="combobox"]:not([class*="bg-[var(--cs-"]):hover:not(:disabled) {
   background: var(--button-hover-bg) !important;
   border-color: var(--button-hover-border) !important;
 }
 
-[data-radix-select-trigger]:focus,
-[data-radix-select-trigger]:focus-visible,
-[data-radix-select-trigger][data-state="open"],
-button[role="combobox"]:focus,
-button[role="combobox"]:focus-visible,
-button[role="combobox"][aria-expanded="true"] {
+[data-radix-select-trigger]:not([class*="bg-[var(--cs-"]):focus,
+[data-radix-select-trigger]:not([class*="bg-[var(--cs-"]):focus-visible,
+[data-radix-select-trigger]:not([class*="bg-[var(--cs-"])[data-state="open"],
+button[role="combobox"]:not([class*="bg-[var(--cs-"]):focus,
+button[role="combobox"]:not([class*="bg-[var(--cs-"]):focus-visible,
+button[role="combobox"]:not([class*="bg-[var(--cs-"])[aria-expanded="true"] {
   border-color: var(--button-focus-border) !important;
   box-shadow: 0 0 0 1px var(--button-focus-ring) !important;
 }
@@ -547,11 +607,17 @@ button[role="combobox"][aria-expanded="true"] {
     height: calc(100dvh - 32px - env(safe-area-inset-bottom, 0px)) !important;
   }
 
-  /* iPadOS specific fix for tablet view */
+  /* iPadOS specific fix for tablet view (exclude combined panel — it needs full height) */
   @media (min-width: 769px) and (max-width: 1280px) {
-    .safari-panel-height {
+    .safari-panel-height:not(.tablet-combined-panel) {
       height: auto !important;
       max-height: calc(100dvh - 36px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px)) !important;
+    }
+
+    .tablet-combined-panel.safari-panel-height {
+      height: calc(100dvh - 32px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px)) !important;
+      min-height: calc(100vh - 32px) !important;
+      max-height: calc(100dvh - 32px - env(safe-area-inset-bottom, 0px) - env(safe-area-inset-top, 0px)) !important;
     }
   }
 
@@ -635,13 +701,13 @@ button[role="combobox"][aria-expanded="true"] {
   --sidebar-border: hsl(214 32% 91%);
   /* slate-200 */
 
-  /* Widget Container Variables - Light Theme */
-  --widget-bg: rgba(255, 255, 255, 0.75);
-  --widget-bg-panel: rgba(255, 255, 255, 0.75);
-  --widget-border: rgba(255, 255, 255, 0.89);
+  /* Widget Container Variables - Light Theme (matches design-demo.html) */
+  --widget-bg: rgba(255, 255, 255, 0.6);
+  --widget-bg-panel: rgba(255, 255, 255, 0.6);
+  --widget-border: #ffffff;
   --widget-border-radius: 16px;
-  --widget-backdrop-blur: blur(10px);
-  --widget-box-shadow: 0 4px 25px 0 rgba(0, 0, 0, 0.10);
+  --widget-backdrop-blur: blur(20px);
+  --widget-box-shadow: 0 10px 30px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.04);
 
   /* Input/Form Control Variables - Light Theme */
   --input-bg: rgba(248, 250, 252, 1);
@@ -693,45 +759,6 @@ button[role="combobox"][aria-expanded="true"] {
 .light .widget-section+.widget-section {
   border-top: 1px solid rgba(226, 232, 240, 1);
   /* slate-200 */
-}
-
-[data-theme="light"] .layer-card,
-.light .layer-card {
-  border: 1px solid rgba(226, 232, 240, 1);
-  /* slate-200 */
-  background: rgba(248, 250, 252, 1);
-  /* slate-50 */
-}
-
-[data-theme="light"] .layer-card:hover,
-.light .layer-card:hover {
-  background: rgba(241, 245, 249, 1);
-  /* slate-100 */
-  border-color: rgba(203, 213, 225, 1);
-  /* slate-300 */
-}
-
-[data-theme="light"] .layer-card.active,
-.light .layer-card.active {
-  background: linear-gradient(135deg,
-      rgba(67, 126, 252, 0.12) 0%,
-      rgba(67, 126, 252, 0.06) 100%);
-  border-color: rgba(67, 126, 252, 0.3);
-  box-shadow: 0 0 20px rgba(67, 126, 252, 0.1);
-}
-
-
-/* Light theme feature cards */
-[data-theme="light"] .feature-card,
-.light .feature-card {
-  background: rgba(255, 255, 255, 0.25);
-  border: 1px solid rgba(255, 255, 255, 1);
-  box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.03);
-}
-
-[data-theme="light"] .feature-card:hover,
-.light .feature-card:hover {
-  border-color: rgba(226, 232, 240, 1);
 }
 
 [data-theme="light"] .features-divider,
@@ -926,21 +953,30 @@ div.detail-popup-panel.safari-modal-fix.z-\[1000\] {
 @media (min-width: 768px) and (max-width: 1400px) {
   .tablet-combined-panel {
     position: fixed !important;
-    top: 20px !important;
-    bottom: 20px !important;
-    height: auto !important;
-    max-height: none !important;
+    top: 16px !important;
+    bottom: auto !important;
+    height: calc(100vh - 32px) !important;
+    min-height: calc(100vh - 32px) !important;
+    max-height: calc(100vh - 32px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: visible !important;
+  }
+
+  .tablet-combined-panel-body {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
     display: flex !important;
     flex-direction: column !important;
   }
 
   /* Make children flex to fill available space */
-  .tablet-combined-panel > * {
+  .tablet-combined-panel-body > * {
     flex-shrink: 0;
   }
 
   /* Last child (Layers panel) should stretch to fill remaining space */
-  .tablet-combined-panel > *:last-child {
+  .tablet-combined-panel-body > *:last-child {
     flex: 1 1 auto !important;
     min-height: 0 !important;
     display: flex !important;
@@ -956,8 +992,8 @@ div.detail-popup-panel.safari-modal-fix.z-\[1000\] {
     max-height: none !important;
   }
 
-  /* Only apply sidebar fixes on Safari/iOS devices */
-  @supports (-webkit-touch-callout: none) and (min-width: 768px) {
+  /* Only apply sidebar fixes on Safari touch devices (iPad/iPhone), not macOS Safari */
+  @supports (-webkit-touch-callout: none) and (hover: none) and (min-width: 768px) {
     /* The inner sidebar rail div on iOS/iPadOS - avoid double application */
     .safari-sidebar-rail {
       /* iPad specific height fix */
@@ -1001,11 +1037,51 @@ div.detail-popup-panel.safari-modal-fix.z-\[1000\] {
     display: none;
   }
 
-  /* Combined tablet panel - default positioning for landscape */
+  /* Combined tablet panel — padding gives box-shadow room; overflow stays visible */
   .tablet-combined-panel {
-    left: 92px !important;
-    width: 340px !important;
+    left: 72px !important;
+    width: 380px !important;
     position: absolute !important;
+    padding: 20px !important;
+    box-sizing: border-box !important;
+    overflow: visible !important;
+    height: calc(100vh - 32px) !important;
+    min-height: calc(100vh - 32px) !important;
+    max-height: calc(100vh - 32px) !important;
+    top: 16px !important;
+    bottom: auto !important;
+    /* Above sidebar (z-index 2000) so shadows render in the 16px gap */
+    z-index: 2100 !important;
+  }
+
+  .tablet-combined-panel-body > * {
+    overflow: visible !important;
+  }
+
+  /* Room below upper widgets so box-shadow isn't covered by the next panel */
+  .tablet-combined-panel .tablet-widget-slot {
+    padding-bottom: 12px;
+  }
+
+  .tablet-combined-panel .widget-container {
+    box-shadow: var(--widget-box-shadow) !important;
+  }
+
+  /* Layer tiles: match Climate Scenario select breathing room (h-9 / px-3 py-2) */
+  .tablet-combined-panel .layer-card {
+    min-height: 36px;
+    padding: 8px 12px;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .tablet-combined-panel .tablet-layers-body {
+    overflow: visible !important;
+  }
+
+  .tablet-combined-panel .layer-list-scroll {
+    padding-inline: 10px;
+    margin-inline: -10px;
   }
 
   /* Hide the desktop right panel via CSS as backup */
@@ -1178,5 +1254,29 @@ div.detail-popup-panel.safari-modal-fix.z-\[1000\].pointer-events-auto {
   margin-left: 0 !important;
   margin-right: 0 !important;
   box-sizing: border-box !important;
+}
+
+/* When left + right widget columns are visible, center in the map corridor between them */
+.app-layout[data-panels-visible="true"] .detail-popup-panel,
+.app-layout[data-panels-visible="true"] div.detail-popup-panel,
+.app-layout[data-panels-visible="true"] .detail-popup-panel.safari-modal-fix,
+.app-layout[data-panels-visible="true"] div.detail-popup-panel.safari-modal-fix,
+.app-layout[data-panels-visible="true"] div.detail-popup-panel.safari-modal-fix.z-\[1000\],
+.app-layout[data-panels-visible="true"] div.detail-popup-panel.safari-modal-fix.z-\[1000\].pointer-events-auto {
+  left: var(--cs-detail-panel-inset-center) !important;
+  width: var(--cs-detail-panel-inset-max-width) !important;
+  max-width: var(--cs-detail-panel-inset-max-width) !important;
+}
+
+/* Tablet / responsive: left column only — center between panels and viewport right edge */
+.app-layout[data-panels-left-only="true"] .detail-popup-panel,
+.app-layout[data-panels-left-only="true"] div.detail-popup-panel,
+.app-layout[data-panels-left-only="true"] .detail-popup-panel.safari-modal-fix,
+.app-layout[data-panels-left-only="true"] div.detail-popup-panel.safari-modal-fix,
+.app-layout[data-panels-left-only="true"] div.detail-popup-panel.safari-modal-fix.z-\[1000\],
+.app-layout[data-panels-left-only="true"] div.detail-popup-panel.safari-modal-fix.z-\[1000\].pointer-events-auto {
+  left: var(--cs-detail-panel-tablet-center) !important;
+  width: var(--cs-detail-panel-tablet-max-width) !important;
+  max-width: var(--cs-detail-panel-tablet-max-width) !important;
 }
 

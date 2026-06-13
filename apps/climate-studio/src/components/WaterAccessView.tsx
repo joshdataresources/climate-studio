@@ -1,6 +1,5 @@
 // Water Access View - Groundwater, Rivers, Lakes, Metro Humidity
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { createRoot, Root } from 'react-dom/client'
 import { Link } from 'react-router-dom'
 import mapboxgl from 'mapbox-gl'
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -25,6 +24,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Waves, Droplets, CloudRain, Factory, MapPin, BarChart3, Mountain, TrendingUp, Loader2, GripVertical, X, Layers, ChevronDown, Save, Trash2, Bookmark, MoreHorizontal, Pencil, Zap, Building2, Users } from 'lucide-react'
 import { useLayer } from '../contexts/LayerContext'
 import { shouldShowClimateWidget } from '../config/layerDefinitions'
+import { BACKEND_BASE_URL } from '../config/backend'
 import {
   DndContext,
   closestCenter,
@@ -73,9 +73,6 @@ import serviceAreasData from '../data/water-service-areas.json'
 // Use environment variable or fallback to the token
 const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1Ijoiam9zaHVhYmJ1dGxlciIsImEiOiJjbWcwNXpyNXUwYTdrMmtva2tiZ2NjcGxhIn0.Fc3d_CloJGiw9-BE4nI_Kw'
 mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
-
-// Backend API base URL
-const API_BASE = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL || 'http://localhost:5001'
 
 // Helper: create a StyleImageInterface for Mapbox GL v3 symbol layers
 function createIconImage(size: number, draw: (ctx: CanvasRenderingContext2D, s: number) => void): { width: number; height: number; data: Uint8ClampedArray } {
@@ -525,7 +522,7 @@ function SortableViewItem({
 
   if (isEditing) {
     return (
-      <li ref={setNodeRef} className="flex items-center gap-2 p-2 rounded-md border border-border/60 bg-background/50">
+      <li ref={setNodeRef} className="feature-card flex items-center gap-2">
         <Input
           value={editingViewName}
           onChange={e => setEditingViewName(e.target.value)}
@@ -559,7 +556,7 @@ function SortableViewItem({
   }
 
   return (
-    <li ref={setNodeRef} style={style} className="flex gap-3 rounded-lg p-3 transition-colors border border-solid border-white/90 bg-white/25 items-center">
+    <li ref={setNodeRef} style={style} className="feature-card flex items-center gap-2">
       <div
         {...attributes}
         {...listeners}
@@ -574,7 +571,7 @@ function SortableViewItem({
         <Bookmark className="h-5 w-5 text-muted-foreground flex-shrink-0" />
         <div className="flex-1 min-w-0 flex flex-col gap-1">
           <div className="flex items-center justify-between gap-2">
-            <h4 className="text-sm font-semibold">{view.name}</h4>
+            <h4 className="text-[13px] font-semibold text-[var(--cs-text-primary)]">{view.name}</h4>
           </div>
         </div>
       </button>
@@ -613,7 +610,6 @@ export default function WaterAccessView() {
   const selectedFeatureIdRef = useRef<string | number | null>(null) // Ref to track selection in event handlers
   const aquiferDataRef = useRef<GeoJSON.FeatureCollection | null>(null) // Ref to persist aquifer data across style changes
   const manageLayersDropdownRef = useRef<HTMLDivElement>(null)
-  const metroMarkersRef = useRef<Array<{ marker: mapboxgl.Marker; root: Root }>>([]) // Store metro humidity markers and React roots
   const [, forceUpdate] = useState(0) // Force re-render when map moves to update marker positions
 
   // iOS Safari viewport height fix
@@ -1037,7 +1033,7 @@ export default function WaterAccessView() {
   const fetchAquiferData = useCallback(async (bounds?: { north: number; south: number; east: number; west: number }) => {
     setError(null)
 
-    let url = `${API_BASE}/api/usgs/aquifers`
+    let url = `${BACKEND_BASE_URL}/api/usgs/aquifers`
     const params = new URLSearchParams()
 
     if (bounds) {
@@ -2888,7 +2884,7 @@ export default function WaterAccessView() {
 
     if (showSeaLevelRiseLayer) {
       // Construct tile URL using the working NOAA tile endpoint
-      const tileUrl = `${API_BASE}/api/tiles/noaa-slr/${seaLevelRiseFeet}/{z}/{x}/{y}.png`
+      const tileUrl = `${BACKEND_BASE_URL}/api/tiles/noaa-slr/${seaLevelRiseFeet}/{z}/{x}/{y}.png`
 
       console.log(`🌊 Adding sea level rise layer: ${seaLevelRiseFeet}ft`)
 
@@ -3036,7 +3032,7 @@ export default function WaterAccessView() {
       }
 
       const rawTileUrl = data.tile_url
-      const nodeBackendBase = import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001'
+      const nodeBackendBase = BACKEND_BASE_URL
       const tileUrl = rawTileUrl.startsWith('/') ? `${nodeBackendBase}${rawTileUrl}` : rawTileUrl
 
       if (!map.getSource('temperature-tiles')) {
@@ -3468,195 +3464,6 @@ export default function WaterAccessView() {
       }
     }
   }, [mapLoaded, showMetroHumidityLayer])
-
-  // Metro Humidity React Markers - Create and manage tooltip bubbles (DISABLED - using React overlay instead)
-  useEffect(() => {
-    if (!mapRef.current || !mapLoaded) return
-    const map = mapRef.current
-
-    console.log('🎯 Metro Humidity Markers useEffect (DISABLED)', { showMetroHumidityLayer, projectionYear })
-
-    // Clean up existing markers
-    metroMarkersRef.current.forEach(({ marker, root }) => {
-      root.unmount()
-      marker.remove()
-    })
-    metroMarkersRef.current = []
-
-    // If layer is not visible, don't create markers
-    if (!showMetroHumidityLayer) {
-      console.log('⏭️ Metro Humidity layer not visible, skipping marker creation')
-      return
-    }
-
-    // Helper function to get humidity data for a specific year (with interpolation)
-    const getHumidityDataForYear = (projections: any, year: number) => {
-      const yearStr = year.toString()
-      if (projections[yearStr]) {
-        return projections[yearStr]
-      }
-
-      const years = Object.keys(projections).map(Number).sort((a, b) => a - b)
-      let lowerYear = years[0]
-      let upperYear = years[years.length - 1]
-
-      for (let i = 0; i < years.length - 1; i++) {
-        if (years[i] <= year && years[i + 1] >= year) {
-          lowerYear = years[i]
-          upperYear = years[i + 1]
-          break
-        }
-      }
-
-      if (year <= lowerYear) return projections[lowerYear.toString()]
-      if (year >= upperYear) return projections[upperYear.toString()]
-
-      const ratio = (year - lowerYear) / (upperYear - lowerYear)
-      const lower = projections[lowerYear.toString()]
-      const upper = projections[upperYear.toString()]
-
-      return {
-        peak_humidity: Math.round(lower.peak_humidity + (upper.peak_humidity - lower.peak_humidity) * ratio),
-        wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
-        days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
-        days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
-        estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
-        casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
-        extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
-      }
-    }
-
-    // Helper to get temperature data for a city and year
-    const getTemperatureData = (cityName: string, year: number) => {
-      // Find city in temperature data (case-insensitive, handle variations)
-      const normalizedCity = cityName.toLowerCase().trim()
-
-      // Try exact match first, then partial match
-      const tempCity = Object.values(metroTemperatureData).find((city: any) => {
-        const tempCityName = city.name.toLowerCase().trim()
-
-        // Exact match
-        if (tempCityName === normalizedCity) return true
-
-        // Handle "City, ST" format - extract just the city name
-        const cityBase = normalizedCity.split(',')[0].trim()
-        const tempCityBase = tempCityName.split(',')[0].trim()
-
-        // Match on base city name
-        if (cityBase === tempCityBase) return true
-
-        // Partial matching as fallback
-        if (tempCityName.includes(cityBase) || cityBase.includes(tempCityBase)) return true
-
-        return false
-      }) as any
-
-      if (!tempCity?.projections) {
-        console.warn(`⚠️ No temperature data found for "${cityName}"`)
-        return null
-      }
-
-      // Map scenario names: RCP to SSP
-      // rcp26 -> ssp126, rcp45 -> ssp245, rcp60 -> ssp370, rcp85 -> ssp585
-      let mappedScenario = controls.scenario
-      if (controls.scenario === 'rcp26') mappedScenario = 'ssp126'
-      else if (controls.scenario === 'rcp45') mappedScenario = 'ssp245'
-      else if (controls.scenario === 'rcp60') mappedScenario = 'ssp370'
-      else if (controls.scenario === 'rcp85') mappedScenario = 'ssp585'
-
-      // Try the mapped scenario, fall back to ssp245 (moderate) as default
-      const scenarioData = tempCity.projections[mappedScenario] || tempCity.projections['ssp245']
-
-      if (!scenarioData) {
-        console.warn(`⚠️ No temperature data for "${cityName}" in scenario ${mappedScenario}`)
-        return null
-      }
-
-      // Find closest decade
-      const decades = Object.keys(scenarioData).map(Number).sort((a, b) => a - b)
-
-      if (decades.length === 0) {
-        console.warn(`⚠️ No decade data for "${cityName}" in scenario ${mappedScenario}`)
-        return null
-      }
-
-      const closestDecade = decades.reduce((prev, curr) =>
-        Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
-      )
-
-      const decadeData = scenarioData[closestDecade]
-
-      if (!decadeData) {
-        console.warn(`⚠️ No data for decade ${closestDecade} for "${cityName}"`)
-        return null
-      }
-
-      return decadeData
-    }
-
-      // Create markers for each metro city
-      ; (metroHumidityData as any).features.forEach((feature: any) => {
-        const { city, lat, lng, humidity_projections } = feature.properties
-        const humidityData = getHumidityDataForYear(humidity_projections, projectionYear)
-        const tempData = getTemperatureData(city, projectionYear)
-
-        // Debug: Log temperature data for first city
-        if (city === 'Phoenix' || city === 'Phoenix, AZ') {
-          console.log('🌡️ Phoenix Temperature Data:', {
-            city,
-            projectionYear,
-            scenario: controls.scenario,
-            tempData,
-            showAverageTemperatures,
-            summerAvg: tempData?.summer_avg ? `${tempData.summer_avg.toFixed(1)}°F` : undefined,
-            winterAvg: tempData?.winter_avg ? `${tempData.winter_avg.toFixed(1)}°F` : undefined
-          })
-        }
-
-        // Create marker element
-        const el = document.createElement('div')
-        el.style.width = '0px'
-        el.style.height = '0px'
-
-        // Create React root and render MetroHumidityBubble
-        const root = createRoot(el)
-        root.render(
-          <MetroHumidityBubble
-            metroName={city}
-            year={projectionYear}
-            peakHumidity={`${humidityData.peak_humidity}%`}
-            wetBulbEvents={`${humidityData.wet_bulb_events}`}
-            humidTemp={`${humidityData.days_over_95F || 0}°`}
-            daysOver100={`${humidityData.days_over_100F || 0}`}
-            visible={true}
-            showHumidityWetBulb={showHumidityWetBulb}
-            showTempHumidity={showTempHumidity}
-            showAverageTemperatures={showAverageTemperatures}
-            summerAvg={tempData?.summer_avg ? `${tempData.summer_avg.toFixed(1)}°F` : undefined}
-            winterAvg={tempData?.winter_avg ? `${tempData.winter_avg.toFixed(1)}°F` : undefined}
-            onClose={() => { }}
-          />
-        )
-
-        // Create Mapbox marker
-        const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
-          .setLngLat([lng, lat])
-          .addTo(map)
-
-        metroMarkersRef.current.push({ marker, root })
-      })
-
-    console.log(`✅ Created ${metroMarkersRef.current.length} metro humidity markers`)
-
-    // Cleanup function
-    return () => {
-      metroMarkersRef.current.forEach(({ marker, root }) => {
-        root.unmount()
-        marker.remove()
-      })
-      metroMarkersRef.current = []
-    }
-  }, [showMetroHumidityLayer, projectionYear, showHumidityWetBulb, showTempHumidity, showAverageTemperatures, mapLoaded, theme, controls.scenario])
 
   // Factories Layer - Map Visualization
   useEffect(() => {
@@ -4162,7 +3969,7 @@ export default function WaterAccessView() {
       }
 
       const rawPrecipTileUrl = precipitationDroughtData.tile_url
-      const precipBackendBase = import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001'
+      const precipBackendBase = BACKEND_BASE_URL
       const tileUrl = rawPrecipTileUrl.startsWith('/') ? `${precipBackendBase}${rawPrecipTileUrl}` : rawPrecipTileUrl
 
       // Add or update source
@@ -4547,7 +4354,7 @@ export default function WaterAccessView() {
           </div>
 
           {/* Water Access Layers Panel */}
-          <div className="widget-container flex flex-col flex-1 min-h-0 pointer-events-auto overflow-hidden">
+          <div className="widget-container flex flex-col flex-1 min-h-0 pointer-events-auto">
             {/* Header with Manage Layers dropdown */}
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
               <h3 className="text-sm font-semibold">Layers</h3>
@@ -4686,11 +4493,11 @@ export default function WaterAccessView() {
             </div>
 
             {/* Layers List with divider */}
-            <div className="border-t border-b border-border/100 flex flex-col flex-1 min-h-0 overflow-hidden">
-              <div className="space-y-2 overflow-y-auto flex-1 py-3 rounded-b-lg">
+            <div className="border-t border-b border-border/100 flex flex-col flex-1 min-h-0">
+              <div className="layer-list-scroll space-y-2 overflow-y-auto flex-1 py-3 rounded-b-lg">
                 {/* Metro Weather Layer */}
                 {layersInWidget.metroWeather && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showMetroHumidityLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowMetroHumidityLayer(!showMetroHumidityLayer)}>
+                  <div className={`layer-card cursor-pointer ${showMetroHumidityLayer ? 'active' : ''}`} onClick={() => setShowMetroHumidityLayer(!showMetroHumidityLayer)}>
                     <MapPin className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-2">
@@ -4716,7 +4523,7 @@ export default function WaterAccessView() {
 
                 {/* Factories Layer */}
                 {layersInWidget.factories && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showFactoriesLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowFactoriesLayer(!showFactoriesLayer)}>
+                  <div className={`layer-card cursor-pointer ${showFactoriesLayer ? 'active' : ''}`} onClick={() => setShowFactoriesLayer(!showFactoriesLayer)}>
                     <Factory className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-2">
@@ -4742,7 +4549,7 @@ export default function WaterAccessView() {
 
                 {/* AI Data Centers Layer */}
                 {layersInWidget.aiDataCenters && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showAIDataCentersLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowAIDataCentersLayer(!showAIDataCentersLayer)}>
+                  <div className={`layer-card cursor-pointer ${showAIDataCentersLayer ? 'active' : ''}`} onClick={() => setShowAIDataCentersLayer(!showAIDataCentersLayer)}>
                     <Zap className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-2">
@@ -4768,7 +4575,7 @@ export default function WaterAccessView() {
 
                 {/* Major Dams Layer */}
                 {layersInWidget.dams && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showDamsLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowDamsLayer(!showDamsLayer)}>
+                  <div className={`layer-card cursor-pointer ${showDamsLayer ? 'active' : ''}`} onClick={() => setShowDamsLayer(!showDamsLayer)}>
                     <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M2 22h20v-2H2v2zm2-18v12h16V4H4zm2 10V6h12v8H6z" />
                     </svg>
@@ -4796,7 +4603,7 @@ export default function WaterAccessView() {
 
                 {/* Rivers Layer */}
                 {layersInWidget.rivers && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showRiversLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowRiversLayer(!showRiversLayer)}>
+                  <div className={`layer-card cursor-pointer ${showRiversLayer ? 'active' : ''}`} onClick={() => setShowRiversLayer(!showRiversLayer)}>
                     <Waves className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-2">
@@ -4822,7 +4629,7 @@ export default function WaterAccessView() {
 
                 {/* Canals & Aqueducts Layer */}
                 {layersInWidget.canals && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showCanalsLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowCanalsLayer(!showCanalsLayer)}>
+                  <div className={`layer-card cursor-pointer ${showCanalsLayer ? 'active' : ''}`} onClick={() => setShowCanalsLayer(!showCanalsLayer)}>
                     <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="none" viewBox="0 0 24 24">
                       <path d="M2 12h20M2 8h20M2 16h20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                     </svg>
@@ -4850,7 +4657,7 @@ export default function WaterAccessView() {
 
                 {/* Sea Level Rise Layer */}
                 {layersInWidget.seaLevel && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showSeaLevelRiseLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowSeaLevelRiseLayer(!showSeaLevelRiseLayer)}>
+                  <div className={`layer-card cursor-pointer ${showSeaLevelRiseLayer ? 'active' : ''}`} onClick={() => setShowSeaLevelRiseLayer(!showSeaLevelRiseLayer)}>
                     <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M3 10h18v2H3v-2zm0 4h18v2H3v-2zm0 4h18v2H3v-2z" />
                     </svg>
@@ -4879,7 +4686,7 @@ export default function WaterAccessView() {
 
                 {/* Aquifers Layer */}
                 {layersInWidget.aquifers && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showAquifersLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowAquifersLayer(!showAquifersLayer)}>
+                  <div className={`layer-card cursor-pointer ${showAquifersLayer ? 'active' : ''}`} onClick={() => setShowAquifersLayer(!showAquifersLayer)}>
                     <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-2">
@@ -4905,7 +4712,7 @@ export default function WaterAccessView() {
 
                 {/* Groundwater Layer */}
                 {layersInWidget.groundwater && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showGroundwaterLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowGroundwaterLayer(!showGroundwaterLayer)}>
+                  <div className={`layer-card cursor-pointer ${showGroundwaterLayer ? 'active' : ''}`} onClick={() => setShowGroundwaterLayer(!showGroundwaterLayer)}>
                     <TrendingUp className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-2">
@@ -4931,7 +4738,7 @@ export default function WaterAccessView() {
 
                 {/* Precipitation & Drought Layer */}
                 {layersInWidget.precipitation && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isPrecipitationDroughtActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleLayer('precipitation_drought')}>
+                  <div className={`layer-card cursor-pointer ${isPrecipitationDroughtActive ? 'active' : ''}`} onClick={() => toggleLayer('precipitation_drought')}>
                     <CloudRain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-2">
@@ -4957,7 +4764,7 @@ export default function WaterAccessView() {
 
                 {/* Wet Bulb Temperature Layer */}
                 {layersInWidget.wetBulb && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isWetBulbActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleLayer('wet_bulb')}>
+                  <div className={`layer-card cursor-pointer ${isWetBulbActive ? 'active' : ''}`} onClick={() => toggleLayer('wet_bulb')}>
                     <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-2">
@@ -4983,7 +4790,7 @@ export default function WaterAccessView() {
 
                 {/* Future Temperature Anomaly Layer */}
                 {layersInWidget.temperature && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isTemperatureProjectionActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleLayer('temperature_projection')}>
+                  <div className={`layer-card cursor-pointer ${isTemperatureProjectionActive ? 'active' : ''}`} onClick={() => toggleLayer('temperature_projection')}>
                     <CloudRain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-2">
@@ -5009,7 +4816,7 @@ export default function WaterAccessView() {
 
                 {/* Topographic Relief Layer */}
                 {layersInWidget.topographic && (
-                  <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showTopographicRelief ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowTopographicRelief(!showTopographicRelief)}>
+                  <div className={`layer-card cursor-pointer ${showTopographicRelief ? 'active' : ''}`} onClick={() => setShowTopographicRelief(!showTopographicRelief)}>
                     <Mountain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                     <div className="flex-1 min-w-0 flex flex-col gap-1">
                       <div className="flex items-center justify-between gap-2">
@@ -5121,7 +4928,7 @@ export default function WaterAccessView() {
 
                   {/* Metro Weather Controls */}
                   {layersInWidget.metroWeather && showMetroHumidityLayer && (
-                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                    <div className="feature-card">
                       <div
                         className="flex items-center justify-between cursor-pointer mb-2.5"
                         onClick={() => {
@@ -5178,7 +4985,7 @@ export default function WaterAccessView() {
 
                   {/* Metro Population Change */}
                   {layersInWidget.metroPopulation && showMetroDataStatistics && (
-                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                    <div className="feature-card">
                       <div
                         className="flex items-center justify-between cursor-pointer mb-2.5"
                         onClick={() => {
@@ -5243,7 +5050,7 @@ export default function WaterAccessView() {
 
                   {/* Factory Filters */}
                   {layersInWidget.factories && showFactoriesLayer && (
-                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                    <div className="feature-card">
                       <div
                         className="flex items-center justify-between cursor-pointer mb-2.5"
                         onClick={() => {
@@ -5311,7 +5118,7 @@ export default function WaterAccessView() {
 
                   {/* Rivers Flow Status */}
                   {layersInWidget.rivers && showRiversLayer && (
-                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                    <div className="feature-card">
                       <div
                         className="flex items-center justify-between cursor-pointer mb-2.5"
                         onClick={() => {
@@ -5372,7 +5179,7 @@ export default function WaterAccessView() {
 
                   {/* Canals & Aqueducts */}
                   {layersInWidget.canals && showCanalsLayer && (
-                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                    <div className="feature-card">
                       <div
                         className="flex items-center justify-between cursor-pointer mb-2.5"
                         onClick={() => {
@@ -5424,7 +5231,7 @@ export default function WaterAccessView() {
 
                   {/* Aquifers */}
                   {layersInWidget.aquifers && showAquifersLayer && (
-                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                    <div className="feature-card">
                       <div
                         className="flex items-center justify-between cursor-pointer mb-2.5"
                         onClick={() => {
@@ -5482,7 +5289,7 @@ export default function WaterAccessView() {
 
                   {/* Historic Groundwater Baseline */}
                   {layersInWidget.groundwater && showGRACELayer && (
-                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                    <div className="feature-card">
                       <div
                         className="flex items-center justify-between cursor-pointer mb-2.5"
                         onClick={() => {
@@ -5547,7 +5354,7 @@ export default function WaterAccessView() {
 
                   {/* Future Temperature Anomaly */}
                   {layersInWidget.temperature && isTemperatureProjectionActive && (
-                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                    <div className="feature-card">
                       <div
                         className="flex items-center justify-between cursor-pointer mb-2.5"
                         onClick={() => {
@@ -5656,7 +5463,7 @@ export default function WaterAccessView() {
 
                   {/* Precipitation & Drought */}
                   {layersInWidget.precipitation && isPrecipitationDroughtActive && (
-                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                    <div className="feature-card">
                       <div
                         className="flex items-center justify-between cursor-pointer mb-2.5"
                         onClick={() => {
@@ -5782,7 +5589,7 @@ export default function WaterAccessView() {
 
                   {/* Wet Bulb Temperature */}
                   {layersInWidget.wetBulb && isWetBulbActive && (
-                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                    <div className="feature-card">
                       <div
                         className="flex items-center justify-between cursor-pointer mb-2.5"
                         onClick={() => {
@@ -5870,7 +5677,7 @@ export default function WaterAccessView() {
                     if (!humidityData) return null
 
                     return (
-                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div className="feature-card">
                         {/* Header */}
                         <div
                           className="flex items-center justify-between cursor-pointer mb-2.5"
@@ -5965,7 +5772,7 @@ export default function WaterAccessView() {
 
                   {/* Topographic Relief */}
                   {layersInWidget.topographic && showTopographicRelief && (
-                    <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                    <div className="feature-card">
                       <div
                         className="flex items-center justify-between cursor-pointer mb-2.5"
                         onClick={() => {
@@ -6072,14 +5879,12 @@ export default function WaterAccessView() {
 
         return (
           <aside
-            className="tablet-combined-panel absolute top-4 z-[1000] flex flex-col gap-3 pointer-events-none overflow-y-auto overflow-x-hidden safari-panel-height"
-            style={{
-              height: 'calc(100vh - 32px)',
-              scrollbarWidth: 'none'
-            }}>
+            className="tablet-combined-panel absolute top-4 z-[2100] flex flex-col pointer-events-none overflow-visible min-h-0 h-[calc(100vh-32px)] safari-panel-height">
+
+            <div className="tablet-combined-panel-body flex flex-col gap-6 flex-1 min-h-0 w-full h-full">
 
             {/* ── 1. Views / Bookmarks ── */}
-            <div className="pointer-events-auto flex-shrink-0 overflow-hidden">
+            <div className="tablet-widget-slot pointer-events-auto flex-shrink-0">
               {tabletViewsOpen ? (
                 <SearchAndViewsPanel
                   viewType="waterAccess"
@@ -6109,7 +5914,7 @@ export default function WaterAccessView() {
             </div>
 
             {/* ── 2. Climate Projections ── */}
-            <div className="pointer-events-auto flex-shrink-0 overflow-hidden">
+            <div className="tablet-widget-slot pointer-events-auto flex-shrink-0">
               {tabletClimateOpen ? (
                 <div className="relative">
                   <ClimateProjectionsWidget />
@@ -6135,13 +5940,13 @@ export default function WaterAccessView() {
             </div>
 
             {/* ── 3. Layers | Features Tabs ── */}
-            <div className="widget-container pointer-events-auto flex-1 min-h-[200px] flex flex-col overflow-hidden">
+            <div className="widget-container pointer-events-auto flex-1 min-h-[200px] flex flex-col">
 
               {/* Layers tab content */}
               {tabletActiveTab === 'layers' && (
-                <div className="flex flex-col flex-1 min-h-0 overflow-hidden -mx-4 -mt-4 -mb-4">
+                <div className="tablet-layers-body flex flex-col flex-1 min-h-0">
                   {/* Header row: tab pills + Manage Layers */}
-                  <div className="flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0">
+                  <div className="flex items-center justify-between pb-2 flex-shrink-0">
                     <div className="flex gap-1.5">
                       <button
                         className="px-3 py-1 text-[11px] font-semibold rounded-full transition-all"
@@ -6301,101 +6106,101 @@ export default function WaterAccessView() {
                   </div>
 
                   {/* Layers list */}
-                  <div className="border-t border-border/100 flex flex-col flex-1 min-h-0 overflow-hidden">
-                    <div className="space-y-2 overflow-y-auto flex-1 py-3 px-4">
+                  <div className="border-t border-border/100 flex flex-col flex-1 min-h-0">
+                    <div className="layer-list-scroll space-y-2 overflow-y-auto flex-1 py-3">
                       {layersInWidget.metroWeather && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showMetroHumidityLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowMetroHumidityLayer(!showMetroHumidityLayer)}>
+                        <div className={`layer-card cursor-pointer ${showMetroHumidityLayer ? 'active' : ''}`} onClick={() => setShowMetroHumidityLayer(!showMetroHumidityLayer)}>
                           <MapPin className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Metro Weather</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, metroWeather: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.factories && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showFactoriesLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowFactoriesLayer(!showFactoriesLayer)}>
+                        <div className={`layer-card cursor-pointer ${showFactoriesLayer ? 'active' : ''}`} onClick={() => setShowFactoriesLayer(!showFactoriesLayer)}>
                           <Factory className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Factories</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, factories: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.aiDataCenters && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showAIDataCentersLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowAIDataCentersLayer(!showAIDataCentersLayer)}>
+                        <div className={`layer-card cursor-pointer ${showAIDataCentersLayer ? 'active' : ''}`} onClick={() => setShowAIDataCentersLayer(!showAIDataCentersLayer)}>
                           <Zap className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">AI Data Centers</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, aiDataCenters: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.rivers && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showRiversLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowRiversLayer(!showRiversLayer)}>
+                        <div className={`layer-card cursor-pointer ${showRiversLayer ? 'active' : ''}`} onClick={() => setShowRiversLayer(!showRiversLayer)}>
                           <Waves className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">River Flow Status</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, rivers: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.canals && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showCanalsLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowCanalsLayer(!showCanalsLayer)}>
+                        <div className={`layer-card cursor-pointer ${showCanalsLayer ? 'active' : ''}`} onClick={() => setShowCanalsLayer(!showCanalsLayer)}>
                           <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Canals & Aqueducts</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, canals: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.wetBulb && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isWetBulbActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleLayer('wet_bulb')}>
+                        <div className={`layer-card cursor-pointer ${isWetBulbActive ? 'active' : ''}`} onClick={() => toggleLayer('wet_bulb')}>
                           <CloudRain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Wet Bulb Temperature</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, wetBulb: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.temperature && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isTemperatureProjectionActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleLayer('temperature_projection')}>
+                        <div className={`layer-card cursor-pointer ${isTemperatureProjectionActive ? 'active' : ''}`} onClick={() => toggleLayer('temperature_projection')}>
                           <TrendingUp className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Future Temperature Anomaly</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, temperature: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.topographic && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showTopographicRelief ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowTopographicRelief(!showTopographicRelief)}>
+                        <div className={`layer-card cursor-pointer ${showTopographicRelief ? 'active' : ''}`} onClick={() => setShowTopographicRelief(!showTopographicRelief)}>
                           <Mountain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Topographic Relief</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, topographic: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.dams && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showDamsLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowDamsLayer(!showDamsLayer)}>
+                        <div className={`layer-card cursor-pointer ${showDamsLayer ? 'active' : ''}`} onClick={() => setShowDamsLayer(!showDamsLayer)}>
                           <Building2 className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Dams</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, dams: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.seaLevel && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showSeaLevelRiseLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowSeaLevelRiseLayer(!showSeaLevelRiseLayer)}>
+                        <div className={`layer-card cursor-pointer ${showSeaLevelRiseLayer ? 'active' : ''}`} onClick={() => setShowSeaLevelRiseLayer(!showSeaLevelRiseLayer)}>
                           <Waves className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Sea Level Rise</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, seaLevel: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.groundwater && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showGroundwaterLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowGroundwaterLayer(!showGroundwaterLayer)}>
+                        <div className={`layer-card cursor-pointer ${showGroundwaterLayer ? 'active' : ''}`} onClick={() => setShowGroundwaterLayer(!showGroundwaterLayer)}>
                           <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Groundwater</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, groundwater: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.aquifers && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showAquifersLayer ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowAquifersLayer(!showAquifersLayer)}>
+                        <div className={`layer-card cursor-pointer ${showAquifersLayer ? 'active' : ''}`} onClick={() => setShowAquifersLayer(!showAquifersLayer)}>
                           <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Aquifers</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, aquifers: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.precipitation && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${isPrecipitationDroughtActive ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => toggleLayer('precipitation_drought')}>
+                        <div className={`layer-card cursor-pointer ${isPrecipitationDroughtActive ? 'active' : ''}`} onClick={() => toggleLayer('precipitation_drought')}>
                           <CloudRain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Precipitation & Drought</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, precipitation: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.metroPopulation && (
-                        <div className={`flex gap-3 rounded-lg p-3 transition-colors border border-solid cursor-pointer ${showMetroDataStatistics ? "border-blue-500/60 bg-blue-500/10" : "border-white/90 bg-white/25"}`} onClick={() => setShowMetroDataStatistics(!showMetroDataStatistics)}>
+                        <div className={`layer-card cursor-pointer ${showMetroDataStatistics ? 'active' : ''}`} onClick={() => setShowMetroDataStatistics(!showMetroDataStatistics)}>
                           <Users className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Metro Population</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, metroPopulation: false }); }}><X className="h-4 w-4" /></button>
@@ -6433,8 +6238,8 @@ export default function WaterAccessView() {
 
               {/* Features tab content */}
               {tabletActiveTab === 'features' && (
-                <div className="flex flex-col flex-1 min-h-0 overflow-hidden -mx-4 -mt-4 -mb-4">
-                  <div className="flex items-center justify-between px-4 pt-4 pb-2 flex-shrink-0">
+                <div className="tablet-layers-body flex flex-col flex-1 min-h-0">
+                  <div className="flex items-center justify-between pb-2 flex-shrink-0">
                     <div className="flex gap-1.5">
                       <button
                         className="px-3 py-1 text-[11px] font-semibold rounded-full transition-all bg-black/[0.04]"
@@ -6451,10 +6256,10 @@ export default function WaterAccessView() {
                       </button>
                     </div>
                   </div>
-                  <div className="space-y-2 overflow-y-auto flex-1 px-4 py-3 border-t border-border/100">
+                  <div className="layer-list-scroll space-y-2 overflow-y-auto flex-1 py-3 border-t border-border/100">
                     {/* Metro Weather Controls */}
                     {layersInWidget.metroWeather && showMetroHumidityLayer && (
-                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div className="feature-card">
                         <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('metroWeather') ? n.delete('metroWeather') : n.add('metroWeather'); setCollapsedFeatures(n) }}>
                           <h4 className="text-[13px] font-semibold">Metro Weather</h4>
                           <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('metroWeather') ? '-rotate-90' : ''}`} />
@@ -6481,7 +6286,7 @@ export default function WaterAccessView() {
 
                     {/* Factory Filters */}
                     {layersInWidget.factories && showFactoriesLayer && (
-                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div className="feature-card">
                         <div
                           className="flex items-center justify-between cursor-pointer mb-2.5"
                           onClick={() => {
@@ -6548,7 +6353,7 @@ export default function WaterAccessView() {
 
                     {/* River Flow Status */}
                     {layersInWidget.rivers && showRiversLayer && (
-                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div className="feature-card">
                         <div
                           className="flex items-center justify-between cursor-pointer mb-2.5"
                           onClick={() => {
@@ -6609,7 +6414,7 @@ export default function WaterAccessView() {
 
                     {/* Canals & Aqueducts */}
                     {layersInWidget.canals && showCanalsLayer && (
-                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div className="feature-card">
                         <div
                           className="flex items-center justify-between cursor-pointer mb-2.5"
                           onClick={() => {
@@ -6661,7 +6466,7 @@ export default function WaterAccessView() {
 
                     {/* Future Temperature Anomaly */}
                     {isTemperatureProjectionActive && (
-                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div className="feature-card">
                         <div
                           className="flex items-center justify-between cursor-pointer mb-2.5"
                           onClick={() => {
@@ -6770,7 +6575,7 @@ export default function WaterAccessView() {
 
                     {/* Aquifers Controls */}
                     {showAquifersLayer && (
-                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div className="feature-card">
                         <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('aquifers') ? n.delete('aquifers') : n.add('aquifers'); setCollapsedFeatures(n) }}>
                           <h4 className="text-[13px] font-semibold">Aquifers</h4>
                           <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('aquifers') ? '-rotate-90' : ''}`} />
@@ -6821,7 +6626,7 @@ export default function WaterAccessView() {
 
                     {/* Historic Groundwater Baseline Controls */}
                     {showGroundwaterLayer && (
-                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div className="feature-card">
                         <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('graceGroundwater') ? n.delete('graceGroundwater') : n.add('graceGroundwater'); setCollapsedFeatures(n) }}>
                           <h4 className="text-[13px] font-semibold">Historic Groundwater Baseline</h4>
                           <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('graceGroundwater') ? '-rotate-90' : ''}`} />
@@ -6857,7 +6662,7 @@ export default function WaterAccessView() {
 
                     {/* Precipitation & Drought Controls */}
                     {isPrecipitationDroughtActive && (
-                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div className="feature-card">
                         <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('precipitation') ? n.delete('precipitation') : n.add('precipitation'); setCollapsedFeatures(n) }}>
                           <h4 className="text-[13px] font-semibold">Precipitation & Drought</h4>
                           <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('precipitation') ? '-rotate-90' : ''}`} />
@@ -6925,7 +6730,7 @@ export default function WaterAccessView() {
 
                     {/* Wet Bulb Temperature Controls */}
                     {isWetBulbActive && (
-                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div className="feature-card">
                         <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('wetbulb') ? n.delete('wetbulb') : n.add('wetbulb'); setCollapsedFeatures(n) }}>
                           <h4 className="text-[13px] font-semibold">Wet Bulb Temperature</h4>
                           <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('wetbulb') ? '-rotate-90' : ''}`} />
@@ -6954,7 +6759,7 @@ export default function WaterAccessView() {
 
                     {/* Sea Level Rise Controls */}
                     {showSeaLevelRiseLayer && (
-                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div className="feature-card">
                         <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('sealevel') ? n.delete('sealevel') : n.add('sealevel'); setCollapsedFeatures(n) }}>
                           <h4 className="text-[13px] font-semibold">Sea Level Rise</h4>
                           <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('sealevel') ? '-rotate-90' : ''}`} />
@@ -6997,7 +6802,7 @@ export default function WaterAccessView() {
 
                     {/* Metro Population Controls */}
                     {showMetroDataStatistics && (
-                      <div className="rounded-lg p-3 border border-solid border-white/90 bg-white/25" style={{ boxShadow: '0 0 8px 0 rgba(0,0,0,0.03)' }}>
+                      <div className="feature-card">
                         <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('metroPopulation') ? n.delete('metroPopulation') : n.add('metroPopulation'); setCollapsedFeatures(n) }}>
                           <h4 className="text-[13px] font-semibold">Metro Population Change</h4>
                           <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('metroPopulation') ? '-rotate-90' : ''}`} />
@@ -7063,6 +6868,8 @@ export default function WaterAccessView() {
                   </div>
                 </div>
               )}
+            </div>
+
             </div>
 
           </aside>

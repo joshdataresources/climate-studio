@@ -257,7 +257,7 @@ function calculateRiskFromFlow(properties: any): 'high' | 'medium' | 'low' {
 /**
  * Check if city names match (flexible matching)
  */
-function cityMatches(city1: string, city2: string): boolean {
+export function cityMatches(city1: string, city2: string): boolean {
   const normalize = (name: string) => 
     name.toLowerCase()
       .replace(/,/g, '')

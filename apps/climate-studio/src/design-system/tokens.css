@@ -1,18 +1,11 @@
-/**
- * Climate Studio Design System Tokens
- * ====================================
- * A comprehensive set of design tokens for consistent UI across the application.
- * 
- * This file defines all primitive tokens used throughout the app.
- * Import this in globals.css for application-wide availability.
+/*
+ * Climate Studio Design Tokens
+ * Generated from design.md
  */
 
-:root {
-  /* ═══════════════════════════════════════════════════════════════════════════
-   * COLOR SYSTEM
-   * ═══════════════════════════════════════════════════════════════════════════ */
-  
-  /* === Neutral Scale === */
+:root,
+[data-theme="dark"] {
+  /* Colors - Neutral scale (dark theme) */
   --cs-neutral-0: #000000;
   --cs-neutral-50: #0a0a0a;
   --cs-neutral-100: #141414;
@@ -27,244 +20,176 @@
   --cs-neutral-900: #f5f5f5;
   --cs-neutral-950: #fafafa;
   --cs-neutral-1000: #ffffff;
-  
-  /* === Brand Colors === */
+
+  /* Colors - Brand */
   --cs-brand-primary: #437efc;
   --cs-brand-primary-light: #6b9bff;
   --cs-brand-primary-dark: #2a5fd4;
   --cs-brand-primary-muted: rgba(67, 126, 252, 0.25);
-  
-  /* === Semantic Colors === */
-  /* Success - Emerald */
-  --cs-success-50: #064e3b;
-  --cs-success-100: #065f46;
-  --cs-success-200: #047857;
-  --cs-success-300: #059669;
-  --cs-success-400: #10b981;
-  --cs-success-500: #34d399;
-  --cs-success-600: #6ee7b7;
+
+  /* Colors - Semantic: Success (Emerald) */
   --cs-success-text: #10b981;
   --cs-success-bg: rgba(16, 185, 129, 0.15);
-  --cs-success-border: rgba(16, 185, 129, 0.3);
-  
-  /* Warning - Amber */
-  --cs-warning-50: #78350f;
-  --cs-warning-100: #92400e;
-  --cs-warning-200: #b45309;
-  --cs-warning-300: #d97706;
-  --cs-warning-400: #f59e0b;
-  --cs-warning-500: #fbbf24;
-  --cs-warning-600: #fcd34d;
+  --cs-success-border: rgba(16, 185, 129, 0.30);
+
+  /* Colors - Semantic: Warning (Amber) */
   --cs-warning-text: #fbbf24;
   --cs-warning-bg: rgba(251, 191, 36, 0.15);
-  --cs-warning-border: rgba(251, 191, 36, 0.3);
-  
-  /* Error - Red */
-  --cs-error-50: #7f1d1d;
-  --cs-error-100: #991b1b;
-  --cs-error-200: #b91c1c;
-  --cs-error-300: #dc2626;
-  --cs-error-400: #ef4444;
-  --cs-error-500: #f87171;
-  --cs-error-600: #fca5a5;
+  --cs-warning-border: rgba(251, 191, 36, 0.30);
+
+  /* Colors - Semantic: Error (Red) */
   --cs-error-text: #ef4444;
   --cs-error-bg: rgba(239, 68, 68, 0.15);
-  --cs-error-border: rgba(239, 68, 68, 0.3);
-  
-  /* Info - Blue */
-  --cs-info-50: #1e3a8a;
-  --cs-info-100: #1e40af;
-  --cs-info-200: #1d4ed8;
-  --cs-info-300: #2563eb;
-  --cs-info-400: #3b82f6;
-  --cs-info-500: #60a5fa;
-  --cs-info-600: #93c5fd;
+  --cs-error-border: rgba(239, 68, 68, 0.30);
+
+  /* Colors - Semantic: Info (Blue) */
   --cs-info-text: #3b82f6;
   --cs-info-bg: rgba(59, 130, 246, 0.15);
-  --cs-info-border: rgba(59, 130, 246, 0.3);
-  
-  /* === Data Visualization Colors === */
-  /* Climate-themed palette */
-  --cs-data-sea: #0ea5e9;        /* Sky blue - sea level */
-  --cs-data-heat: #f97316;       /* Orange - heat/temperature */
-  --cs-data-cold: #3b82f6;       /* Blue - cold/cooling */
-  --cs-data-drought: #eab308;    /* Yellow - drought */
-  --cs-data-rain: #06b6d4;       /* Cyan - precipitation */
-  --cs-data-growth: #10b981;     /* Emerald - positive growth */
-  --cs-data-decline: #ef4444;    /* Red - negative/decline */
-  --cs-data-urban: #8b5cf6;      /* Violet - urban */
-  --cs-data-forest: #22c55e;     /* Green - vegetation */
-  --cs-data-terrain: #78716c;    /* Stone - topographic */
-  
-  /* Chart colors (ordered for accessibility) */
-  --cs-chart-1: #437efc;  /* Primary blue */
-  --cs-chart-2: #10b981;  /* Emerald */
-  --cs-chart-3: #f59e0b;  /* Amber */
-  --cs-chart-4: #8b5cf6;  /* Violet */
-  --cs-chart-5: #ef4444;  /* Red */
-  --cs-chart-6: #06b6d4;  /* Cyan */
-  --cs-chart-7: #f97316;  /* Orange */
-  --cs-chart-8: #84cc16;  /* Lime */
-  
-  /* ═══════════════════════════════════════════════════════════════════════════
-   * TYPOGRAPHY
-   * ═══════════════════════════════════════════════════════════════════════════ */
-  
-  /* Font Families */
+  --cs-info-border: rgba(59, 130, 246, 0.30);
+
+  /* Colors - Data-visualization palette */
+  --cs-data-sea: #0ea5e9;
+  --cs-data-heat: #f97316;
+  --cs-data-cold: #3b82f6;
+  --cs-data-drought: #eab308;
+  --cs-data-rain: #06b6d4;
+  --cs-data-growth: #10b981;
+  --cs-data-decline: #ef4444;
+  --cs-data-urban: #8b5cf6;
+  --cs-data-forest: #22c55e;
+  --cs-data-terrain: #78716c;
+
+  /* Colors - Chart series */
+  --cs-chart-1: #437efc;
+  --cs-chart-2: #10b981;
+  --cs-chart-3: #f59e0b;
+  --cs-chart-4: #8b5cf6;
+  --cs-chart-5: #ef4444;
+  --cs-chart-6: #06b6d4;
+  --cs-chart-7: #f97316;
+  --cs-chart-8: #84cc16;
+
+  /* Typography - Font Families */
   --cs-font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --cs-font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
-  
-  /* Font Sizes */
-  --cs-text-2xs: 0.625rem;    /* 10px */
-  --cs-text-xs: 0.6875rem;    /* 11px */
-  --cs-text-sm: 0.75rem;      /* 12px */
-  --cs-text-base: 0.875rem;   /* 14px */
-  --cs-text-md: 1rem;         /* 16px */
-  --cs-text-lg: 1.125rem;     /* 18px */
-  --cs-text-xl: 1.25rem;      /* 20px */
-  --cs-text-2xl: 1.5rem;      /* 24px */
-  --cs-text-3xl: 1.875rem;    /* 30px */
-  --cs-text-4xl: 2.25rem;     /* 36px */
-  
-  /* Font Weights */
-  --cs-font-normal: 400;
-  --cs-font-medium: 500;
-  --cs-font-semibold: 600;
-  --cs-font-bold: 700;
-  
-  /* Line Heights */
-  --cs-leading-none: 1;
-  --cs-leading-tight: 1.25;
-  --cs-leading-snug: 1.375;
-  --cs-leading-normal: 1.5;
-  --cs-leading-relaxed: 1.625;
-  
-  /* Letter Spacing */
-  --cs-tracking-tighter: -0.05em;
-  --cs-tracking-tight: -0.025em;
-  --cs-tracking-normal: 0;
-  --cs-tracking-wide: 0.025em;
-  --cs-tracking-wider: 0.05em;
-  
-  /* ═══════════════════════════════════════════════════════════════════════════
-   * SPACING
-   * ═══════════════════════════════════════════════════════════════════════════ */
-  
-  --cs-space-0: 0;
-  --cs-space-px: 1px;
-  --cs-space-0-5: 0.125rem;   /* 2px */
-  --cs-space-1: 0.25rem;      /* 4px */
-  --cs-space-1-5: 0.375rem;   /* 6px */
-  --cs-space-2: 0.5rem;       /* 8px */
-  --cs-space-2-5: 0.625rem;   /* 10px */
-  --cs-space-3: 0.75rem;      /* 12px */
-  --cs-space-3-5: 0.875rem;   /* 14px */
-  --cs-space-4: 1rem;         /* 16px */
-  --cs-space-5: 1.25rem;      /* 20px */
-  --cs-space-6: 1.5rem;       /* 24px */
-  --cs-space-7: 1.75rem;      /* 28px */
-  --cs-space-8: 2rem;         /* 32px */
-  --cs-space-9: 2.25rem;      /* 36px */
-  --cs-space-10: 2.5rem;      /* 40px */
-  --cs-space-12: 3rem;        /* 48px */
-  --cs-space-14: 3.5rem;      /* 56px */
-  --cs-space-16: 4rem;        /* 64px */
-  --cs-space-20: 5rem;        /* 80px */
-  
-  /* ═══════════════════════════════════════════════════════════════════════════
-   * BORDERS & RADIUS
-   * ═══════════════════════════════════════════════════════════════════════════ */
-  
-  /* Border Widths */
-  --cs-border-0: 0;
-  --cs-border-1: 1px;
-  --cs-border-2: 2px;
-  --cs-border-4: 4px;
-  
-  /* Border Radius */
+
+  /* Typography - Sizes and Weights (example for body) */
+  --cs-text-display-font-size: 36px;
+  --cs-text-display-font-weight: 700;
+  --cs-text-display-line-height: 44px;
+  --cs-text-display-letter-spacing: -0.025em;
+
+  --cs-text-h1-font-size: 30px;
+  --cs-text-h1-font-weight: 700;
+  --cs-text-h1-line-height: 38px;
+
+  --cs-text-h2-font-size: 24px;
+  --cs-text-h2-font-weight: 600;
+  --cs-text-h2-line-height: 32px;
+
+  --cs-text-h3-font-size: 20px;
+  --cs-text-h3-font-weight: 600;
+  --cs-text-h3-line-height: 28px;
+
+  --cs-text-body-lg-font-size: 16px;
+  --cs-text-body-lg-font-weight: 400;
+  --cs-text-body-lg-line-height: 24px;
+
+  --cs-text-body-font-size: 14px;
+  --cs-text-body-font-weight: 400;
+  --cs-text-body-line-height: 20px;
+
+  --cs-text-caption-font-size: 12px;
+  --cs-text-caption-font-weight: 400;
+  --cs-text-caption-line-height: 16px;
+
+  --cs-text-eyebrow-font-size: 14px;
+  --cs-text-eyebrow-font-weight: 600;
+  --cs-text-eyebrow-line-height: 20px;
+  --cs-text-eyebrow-letter-spacing: 0.05em;
+  --cs-text-eyebrow-text-transform: uppercase;
+
+  --cs-text-metric-label-font-size: 11px;
+  --cs-text-metric-label-font-weight: 600;
+  --cs-text-metric-label-line-height: 16px;
+  --cs-text-metric-label-letter-spacing: 0.02em;
+  --cs-text-metric-label-text-transform: uppercase;
+
+  --cs-text-micro-font-size: 10px;
+  --cs-text-micro-font-weight: 400;
+  --cs-text-micro-line-height: 14px;
+
+  --cs-text-code-font-size: 14px;
+  --cs-text-code-font-weight: 400;
+  --cs-text-code-line-height: 20px;
+
+  /* Rounded corners */
   --cs-radius-none: 0;
-  --cs-radius-sm: 0.25rem;    /* 4px */
-  --cs-radius-md: 0.375rem;   /* 6px */
-  --cs-radius-DEFAULT: 0.5rem; /* 8px */
-  --cs-radius-lg: 0.75rem;    /* 12px */
-  --cs-radius-xl: 1rem;       /* 16px */
-  --cs-radius-2xl: 1.5rem;    /* 24px */
+  --cs-radius-sm: 0.25rem;
+  --cs-radius-md: 0.375rem;
+  --cs-radius-DEFAULT: 0.5rem;
+  --cs-radius-lg: 0.75rem;
+  --cs-radius-xl: 1rem;
+  --cs-radius-2xl: 1.5rem;
   --cs-radius-full: 9999px;
-  
-  /* ═══════════════════════════════════════════════════════════════════════════
-   * SHADOWS
-   * ═══════════════════════════════════════════════════════════════════════════ */
-  
+
+  /* Spacing */
+  --cs-spacing-unit: 8px;
+  --cs-spacing-0: 0;
+  --cs-spacing-px: 1px;
+  --cs-spacing-0-5: 2px;
+  --cs-spacing-1: 4px;
+  --cs-spacing-1-5: 6px;
+  --cs-spacing-2: 8px;
+  --cs-spacing-2-5: 10px;
+  --cs-spacing-3: 12px;
+  --cs-spacing-3-5: 14px;
+  --cs-spacing-4: 16px;
+  --cs-spacing-5: 20px;
+  --cs-spacing-6: 24px;
+  --cs-spacing-7: 28px;
+  --cs-spacing-8: 32px;
+  --cs-spacing-9: 36px;
+  --cs-spacing-10: 40px;
+  --cs-spacing-12: 48px;
+  --cs-spacing-14: 56px;
+  --cs-spacing-16: 64px;
+  --cs-spacing-20: 80px;
+  --cs-spacing-sidebar-collapsed: 72px;
+  --cs-spacing-sidebar-expanded: 240px;
+
+  /* Shadows */
   --cs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --cs-shadow-DEFAULT: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-  --cs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
-  --cs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --cs-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --cs-shadow-DEFAULT: 0 1px 3px 0 rgba(0, 0, 0, 0.10), 0 1px 2px -1px rgba(0, 0, 0, 0.10);
+  --cs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.10), 0 2px 4px -2px rgba(0, 0, 0, 0.10);
+  --cs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.10), 0 4px 6px -4px rgba(0, 0, 0, 0.10);
+  --cs-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.10), 0 8px 10px -6px rgba(0, 0, 0, 0.10);
   --cs-shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  
-  /* Glow effects */
-  --cs-glow-sm: 0 0 10px rgba(67, 126, 252, 0.3);
-  --cs-glow-md: 0 0 20px rgba(67, 126, 252, 0.4);
-  --cs-glow-lg: 0 0 40px rgba(67, 126, 252, 0.5);
-  
-  /* Panel shadows (for floating elements) */
-  --cs-shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.4);
-  --cs-shadow-panel-lg: 0 16px 48px rgba(0, 0, 0, 0.5);
-  
-  /* ═══════════════════════════════════════════════════════════════════════════
-   * EFFECTS
-   * ═══════════════════════════════════════════════════════════════════════════ */
-  
-  /* Blur */
-  --cs-blur-sm: 4px;
-  --cs-blur-DEFAULT: 8px;
-  --cs-blur-md: 12px;
-  --cs-blur-lg: 16px;
-  --cs-blur-xl: 24px;
-  --cs-blur-2xl: 40px;
-  
-  /* Opacity */
-  --cs-opacity-0: 0;
-  --cs-opacity-5: 0.05;
-  --cs-opacity-10: 0.1;
-  --cs-opacity-20: 0.2;
-  --cs-opacity-25: 0.25;
-  --cs-opacity-30: 0.3;
-  --cs-opacity-40: 0.4;
-  --cs-opacity-50: 0.5;
-  --cs-opacity-60: 0.6;
-  --cs-opacity-70: 0.7;
-  --cs-opacity-75: 0.75;
-  --cs-opacity-80: 0.8;
-  --cs-opacity-90: 0.9;
-  --cs-opacity-95: 0.95;
-  --cs-opacity-100: 1;
-  
-  /* ═══════════════════════════════════════════════════════════════════════════
-   * TRANSITIONS
-   * ═══════════════════════════════════════════════════════════════════════════ */
-  
-  /* Duration */
-  --cs-duration-75: 75ms;
-  --cs-duration-100: 100ms;
-  --cs-duration-150: 150ms;
-  --cs-duration-200: 200ms;
-  --cs-duration-300: 300ms;
-  --cs-duration-500: 500ms;
-  --cs-duration-700: 700ms;
-  --cs-duration-1000: 1000ms;
-  
-  /* Easing */
-  --cs-ease-linear: linear;
-  --cs-ease-in: cubic-bezier(0.4, 0, 1, 1);
-  --cs-ease-out: cubic-bezier(0, 0, 0.2, 1);
-  --cs-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
-  --cs-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-  
-  /* ═══════════════════════════════════════════════════════════════════════════
-   * Z-INDEX
-   * ═══════════════════════════════════════════════════════════════════════════ */
-  
+  --cs-shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.40);
+  --cs-shadow-panel-lg: 0 16px 48px rgba(0, 0, 0, 0.50);
+  --cs-glow-sm: 0 0 10px rgba(67, 126, 252, 0.30);
+  --cs-glow-md: 0 0 20px rgba(67, 126, 252, 0.40);
+  --cs-glow-lg: 0 0 40px rgba(67, 126, 252, 0.50);
+
+  /* Motion */
+  --cs-motion-duration-75: 75ms;
+  --cs-motion-duration-100: 100ms;
+  --cs-motion-duration-150: 150ms;
+  --cs-motion-duration-200: 200ms;
+  --cs-motion-duration-300: 300ms;
+  --cs-motion-duration-500: 500ms;
+  --cs-motion-duration-700: 700ms;
+  --cs-motion-duration-1000: 1000ms;
+  --cs-motion-ease-linear: linear;
+  --cs-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --cs-motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --cs-motion-ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+  --cs-motion-ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  --cs-motion-standard-transition-properties: color, background-color, border-color, box-shadow, transform, opacity;
+  --cs-motion-standard-transition-duration: 200ms;
+  --cs-motion-standard-transition-easing: cubic-bezier(0, 0, 0.2, 1);
+
+  /* Z-index */
   --cs-z-base: 0;
   --cs-z-dropdown: 1000;
   --cs-z-sticky: 1100;
@@ -274,205 +199,449 @@
   --cs-z-tooltip: 1500;
   --cs-z-toast: 1600;
   --cs-z-max: 9999;
-  
-  /* ═══════════════════════════════════════════════════════════════════════════
-   * COMPONENT TOKENS (Semantic Aliases) - DARK THEME (Default)
-   * ═══════════════════════════════════════════════════════════════════════════ */
-  
-  /* === Surface Colors === */
+
+  /* Layout: desktop panel columns (for detail popup centering) */
+  --cs-left-panel-offset: 92px;
+  --cs-left-panel-width: 352px;
+  --cs-right-panel-width: 361px;
+  --cs-detail-panel-inset-left: calc(var(--cs-left-panel-offset) + var(--cs-left-panel-width));
+  --cs-detail-panel-inset-center: calc(
+    var(--cs-detail-panel-inset-left) +
+    (100vw - var(--cs-detail-panel-inset-left) - var(--cs-right-panel-width)) / 2
+  );
+  --cs-detail-panel-inset-max-width: min(
+    640px,
+    calc(100vw - var(--cs-detail-panel-inset-left) - var(--cs-right-panel-width) - 40px)
+  );
+
+  /* Layout: tablet — left column only (responsive / 769–1280px) */
+  --cs-tablet-left-panel-width: 340px;
+  --cs-detail-panel-tablet-left: calc(var(--cs-left-panel-offset) + var(--cs-tablet-left-panel-width));
+  --cs-detail-panel-tablet-center: calc(
+    var(--cs-detail-panel-tablet-left) + (100vw - var(--cs-detail-panel-tablet-left)) / 2
+  );
+  --cs-detail-panel-tablet-max-width: min(
+    640px,
+    calc(100vw - var(--cs-detail-panel-tablet-left) - 40px)
+  );
+
+  /* Component: Widget Container */
+  --cs-widget-container-background: rgba(30, 30, 30, 0.75);
+  --cs-widget-container-border: rgba(255, 255, 255, 0.06);
+  --cs-widget-container-border-hover: rgba(255, 255, 255, 0.12);
+  --cs-widget-container-blur: blur(10px);
+  --cs-widget-container-shadow: 0 4px 25px 0 rgba(0, 0, 0, 0.10);
+  --cs-widget-container-radius: var(--cs-radius-xl);
+  --cs-widget-container-padding: var(--cs-spacing-4);
+  --cs-widget-container-transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  /* Component: Button Default */
+  --cs-button-default-height: 36px;
+  --cs-button-default-padding: 0 16px;
+  --cs-button-default-radius: var(--cs-radius-md);
+  --cs-button-default-font-size: 14px;
+  --cs-button-default-font-weight: 500;
+  --cs-button-default-background: rgba(40, 40, 40, 0.80);
+  --cs-button-default-border: rgba(0, 0, 0, 0.15);
+  --cs-button-default-background-hover: rgba(255, 255, 255, 0.10);
+  --cs-button-default-focus-ring: rgba(59, 130, 246, 0.50);
+
+  /* Component: Button Primary (demo .btn-primary-action) */
+  --cs-button-primary-background: #3b82f6;
+  --cs-button-primary-background-hover: #2563eb;
+  --cs-button-primary-text-color: var(--cs-neutral-1000);
+  --cs-button-primary-radius: var(--cs-radius-md);
+  --cs-button-primary-height: 36px;
+
+  /* Component: Button Success (demo .btn-success-action) */
+  --cs-button-success-background: #16a34a;
+  --cs-button-success-background-hover: #15803d;
+
+  /* Component: Button Destructive (demo .btn-destructive) */
+  --cs-button-destructive-background: #f97316;
+  --cs-button-destructive-background-hover: #ea580c;
+
+  /* Component: Button Small */
+  --cs-button-sm-height: 32px;
+  --cs-button-sm-padding: 0 12px;
+  --cs-button-sm-font-size: 12px;
+
+  /* Component: Button Large */
+  --cs-button-lg-height: 40px;
+  --cs-button-lg-padding: 0 32px;
+
+  /* Component: Button Icon */
+  --cs-button-icon-height: 36px;
+  --cs-button-icon-width: 36px;
+  --cs-button-icon-radius: var(--cs-radius-md);
+
+  /* Component: Input */
+  --cs-input-height: 36px;
+  --cs-input-radius: var(--cs-radius-md);
+  --cs-input-padding: 0 12px;
+  --cs-input-background: var(--cs-neutral-200);
+  --cs-input-bg: var(--cs-input-background);
+  --cs-input-border: rgba(0, 0, 0, 0.15);
+  --cs-input-background-hover: rgba(255, 255, 255, 0.10);
+  --cs-input-border-focus: #3b82f6;
+  --cs-input-focus-ring: rgba(59, 130, 246, 0.50);
+
+  /* Component: Layer Card */
+  --cs-layer-card-background: rgba(255, 255, 255, 0.02);
+  --cs-layer-card-background-hover: rgba(255, 255, 255, 0.05);
+  --cs-layer-card-background-active: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(59,130,246,0.06));
+  --cs-layer-card-border: rgba(255, 255, 255, 0.08);
+  --cs-layer-card-border-hover: rgba(255, 255, 255, 0.12);
+  --cs-layer-card-border-active: rgba(59, 130, 246, 0.40);
+  --cs-layer-card-shadow-active: 0 0 20px rgba(59, 130, 246, 0.10);
+  --cs-layer-card-radius: var(--cs-radius-lg);
+  --cs-layer-card-padding: 14px;
+
+  /* Component: Feature Card */
+  --cs-feature-card-background: rgba(255, 255, 255, 0.04);
+  --cs-feature-card-border: rgba(255, 255, 255, 0.08);
+  --cs-feature-card-radius: var(--cs-radius-DEFAULT);
+  --cs-feature-card-padding: 12px;
+
+  /* Component: Metric Badge */
+  --cs-metric-badge-radius: var(--cs-radius-full);
+  --cs-metric-badge-padding: 4px 10px;
+  --cs-metric-badge-font-size: 11px;
+  --cs-metric-badge-font-weight: 600;
+  --cs-metric-badge-letter-spacing: 0.02em;
+  --cs-metric-badge-text-transform: uppercase;
+  --cs-metric-badge-success-background: var(--cs-success-bg);
+  --cs-metric-badge-success-text-color: #34d399;
+  --cs-metric-badge-warning-background: var(--cs-warning-bg);
+  --cs-metric-badge-warning-text-color: var(--cs-warning-text);
+  --cs-metric-badge-error-background: var(--cs-error-bg);
+  --cs-metric-badge-error-text-color: #f87171;
+  --cs-metric-badge-info-background: var(--cs-info-bg);
+  --cs-metric-badge-info-text-color: #60a5fa;
+
+  /* Component: Slider */
+  --cs-slider-track-height: 6px;
+  --cs-slider-track-background: rgba(63, 63, 63, 1);
+  --cs-slider-range-background: linear-gradient(to right, #3b82f6, #60a5fa);
+  --cs-slider-thumb-size: 16px;
+  --cs-slider-thumb-background: var(--cs-neutral-700);
+  --cs-slider-thumb-border: 2px solid #60a5fa;
+  --cs-slider-thumb-shadow: 0 0 10px rgba(59, 130, 246, 0.20);
+  --cs-slider-thumb-scale-hover: 1.10;
+  --cs-slider-thumb-scale-active: 0.95;
+
+  /* Component: Map Control */
+  --cs-map-control-size: 29px;
+  --cs-map-control-radius: var(--cs-radius-md);
+  --cs-map-control-background: rgba(30, 30, 30, 0.75);
+  --cs-map-control-border: rgba(255, 255, 255, 0.06);
+
+  /* Component: Sidebar */
+  --cs-sidebar-width-collapsed: var(--cs-spacing-sidebar-collapsed);
+  --cs-sidebar-width-expanded: var(--cs-spacing-sidebar-expanded);
+  --cs-sidebar-background: var(--cs-neutral-150);
+  --cs-sidebar-background-light: var(--cs-light-surface-base);
+
+  /* Component: Theme Toggle */
+  --cs-theme-toggle-width: 56px;
+  --cs-theme-toggle-height: 28px;
+  --cs-theme-toggle-radius: var(--cs-radius-full);
+  --cs-theme-toggle-knob-size: 24px;
+  --cs-theme-toggle-dark-knob-background: rgba(59, 130, 246, 0.20);
+  --cs-theme-toggle-dark-knob-border: rgba(59, 130, 246, 0.40);
+  --cs-theme-toggle-light-knob-background: #fef3c7;
+  --cs-theme-toggle-light-knob-border: #fde68a;
+  --cs-theme-toggle-transition-duration: var(--cs-motion-duration-300);
+
+  /* Component: Card (glass) */
+  --cs-card-background: color-mix(in srgb, var(--cs-surface-elevated) 50%, transparent);
+  --cs-card-border: var(--cs-border-default);
+  --cs-card-blur: blur(10px);
+  --cs-card-shadow: var(--cs-shadow-DEFAULT);
+  --cs-card-radius: var(--cs-radius-xl);
+
+  /* Component: Select trigger */
+  --cs-select-trigger-background: rgba(64, 64, 64, 1);
+
+  /* Component: Divider */
+  --cs-divider-color: rgba(255, 255, 255, 0.10);
+
+  /* Component: Switch */
+  --cs-switch-track-off: rgba(255, 255, 255, 0.10);
+  --cs-switch-track-on: #3b82f6;
+  --cs-switch-knob: #ffffff;
+
+  /* Component: Spinner / Progress */
+  --cs-spinner-color: #3b82f6;
+  --cs-progress-track: rgba(255, 255, 255, 0.10);
+  --cs-progress-bar: #3b82f6;
+
+  /* Tones - icon tiles, impact metrics, layer icons */
+  --cs-tone-sky-bg: rgba(14, 165, 233, 0.18);
+  --cs-tone-sky-text: #38bdf8;
+  --cs-tone-orange-bg: rgba(249, 115, 22, 0.18);
+  --cs-tone-orange-text: #fb923c;
+  --cs-tone-stone-bg: rgba(120, 113, 108, 0.20);
+  --cs-tone-stone-text: #a8a29e;
+  --cs-tone-violet-bg: rgba(139, 92, 246, 0.18);
+  --cs-tone-violet-text: #a78bfa;
+  --cs-tone-amber-bg: rgba(245, 158, 11, 0.18);
+  --cs-tone-amber-text: #fbbf24;
+  --cs-tone-emerald-bg: rgba(16, 185, 129, 0.18);
+  --cs-tone-emerald-text: #34d399;
+  --cs-tone-red-bg: rgba(239, 68, 68, 0.18);
+  --cs-tone-red-text: #f87171;
+  --cs-tone-blue-bg: rgba(59, 130, 246, 0.18);
+  --cs-tone-blue-text: #60a5fa;
+
+  /* Component: Callout */
+  --cs-callout-success-bg: rgba(16, 185, 129, 0.10);
+  --cs-callout-success-border: rgba(16, 185, 129, 0.30);
+  --cs-callout-success-title: #34d399;
+  --cs-callout-success-disc: #10b981;
+  --cs-callout-warning-bg: rgba(234, 179, 8, 0.10);
+  --cs-callout-warning-border: rgba(234, 179, 8, 0.30);
+  --cs-callout-warning-title: #fde047;
+  --cs-callout-warning-disc: #eab308;
+  --cs-callout-error-bg: rgba(239, 68, 68, 0.10);
+  --cs-callout-error-border: rgba(239, 68, 68, 0.30);
+  --cs-callout-error-title: #f87171;
+  --cs-callout-error-disc: #ef4444;
+  --cs-callout-info-bg: rgba(59, 130, 246, 0.10);
+  --cs-callout-info-border: rgba(59, 130, 246, 0.30);
+  --cs-callout-info-title: #60a5fa;
+  --cs-callout-info-disc: #3b82f6;
+
+  /* Component: Layer Status */
+  --cs-layer-status-loading-bg: rgba(59, 130, 246, 0.10);
+  --cs-layer-status-loading-border: rgba(59, 130, 246, 0.30);
+  --cs-layer-status-loading-title: #60a5fa;
+  --cs-layer-status-success-bg: rgba(16, 185, 129, 0.10);
+  --cs-layer-status-success-border: rgba(16, 185, 129, 0.30);
+  --cs-layer-status-success-title: #34d399;
+  --cs-layer-status-fallback-bg: rgba(251, 191, 36, 0.10);
+  --cs-layer-status-fallback-border: rgba(251, 191, 36, 0.30);
+  --cs-layer-status-fallback-title: #fbbf24;
+  --cs-layer-status-error-bg: rgba(239, 68, 68, 0.10);
+  --cs-layer-status-error-border: rgba(239, 68, 68, 0.30);
+  --cs-layer-status-error-title: #f87171;
+
+  /* Component: Legend */
+  --cs-legend-bar-border: rgba(255, 255, 255, 0.12);
+
+  /* Component: Error Overlay */
+  --cs-error-overlay-bg: rgba(127, 29, 29, 0.95);
+  --cs-error-overlay-border: #ef4444;
+  --cs-error-overlay-icon: #fca5a5;
+  --cs-error-overlay-block-bg: rgba(69, 10, 10, 0.50);
+  --cs-error-overlay-block-text: #fee2e2;
+
+  /* Component: Layer Card / Layer Row extras */
+  --cs-layer-card-blur: none;
+  --cs-layer-card-shadow: none;
+  --cs-layer-card-shadow-hover: none;
+
+  /* Component: Feature Card extras */
+  --cs-feature-card-blur: none;
+  --cs-feature-card-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.03);
+
+  /* Component: Accordion */
+  --cs-accordion-trigger-hover-bg: rgba(255, 255, 255, 0.04);
+  --cs-accordion-chevron-open-color: #60a5fa;
+
+  /* Component: Color Swatch */
+  --cs-swatch-chip-border: rgba(255, 255, 255, 0.20);
+
+  /* Data visualization gradients */
+  --cs-gradient-temp-anomaly: linear-gradient(to right, #ffffff, #fef9c3, #fde047, #facc15, #f59e0b, #fb923c, #f97316, #ea580c, #dc2626, #7f1d1d);
+  --cs-gradient-temp-actual: linear-gradient(to right, #1e3a8a, #3b82f6, #fef08a, #fb923c, #ef4444, #7f1d1d);
+  --cs-gradient-precip: linear-gradient(to right, #ffffff, #e3f2fd, #90caf9, #42a5f5, #1e88e5, #0d47a1);
+  --cs-gradient-precip-legend: linear-gradient(90deg, #F5ED53 0%, #F5F3CE 50%, #6B9AF3 75%, #2357D2 100%);
+  --cs-gradient-population: linear-gradient(to right, #dc2626 0%, #ef4444 10%, #f97316 20%, #eab308 30%, #a855f7 40%, #8b5cf6 50%, #3b82f6 60%, #0ea5e9 70%, #06b6d4 85%, #10b981 100%);
+  --cs-gradient-drought: linear-gradient(to right, #8b4513, #d2691e, #f4a460, #ffffff, #90ee90, #32cd32, #228b22);
+  --cs-gradient-soil: linear-gradient(to right, #8b4513, #daa520, #f0e68c, #adff2f, #7cfc00, #32cd32);
+
+  /* Semantic aliases (dark theme) */
   --cs-surface-base: var(--cs-neutral-100);
   --cs-surface-elevated: var(--cs-neutral-150);
-  --cs-surface-overlay: rgba(30, 30, 30, 0.85);
+  --cs-surface-overlay: rgba(30, 30, 30, 0.85); /* Adjusted from demo to match description */
   --cs-surface-sunken: var(--cs-neutral-50);
-  
-  /* === Text Colors === */
+
   --cs-text-primary: var(--cs-neutral-900);
   --cs-text-secondary: var(--cs-neutral-600);
   --cs-text-tertiary: var(--cs-neutral-500);
   --cs-text-disabled: var(--cs-neutral-400);
-  --cs-text-inverse: var(--cs-neutral-100);
-  
-  /* === Border Colors === */
+
   --cs-border-default: var(--cs-neutral-300);
-  --cs-border-muted: var(--cs-neutral-200);
+  --cs-border-muted: var(--cs-neutral-200); /* No direct equivalent, using neutral-200 as muted border */
   --cs-border-strong: var(--cs-neutral-400);
-  --cs-border-focus: var(--cs-brand-primary);
-  
-  /* === Interactive States === */
-  --cs-interactive-hover: rgba(255, 255, 255, 0.1);
+
+  --cs-interactive-hover: rgba(255, 255, 255, 0.10);
   --cs-interactive-active: rgba(255, 255, 255, 0.15);
   --cs-interactive-selected: var(--cs-brand-primary-muted);
-  --cs-interactive-disabled: var(--cs-opacity-50);
-  
-  /* ═══════════════════════════════════════════════════════════════════════════
-   * COMPONENT-SPECIFIC TOKENS
-   * ═══════════════════════════════════════════════════════════════════════════ */
-  
-  /* Widget/Panel */
-  --cs-widget-bg: var(--cs-surface-overlay);
-  --cs-widget-border: var(--cs-border-default);
-  --cs-widget-radius: var(--cs-radius-xl);
-  --cs-widget-padding: var(--cs-space-4);
-  --cs-widget-shadow: var(--cs-shadow-panel);
-  --cs-widget-blur: var(--cs-blur-md);
-  
-  /* Button */
-  --cs-btn-height-sm: 2rem;    /* 32px */
-  --cs-btn-height-md: 2.25rem; /* 36px */
-  --cs-btn-height-lg: 2.75rem; /* 44px */
-  --cs-btn-radius: var(--cs-radius-md);
-  --cs-btn-padding-x: var(--cs-space-4);
-  --cs-btn-font-size: var(--cs-text-sm);
-  --cs-btn-font-weight: var(--cs-font-medium);
-  
-  /* Input */
-  --cs-input-height: 2.25rem; /* 36px */
-  --cs-input-radius: var(--cs-radius-md);
-  --cs-input-padding-x: var(--cs-space-3);
-  --cs-input-bg: var(--cs-neutral-200);
-  --cs-input-border: var(--cs-border-default);
-  
-  /* Sidebar */
-  --cs-sidebar-width: 72px;
-  --cs-sidebar-width-expanded: 240px;
-  --cs-sidebar-bg: var(--cs-neutral-150);
-  
-  /* Map Controls */
-  --cs-map-control-size: 29px;
-  --cs-map-control-radius: var(--cs-radius-md);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
- * LIGHT THEME
- * ═══════════════════════════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  /* Colors - Light theme surface / text / border overrides (matches design-demo.html) */
+  --cs-light-surface-base: #f1f5f9;
+  --cs-light-surface-elevated: #ffffff;
+  --cs-light-surface-overlay: rgba(255, 255, 255, 0.6);
+  --cs-light-surface-sunken: #e2e8f0;
+  --cs-light-text-primary: #0f172a;
+  --cs-light-text-secondary: #475569;
+  --cs-light-text-tertiary: #64748b;
+  --cs-light-text-disabled: #94a3b8;
+  --cs-light-border-default: #ffffff;
+  --cs-light-border-muted: #f1f5f9;
+  --cs-light-border-strong: #cbd5e1;
 
-[data-theme="light"],
-.light {
-  /* === Surface Colors (Light) === */
-  --cs-surface-base: #f8fafc;
-  --cs-surface-elevated: #ffffff;
-  --cs-surface-overlay: rgba(255, 255, 255, 0.92);
-  --cs-surface-sunken: #f1f5f9;
-  
-  /* === Text Colors (Light) === */
-  --cs-text-primary: #0f172a;
-  --cs-text-secondary: #475569;
-  --cs-text-tertiary: #64748b;
-  --cs-text-disabled: #94a3b8;
-  --cs-text-inverse: #f8fafc;
-  
-  /* === Border Colors (Light) === */
-  --cs-border-default: #e2e8f0;
-  --cs-border-muted: #f1f5f9;
-  --cs-border-strong: #cbd5e1;
-  --cs-border-focus: var(--cs-brand-primary);
-  
-  /* === Interactive States (Light) === */
+  /* Semantic aliases (light theme) */
+  --cs-surface-base: var(--cs-light-surface-base);
+  --cs-surface-elevated: var(--cs-light-surface-elevated);
+  --cs-surface-overlay: var(--cs-light-surface-overlay);
+  --cs-surface-sunken: var(--cs-light-surface-sunken);
+
+  --cs-text-primary: var(--cs-light-text-primary);
+  --cs-text-secondary: var(--cs-light-text-secondary);
+  --cs-text-tertiary: var(--cs-light-text-tertiary);
+  --cs-text-disabled: var(--cs-light-text-disabled);
+
+  --cs-border-default: var(--cs-light-border-default);
+  --cs-border-strong: var(--cs-light-border-strong);
+  --cs-border-muted: var(--cs-light-border-muted);
+
   --cs-interactive-hover: rgba(0, 0, 0, 0.04);
   --cs-interactive-active: rgba(0, 0, 0, 0.08);
   --cs-interactive-selected: rgba(67, 126, 252, 0.12);
-  
-  /* === Widget/Panel (Light) === */
-  --cs-widget-bg: var(--cs-surface-overlay);
-  --cs-widget-border: var(--cs-border-default);
-  --cs-widget-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  
-  /* === Input (Light) === */
-  --cs-input-bg: #ffffff;
-  --cs-input-border: var(--cs-border-default);
-  
-  /* === Sidebar (Light) === */
-  --cs-sidebar-bg: #f8fafc;
-  
-  /* === Semantic Colors (Light - adjusted for readability) === */
+
   --cs-success-text: #059669;
-  --cs-success-bg: rgba(16, 185, 129, 0.1);
-  --cs-success-border: rgba(16, 185, 129, 0.25);
-  
   --cs-warning-text: #d97706;
-  --cs-warning-bg: rgba(245, 158, 11, 0.1);
-  --cs-warning-border: rgba(245, 158, 11, 0.25);
-  
   --cs-error-text: #dc2626;
-  --cs-error-bg: rgba(239, 68, 68, 0.1);
-  --cs-error-border: rgba(239, 68, 68, 0.25);
-  
   --cs-info-text: #2563eb;
-  --cs-info-bg: rgba(59, 130, 246, 0.1);
-  --cs-info-border: rgba(59, 130, 246, 0.25);
-  
-  /* === Shadows (Light - softer) === */
-  --cs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
-  --cs-shadow-DEFAULT: 0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
-  --cs-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.06), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
-  --cs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.06), 0 4px 6px -4px rgba(0, 0, 0, 0.06);
-  --cs-shadow-panel: 0 8px 32px rgba(0, 0, 0, 0.08);
-  
-  /* === Glow effects (Light - subtle) === */
+
+  /* Widget Container (light theme overrides) */
+  --cs-widget-container-background: rgba(255, 255, 255, 0.6);
+  --cs-widget-container-border: #ffffff;
+  --cs-widget-container-shadow: 0 10px 30px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.04);
+  --cs-widget-container-blur: blur(20px);
+
+  /* Shadows (light theme overrides) */
+  --cs-shadow-panel: 0 16px 48px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.04);
   --cs-glow-sm: 0 0 10px rgba(67, 126, 252, 0.15);
   --cs-glow-md: 0 0 20px rgba(67, 126, 252, 0.2);
-  --cs-glow-lg: 0 0 40px rgba(67, 126, 252, 0.25);
+
+  /* Card glass (light theme overrides) */
+  --cs-card-background: rgba(255, 255, 255, 0.6);
+  --cs-card-border: #ffffff;
+  --cs-card-blur: blur(20px);
+  --cs-card-shadow: 0 10px 30px rgba(15, 23, 42, 0.10), 0 2px 6px rgba(15, 23, 42, 0.04);
+
+  /* Form controls (light theme overrides) */
+  --cs-select-trigger-background: #ffffff;
+  --cs-divider-color: #e2e8f0;
+  --cs-switch-track-off: #cbd5e1;
+  --cs-progress-track: #e2e8f0;
+
+  /* Tones (light theme overrides) */
+  --cs-tone-sky-text: #0284c7;
+  --cs-tone-orange-text: #ea580c;
+  --cs-tone-stone-text: #57534e;
+  --cs-tone-violet-text: #7c3aed;
+  --cs-tone-amber-text: #b45309;
+  --cs-tone-emerald-text: #059669;
+  --cs-tone-red-text: #dc2626;
+  --cs-tone-blue-text: #2563eb;
+
+  /* Callout (light theme overrides) */
+  --cs-callout-success-bg: #ecfdf5;
+  --cs-callout-success-border: #a7f3d0;
+  --cs-callout-success-title: #047857;
+  --cs-callout-warning-bg: #fefce8;
+  --cs-callout-warning-border: #fef08a;
+  --cs-callout-warning-title: #a16207;
+  --cs-callout-error-bg: #fef2f2;
+  --cs-callout-error-border: #fecaca;
+  --cs-callout-error-title: #b91c1c;
+  --cs-callout-info-bg: #eff6ff;
+  --cs-callout-info-border: #bfdbfe;
+  --cs-callout-info-title: #1d4ed8;
+
+  /* Layer status (light theme overrides) */
+  --cs-layer-status-loading-bg: #eff6ff;
+  --cs-layer-status-loading-border: #bfdbfe;
+  --cs-layer-status-loading-title: #1d4ed8;
+  --cs-layer-status-success-bg: #ecfdf5;
+  --cs-layer-status-success-border: #a7f3d0;
+  --cs-layer-status-success-title: #047857;
+  --cs-layer-status-fallback-bg: #fefce8;
+  --cs-layer-status-fallback-border: #fef08a;
+  --cs-layer-status-fallback-title: #a16207;
+  --cs-layer-status-error-bg: #fef2f2;
+  --cs-layer-status-error-border: #fecaca;
+  --cs-layer-status-error-title: #b91c1c;
+
+  /* Legend (light theme overrides) */
+  --cs-legend-bar-border: #e2e8f0;
+
+  /* Metric badge (light theme overrides) */
+  --cs-metric-badge-success-text-color: #059669;
+  --cs-metric-badge-warning-text-color: #b45309;
+  --cs-metric-badge-error-text-color: #dc2626;
+  --cs-metric-badge-info-text-color: #2563eb;
+
+  /* Layer card / layer row (light theme overrides) */
+  --cs-layer-card-background: rgba(255, 255, 255, 0.55);
+  --cs-layer-card-background-hover: rgba(255, 255, 255, 0.75);
+  --cs-layer-card-background-active: rgba(239, 246, 255, 0.7);
+  --cs-layer-card-border: #ffffff;
+  --cs-layer-card-border-hover: #ffffff;
+  --cs-layer-card-border-active: #ffffff;
+  --cs-layer-card-shadow-active: 0 0 0 1px #3b82f6, 0 0 20px rgba(59, 130, 246, 0.20);
+  --cs-layer-card-blur: blur(16px);
+  --cs-layer-card-shadow: 0 4px 14px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --cs-layer-card-shadow-hover: 0 8px 20px rgba(15, 23, 42, 0.10), 0 1px 3px rgba(15, 23, 42, 0.05);
+
+  /* Feature card (light theme overrides) */
+  --cs-feature-card-background: rgba(255, 255, 255, 0.55);
+  --cs-feature-card-border: #ffffff;
+  --cs-feature-card-blur: blur(14px);
+  --cs-feature-card-shadow: 0 4px 12px rgba(15, 23, 42, 0.05), 0 1px 2px rgba(15, 23, 42, 0.03);
+
+  /* Form controls (light theme overrides) */
+  --cs-input-background: #ffffff;
+  --cs-slider-track-background: rgba(67, 126, 252, 0.25);
+
+  /* Accordion (light theme overrides) */
+  --cs-accordion-trigger-hover-bg: rgba(0, 0, 0, 0.03);
+  --cs-accordion-chevron-open-color: #2563eb;
+
+  /* Color swatch (light theme overrides) */
+  --cs-swatch-chip-border: #e2e8f0;
+
+  /* Gradients (light theme overrides) */
+  --cs-gradient-precip: linear-gradient(to right, #f1f5f9, #e3f2fd, #90caf9, #42a5f5, #1e88e5, #0d47a1);
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
- * UTILITY CLASSES
- * ═══════════════════════════════════════════════════════════════════════════ */
-
-/* Glass morphism effect */
-.cs-glass {
-  background: var(--cs-widget-bg);
-  backdrop-filter: blur(var(--cs-widget-blur));
-  -webkit-backdrop-filter: blur(var(--cs-widget-blur));
-  border: 1px solid var(--cs-widget-border);
-  box-shadow: var(--cs-widget-shadow);
+[data-theme="light"] body {
+  background:
+    radial-gradient(60% 50% at 80% -10%, rgba(67, 126, 252, .10), transparent 60%),
+    radial-gradient(50% 40% at 0% 30%,  rgba(168, 85, 247, .08), transparent 60%),
+    radial-gradient(70% 50% at 100% 80%, rgba(14, 165, 233, .08), transparent 60%),
+    var(--cs-surface-base);
+  background-attachment: fixed;
 }
 
-/* Glow effects */
-.cs-glow-primary {
-  box-shadow: var(--cs-glow-sm);
+/* Canvas surface for full-page views that set data-theme on themselves */
+.cs-canvas {
+  background: var(--cs-surface-base);
 }
 
-.cs-glow-primary-md {
-  box-shadow: var(--cs-glow-md);
+.cs-canvas[data-theme="light"],
+[data-theme="light"] .cs-canvas:not([data-theme="dark"]) {
+  background:
+    radial-gradient(60% 50% at 80% -10%, rgba(67, 126, 252, .10), transparent 60%),
+    radial-gradient(50% 40% at 0% 30%,  rgba(168, 85, 247, .08), transparent 60%),
+    radial-gradient(70% 50% at 100% 80%, rgba(14, 165, 233, .08), transparent 60%),
+    var(--cs-surface-base);
+  background-attachment: fixed;
 }
-
-/* Status indicators */
-.cs-status-success {
-  background: var(--cs-success-bg);
-  border-color: var(--cs-success-border);
-  color: var(--cs-success-text);
-}
-
-.cs-status-warning {
-  background: var(--cs-warning-bg);
-  border-color: var(--cs-warning-border);
-  color: var(--cs-warning-text);
-}
-
-.cs-status-error {
-  background: var(--cs-error-bg);
-  border-color: var(--cs-error-border);
-  color: var(--cs-error-text);
-}
-
-.cs-status-info {
-  background: var(--cs-info-bg);
-  border-color: var(--cs-info-border);
-  color: var(--cs-info-text);
-}
-
-/* Smooth transitions */
-.cs-transition {
-  transition-property: color, background-color, border-color, box-shadow, transform, opacity;
-  transition-timing-function: var(--cs-ease-out);
-  transition-duration: var(--cs-duration-200);
-}
-
-.cs-transition-fast {
-  transition-duration: var(--cs-duration-150);
-}
-
-.cs-transition-slow {
-  transition-duration: var(--cs-duration-300);
-}
-

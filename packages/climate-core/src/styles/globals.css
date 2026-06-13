@@ -1,51 +1,12 @@
 /* Shared Global Styles for Climate Suite Applications */
+@import "../../apps/climate-studio/src/design-system/tokens.css";
 
 :root {
-  --background: hsl(0 0% 8%);
-  --foreground: hsl(0 0% 95%);
-  --card: hsl(0 0% 12%);
-  --card-foreground: hsl(0 0% 95%);
-  --popover: hsl(0 0% 12%);
-  --popover-foreground: hsl(0 0% 95%);
-  --primary: hsl(264 100% 65%);
-  --primary-foreground: hsl(0 0% 98%);
-  --secondary: hsl(0 0% 18%);
-  --secondary-foreground: hsl(0 0% 95%);
-  --muted: hsl(0 0% 15%);
-  --muted-foreground: hsl(0 0% 65%);
-  --accent: hsl(0 0% 20%);
-  --accent-foreground: hsl(0 0% 95%);
-  --destructive: hsl(25 100% 60%);
-  --destructive-foreground: hsl(0 0% 98%);
-  --border: hsl(0 0% 25%);
-  --input: hsl(0 0% 18%);
-  --ring: hsl(264 100% 65%);
-  --chart-1: hsl(264 100% 65%);
-  --chart-2: hsl(162 100% 70%);
-  --chart-3: hsl(70 100% 75%);
-  --chart-4: hsl(304 100% 60%);
-  --chart-5: hsl(16 100% 65%);
-  --radius: 0.5rem;
-  --sidebar: hsl(0 0% 10%);
-  --sidebar-foreground: hsl(0 0% 95%);
-  --sidebar-primary: hsl(264 100% 65%);
-  --sidebar-primary-foreground: hsl(0 0% 98%);
-  --sidebar-accent: hsl(0 0% 18%);
-  --sidebar-accent-foreground: hsl(0 0% 95%);
-  --sidebar-border: hsl(0 0% 25%);
-  --sidebar-ring: hsl(264 100% 65%);
-  
-  /* Widget Container Variables - Global style for all widget panels */
-  --widget-bg: rgba(30, 30, 30, 0.85);
-  --widget-border: rgba(63, 63, 63, 1);
-  --widget-border-radius: 0.5rem;
-  --widget-padding: 1rem;
-  --widget-backdrop-blur: blur(12px);
+  /* No custom tokens here, all defined in tokens.css */
 }
-
 @layer base {
   * {
-    border-color: var(--border);
+    border-color: var(--cs-border-default);
   }
   
   html, body {
@@ -55,13 +16,21 @@
   }
   
   body {
-    background-color: var(--background);
-    color: var(--foreground);
+    font-family: var(--cs-font-sans);
+    background-color: var(--cs-surface-base);
+    color: var(--cs-text-primary);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
   }
   
   #root {
     height: 100%;
   }
+
+  h1, h2, h3, h4, p { margin: 0; }
+  code { font-family: var(--cs-font-mono); }
+  a { color: inherit; }
+  button { font: inherit; color: inherit; cursor: pointer; }
 }
 
 @layer utilities {
@@ -75,21 +44,23 @@
 
 /* Widget Container - Reusable style for all widget panels */
 .widget-container {
-  border-radius: var(--widget-border-radius);
-  border: 1px solid var(--widget-border);
-  background: var(--widget-bg);
-  backdrop-filter: var(--widget-backdrop-blur);
-  -webkit-backdrop-filter: var(--widget-backdrop-blur);
-  padding: var(--widget-padding);
+  border-radius: var(--cs-widget-container-radius);
+  border: 1px solid var(--cs-widget-container-border);
+  background: var(--cs-widget-container-background);
+  backdrop-filter: var(--cs-widget-container-blur);
+  -webkit-backdrop-filter: var(--cs-widget-container-blur);
+  padding: var(--cs-widget-container-padding);
+  box-shadow: var(--cs-widget-container-shadow);
+  transition: var(--cs-widget-container-transition);
 }
 
 /* Widget Container Variants */
 .widget-container-sm {
-  padding: calc(var(--widget-padding) * 0.5);
+  padding: calc(var(--cs-widget-container-padding) * 0.5);
 }
 
 .widget-container-lg {
-  padding: calc(var(--widget-padding) * 1.5);
+  padding: calc(var(--cs-widget-container-padding) * 1.5);
 }
 
 .widget-container-no-padding {
