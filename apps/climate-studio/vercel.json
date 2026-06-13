@@ -2,6 +2,12 @@
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "cd ../.. && npm install",
+  "build": {
+    "env": {
+      "VITE_ENABLE_LOCATION_DASHBOARD": "true",
+      "VITE_NODE_BACKEND_URL": "https://climate-studio-backend.onrender.com"
+    }
+  },
   "rewrites": [
     {
       "source": "/(.*)",
