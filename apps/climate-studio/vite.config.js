@@ -7,7 +7,7 @@ import tsconfigPaths from 'vite-tsconfig-paths'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export default defineConfig({
-  base: '/',
+  base: process.env.VITE_BASE_PATH || '/',
   cacheDir: process.env.VITE_CACHE_DIR || 'node_modules/.vite',
   plugins: [
     react(),

@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { createBrowserRouter, Navigate, Outlet, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { ClimateProvider } from '@climate-studio/core'
 import { SidebarProvider } from './contexts/SidebarContext'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -28,14 +28,11 @@ function AppProviders({ children }: { children: ReactNode }) {
 }
 
 function AppShell() {
-  return (
-    <AppLayout>
-      <Outlet />
-    </AppLayout>
-  )
+  return <AppLayout />
 }
 
-const router = createBrowserRouter([
+const router = createBrowserRouter(
+  [
   {
     path: '/grace-demo',
     element: (
@@ -61,7 +58,9 @@ const router = createBrowserRouter([
       { path: 'settings', element: <SettingsPage /> },
     ],
   },
-])
+],
+  { basename: import.meta.env.BASE_URL }
+)
 
 export default function App() {
   return <RouterProvider router={router} />
