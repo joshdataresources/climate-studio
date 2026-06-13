@@ -227,19 +227,9 @@ Cache keys: `"{layerId}:{JSON.stringify(params)}"`
 
 ### Vercel (Frontend)
 
-1. Set **Root Directory** in Vercel to: `apps/climate-studio`
-2. Configure environment variables in Vercel dashboard (or use the GitHub Actions workflow below)
-3. **Important:** `climate-studio.vercel.app` may be a different project. In Vercel → your `climate-studio` project → Settings → Domains, assign your production domain to the GitHub-connected project under `joshua-butlers-projects`.
+Pushes to `main` auto-deploy via the Vercel GitHub integration. In Vercel, set **Root Directory** to `apps/climate-studio`.
 
-**Environment variables** (Vercel dashboard → Settings → Environment Variables, Production):
-
-| Variable | Value |
-|----------|-------|
-| `VITE_ENABLE_LOCATION_DASHBOARD` | `true` |
-| `VITE_MAPBOX_ACCESS_TOKEN` | your Mapbox pk token |
-| `VITE_NODE_BACKEND_URL` | `https://climate-studio-backend.onrender.com` |
-
-**Optional — GitHub Actions deploy with synced secrets:** add repo secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` (from Vercel project Settings → General). The workflow `.github/workflows/vercel.yml` then builds with the same env as GitHub Pages and deploys to production. Consider disabling Vercel's native GitHub auto-deploy to avoid duplicate builds.
+`vercel.json` sets `VITE_ENABLE_LOCATION_DASHBOARD` and the Render backend URL at build time. Also add `VITE_MAPBOX_ACCESS_TOKEN` in Vercel → Settings → Environment Variables (Production) for the dashboard map background.
 
 Configuration (`apps/climate-studio/vercel.json`):
 ```json
