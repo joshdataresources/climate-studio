@@ -24,7 +24,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Waves, Droplets, CloudRain, Factory, MapPin, BarChart3, Mountain, TrendingUp, Loader2, GripVertical, X, Layers, ChevronDown, Save, Trash2, Bookmark, MoreHorizontal, Pencil, Zap, Building2, Users } from 'lucide-react'
 import { useLayer } from '../contexts/LayerContext'
 import { shouldShowClimateWidget } from '../config/layerDefinitions'
-import { BACKEND_BASE_URL } from '../config/backend'
+import { BACKEND_BASE_URL, resolveClimateTileUrl } from '../config/backend'
 import {
   DndContext,
   closestCenter,
@@ -73,6 +73,17 @@ import serviceAreasData from '../data/water-service-areas.json'
 // Use environment variable or fallback to the token
 const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1Ijoiam9zaHVhYmJ1dGxlciIsImEiOiJjbWcwNXpyNXUwYTdrMmtva2tiZ2NjcGxhIn0.Fc3d_CloJGiw9-BE4nI_Kw'
 mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
+
+const AQUIFER_LAYER_IDS = ['aquifer-fill', 'aquifer-outline', 'aquifer-hover'] as const
+
+function setAquiferLayersVisibility(map: mapboxgl.Map, visible: boolean) {
+  const visibility = visible ? 'visible' : 'none'
+  AQUIFER_LAYER_IDS.forEach((layerId) => {
+    if (map.getLayer(layerId)) {
+      map.setLayoutProperty(layerId, 'visibility', visibility)
+    }
+  })
+}
 
 // Helper: create a StyleImageInterface for Mapbox GL v3 symbol layers
 function createIconImage(size: number, draw: (ctx: CanvasRenderingContext2D, s: number) => void): { width: number; height: number; data: Uint8ClampedArray } {
@@ -609,6 +620,7 @@ export default function WaterAccessView() {
   const isMountedRef = useRef(true)
   const selectedFeatureIdRef = useRef<string | number | null>(null) // Ref to track selection in event handlers
   const aquiferDataRef = useRef<GeoJSON.FeatureCollection | null>(null) // Ref to persist aquifer data across style changes
+  const showAquifersLayerRef = useRef(false)
   const manageLayersDropdownRef = useRef<HTMLDivElement>(null)
   const [, forceUpdate] = useState(0) // Force re-render when map moves to update marker positions
 
@@ -659,6 +671,7 @@ export default function WaterAccessView() {
     metroYear?: number
   } | null>(null)
   const [mapLoaded, setMapLoaded] = useState(false)
+  const [mapStyleEpoch, setMapStyleEpoch] = useState(0)
   const [aquiferData, setAquiferData] = useState<GeoJSON.FeatureCollection | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [aquiferCount, setAquiferCount] = useState(0)
@@ -718,6 +731,9 @@ export default function WaterAccessView() {
   const [showRiversLayer, setShowRiversLayer] = useState(true) // Default ON
   const [showCanalsLayer, setShowCanalsLayer] = useState(true) // Default ON - shows water infrastructure risk
   const [showAquifersLayer, setShowAquifersLayer] = useState(false)
+  useEffect(() => {
+    showAquifersLayerRef.current = showAquifersLayer
+  }, [showAquifersLayer])
   const [showDamsLayer, setShowDamsLayer] = useState(true) // Default ON - shows dam infrastructure
   const [showMetroHumidityLayer, setShowMetroHumidityLayer] = useState(true) // Default ON
   const [showGroundwaterLayer, setShowGroundwaterLayer] = useState(false)
@@ -799,17 +815,12 @@ export default function WaterAccessView() {
 
   // Initialize default climate layers on mount (run only once)
   useEffect(() => {
-    // Enable Wet Bulb Temperature and Future Temperature Anomaly by default
-    const timer = setTimeout(() => {
-      if (!isLayerActive('wet_bulb')) {
-        toggleLayer('wet_bulb')
-      }
-      if (!isLayerActive('temperature_projection')) {
-        toggleLayer('temperature_projection')
-      }
-    }, 100)
-
-    return () => clearTimeout(timer)
+    if (!isLayerActive('wet_bulb')) {
+      toggleLayer('wet_bulb')
+    }
+    if (!isLayerActive('temperature_projection')) {
+      toggleLayer('temperature_projection')
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -898,8 +909,7 @@ export default function WaterAccessView() {
   useEffect(() => {
     const fetchGRACETileUrl = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:8081'
-        const response = await fetch(`${apiUrl}/api/climate/groundwater/tiles`)
+        const response = await fetch(`${BACKEND_BASE_URL}/api/climate/groundwater/tiles`)
 
         if (response.ok) {
           const data = await response.json()
@@ -1212,6 +1222,9 @@ export default function WaterAccessView() {
           id: 'aquifer-fill',
           type: 'fill',
           source: 'aquifers',
+          layout: {
+            visibility: showAquifersLayerRef.current ? 'visible' : 'none',
+          },
           paint: {
             // Use solid fill color based on fillColor property
             'fill-color': ['coalesce', ['get', 'fillColor'], '#6366f1'],
@@ -1238,6 +1251,9 @@ export default function WaterAccessView() {
           id: 'aquifer-outline',
           type: 'line',
           source: 'aquifers',
+          layout: {
+            visibility: showAquifersLayerRef.current ? 'visible' : 'none',
+          },
           paint: {
             'line-color': [
               'case',
@@ -1262,6 +1278,9 @@ export default function WaterAccessView() {
           id: 'aquifer-hover',
           type: 'line',
           source: 'aquifers',
+          layout: {
+            visibility: showAquifersLayerRef.current ? 'visible' : 'none',
+          },
           paint: {
             'line-color': [
               'case',
@@ -1930,6 +1949,8 @@ export default function WaterAccessView() {
       // See useEffect below that handles precipitation_drought layer
       // It will be inserted after aquifers using 'aquifer-hover' as beforeId
 
+      setAquiferLayersVisibility(map, showAquifersLayerRef.current)
+
       if (isMountedRef.current && !force) {
         setMapLoaded(true)
       }
@@ -2010,6 +2031,9 @@ export default function WaterAccessView() {
 
     map.on('load', () => {
       setupMapLayers(map)
+      setAquiferLayersVisibility(map, showAquifersLayerRef.current)
+
+      if (!showAquifersLayerRef.current) return
 
       const bounds = map.getBounds()
       const ne = bounds.getNorthEast()
@@ -2041,6 +2065,8 @@ export default function WaterAccessView() {
           west: sw.lng - padding,
           zoom: map.getZoom()
         })
+
+        if (!showAquifersLayerRef.current) return
 
         fetchAquiferData({
           north: ne.lat + padding,
@@ -2532,6 +2558,8 @@ export default function WaterAccessView() {
         // Force re-setup the layers
         const layersReady = setupMapLayers(map, true)
         console.log('✅ Layers setup result:', layersReady)
+        setAquiferLayersVisibility(map, showAquifersLayerRef.current)
+        setMapStyleEpoch((epoch) => epoch + 1)
 
         if (currentAquiferData && currentAquiferData.features && currentAquiferData.features.length > 0) {
           // Try to add data with retry
@@ -2845,18 +2873,25 @@ export default function WaterAccessView() {
   // Toggle aquifer layers visibility (independent layer)
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return
+    setAquiferLayersVisibility(mapRef.current, showAquifersLayer)
+  }, [showAquifersLayer, mapLoaded])
+
+  // Load aquifer data when the layer is first enabled
+  useEffect(() => {
+    if (!showAquifersLayer || !mapRef.current || !mapLoaded) return
 
     const map = mapRef.current
-    const visibility = showAquifersLayer ? 'visible' : 'none'
-
-    const aquiferLayerIds = ['aquifer-fill', 'aquifer-outline', 'aquifer-hover']
-
-    aquiferLayerIds.forEach(layerId => {
-      if (map.getLayer(layerId)) {
-        map.setLayoutProperty(layerId, 'visibility', visibility)
-      }
+    const bounds = map.getBounds()
+    const ne = bounds.getNorthEast()
+    const sw = bounds.getSouthWest()
+    const padding = 5.0
+    fetchAquiferData({
+      north: ne.lat + padding,
+      south: sw.lat - padding,
+      east: ne.lng + padding,
+      west: sw.lng - padding,
     })
-  }, [showAquifersLayer, mapLoaded])
+  }, [showAquifersLayer, mapLoaded, fetchAquiferData])
 
   // Toggle dams layer visibility
   useEffect(() => {
@@ -3032,16 +3067,21 @@ export default function WaterAccessView() {
       }
 
       const rawTileUrl = data.tile_url
-      const nodeBackendBase = BACKEND_BASE_URL
-      const tileUrl = rawTileUrl.startsWith('/') ? `${nodeBackendBase}${rawTileUrl}` : rawTileUrl
+      const tileUrl = resolveClimateTileUrl(rawTileUrl)
 
       if (!map.getSource('temperature-tiles')) {
-        console.log('🌡️ Adding temperature projection tile source...')
+        console.log('🌡️ Adding temperature projection tile source...', tileUrl)
         map.addSource('temperature-tiles', {
           type: 'raster',
           tiles: [tileUrl],
           tileSize: 256
         })
+      } else {
+        const source = map.getSource('temperature-tiles') as mapboxgl.RasterTileSource
+        if (source && (source as any).tiles?.[0] !== tileUrl) {
+          console.log('🔄 Updating temperature tile URL...', tileUrl)
+          ;(source as any).setTiles([tileUrl])
+        }
       }
 
       if (!map.getLayer('temperature-layer')) {
@@ -3084,7 +3124,8 @@ export default function WaterAccessView() {
     }
 
     return () => {
-      // Cleanup on unmount
+      // Only tear down when the layer is deactivated — not on every control/style refresh
+      if (isTemperatureProjectionActive) return
       if (!map || map._removed) return
 
       try {
@@ -3098,7 +3139,7 @@ export default function WaterAccessView() {
         console.log('Map already removed during temperature layer cleanup')
       }
     }
-  }, [isTemperatureProjectionActive, temperatureProjectionData, mapLoaded, controls.projectionOpacity])
+  }, [isTemperatureProjectionActive, temperatureProjectionData, mapLoaded, controls.projectionOpacity, mapStyleEpoch])
 
   // Backstop: Monitor temperature projection status and retry on prolonged loading/error
   useEffect(() => {
@@ -3969,8 +4010,7 @@ export default function WaterAccessView() {
       }
 
       const rawPrecipTileUrl = precipitationDroughtData.tile_url
-      const precipBackendBase = BACKEND_BASE_URL
-      const tileUrl = rawPrecipTileUrl.startsWith('/') ? `${precipBackendBase}${rawPrecipTileUrl}` : rawPrecipTileUrl
+      const tileUrl = resolveClimateTileUrl(rawPrecipTileUrl)
 
       // Add or update source
       if (!map.getSource(sourceId)) {
@@ -4049,7 +4089,7 @@ export default function WaterAccessView() {
         map.removeSource(sourceId)
       }
     }
-  }, [isPrecipitationDroughtActive, precipitationDroughtData, mapLoaded, controls.droughtOpacity])
+  }, [isPrecipitationDroughtActive, precipitationDroughtData, mapLoaded, controls.droughtOpacity, mapStyleEpoch])
 
   // Backstop: Monitor precipitation drought status and retry on prolonged loading/error
   useEffect(() => {
