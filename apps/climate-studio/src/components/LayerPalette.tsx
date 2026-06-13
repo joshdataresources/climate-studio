@@ -29,7 +29,7 @@ export function LayerPalette({ className = '' }: LayerPaletteProps) {
   )
 
   // State for showing/hiding source attribution
-  const [showSources, setShowSources] = useState(true)
+  const [showSources, setShowSources] = useState(false)
 
   // State for select all checkbox
   const [selectAll, setSelectAll] = useState(false)

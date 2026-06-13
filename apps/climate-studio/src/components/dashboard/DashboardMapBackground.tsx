@@ -8,8 +8,6 @@ import { useClimateLayerData } from '../../hooks/useClimateLayerData'
 import { resolveClimateTileUrl } from '../../config/backend'
 import { destroyMap, isMapUsable, safeGetLayer, safeRemoveLayer, safeRemoveSource } from '../../utils/mapboxHelpers'
 
-const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
-
 const TEMP_SOURCE_ID = 'dashboard-temperature-tiles'
 const TEMP_LAYER_ID = 'dashboard-temperature-layer'
 
@@ -19,7 +17,15 @@ const MAP_MAX_BOUNDS: mapboxgl.LngLatBoundsLike = [
   [-60, 55],
 ]
 
-if (MAPBOX_ACCESS_TOKEN) {
+/** Match Climate Suite — env var in CI, otherwise same public pk fallback. */
+async function ensureMapboxToken(): Promise<void> {
+  if (mapboxgl.accessToken) return
+  const fromEnv = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
+  if (fromEnv) {
+    mapboxgl.accessToken = fromEnv
+    return
+  }
+  const { MAPBOX_ACCESS_TOKEN } = await import('../WaterAccessView')
   mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
 }
 
@@ -116,38 +122,46 @@ export function DashboardMapBackground() {
   }, [])
 
   useEffect(() => {
-    if (!MAPBOX_ACCESS_TOKEN || !containerRef.current || mapRef.current) return
+    if (!containerRef.current || mapRef.current) return
 
-    const map = new mapboxgl.Map({
-      container: containerRef.current,
-      style: isDark
-        ? 'mapbox://styles/mapbox/dark-v11'
-        : 'mapbox://styles/mapbox/light-v11',
-      center: [viewport.center.lng, viewport.center.lat],
-      zoom: viewport.zoom,
-      maxBounds: MAP_MAX_BOUNDS,
-      minZoom: 3,
-      interactive: false,
-      attributionControl: false,
-      logoPosition: 'bottom-left',
+    let cancelled = false
+    let resizeObserver: ResizeObserver | null = null
+
+    void ensureMapboxToken().then(() => {
+      if (cancelled || !containerRef.current || mapRef.current) return
+
+      const map = new mapboxgl.Map({
+        container: containerRef.current,
+        style: isDark
+          ? 'mapbox://styles/mapbox/dark-v11'
+          : 'mapbox://styles/mapbox/light-v11',
+        center: [viewport.center.lng, viewport.center.lat],
+        zoom: viewport.zoom,
+        maxBounds: MAP_MAX_BOUNDS,
+        minZoom: 3,
+        interactive: false,
+        attributionControl: false,
+        logoPosition: 'bottom-left',
+      })
+
+      mapRef.current = map
+
+      map.on('load', () => {
+        setMapLoaded(true)
+        map.resize()
+      })
+
+      resizeObserver = new ResizeObserver(() => {
+        if (mapRef.current && !mapRef.current._removed) {
+          mapRef.current.resize()
+        }
+      })
+      resizeObserver.observe(containerRef.current)
     })
-
-    mapRef.current = map
-
-    map.on('load', () => {
-      setMapLoaded(true)
-      map.resize()
-    })
-
-    const resizeObserver = new ResizeObserver(() => {
-      if (mapRef.current && !mapRef.current._removed) {
-        mapRef.current.resize()
-      }
-    })
-    resizeObserver.observe(containerRef.current)
 
     return () => {
-      resizeObserver.disconnect()
+      cancelled = true
+      resizeObserver?.disconnect()
       const mapInstance = mapRef.current
       mapRef.current = null
       setMapLoaded(false)
@@ -233,8 +247,6 @@ export function DashboardMapBackground() {
       }
     }
   }, [])
-
-  if (!MAPBOX_ACCESS_TOKEN) return null
 
   return (
     <div

@@ -71,8 +71,11 @@ import enhancedInfrastructureData from '../data/enhanced-water-infrastructure.js
 // Import water service area cities
 import serviceAreasData from '../data/water-service-areas.json'
 
-// Use environment variable or fallback to the token
-const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1Ijoiam9zaHVhYmJ1dGxlciIsImEiOiJjbWcwNXpyNXUwYTdrMmtva2tiZ2NjcGxhIn0.Fc3d_CloJGiw9-BE4nI_Kw'
+/** Shared with DashboardMapBackground — same token as Climate Suite map. */
+export const MAPBOX_ACCESS_TOKEN =
+  import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ||
+  'pk.eyJ1Ijoiam9zaHVhYmJ1dGxlciIsImEiOiJjbWcwNXpyNXUwYTdrMmtva2tiZ2NjcGxhIn0.Fc3d_CloJGiw9-BE4nI_Kw'
+
 mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
 
 const AQUIFER_LAYER_IDS = ['aquifer-fill', 'aquifer-outline', 'aquifer-hover'] as const
@@ -803,7 +806,7 @@ export default function WaterAccessView() {
 
   // Climate Suite panel controls
   const [showManageLayersDropdown, setShowManageLayersDropdown] = useState(false)
-  const [showSourceInfo, setShowSourceInfo] = useState(true)
+  const [showSourceInfo, setShowSourceInfo] = useState(false)
   const [selectAllLayers, setSelectAllLayers] = useState(true)
 
   // Close Manage Layers dropdown when clicking outside
