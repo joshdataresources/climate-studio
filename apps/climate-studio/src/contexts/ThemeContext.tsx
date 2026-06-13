@@ -1,6 +1,10 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
-
-type Theme = 'dark' | 'light'
+import {
+  type Theme,
+  THEME_STORAGE_KEY,
+  resolveInitialTheme,
+  applyThemeToDocument,
+} from '../utils/themeStorage'
 
 interface ThemeContextType {
   theme: Theme
@@ -11,29 +15,11 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    // Check localStorage first, then system preference
-    const stored = localStorage.getItem('cs-theme') as Theme | null
-    if (stored) return stored
+  const [theme, setThemeState] = useState<Theme>(resolveInitialTheme)
 
-    return 'dark'
-  })
-  
   useEffect(() => {
-    // Save to localStorage
-    localStorage.setItem('cs-theme', theme)
-    
-    // Update document attribute for CSS
-    document.documentElement.setAttribute('data-theme', theme)
-    
-    // Update body classes for Tailwind
-    if (theme === 'light') {
-      document.documentElement.classList.add('light')
-      document.documentElement.classList.remove('dark')
-    } else {
-      document.documentElement.classList.add('dark')
-      document.documentElement.classList.remove('light')
-    }
+    localStorage.setItem(THEME_STORAGE_KEY, theme)
+    applyThemeToDocument(theme)
   }, [theme])
   
   const toggleTheme = () => {

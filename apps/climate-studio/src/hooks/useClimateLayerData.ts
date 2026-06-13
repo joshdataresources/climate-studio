@@ -4,7 +4,7 @@ import { useClimate } from "@climate-studio/core";
 import { LatLngBoundsLiteral } from '../types/geography';
 import { layerStatusMonitor } from '../agents/LayerStatusMonitor';
 import { climateLayerReliability } from '../services/climateLayerReliability';
-import { BACKEND_BASE_URL } from '../config/backend';
+import { getBackendBaseUrl, resolveClimateTileUrl } from '../config/backend';
 
 const buildQueryString = (params: Record<string, string | number | boolean>) => {
   const search = new URLSearchParams();
@@ -203,13 +203,14 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
 
       try {
         const queryString = buildQueryString(params);
-        const url = `${BACKEND_BASE_URL}${layer.fetch.route}${queryString ? `?${queryString}` : ''}`;
+        const backendBase = getBackendBaseUrl();
+        const url = `${backendBase}${layer.fetch.route}${queryString ? `?${queryString}` : ''}`;
 
         console.log('='.repeat(80));
         console.log(`🌊 Fetching ${layerId} (${layer.title})`);
         console.log(`🔗 Full URL: ${url}`);
         console.log(`📦 Query params:`, params);
-        console.log(`⚙️ Backend: ${BACKEND_BASE_URL}`);
+        console.log(`⚙️ Backend: ${backendBase}`);
         console.log(`🛣️ Route: ${layer.fetch.route}`);
         console.log('='.repeat(80));
 
@@ -578,7 +579,7 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       // Reset circuit breaker for this layer to allow retry
       const layer = getClimateLayer(layerId);
       if (layer?.fetch.route) {
-        const url = `${BACKEND_BASE_URL}${layer.fetch.route}`;
+        const url = `${getBackendBaseUrl()}${layer.fetch.route}`;
         climateLayerReliability.resetCircuitBreaker(layerId, url);
       }
       

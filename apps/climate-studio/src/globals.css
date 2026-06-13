@@ -132,7 +132,9 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: var(--cs-canvas-mesh), var(--cs-surface-base);
+    background-attachment: fixed;
   }
 
   #root {
@@ -156,23 +158,21 @@
 .widget-container {
   position: relative;
   /* Required for backdrop-filter to work properly */
-  border-radius: var(--widget-border-radius);
-  border: 1px solid var(--widget-border);
-  background: var(--widget-bg);
-  -webkit-backdrop-filter: var(--widget-backdrop-blur);
-  backdrop-filter: var(--widget-backdrop-blur);
-  padding: var(--widget-padding);
-  box-shadow: var(--widget-box-shadow);
+  border-radius: var(--cs-widget-container-radius, var(--widget-border-radius));
+  border: 1px solid var(--cs-widget-container-border, var(--widget-border));
+  background: var(--cs-widget-container-background, var(--widget-bg));
+  -webkit-backdrop-filter: var(--cs-widget-container-blur, var(--widget-backdrop-blur));
+  backdrop-filter: var(--cs-widget-container-blur, var(--widget-backdrop-blur));
+  padding: var(--cs-widget-container-padding, var(--widget-padding));
+  box-shadow: var(--cs-widget-container-shadow, var(--widget-box-shadow));
   transform: translateZ(0);
   /* Smooth transitions for interactive states */
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease;
+  transition: var(--cs-widget-container-transition, border-color 0.2s ease, box-shadow 0.2s ease);
 }
 
 /* Enhanced hover state for interactive widgets */
 .widget-container:hover {
-  border-color: rgba(255, 255, 255, 0.12);
+  border-color: var(--cs-widget-container-border-hover, rgba(255, 255, 255, 0.12));
 }
 
 /* Widget Container Variants */
@@ -204,17 +204,40 @@
   letter-spacing: -0.01em;
 }
 
+.cs-h2 {
+  font-size: var(--cs-text-h2-font-size);
+  font-weight: var(--cs-text-h2-font-weight);
+  line-height: var(--cs-text-h2-line-height);
+  letter-spacing: -0.01em;
+  color: var(--cs-text-primary);
+}
+
 /* Dashboard page — full width beside sidebar, scroll without clipping widget shadows */
 .dashboard-page {
-  background: var(--cs-surface-base);
+  background: transparent;
   color: var(--cs-text-primary);
   height: 100%;
   width: 100%;
   overflow-x: hidden;
   overflow-y: auto;
+  position: relative;
+}
+
+.dashboard-map-background {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.dashboard-map-background .mapboxgl-ctrl-bottom-left,
+.dashboard-map-background .mapboxgl-ctrl-bottom-right {
+  display: none;
 }
 
 .dashboard-page-inner {
+  position: relative;
+  z-index: 1;
   width: 100%;
   min-height: 100%;
   box-sizing: border-box;
@@ -243,16 +266,6 @@
 .dashboard-tabs-list {
   gap: 8px;
   padding: 8px;
-}
-
-[data-theme="light"] .dashboard-page,
-.light .dashboard-page {
-  background:
-    radial-gradient(60% 50% at 80% -10%, rgba(67, 126, 252, 0.1), transparent 60%),
-    radial-gradient(50% 40% at 0% 30%, rgba(168, 85, 247, 0.08), transparent 60%),
-    radial-gradient(70% 50% at 100% 80%, rgba(14, 165, 233, 0.08), transparent 60%),
-    var(--cs-surface-base);
-  background-attachment: fixed;
 }
 
 /* Widget content sections */

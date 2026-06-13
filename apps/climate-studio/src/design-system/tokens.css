@@ -479,6 +479,25 @@
   --cs-interactive-hover: rgba(255, 255, 255, 0.10);
   --cs-interactive-active: rgba(255, 255, 255, 0.15);
   --cs-interactive-selected: var(--cs-brand-primary-muted);
+
+  /* Ambient canvas mesh — warm anomaly-toned base (matches temp layer palette) */
+  --cs-canvas-mesh:
+    radial-gradient(ellipse 80% 60% at 82% -8%, rgba(251, 191, 36, 0.09), transparent 62%),
+    radial-gradient(ellipse 65% 50% at -2% 32%, rgba(251, 146, 60, 0.07), transparent 58%),
+    radial-gradient(ellipse 72% 52% at 102% 78%, rgba(254, 249, 195, 0.06), transparent 60%),
+    radial-gradient(ellipse 55% 42% at 48% 102%, rgba(245, 158, 11, 0.05), transparent 55%);
+
+  /* Animated atmosphere — ~60% wash parity with default temp-anomaly layer opacity */
+  --cs-atmosphere-layer-a:
+    radial-gradient(ellipse 82% 68% at 88% -4%, rgba(254, 249, 195, 0.14), transparent 62%),
+    radial-gradient(ellipse 68% 56% at 0% 38%, rgba(250, 204, 21, 0.11), transparent 58%),
+    radial-gradient(ellipse 74% 58% at 100% 72%, rgba(251, 146, 60, 0.10), transparent 60%),
+    radial-gradient(ellipse 58% 46% at 44% 102%, rgba(245, 158, 11, 0.08), transparent 56%);
+  --cs-atmosphere-layer-b:
+    radial-gradient(ellipse 52% 44% at 64% 44%, rgba(249, 115, 22, 0.09), transparent 62%),
+    radial-gradient(ellipse 46% 40% at 16% 66%, rgba(253, 224, 71, 0.08), transparent 58%);
+  --cs-atmosphere-opacity-min: 0.52;
+  --cs-atmosphere-opacity-max: 0.72;
 }
 
 [data-theme="light"] {
@@ -620,28 +639,26 @@
 
   /* Gradients (light theme overrides) */
   --cs-gradient-precip: linear-gradient(to right, #f1f5f9, #e3f2fd, #90caf9, #42a5f5, #1e88e5, #0d47a1);
+
+  --cs-canvas-mesh:
+    radial-gradient(60% 50% at 80% -10%, rgba(67, 126, 252, .10), transparent 60%),
+    radial-gradient(50% 40% at 0% 30%, rgba(168, 85, 247, .08), transparent 60%),
+    radial-gradient(70% 50% at 100% 80%, rgba(14, 165, 233, .08), transparent 60%);
+}
+
+:root body,
+[data-theme="dark"] body {
+  background: var(--cs-canvas-mesh), var(--cs-surface-base);
+  background-attachment: fixed;
 }
 
 [data-theme="light"] body {
-  background:
-    radial-gradient(60% 50% at 80% -10%, rgba(67, 126, 252, .10), transparent 60%),
-    radial-gradient(50% 40% at 0% 30%,  rgba(168, 85, 247, .08), transparent 60%),
-    radial-gradient(70% 50% at 100% 80%, rgba(14, 165, 233, .08), transparent 60%),
-    var(--cs-surface-base);
+  background: var(--cs-canvas-mesh), var(--cs-surface-base);
   background-attachment: fixed;
 }
 
 /* Canvas surface for full-page views that set data-theme on themselves */
 .cs-canvas {
-  background: var(--cs-surface-base);
-}
-
-.cs-canvas[data-theme="light"],
-[data-theme="light"] .cs-canvas:not([data-theme="dark"]) {
-  background:
-    radial-gradient(60% 50% at 80% -10%, rgba(67, 126, 252, .10), transparent 60%),
-    radial-gradient(50% 40% at 0% 30%,  rgba(168, 85, 247, .08), transparent 60%),
-    radial-gradient(70% 50% at 100% 80%, rgba(14, 165, 233, .08), transparent 60%),
-    var(--cs-surface-base);
+  background: var(--cs-canvas-mesh), var(--cs-surface-base);
   background-attachment: fixed;
 }

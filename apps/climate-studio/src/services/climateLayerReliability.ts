@@ -312,11 +312,11 @@ export class ClimateLayerReliabilityService {
    */
   async checkBackendHealth(): Promise<HealthCheckResult> {
     const startTime = Date.now();
-    const healthUrl = `${this.backendBaseUrl}/health`;
+    const healthUrl = `${this.backendBaseUrl}/api/climate/status`;
 
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 25000);
 
       const response = await fetch(healthUrl, {
         signal: controller.signal,
@@ -336,6 +336,8 @@ export class ClimateLayerReliabilityService {
 
       if (response.ok) {
         console.log(`✅ Backend health check passed (${latency}ms)`);
+        // Clear stale circuit breakers after a successful reconnect
+        this.circuitBreakers.clear();
       } else {
         console.warn(`⚠️ Backend health check failed: ${response.status}`);
         result.error = `HTTP ${response.status}`;
@@ -432,7 +434,7 @@ export class ClimateLayerReliabilityService {
   }
 }
 
-import { BACKEND_BASE_URL } from '../config/backend';
+import { getBackendBaseUrl } from '../config/backend';
 
-export const climateLayerReliability = new ClimateLayerReliabilityService(BACKEND_BASE_URL);
+export const climateLayerReliability = new ClimateLayerReliabilityService(getBackendBaseUrl());
 

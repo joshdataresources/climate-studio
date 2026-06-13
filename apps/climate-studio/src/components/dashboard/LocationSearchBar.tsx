@@ -1,18 +1,20 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Search, Loader2, MapPin } from 'lucide-react'
+import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
+import { ChevronDown, Plus } from 'lucide-react'
+import { Button } from '../ui/button'
 import { Input } from '../ui/input'
-import { resolveNearestMetro, resolveMetroByName, type MetroMatch } from '../../utils/metroResolver'
+import {
+  getAllSupportedMetros,
+  SUPPORTED_METRO_COUNT,
+  type MetroMatch,
+} from '../../utils/metroResolver'
 import { cn } from '../../lib/utils'
-
-export interface GeoSearchResult {
-  display_name: string
-  lat: string
-  lon: string
-}
 
 export interface LocationSelection {
   metroKey: string
   metroName: string
+  lat: number
+  lon: number
   searchLabel?: string
   distanceKm?: number
 }
@@ -23,164 +25,259 @@ interface LocationSearchBarProps {
   className?: string
 }
 
+const ALL_METROS = getAllSupportedMetros()
+
+interface DropdownPosition {
+  top: number
+  left: number
+  width: number
+}
+
+function matchToSelection(match: MetroMatch): LocationSelection {
+  return {
+    metroKey: match.key,
+    metroName: match.name,
+    lat: match.lat,
+    lon: match.lon,
+  }
+}
+
+function filterMetros(query: string): MetroMatch[] {
+  const q = query.trim().toLowerCase()
+  if (!q) return ALL_METROS
+  return ALL_METROS.filter(
+    metro =>
+      metro.key.toLowerCase().includes(q) ||
+      metro.name.toLowerCase().includes(q)
+  )
+}
+
 export function LocationSearchBar({
   onSelect,
   existingMetroKeys = [],
   className,
 }: LocationSearchBarProps) {
-  const [query, setQuery] = useState('')
-  const [results, setResults] = useState<GeoSearchResult[]>([])
-  const [isSearching, setIsSearching] = useState(false)
-  const [isOpen, setIsOpen] = useState(false)
-  const controllerRef = useRef<AbortController | null>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const listboxId = useId()
+  const rootRef = useRef<HTMLDivElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const listRef = useRef<HTMLUListElement>(null)
 
-  const handleSelectMetro = useCallback(
-    (match: MetroMatch) => {
-      if (existingMetroKeys.includes(match.key)) return
-      onSelect({
-        metroKey: match.key,
-        metroName: match.name,
-        searchLabel: match.resolvedFrom,
-        distanceKm: match.distanceKm,
-      })
+  const [query, setQuery] = useState('')
+  const [open, setOpen] = useState(false)
+  const [highlightIndex, setHighlightIndex] = useState(0)
+  const [feedback, setFeedback] = useState<string | null>(null)
+  const [dropdownPosition, setDropdownPosition] = useState<DropdownPosition | null>(null)
+
+  const filteredMetros = useMemo(() => filterMetros(query), [query])
+
+  const updateDropdownPosition = useCallback(() => {
+    const input = inputRef.current
+    if (!input) return
+    const rect = input.getBoundingClientRect()
+    setDropdownPosition({
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+    })
+  }, [])
+
+  useEffect(() => {
+    setHighlightIndex(0)
+  }, [query, open])
+
+  useEffect(() => {
+    if (!open) return
+
+    updateDropdownPosition()
+
+    const handleReposition = () => updateDropdownPosition()
+    window.addEventListener('resize', handleReposition)
+    window.addEventListener('scroll', handleReposition, true)
+
+    return () => {
+      window.removeEventListener('resize', handleReposition)
+      window.removeEventListener('scroll', handleReposition, true)
+    }
+  }, [open, updateDropdownPosition])
+
+  useEffect(() => {
+    if (!open || !listRef.current) return
+    const option = listRef.current.querySelector<HTMLElement>(
+      `[data-metro-index="${highlightIndex}"]`
+    )
+    option?.scrollIntoView({ block: 'nearest' })
+  }, [highlightIndex, open])
+
+  const selectMetro = useCallback(
+    (metro: MetroMatch) => {
+      if (existingMetroKeys.includes(metro.key)) {
+        setFeedback(`${metro.name} is already on the dashboard.`)
+        return false
+      }
+      onSelect(matchToSelection(metro))
       setQuery('')
-      setResults([])
-      setIsOpen(false)
+      setOpen(false)
+      setFeedback(null)
+      inputRef.current?.blur()
+      return true
     },
     [existingMetroKeys, onSelect]
   )
 
-  const search = useCallback(async (term: string) => {
-    const trimmed = term.trim()
-    if (!trimmed) {
-      setResults([])
+  const selectHighlighted = useCallback(() => {
+    const metro = filteredMetros[highlightIndex]
+    if (!metro) {
+      if (filteredMetros.length === 0) {
+        setFeedback('No matching metros. Try another name.')
+      }
       return
     }
+    selectMetro(metro)
+  }, [filteredMetros, highlightIndex, selectMetro])
 
-    const nameMatch = resolveMetroByName(trimmed)
-    if (nameMatch && !existingMetroKeys.includes(nameMatch.key)) {
-      handleSelectMetro(nameMatch)
-      return
+  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    switch (event.key) {
+      case 'ArrowDown':
+        event.preventDefault()
+        setOpen(true)
+        setHighlightIndex(i => Math.min(i + 1, Math.max(filteredMetros.length - 1, 0)))
+        break
+      case 'ArrowUp':
+        event.preventDefault()
+        setOpen(true)
+        setHighlightIndex(i => Math.max(i - 1, 0))
+        break
+      case 'Enter':
+        event.preventDefault()
+        selectHighlighted()
+        break
+      case 'Escape':
+        setOpen(false)
+        break
+      case 'Tab':
+        setOpen(false)
+        break
+      default:
+        break
     }
-
-    try {
-      controllerRef.current?.abort()
-      const controller = new AbortController()
-      controllerRef.current = controller
-      setIsSearching(true)
-
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(trimmed)}`,
-        { headers: { Accept: 'application/json' }, signal: controller.signal }
-      )
-      if (!response.ok) throw new Error(`Geocoding failed: ${response.status}`)
-
-      const data: GeoSearchResult[] = await response.json()
-      if (data.length > 0) {
-        const first = data[0]
-        const lat = parseFloat(first.lat)
-        const lon = parseFloat(first.lon)
-        const match = resolveNearestMetro(lat, lon, first.display_name)
-        if (match && !existingMetroKeys.includes(match.key)) {
-          handleSelectMetro(match)
-          return
-        }
-      }
-      setResults(data)
-      setIsOpen(data.length > 0)
-    } catch (error) {
-      if ((error as Error).name !== 'AbortError') {
-        console.error('Geocoding error:', error)
-      }
-    } finally {
-      setIsSearching(false)
-    }
-  }, [existingMetroKeys, handleSelectMetro])
-
-  useEffect(() => {
-    if (!query.trim()) {
-      setResults([])
-      setIsOpen(false)
-      return
-    }
-    const timer = setTimeout(() => search(query), 400)
-    return () => clearTimeout(timer)
-  }, [query, search])
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  const handleResultClick = (result: GeoSearchResult) => {
-    const lat = parseFloat(result.lat)
-    const lon = parseFloat(result.lon)
-    const match = resolveNearestMetro(lat, lon, result.display_name)
-    if (match) handleSelectMetro(match)
   }
 
+  const dropdown =
+    open && dropdownPosition
+      ? createPortal(
+          <ul
+            ref={listRef}
+            id={listboxId}
+            role="listbox"
+            aria-label="Supported metros"
+            style={{
+              top: dropdownPosition.top,
+              left: dropdownPosition.left,
+              width: dropdownPosition.width,
+            }}
+            className="fixed z-[2500] max-h-60 overflow-y-auto rounded-md border border-[var(--cs-border-default)] bg-[var(--cs-surface-elevated)] py-1 shadow-[var(--cs-shadow-md)] [backdrop-filter:var(--cs-widget-container-blur)] [-webkit-backdrop-filter:var(--cs-widget-container-blur)]"
+          >
+            {filteredMetros.length === 0 ? (
+              <li className="px-3 py-2 text-sm text-[var(--cs-text-tertiary)]">
+                No metros match &ldquo;{query}&rdquo;
+              </li>
+            ) : (
+              filteredMetros.map((metro, index) => {
+                const alreadyAdded = existingMetroKeys.includes(metro.key)
+                const highlighted = index === highlightIndex
+
+                return (
+                  <li
+                    key={metro.key}
+                    id={`${listboxId}-option-${index}`}
+                    role="option"
+                    aria-selected={highlighted}
+                    aria-disabled={alreadyAdded}
+                    data-metro-index={index}
+                    onMouseDown={e => e.preventDefault()}
+                    onMouseEnter={() => setHighlightIndex(index)}
+                    onClick={() => selectMetro(metro)}
+                    className={cn(
+                      'cursor-pointer px-3 py-2 text-sm transition-colors',
+                      highlighted && 'bg-[var(--cs-interactive-hover)]',
+                      alreadyAdded
+                        ? 'cursor-not-allowed text-[var(--cs-text-tertiary)]'
+                        : 'text-[var(--cs-text-primary)]'
+                    )}
+                  >
+                    <span className="font-medium">{metro.name}</span>
+                    {alreadyAdded && (
+                      <span className="ml-2 text-xs text-[var(--cs-text-tertiary)]">
+                        Already added
+                      </span>
+                    )}
+                  </li>
+                )
+              })
+            )}
+          </ul>,
+          document.body
+        )
+      : null
+
   return (
-    <div ref={containerRef} className={cn('relative', className)}>
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--cs-text-tertiary)]" />
-        <Input
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          onFocus={() => results.length > 0 && setIsOpen(true)}
-          placeholder="Search for a city or address…"
-          className="pl-9 pr-9"
-        />
-        {isSearching && (
-          <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-[var(--cs-text-tertiary)]" />
-        )}
+    <div ref={rootRef} className={cn('relative space-y-0', className)}>
+      <div className="flex gap-2">
+        <div className="relative min-w-0 flex-1">
+          <Input
+            ref={inputRef}
+            role="combobox"
+            aria-expanded={open}
+            aria-controls={listboxId}
+            aria-autocomplete="list"
+            aria-activedescendant={
+              open && filteredMetros[highlightIndex]
+                ? `${listboxId}-option-${highlightIndex}`
+                : undefined
+            }
+            value={query}
+            onChange={e => {
+              setQuery(e.target.value)
+              setOpen(true)
+              if (feedback) setFeedback(null)
+            }}
+            onFocus={() => {
+              setOpen(true)
+              updateDropdownPosition()
+            }}
+            onBlur={() => {
+              window.setTimeout(() => setOpen(false), 150)
+            }}
+            onKeyDown={handleInputKeyDown}
+            placeholder={`Filter ${SUPPORTED_METRO_COUNT} supported metros…`}
+            className="pr-9"
+            autoComplete="off"
+          />
+          <ChevronDown
+            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--cs-text-tertiary)]"
+            aria-hidden
+          />
+        </div>
+        <Button
+          type="button"
+          variant="secondary"
+          className="shrink-0"
+          disabled={filteredMetros.length === 0}
+          onMouseDown={e => e.preventDefault()}
+          onClick={selectHighlighted}
+        >
+          <Plus className="mr-1 h-4 w-4" />
+          Add
+        </Button>
       </div>
 
-      {isOpen && results.length > 0 && (
-        <ul className="absolute z-50 mt-1 max-h-64 w-full overflow-auto rounded-lg border border-[var(--cs-border-default)] bg-[var(--cs-surface-elevated)] shadow-[var(--cs-shadow-md)]">
-          {results.map((result, i) => {
-            const lat = parseFloat(result.lat)
-            const lon = parseFloat(result.lon)
-            const match = resolveNearestMetro(lat, lon, result.display_name)
-            const alreadyAdded = match ? existingMetroKeys.includes(match.key) : false
-
-            return (
-              <li key={`${result.lat}-${result.lon}-${i}`}>
-                <button
-                  type="button"
-                  disabled={alreadyAdded}
-                  onClick={() => handleResultClick(result)}
-                  className={cn(
-                    'flex w-full items-start gap-2 px-3 py-2.5 text-left text-sm transition-colors',
-                    alreadyAdded
-                      ? 'cursor-not-allowed opacity-50'
-                      : 'hover:bg-[var(--cs-interactive-hover)]'
-                  )}
-                >
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-[var(--cs-brand-primary)]" />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-[var(--cs-text-primary)]">{result.display_name}</div>
-                    {match && (
-                      <div className="text-xs text-[var(--cs-text-tertiary)]">
-                        → {match.name}
-                        {match.distanceKm != null && match.distanceKm > 0
-                          ? ` (${match.distanceKm} km)`
-                          : ''}
-                        {alreadyAdded ? ' · already added' : ''}
-                      </div>
-                    )}
-                  </div>
-                </button>
-              </li>
-            )
-          })}
-        </ul>
+      {feedback && (
+        <p className="mt-2 text-xs text-[var(--cs-tone-orange-text)]" role="status">
+          {feedback}
+        </p>
       )}
+
+      {dropdown}
     </div>
   )
 }

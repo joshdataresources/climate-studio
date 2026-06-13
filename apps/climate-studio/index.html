@@ -5,6 +5,26 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>Sustainable Urban Studio</title>
+    <script>
+      (function () {
+        var VERSION = '2';
+        var versionKey = 'cs-theme-version';
+        var themeKey = 'cs-theme';
+        var theme = 'dark';
+        try {
+          if (localStorage.getItem(versionKey) !== VERSION) {
+            localStorage.setItem(themeKey, 'dark');
+            localStorage.setItem(versionKey, VERSION);
+          } else {
+            var stored = localStorage.getItem(themeKey);
+            if (stored === 'light' || stored === 'dark') theme = stored;
+          }
+        } catch (e) {}
+        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.classList.toggle('dark', theme === 'dark');
+        document.documentElement.classList.toggle('light', theme === 'light');
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -1,14 +1,15 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useClimate } from '@climate-studio/core'
 import { GitCompare, X } from 'lucide-react'
 import {
   LocationSearchBar,
   type LocationSelection,
 } from '../components/dashboard/LocationSearchBar'
-import { resolveNearestMetro } from '../utils/metroResolver'
-import { useMap } from '../contexts/MapContext'
+import { getDefaultDashboardMetros } from '../utils/metroResolver'
 import { LocationCityView } from '../components/dashboard/LocationCityView'
 import { LocationCompareView } from '../components/dashboard/LocationCompareView'
+import { DashboardMapBackground } from '../components/dashboard/DashboardMapBackground'
+import { Callout } from '../components/ui/callout'
 import { Slider } from '../components/ui/slider'
 import {
   Select,
@@ -20,6 +21,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { PROJECTION_YEARS } from '../utils/metroChartData'
 import {
+  DASHBOARD_SCENARIOS,
   scenarioToSsp,
   sspToRcp,
   SSP_LABELS,
@@ -29,14 +31,17 @@ import { cn } from '../lib/utils'
 
 const COMPARE_TAB = '__compare__'
 
-function matchToSelection(match: ReturnType<typeof resolveNearestMetro>): LocationSelection | null {
-  if (!match) return null
-  return {
-    metroKey: match.key,
-    metroName: match.name,
-    searchLabel: match.resolvedFrom,
-    distanceKm: match.distanceKm,
-  }
+function defaultLocations(): LocationSelection[] {
+  return getDefaultDashboardMetros().map(m => ({
+    metroKey: m.key,
+    metroName: m.name,
+    lat: m.lat,
+    lon: m.lon,
+  }))
+}
+
+function defaultActiveTab(locations: LocationSelection[]): string {
+  return locations.length >= 2 ? COMPARE_TAB : (locations[0]?.metroKey ?? '')
 }
 
 interface CityTabTriggerProps {
@@ -84,11 +89,8 @@ function CityTabTrigger({ metroKey, label, onRemove }: CityTabTriggerProps) {
 
 const Dashboard: React.FC = () => {
   const { controls, setScenario, setProjectionYear } = useClimate()
-  const { viewport } = useMap()
-  const [selectedLocations, setSelectedLocations] = useState<LocationSelection[]>([])
-  const [activeTab, setActiveTab] = useState<string>('')
-  const [isLocating, setIsLocating] = useState(false)
-  const autoLoadAttempted = useRef(false)
+  const [selectedLocations, setSelectedLocations] = useState<LocationSelection[]>(defaultLocations)
+  const [activeTab, setActiveTab] = useState<string>(() => defaultActiveTab(defaultLocations()))
 
   const scenario = scenarioToSsp(controls.scenario)
   const projectionYear = controls.projectionYear
@@ -125,53 +127,35 @@ const Dashboard: React.FC = () => {
       setActiveTab('')
       return
     }
-    if (!activeTab || !selectedLocations.some(l => l.metroKey === activeTab)) {
-      if (activeTab !== COMPARE_TAB) {
-        setActiveTab(selectedLocations[0].metroKey)
-      }
-    }
+
+    const activeCityTab = selectedLocations.some(l => l.metroKey === activeTab)
+    if (activeTab === COMPARE_TAB && selectedLocations.length >= 2) return
+    if (activeCityTab) return
+
+    setActiveTab(
+      selectedLocations.length >= 2 ? COMPARE_TAB : selectedLocations[0].metroKey
+    )
   }, [selectedLocations, activeTab])
-
-  useEffect(() => {
-    if (autoLoadAttempted.current || selectedLocations.length > 0) return
-    autoLoadAttempted.current = true
-    setIsLocating(true)
-
-    const loadMatch = (lat: number, lon: number, label: string) => {
-      const selection = matchToSelection(resolveNearestMetro(lat, lon, label))
-      if (selection) handleLocationSelect(selection)
-      setIsLocating(false)
-    }
-
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        pos => loadMatch(pos.coords.latitude, pos.coords.longitude, 'Your location'),
-        () => loadMatch(viewport.center.lat, viewport.center.lng, 'Map center'),
-        { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 }
-      )
-    } else {
-      loadMatch(viewport.center.lat, viewport.center.lng, 'Map center')
-    }
-  }, [selectedLocations.length, handleLocationSelect, viewport.center.lat, viewport.center.lng])
 
   const existingMetroKeys = selectedLocations.map(l => l.metroKey)
   const showCompare = selectedLocations.length >= 2
 
   return (
     <div className="dashboard-page">
+      <DashboardMapBackground />
       <div className="dashboard-page-inner flex flex-col">
         <div className="widget-container mb-4 shrink-0">
-          <h2 className="widget-title text-base">Location Analysis</h2>
-          <p className="mb-4 text-xs leading-relaxed text-[var(--cs-text-secondary)]">
-            Real precomputed climate projections for your nearest metro — temperature (NASA
-            NEX-GDDP-CMIP6), humidity &amp; wet bulb events, and drought from river flow models.
-            Baseline period 1995–2014.
-          </p>
-
-          <div className="grid grid-cols-1 items-end gap-3 md:grid-cols-[minmax(0,1fr)_11rem_minmax(0,1fr)]">
+          <Callout
+            status="warning"
+            className="mb-4"
+            title="Test preview"
+            description="This dashboard is for exploration. I am still working on displayed data."
+          />
+          <h2 className="cs-h2 mb-4">Location Analysis</h2>
+          <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-[minmax(0,1fr)_11rem_minmax(0,1fr)]">
             <div className="min-w-0">
               <label className="mb-1.5 block text-xs font-medium text-[var(--cs-text-tertiary)]">
-                Search location
+                Search Supported Metros
               </label>
               <LocationSearchBar
                 onSelect={handleLocationSelect}
@@ -191,7 +175,7 @@ const Dashboard: React.FC = () => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {(['ssp245', 'ssp585'] as SspScenario[]).map(ssp => (
+                  {DASHBOARD_SCENARIOS.map(ssp => (
                     <SelectItem key={ssp} value={ssp}>
                       {SSP_LABELS[ssp]}
                     </SelectItem>
@@ -221,20 +205,19 @@ const Dashboard: React.FC = () => {
         </div>
 
         <div className="dashboard-shadow-bleed flex-1">
-          {isLocating && selectedLocations.length === 0 ? (
-            <div className="widget-container flex flex-col items-center justify-center py-16 text-center">
-              <div className="mb-3 h-8 w-8 animate-spin rounded-full border-2 border-[var(--cs-brand-primary)] border-t-transparent" />
-              <p className="text-sm text-[var(--cs-text-secondary)]">
-                Loading nearest metro from your location…
-              </p>
-            </div>
-          ) : selectedLocations.length === 0 ? (
+          {selectedLocations.length === 0 ? (
             <div className="widget-container py-12 text-center text-sm text-[var(--cs-text-tertiary)]">
-              Search for a city above, or allow location access to load your nearest metro.
+              Choose a supported metro above to add it to the dashboard.
             </div>
           ) : (
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="dashboard-tabs-list mb-3 h-auto w-full flex-wrap justify-start">
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-4">
+              <TabsList className="dashboard-tabs-list h-auto w-full flex-wrap justify-start">
+                {showCompare && (
+                  <TabsTrigger value={COMPARE_TAB} className="gap-1.5 text-xs">
+                    <GitCompare className="h-3 w-3" />
+                    Compare
+                  </TabsTrigger>
+                )}
                 {selectedLocations.map(loc => (
                   <CityTabTrigger
                     key={loc.metroKey}
@@ -243,23 +226,15 @@ const Dashboard: React.FC = () => {
                     onRemove={handleRemoveLocation}
                   />
                 ))}
-                {showCompare && (
-                  <TabsTrigger value={COMPARE_TAB} className="gap-1.5 text-xs">
-                    <GitCompare className="h-3 w-3" />
-                    Compare
-                  </TabsTrigger>
-                )}
               </TabsList>
 
               {selectedLocations.map(loc => (
                 <TabsContent key={loc.metroKey} value={loc.metroKey} className="mt-0">
-                  {activeTab === loc.metroKey && (
-                    <LocationCityView
-                      location={loc}
-                      scenario={scenario}
-                      projectionYear={projectionYear}
-                    />
-                  )}
+                  <LocationCityView
+                    location={loc}
+                    scenario={scenario}
+                    projectionYear={projectionYear}
+                  />
                 </TabsContent>
               ))}
 
