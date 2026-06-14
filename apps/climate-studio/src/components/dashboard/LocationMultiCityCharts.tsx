@@ -183,8 +183,7 @@ export function LocationMultiCityCharts({
     return (
       <div
         className={cn(
-          'grid grid-cols-1 gap-4 lg:grid-cols-2',
-          !embedded && 'dashboard-shadow-bleed',
+          'grid grid-cols-1 gap-4 lg:grid-cols-2 dashboard-shadow-bleed',
           className
         )}
       >
@@ -314,8 +313,7 @@ export function LocationMultiCityCharts({
   return (
     <div
       className={cn(
-        'grid grid-cols-1 gap-4 lg:grid-cols-2',
-        !embedded && 'dashboard-shadow-bleed',
+        'grid grid-cols-1 gap-4 lg:grid-cols-2 dashboard-shadow-bleed',
         className
       )}
     >

@@ -244,10 +244,10 @@
   padding: 1rem 1rem 2rem;
 }
 
-/* Mobile: clear floating logo + Map/Charts nav cluster */
+/* Mobile: clear floating logo + Map/Charts nav row */
 @media (max-width: 768px) {
   .dashboard-page-inner {
-    padding-top: calc(12px + 44px + 8px + 44px + 16px);
+    padding-top: calc(var(--mobile-nav-gap, 12px) + 44px + var(--mobile-nav-gap, 12px));
   }
 }
 
@@ -266,13 +266,13 @@
 
 /* Extra inset so widget box-shadows are not clipped by overflow scrollers */
 .dashboard-shadow-bleed {
-  padding: 6px;
-  margin: -6px;
+  padding-inline: 6px;
+  margin-inline: -6px;
 }
 
 .dashboard-tabs-list {
-  gap: 8px;
-  padding: 8px;
+  gap: 1rem;
+  padding: 1rem;
 }
 
 /* Widget content sections */

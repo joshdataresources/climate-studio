@@ -143,16 +143,15 @@ const Dashboard: React.FC = () => {
   return (
     <div className="dashboard-page">
       <DashboardMapBackground />
-      <div className="dashboard-page-inner flex flex-col">
-        <div className="widget-container mb-4 shrink-0">
+      <div className="dashboard-page-inner flex flex-col gap-4">
+        <div className="widget-container shrink-0 flex flex-col gap-4">
           <Callout
             status="warning"
-            className="mb-4"
             title="Test preview"
-            description="This dashboard is for exploration. I am still working on displayed data."
+            description="This dashboard is for exploration. I am still working on displayed data. I know data is redundant in places."
           />
-          <h2 className="cs-h2 mb-4">Location Analysis</h2>
-          <div className="grid grid-cols-1 items-start gap-3 md:grid-cols-[minmax(0,1fr)_11rem_minmax(0,1fr)]">
+          <h2 className="cs-h2">Location Analysis</h2>
+          <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-[minmax(0,1fr)_11rem_minmax(0,1fr)]">
             <div className="min-w-0">
               <label className="mb-1.5 block text-xs font-medium text-[var(--cs-text-tertiary)]">
                 Search Supported Metros
@@ -204,7 +203,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="dashboard-shadow-bleed flex-1">
+        <div className="flex min-h-0 flex-1 flex-col gap-4">
           {selectedLocations.length === 0 ? (
             <div className="widget-container py-12 text-center text-sm text-[var(--cs-text-tertiary)]">
               Choose a supported metro above to add it to the dashboard.

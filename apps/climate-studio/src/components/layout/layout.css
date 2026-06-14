@@ -408,11 +408,18 @@
  * MOBILE RESPONSIVE - Header bar + Layers drawer
  * ═══════════════════════════════════════════════════════════════════════════ */
 
+@media (max-width: 768px) {
+  .app-layout {
+    --mobile-nav-gap: 12px;
+  }
+}
+
 /* Mobile header bar - replaces the vertical sidebar */
 .mobile-header {
+  --mobile-nav-gap: 12px;
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: center;
+  gap: var(--mobile-nav-gap);
   position: fixed;
   top: 0;
   left: 0;
@@ -420,7 +427,7 @@
   z-index: 2500;
   height: auto;
   min-height: 72px;
-  padding: 12px 16px 8px;
+  padding: var(--mobile-nav-gap) 16px;
   background: transparent;
   border: none;
   pointer-events: none;
@@ -433,16 +440,16 @@
 
 .mobile-header-left {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 8px;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--mobile-nav-gap);
   flex-shrink: 0;
 }
 
 .mobile-header-nav {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--mobile-nav-gap);
 }
 
 .mobile-header-logo {

@@ -46,6 +46,33 @@ function getVolumeForYear(
   return lowerVol + (upperVol - lowerVol) * ratio
 }
 
+/** Storage remaining (% of 2025 baseline) for a metro coordinate at a given year. */
+export function getAquiferStoragePercentAt(
+  lat: number,
+  lon: number,
+  year: number
+): { name: string; remainingPct: number } | null {
+  const feature = aquiferFeatureAt(lat, lon)
+  if (!feature?.properties) return null
+
+  const props = feature.properties as {
+    name?: string
+    volume_gallons_2025?: number
+    projections?: Record<string, number>
+  }
+  const baseline = props.volume_gallons_2025 ?? props.projections?.['2025']
+  const projections = props.projections
+  if (!props.name || !baseline || !projections) return null
+
+  const volume = getVolumeForYear(projections, year)
+  if (volume == null) return null
+
+  return {
+    name: props.name,
+    remainingPct: Math.round((volume / baseline) * 1000) / 10,
+  }
+}
+
 /** Point-in-polygon lookup against USGS principal aquifer polygons. */
 export function findAquiferAt(lat: number, lon: number): AquiferMatch | null {
   const pt = point([lon, lat])

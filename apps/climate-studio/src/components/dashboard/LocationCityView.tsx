@@ -3,10 +3,12 @@ import { Callout } from '../ui/callout'
 import { Spinner } from '../ui/spinner'
 import { ImpactGrid, ImpactMetric } from '../ui/impact-grid'
 import { LocationMultiCityCharts } from './LocationMultiCityCharts'
+import { LocationOutlookPanel } from './LocationOutlookPanel'
 import { useDashboardEarthEngine } from '../../hooks/useDashboardEarthEngine'
 import { loadMetroBundle } from '../../utils/metroResolver'
 import {
   getTemperatureStats,
+  getWetBulbStats,
   hasTemperatureScenario,
 } from '../../utils/metroChartData'
 import type { SspScenario } from '../../utils/scenarioMapping'
@@ -19,7 +21,7 @@ interface LocationCityViewProps {
   projectionYear: number
 }
 
-/** Climate Suite–aligned metro widgets (temperature + optional humidity/wet bulb). */
+/** City-specific outlook: trajectory risk tags + domain drivers (not in Compare tab). */
 export function LocationCityView({
   location,
   scenario,
@@ -40,6 +42,11 @@ export function LocationCityView({
     [temperature, scenario, projectionYear, bundle.wetBulb]
   )
 
+  const wetBulbStats = useMemo(
+    () => getWetBulbStats(bundle.wetBulb, projectionYear),
+    [bundle.wetBulb, projectionYear]
+  )
+
   const annualHasData = hasTemperatureScenario(temperature, scenario)
 
   if (!tempStats || !annualHasData) {
@@ -50,13 +57,10 @@ export function LocationCityView({
     )
   }
 
-  const summerDelta = tempStats.current.summer_avg - tempStats.baseline.summer_avg
-  const winterDelta = tempStats.current.winter_avg - tempStats.baseline.winter_avg
-
   return (
-    <div key={location.metroKey} className="dashboard-shadow-bleed flex flex-col gap-4">
-      <div className="widget-container">
-        <div className="widget-header !mb-4 !pb-4">
+    <div key={location.metroKey} className="flex flex-col gap-4">
+      <div className="widget-container flex flex-col gap-4">
+        <div className="widget-header !mb-0 !pb-0">
           <div className="min-w-0">
             <h2 className="cs-h2">{location.metroName}</h2>
             {location.searchLabel && location.searchLabel !== location.metroName && (
@@ -74,7 +78,6 @@ export function LocationCityView({
         {eeState === 'loading' && (
           <Callout
             status="info"
-            className="mb-4"
             icon={<Spinner className="h-4 w-4 text-white" />}
             title="Loading Earth Engine snapshot…"
             description="Fetching live data for this metro."
@@ -83,7 +86,6 @@ export function LocationCityView({
         {eeState === 'error' && (
           <Callout
             status="warning"
-            className="mb-4"
             title="Earth Engine unavailable"
             description={
               eeError ??
@@ -92,24 +94,18 @@ export function LocationCityView({
           />
         )}
 
-        <ImpactGrid className="grid-cols-2 gap-3 sm:grid-cols-4">
+        <LocationOutlookPanel
+          location={location}
+          scenario={scenario}
+          projectionYear={projectionYear}
+        />
+
+        <ImpactGrid className="grid-cols-2 gap-4 sm:grid-cols-4">
           <ImpactMetric
             label="Annual avg"
             value={`${tempStats.current.annual_avg.toFixed(1)}°F`}
             caption={`Baseline ${tempStats.baseline.avg_annual.toFixed(1)}°F`}
             tone="neutral"
-          />
-          <ImpactMetric
-            label="Summer avg"
-            value={`${tempStats.current.summer_avg.toFixed(1)}°F`}
-            caption={`Baseline ${tempStats.baseline.summer_avg.toFixed(1)}°F`}
-            tone="orange"
-          />
-          <ImpactMetric
-            label="Winter avg"
-            value={`${tempStats.current.winter_avg.toFixed(1)}°F`}
-            caption={`Baseline ${tempStats.baseline.winter_avg.toFixed(1)}°F`}
-            tone="blue"
           />
           <ImpactMetric
             label="Days &gt;100°F"
@@ -121,29 +117,19 @@ export function LocationCityView({
             }
             tone="red"
           />
+          {wetBulbStats && (
+            <ImpactMetric
+              label="Wet bulb events"
+              value={String(wetBulbStats.current.wet_bulb_events ?? '—')}
+              caption={`Baseline ${wetBulbStats.baseline.wet_bulb_events ?? '—'}`}
+              tone="violet"
+            />
+          )}
           <ImpactMetric
             label="Temp anomaly"
             value={`${tempStats.tempIncrease > 0 ? '+' : ''}${tempStats.tempIncrease.toFixed(1)}°F`}
-            caption="Annual vs baseline"
+            caption={`At ${projectionYear}`}
             tone="orange"
-          />
-          <ImpactMetric
-            label="Summer Δ"
-            value={`${summerDelta > 0 ? '+' : ''}${summerDelta.toFixed(1)}°F`}
-            caption="vs 1995–2014"
-            tone="orange"
-          />
-          <ImpactMetric
-            label="Winter Δ"
-            value={`${winterDelta > 0 ? '+' : ''}${winterDelta.toFixed(1)}°F`}
-            caption="vs 1995–2014"
-            tone="blue"
-          />
-          <ImpactMetric
-            label="Days &gt;110°F"
-            value={String(tempStats.current.days_over_110)}
-            caption={`Baseline ${tempStats.baseline.days_over_110}`}
-            tone="amber"
           />
         </ImpactGrid>
       </div>

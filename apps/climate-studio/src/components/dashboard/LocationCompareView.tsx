@@ -92,7 +92,7 @@ export function LocationCompareView({
 
       <div
         className={cn(
-          'grid gap-3',
+          'grid gap-4',
           'grid-cols-1 sm:grid-cols-2',
           locations.length >= 4 ? 'lg:grid-cols-4' : 'xl:grid-cols-3'
         )}
@@ -146,7 +146,7 @@ export function LocationCompareView({
         })}
       </div>
 
-      <div className="dashboard-shadow-bleed pt-4">
+      <div className="dashboard-shadow-bleed">
         <LocationMultiCityCharts locations={locations} scenario={scenario} embedded />
       </div>
     </div>
