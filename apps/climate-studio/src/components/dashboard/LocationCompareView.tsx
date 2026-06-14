@@ -1,11 +1,9 @@
 import React, { useMemo } from 'react'
 import { loadMetroBundle } from '../../utils/metroResolver'
 import { getTemperatureStats, getWetBulbStats } from '../../utils/metroChartData'
-import { ImpactGrid, ImpactMetric } from '../ui/impact-grid'
 import { LocationMultiCityCharts } from './LocationMultiCityCharts'
 import type { SspScenario } from '../../utils/scenarioMapping'
 import type { LocationSelection } from './LocationSearchBar'
-import { cn } from '../../lib/utils'
 
 interface LocationCompareViewProps {
   locations: LocationSelection[]
@@ -88,62 +86,6 @@ export function LocationCompareView({
             </tbody>
           </table>
         </div>
-      </div>
-
-      <div
-        className={cn(
-          'grid gap-4',
-          'grid-cols-1 sm:grid-cols-2',
-          locations.length >= 4 ? 'lg:grid-cols-4' : 'xl:grid-cols-3'
-        )}
-      >
-        {locations.map(loc => {
-          const bundle = loadMetroBundle(loc.metroKey)
-          const temp = getTemperatureStats(bundle.temperature, scenario, projectionYear, bundle.wetBulb)
-          const wetBulb = getWetBulbStats(bundle.wetBulb, projectionYear)
-
-          return (
-            <div key={loc.metroKey} className="widget-container">
-              <h4 className="widget-title mb-3">{loc.metroName}</h4>
-              <ImpactGrid>
-                <ImpactMetric
-                  label="Temp Δ"
-                  value={temp ? `+${temp.tempIncrease.toFixed(1)}°F` : '—'}
-                  tone="orange"
-                />
-                <ImpactMetric
-                  label="Summer"
-                  value={temp ? `${temp.current.summer_avg.toFixed(1)}°F` : '—'}
-                  tone="orange"
-                />
-                <ImpactMetric
-                  label="Winter"
-                  value={temp ? `${temp.current.winter_avg.toFixed(1)}°F` : '—'}
-                  tone="blue"
-                />
-                <ImpactMetric
-                  label=">100°F"
-                  value={temp ? String(temp.current.days_over_100) : '—'}
-                  tone="red"
-                />
-                {wetBulb && (
-                  <>
-                    <ImpactMetric
-                      label="Humidity"
-                      value={`${wetBulb.current.peak_humidity}%`}
-                      tone="blue"
-                    />
-                    <ImpactMetric
-                      label="Wet bulb"
-                      value={String(wetBulb.current.wet_bulb_events)}
-                      tone="violet"
-                    />
-                  </>
-                )}
-              </ImpactGrid>
-            </div>
-          )
-        })}
       </div>
 
       <div className="dashboard-shadow-bleed">

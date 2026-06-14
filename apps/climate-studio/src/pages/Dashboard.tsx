@@ -28,8 +28,10 @@ import {
   type SspScenario,
 } from '../utils/scenarioMapping'
 import { cn } from '../lib/utils'
+import { features } from '../config/features'
 
 const COMPARE_TAB = '__compare__'
+const showCityCards = features.cityDashboardCards
 
 function defaultLocations(): LocationSelection[] {
   return getDefaultDashboardMetros().map(m => ({
@@ -41,7 +43,8 @@ function defaultLocations(): LocationSelection[] {
 }
 
 function defaultActiveTab(locations: LocationSelection[]): string {
-  return locations.length >= 2 ? COMPARE_TAB : (locations[0]?.metroKey ?? '')
+  if (!showCityCards || locations.length >= 2) return COMPARE_TAB
+  return locations[0]?.metroKey ?? ''
 }
 
 interface CityTabTriggerProps {
@@ -56,9 +59,10 @@ function CityTabTrigger({ metroKey, label, onRemove }: CityTabTriggerProps) {
       value={metroKey}
       className={cn(
         'gap-1.5 pr-1.5 text-xs',
-        'data-[state=active]:border-[var(--cs-border-default)]',
-        'data-[state=active]:bg-[var(--cs-surface-elevated)]',
-        'data-[state=active]:shadow-[var(--cs-shadow-sm)]'
+        'data-[state=active]:border-[#5a7cec]',
+        'data-[state=active]:bg-[rgba(90,124,236,0.1)]',
+        'data-[state=active]:text-[#5a7cec]',
+        'data-[state=active]:shadow-none'
       )}
     >
       <span className="truncate">{label}</span>
@@ -104,14 +108,16 @@ const Dashboard: React.FC = () => {
       if (prev.some(l => l.metroKey === selection.metroKey)) return prev
       return [...prev, selection]
     })
-    setActiveTab(selection.metroKey)
+    if (showCityCards) setActiveTab(selection.metroKey)
   }, [])
 
   const handleRemoveLocation = useCallback(
     (metroKey: string) => {
       setSelectedLocations(prev => {
         const next = prev.filter(l => l.metroKey !== metroKey)
-        if (activeTab === metroKey) {
+        if (!showCityCards) {
+          setActiveTab(COMPARE_TAB)
+        } else if (activeTab === metroKey) {
           setActiveTab(next[0]?.metroKey ?? '')
         } else if (activeTab === COMPARE_TAB && next.length < 2) {
           setActiveTab(next[0]?.metroKey ?? '')
@@ -128,6 +134,11 @@ const Dashboard: React.FC = () => {
       return
     }
 
+    if (!showCityCards) {
+      setActiveTab(selectedLocations.length >= 2 ? COMPARE_TAB : selectedLocations[0].metroKey)
+      return
+    }
+
     const activeCityTab = selectedLocations.some(l => l.metroKey === activeTab)
     if (activeTab === COMPARE_TAB && selectedLocations.length >= 2) return
     if (activeCityTab) return
@@ -140,94 +151,140 @@ const Dashboard: React.FC = () => {
   const existingMetroKeys = selectedLocations.map(l => l.metroKey)
   const showCompare = selectedLocations.length >= 2
 
+  const handleTabChange = useCallback(
+    (value: string) => {
+      if (!showCityCards) {
+        if (value === COMPARE_TAB) setActiveTab(COMPARE_TAB)
+        return
+      }
+      setActiveTab(value)
+    },
+    []
+  )
+
+  const locationAnalysisControls = (
+    <>
+      <Callout
+        status="warning"
+        title="Test preview"
+        description="This dashboard is for exploration. I am still working on displayed data. I know data is redundant in places."
+      />
+      <h2 className="cs-h2">Location Analysis</h2>
+      <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-[minmax(0,1fr)_11rem_minmax(0,1fr)]">
+        <div className="min-w-0">
+          <label className="mb-1.5 block text-xs font-medium text-[var(--cs-text-tertiary)]">
+            Search Supported Metros
+          </label>
+          <LocationSearchBar
+            onSelect={handleLocationSelect}
+            existingMetroKeys={existingMetroKeys}
+          />
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-xs font-medium text-[var(--cs-text-tertiary)]">
+            Scenario
+          </label>
+          <Select
+            value={scenario}
+            onValueChange={value => handleScenarioChange(value as SspScenario)}
+          >
+            <SelectTrigger className="h-9">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {DASHBOARD_SCENARIOS.map(ssp => (
+                <SelectItem key={ssp} value={ssp}>
+                  {SSP_LABELS[ssp]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="min-w-0">
+          <div className="mb-1.5 flex items-center justify-between">
+            <label className="text-xs font-medium text-[var(--cs-text-tertiary)]">
+              Projection year
+            </label>
+            <span className="text-sm font-semibold text-[var(--cs-tone-orange-text)]">
+              {projectionYear}
+            </span>
+          </div>
+          <Slider
+            value={[projectionYear]}
+            onValueChange={([v]) => setProjectionYear(v)}
+            min={PROJECTION_YEARS[0]}
+            max={PROJECTION_YEARS[PROJECTION_YEARS.length - 1]}
+            step={10}
+          />
+        </div>
+      </div>
+    </>
+  )
+
+  const metroTabsList = selectedLocations.length > 0 ? (
+    <TabsList className="dashboard-tabs-list h-auto w-full flex-wrap justify-start border-0 bg-transparent p-0 shadow-none backdrop-blur-none">
+      {showCompare && (
+        <TabsTrigger
+          value={COMPARE_TAB}
+          className={cn(
+            'gap-1.5 text-xs',
+            'data-[state=active]:border-[#5a7cec]',
+            'data-[state=active]:bg-[rgba(90,124,236,0.1)]',
+            'data-[state=active]:text-[#5a7cec]',
+            'data-[state=active]:shadow-none'
+          )}
+        >
+          <GitCompare className="h-3 w-3" />
+          Compare
+        </TabsTrigger>
+      )}
+      {selectedLocations.map(loc => (
+        <CityTabTrigger
+          key={loc.metroKey}
+          metroKey={loc.metroKey}
+          label={loc.metroName}
+          onRemove={handleRemoveLocation}
+        />
+      ))}
+    </TabsList>
+  ) : null
+
+  const compareView = (
+    <LocationCompareView
+      locations={selectedLocations}
+      scenario={scenario}
+      projectionYear={projectionYear}
+    />
+  )
+
   return (
     <div className="dashboard-page">
       <DashboardMapBackground />
       <div className="dashboard-page-inner flex flex-col gap-4">
-        <div className="widget-container shrink-0 flex flex-col gap-4">
-          <Callout
-            status="warning"
-            title="Test preview"
-            description="This dashboard is for exploration. I am still working on displayed data. I know data is redundant in places."
-          />
-          <h2 className="cs-h2">Location Analysis</h2>
-          <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-[minmax(0,1fr)_11rem_minmax(0,1fr)]">
-            <div className="min-w-0">
-              <label className="mb-1.5 block text-xs font-medium text-[var(--cs-text-tertiary)]">
-                Search Supported Metros
-              </label>
-              <LocationSearchBar
-                onSelect={handleLocationSelect}
-                existingMetroKeys={existingMetroKeys}
-              />
+        {selectedLocations.length === 0 ? (
+          <>
+            <div className="widget-container shrink-0 flex flex-col gap-4">
+              {locationAnalysisControls}
             </div>
-
-            <div>
-              <label className="mb-1.5 block text-xs font-medium text-[var(--cs-text-tertiary)]">
-                Scenario
-              </label>
-              <Select
-                value={scenario}
-                onValueChange={value => handleScenarioChange(value as SspScenario)}
-              >
-                <SelectTrigger className="h-9">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {DASHBOARD_SCENARIOS.map(ssp => (
-                    <SelectItem key={ssp} value={ssp}>
-                      {SSP_LABELS[ssp]}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="min-w-0">
-              <div className="mb-1.5 flex items-center justify-between">
-                <label className="text-xs font-medium text-[var(--cs-text-tertiary)]">
-                  Projection year
-                </label>
-                <span className="text-sm font-semibold text-[var(--cs-tone-orange-text)]">
-                  {projectionYear}
-                </span>
-              </div>
-              <Slider
-                value={[projectionYear]}
-                onValueChange={([v]) => setProjectionYear(v)}
-                min={PROJECTION_YEARS[0]}
-                max={PROJECTION_YEARS[PROJECTION_YEARS.length - 1]}
-                step={10}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex min-h-0 flex-1 flex-col gap-4">
-          {selectedLocations.length === 0 ? (
             <div className="widget-container py-12 text-center text-sm text-[var(--cs-text-tertiary)]">
               Choose a supported metro above to add it to the dashboard.
             </div>
-          ) : (
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-4">
-              <TabsList className="dashboard-tabs-list h-auto w-full flex-wrap justify-start">
-                {showCompare && (
-                  <TabsTrigger value={COMPARE_TAB} className="gap-1.5 text-xs">
-                    <GitCompare className="h-3 w-3" />
-                    Compare
-                  </TabsTrigger>
-                )}
-                {selectedLocations.map(loc => (
-                  <CityTabTrigger
-                    key={loc.metroKey}
-                    metroKey={loc.metroKey}
-                    label={loc.metroName}
-                    onRemove={handleRemoveLocation}
-                  />
-                ))}
-              </TabsList>
+          </>
+        ) : (
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="flex flex-col gap-4">
+            <div className="widget-container shrink-0 flex flex-col gap-4">
+              {locationAnalysisControls}
+              {metroTabsList && (
+                <div className="border-t border-[var(--widget-border)] pt-4">
+                  {metroTabsList}
+                </div>
+              )}
+            </div>
 
-              {selectedLocations.map(loc => (
+            {showCityCards &&
+              selectedLocations.map(loc => (
                 <TabsContent key={loc.metroKey} value={loc.metroKey} className="mt-0">
                   <LocationCityView
                     location={loc}
@@ -237,18 +294,15 @@ const Dashboard: React.FC = () => {
                 </TabsContent>
               ))}
 
-              {showCompare && (
-                <TabsContent value={COMPARE_TAB} className="mt-0">
-                  <LocationCompareView
-                    locations={selectedLocations}
-                    scenario={scenario}
-                    projectionYear={projectionYear}
-                  />
-                </TabsContent>
-              )}
-            </Tabs>
-          )}
-        </div>
+            {showCityCards && showCompare ? (
+              <TabsContent value={COMPARE_TAB} className="mt-0">
+                {compareView}
+              </TabsContent>
+            ) : (
+              !showCityCards && compareView
+            )}
+          </Tabs>
+        )}
       </div>
     </div>
   )
