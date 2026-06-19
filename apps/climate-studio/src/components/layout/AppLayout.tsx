@@ -38,6 +38,7 @@ export function AppLayout() {
   return (
     <div
       className="app-layout"
+      data-route={isDashboard ? 'dashboard' : undefined}
       data-panels-visible={!isMobile && !isTablet && !panelsCollapsed ? 'true' : undefined}
       data-panels-left-only={!isMobile && isTablet && !panelsCollapsed ? 'true' : undefined}
       data-mobile-layers-open={isMobile && mobileLayersOpen ? '' : undefined}

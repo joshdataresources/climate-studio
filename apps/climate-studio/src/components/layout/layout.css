@@ -12,7 +12,7 @@
   isolation: isolate;
 }
 
-/* Undulating atmospheric glow — temp-anomaly palette, dark theme only */
+/* Undulating atmospheric glow — brand blue on black / soft blue on white */
 @keyframes cs-atmosphere-drift {
   0%,
   100% {
@@ -47,28 +47,30 @@
   0%,
   100% {
     transform: translate3d(0, 0, 0) scale(1.02);
-    filter: blur(52px) hue-rotate(0deg);
+    filter: blur(52px);
   }
 
   50% {
     transform: translate3d(-3%, 2.5%, 0) scale(1.1);
-    filter: blur(64px) hue-rotate(8deg);
+    filter: blur(64px);
   }
 }
 
-[data-theme="dark"] .app-layout::before {
+[data-theme="dark"] .app-layout::before,
+[data-theme="light"] .app-layout::before {
   content: '';
   position: fixed;
   inset: -22%;
   pointer-events: none;
   z-index: 0;
   background: var(--cs-atmosphere-layer-a);
-  filter: blur(48px);
-  animation: cs-atmosphere-drift 24s ease-in-out infinite;
+  filter: blur(var(--cs-atmosphere-blur-a, 48px));
+  animation: cs-atmosphere-drift 26s ease-in-out infinite;
   will-change: transform;
 }
 
-[data-theme="dark"] .app-layout::after {
+[data-theme="dark"] .app-layout::after,
+[data-theme="light"] .app-layout::after {
   content: '';
   position: fixed;
   inset: -16%;
@@ -76,9 +78,57 @@
   z-index: 0;
   background: var(--cs-atmosphere-layer-b);
   animation:
-    cs-atmosphere-shift 32s ease-in-out infinite,
-    cs-atmosphere-breathe 14s ease-in-out infinite;
+    cs-atmosphere-shift 34s ease-in-out infinite,
+    cs-atmosphere-breathe 18s ease-in-out infinite;
   will-change: transform, opacity, filter;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-theme="dark"] .app-layout::before,
+  [data-theme="dark"] .app-layout::after,
+  [data-theme="light"] .app-layout::before,
+  [data-theme="light"] .app-layout::after,
+  [data-theme="dark"] .dashboard-page::before,
+  [data-theme="dark"] .dashboard-page::after,
+  [data-theme="light"] .dashboard-page::before,
+  [data-theme="light"] .dashboard-page::after {
+    animation: none;
+    opacity: var(--cs-atmosphere-opacity-min, 0.5);
+  }
+}
+
+/* Dashboard: atmosphere on the scroll container so glass widgets can backdrop-blur it */
+[data-theme="dark"] .dashboard-page::before,
+[data-theme="light"] .dashboard-page::before {
+  content: '';
+  position: absolute;
+  inset: -22%;
+  pointer-events: none;
+  z-index: 0;
+  background: var(--cs-atmosphere-layer-a);
+  filter: blur(var(--cs-atmosphere-blur-a, 48px));
+  animation: cs-atmosphere-drift 26s ease-in-out infinite;
+  will-change: transform;
+}
+
+[data-theme="dark"] .dashboard-page::after,
+[data-theme="light"] .dashboard-page::after {
+  content: '';
+  position: absolute;
+  inset: -16%;
+  pointer-events: none;
+  z-index: 0;
+  background: var(--cs-atmosphere-layer-b);
+  animation:
+    cs-atmosphere-shift 34s ease-in-out infinite,
+    cs-atmosphere-breathe 18s ease-in-out infinite;
+  will-change: transform, opacity, filter;
+}
+
+/* Avoid double-stacking with app-layout layers behind .app-main */
+.app-layout[data-route="dashboard"]::before,
+.app-layout[data-route="dashboard"]::after {
+  content: none;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -123,6 +173,15 @@
 
 .app-main.sidebar-collapsed {
   margin-left: 0;
+}
+
+.app-layout[data-route="dashboard"] .app-main {
+  background: transparent;
+}
+
+.app-layout[data-route="dashboard"] {
+  background: var(--cs-canvas-mesh), var(--cs-neutral-50, #0a0a0a);
+  background-attachment: fixed;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

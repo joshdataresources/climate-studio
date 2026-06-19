@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react'
+import React, { useMemo, useEffect } from 'react'
 import { DashboardChart } from './DashboardChart'
 import { loadMetroBundle } from '../../utils/metroResolver'
 import {
@@ -64,30 +64,38 @@ export function LocationMultiCityCharts({
     scenario
   )
 
+  const locationsKey = locations.map(l => l.metroKey).join('|')
+  // Remove chart key from individual charts to prevent remounting when cities change
+  // The key prop on charts was causing React to unmount/remount when cities were added/removed
+
+  // Build chart metros with proper memoization - use locationsKey for proper dependency tracking
   const chartMetros = useMemo(
     () => metrosToChartInputs(locations, loadMetroBundle),
-    [locations]
+    [locationsKey]
   )
 
   const cityLabels = locations.map(l => l.metroName).join(' · ')
-  const chartKey = locations.map(l => l.metroKey).join('-')
 
   const annualChart = useMemo(
     () => buildMultiCityTemperatureTrajectory(chartMetros, scenario),
     [chartMetros, scenario]
   )
+
   const summerChart = useMemo(
     () => buildMultiCitySummerSeries(chartMetros, scenario),
     [chartMetros, scenario]
   )
+
   const winterChart = useMemo(
     () => buildMultiCityWinterSeries(chartMetros, scenario),
     [chartMetros, scenario]
   )
+
   const daysOver100Chart = useMemo(
     () => buildMultiCityDaysOver100Series(chartMetros, scenario),
     [chartMetros, scenario]
   )
+
   const wetBulbChart = useMemo(
     () => buildMultiCityWetBulbSeries(chartMetros),
     [chartMetros]
@@ -162,7 +170,9 @@ export function LocationMultiCityCharts({
   const hasDroughtCompare = droughtChart.data.length > 0 && droughtChart.series.length > 0
   const hasAquiferCompare = aquiferCompare.data.length > 0 && aquiferCompare.series.length > 0
 
-  const compareSubtitle = compareMode ? `${cityLabels} — one line per city` : undefined
+  const compareSubtitle = compareMode
+    ? `${locations.length} ${locations.length === 1 ? 'city' : 'cities'}`
+    : undefined
 
   if (
     compareMode &&
@@ -317,45 +327,49 @@ export function LocationMultiCityCharts({
         className
       )}
     >
-      {annualChart.data.length > 0 && (
-        <>
-          <DashboardChart
-            chartId={`multi-annual-${chartKey}`}
-            title="Annual Temperature"
-            subtitle={compareSubtitle ?? 'Projected annual average vs 1995–2014 baseline'}
-            yAxisLabel="°F"
-            data={annualChart.data}
-            series={annualChart.series}
-          />
-          <DashboardChart
-            chartId={`multi-summer-${chartKey}`}
-            title="Summer Average"
-            subtitle={compareSubtitle ?? 'Seasonal averages by decade'}
-            yAxisLabel="°F"
-            data={summerChart.data}
-            series={summerChart.series}
-          />
-          <DashboardChart
-            chartId={`multi-winter-${chartKey}`}
-            title="Winter Average"
-            subtitle={compareSubtitle ?? 'Seasonal averages by decade'}
-            yAxisLabel="°F"
-            data={winterChart.data}
-            series={winterChart.series}
-          />
-          <DashboardChart
-            chartId={`multi-days100-${chartKey}`}
-            title="Days Over 100°F"
-            subtitle={compareSubtitle ?? 'Extreme heat days per metro'}
-            yAxisLabel="days"
-            data={daysOver100Chart.data}
-            series={daysOver100Chart.series}
-          />
-        </>
+      {annualChart.series.length > 0 && (
+        <DashboardChart
+          chartId={`compare-annual`}
+          title="Annual Temperature"
+          subtitle={compareSubtitle ?? 'Projected annual average vs 1995–2014 baseline'}
+          yAxisLabel="°F"
+          data={annualChart.data}
+          series={annualChart.series}
+        />
+      )}
+      {summerChart.series.length > 0 && (
+        <DashboardChart
+          chartId={`compare-summer`}
+          title="Summer Average"
+          subtitle={compareSubtitle ?? 'Seasonal averages by decade'}
+          yAxisLabel="°F"
+          data={summerChart.data}
+          series={summerChart.series}
+        />
+      )}
+      {winterChart.series.length > 0 && (
+        <DashboardChart
+          chartId={`compare-winter`}
+          title="Winter Average"
+          subtitle={compareSubtitle ?? 'Seasonal averages by decade'}
+          yAxisLabel="°F"
+          data={winterChart.data}
+          series={winterChart.series}
+        />
+      )}
+      {daysOver100Chart.series.length > 0 && (
+        <DashboardChart
+          chartId={`compare-days100`}
+          title="Days Over 100°F"
+          subtitle={compareSubtitle ?? 'Extreme heat days per metro'}
+          yAxisLabel="days"
+          data={daysOver100Chart.data}
+          series={daysOver100Chart.series}
+        />
       )}
       {hasWetBulbChart && (
         <DashboardChart
-          chartId={`multi-wetbulb-${chartKey}`}
+          chartId={`compare-wetbulb`}
           title="Wet Bulb Events"
           subtitle={compareSubtitle ?? 'Dangerous heat-humidity days'}
           yAxisLabel="events"
@@ -365,9 +379,9 @@ export function LocationMultiCityCharts({
       )}
       {compareMode && hasPrecipCompare && (
         <DashboardChart
-          chartId={`multi-precip-${chartKey}`}
+          chartId={`compare-precip`}
           title="Precipitation & Drought"
-          subtitle={`${cityLabels} · mm/day`}
+          subtitle={compareMode ? 'mm/day' : `${cityLabels} · mm/day`}
           yAxisLabel="mm/day"
           source={PRECIP_DROUGHT_SOURCE}
           data={precipChart.data}
@@ -376,9 +390,9 @@ export function LocationMultiCityCharts({
       )}
       {compareMode && hasDroughtCompare && (
         <DashboardChart
-          chartId={`multi-drought-${chartKey}`}
+          chartId={`compare-drought`}
           title="Drought Index"
-          subtitle={`${cityLabels} · higher = drier`}
+          subtitle={compareMode ? 'Higher = drier' : `${cityLabels} · higher = drier`}
           yAxisLabel="index (0–10)"
           source={PRECIP_DROUGHT_SOURCE}
           data={droughtChart.data}
@@ -389,9 +403,9 @@ export function LocationMultiCityCharts({
       )}
       {compareMode && hasAquiferCompare && (
         <DashboardChart
-          chartId={`multi-aquifer-${chartKey}`}
+          chartId={`compare-aquifer`}
           title="Aquifer Storage"
-          subtitle={`${cityLabels} · % of 2025 volume at city coordinates`}
+          subtitle={compareMode ? '% of 2025 volume' : `${cityLabels} · % of 2025 volume at city coordinates`}
           yAxisLabel="% of 2025 storage"
           source={AQUIFER_SOURCE}
           data={aquiferCompare.data}

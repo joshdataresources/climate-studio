@@ -1,90 +1,26 @@
-import React, { useMemo } from 'react'
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-  Legend,
-} from 'recharts'
+import React, { useState, useMemo } from 'react'
 import { cn } from '../../lib/utils'
-
-export interface ChartSeries {
-  key: string
-  label: string
-  color: string
-  dashed?: boolean
-}
+import { SvgLinePlotFixed as SvgLinePlot } from './SvgLinePlotFixed'
+import { ChartLegend } from './ChartLegend'
+export type { ChartDataPoint, ChartSeries } from './chartTypes'
+import type { ChartDataPoint, ChartSeries } from './chartTypes'
 
 interface DashboardChartProps {
   title: string
   subtitle?: string
-  /** Short unit / scale note shown top-right above the plot */
   yAxisLabel?: string
-  /** Layer-style attribution, e.g. "CHIRPS via Earth Engine" */
   source?: string
   data: ChartDataPoint[]
   series: ChartSeries[]
   height?: number
   yDomain?: [number | string, number | string]
-  /** Tighten y-axis to data range (optional clamp, e.g. [0, 10] for drought index) */
   fitYDomain?: boolean
   yClamp?: [number, number]
   className?: string
-  /** Unique id so Recharts remounts when city/data changes */
   chartId?: string
 }
 
-export interface ChartDataPoint {
-  year: number
-  [key: string]: number | string
-}
-
 const DEFAULT_HEIGHT = 220
-
-function collectNumericValues(data: ChartDataPoint[], series: ChartSeries[]): number[] {
-  const keys = new Set([...series.map(s => s.key), 'baseline'])
-  const values: number[] = []
-  for (const row of data) {
-    for (const key of keys) {
-      const v = row[key]
-      if (typeof v === 'number' && Number.isFinite(v)) values.push(v)
-    }
-  }
-  return values
-}
-
-function computeFittedYDomain(
-  data: ChartDataPoint[],
-  series: ChartSeries[],
-  clamp?: [number, number]
-): [number, number] {
-  const values = collectNumericValues(data, series)
-  if (!values.length) return [0, 10]
-
-  let min = Math.min(...values)
-  let max = Math.max(...values)
-  const span = max - min || 0.5
-  const pad = Math.max(span * 0.15, 0.35)
-  min -= pad
-  max += pad
-
-  if (max - min < 1.5) {
-    const mid = (Math.min(...values) + Math.max(...values)) / 2
-    min = mid - 0.75
-    max = mid + 0.75
-  }
-
-  if (clamp) {
-    min = Math.max(clamp[0], min)
-    max = Math.min(clamp[1], max)
-    if (max <= min) max = min + 1
-  }
-
-  return [Math.round(min * 10) / 10, Math.round(max * 10) / 10]
-}
 
 export function DashboardChart({
   title,
@@ -100,11 +36,31 @@ export function DashboardChart({
   className,
   chartId,
 }: DashboardChartProps) {
-  const resolvedDomain = useMemo((): [number | string, number | string] => {
-    if (yDomain) return yDomain
-    if (fitYDomain) return computeFittedYDomain(data, series, yClamp)
-    return ['auto', 'auto']
-  }, [yDomain, fitYDomain, yClamp, data, series])
+  const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
+
+  const handleSeriesToggle = (seriesKey: string) => {
+    setHiddenSeries(prev => {
+      const next = new Set(prev)
+      if (next.has(seriesKey)) {
+        next.delete(seriesKey)
+      } else {
+        next.add(seriesKey)
+      }
+      return next
+    })
+  }
+
+  // Filter data to exclude hidden series
+  // IMPORTANT: For 6 or fewer cities, always show all series (ignore hiddenSeries)
+  const visibleSeries = useMemo(
+    () => {
+      if (series.length <= 6) {
+        return series // Always show all series for 6 or fewer cities
+      }
+      return series.filter(s => !hiddenSeries.has(s.key))
+    },
+    [series, hiddenSeries]
+  )
 
   return (
     <div className={cn('widget-container flex flex-col', className)}>
@@ -124,52 +80,20 @@ export function DashboardChart({
             {yAxisLabel}
           </p>
         )}
-        <ResponsiveContainer width="100%" height={height}>
-          <LineChart
-            key={chartId ?? title}
-            data={data}
-            margin={{ top: yAxisLabel ? 18 : 8, right: 12, left: 0, bottom: 0 }}
-          >
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-            <XAxis
-              dataKey="year"
-              tick={{ fontSize: 11, fill: 'var(--cs-text-tertiary)' }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tick={{ fontSize: 11, fill: 'var(--cs-text-tertiary)' }}
-              axisLine={false}
-              tickLine={false}
-              width={40}
-              domain={resolvedDomain}
-            />
-            <Tooltip
-              contentStyle={{
-                background: 'var(--cs-surface-elevated)',
-                border: '1px solid var(--cs-border-default)',
-                borderRadius: '8px',
-                fontSize: 12,
-              }}
-            />
-            {series.length > 1 && <Legend wrapperStyle={{ fontSize: 11 }} />}
-            {series.map(s => (
-              <Line
-                key={s.key}
-                type="monotone"
-                dataKey={s.key}
-                name={s.label}
-                stroke={s.color}
-                strokeWidth={s.dashed ? 1.5 : 2}
-                strokeDasharray={s.dashed ? '4 4' : undefined}
-                dot={s.dashed ? false : { r: 3, fill: s.color }}
-                activeDot={{ r: 4 }}
-                connectNulls={false}
-              />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
+        <SvgLinePlot
+          height={height}
+          data={data}
+          series={visibleSeries}
+          yDomain={yDomain}
+          fitYDomain={fitYDomain}
+          yClamp={yClamp}
+        />
       </div>
+      <ChartLegend
+        series={series}
+        onSeriesToggle={series.length > 6 ? handleSeriesToggle : undefined} // Only allow toggling with many series
+        hiddenSeries={series.length > 6 ? hiddenSeries : new Set()} // Don't show hidden state for 6 or fewer
+      />
     </div>
   )
 }

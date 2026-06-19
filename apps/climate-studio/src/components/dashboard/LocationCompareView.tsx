@@ -49,8 +49,7 @@ export function LocationCompareView({
       <div className="widget-container">
         <h2 className="cs-h2 mb-4">City Comparison</h2>
         <p className="mb-4 text-xs text-[var(--cs-text-tertiary)]">
-          Side-by-side metrics at projection year {projectionYear}. Line charts for all cities are
-          below — one line per city, no baseline.
+          Metrics at projection year {projectionYear}.
         </p>
 
         <div className="overflow-x-auto">
@@ -89,7 +88,11 @@ export function LocationCompareView({
       </div>
 
       <div className="dashboard-shadow-bleed">
-        <LocationMultiCityCharts locations={locations} scenario={scenario} embedded />
+        <LocationMultiCityCharts
+          locations={locations}
+          scenario={scenario}
+          embedded
+        />
       </div>
     </div>
   )

@@ -1,19 +1,16 @@
 import React, { useMemo } from 'react'
-import { Callout } from '../ui/callout'
-import { Spinner } from '../ui/spinner'
-import { ImpactGrid, ImpactMetric } from '../ui/impact-grid'
 import { LocationMultiCityCharts } from './LocationMultiCityCharts'
+import { LocationCityMetricsGrid } from './LocationCityMetricsGrid'
 import { LocationOutlookPanel } from './LocationOutlookPanel'
-import { useDashboardEarthEngine } from '../../hooks/useDashboardEarthEngine'
 import { loadMetroBundle } from '../../utils/metroResolver'
 import {
   getTemperatureStats,
-  getWetBulbStats,
   hasTemperatureScenario,
 } from '../../utils/metroChartData'
 import type { SspScenario } from '../../utils/scenarioMapping'
 import { SSP_LABELS } from '../../utils/scenarioMapping'
 import type { LocationSelection } from './LocationSearchBar'
+import { features } from '../../config/features'
 
 interface LocationCityViewProps {
   location: LocationSelection
@@ -27,12 +24,7 @@ export function LocationCityView({
   scenario,
   projectionYear,
 }: LocationCityViewProps) {
-  const { state: eeState, error: eeError } = useDashboardEarthEngine(
-    location.lat,
-    location.lon,
-    projectionYear,
-    scenario
-  )
+  const showExtendedCards = features.cityDashboardCards
 
   const bundle = useMemo(() => loadMetroBundle(location.metroKey), [location.metroKey])
   const temperature = bundle.temperature
@@ -40,11 +32,6 @@ export function LocationCityView({
   const tempStats = useMemo(
     () => getTemperatureStats(temperature, scenario, projectionYear, bundle.wetBulb),
     [temperature, scenario, projectionYear, bundle.wetBulb]
-  )
-
-  const wetBulbStats = useMemo(
-    () => getWetBulbStats(bundle.wetBulb, projectionYear),
-    [bundle.wetBulb, projectionYear]
   )
 
   const annualHasData = hasTemperatureScenario(temperature, scenario)
@@ -75,63 +62,15 @@ export function LocationCityView({
           </div>
         </div>
 
-        {eeState === 'loading' && (
-          <Callout
-            status="info"
-            icon={<Spinner className="h-4 w-4 text-white" />}
-            title="Loading Earth Engine snapshot…"
-            description="Fetching live data for this metro."
-          />
-        )}
-        {eeState === 'error' && (
-          <Callout
-            status="warning"
-            title="Earth Engine unavailable"
-            description={
-              eeError ??
-              'Showing metro projection charts only. Check that the climate backend is running.'
-            }
+        {showExtendedCards && (
+          <LocationOutlookPanel
+            location={location}
+            scenario={scenario}
+            projectionYear={projectionYear}
           />
         )}
 
-        <LocationOutlookPanel
-          location={location}
-          scenario={scenario}
-          projectionYear={projectionYear}
-        />
-
-        <ImpactGrid className="grid-cols-2 gap-4 sm:grid-cols-4">
-          <ImpactMetric
-            label="Annual avg"
-            value={`${tempStats.current.annual_avg.toFixed(1)}°F`}
-            caption={`Baseline ${tempStats.baseline.avg_annual.toFixed(1)}°F`}
-            tone="neutral"
-          />
-          <ImpactMetric
-            label="Days &gt;100°F"
-            value={String(tempStats.current.days_over_100)}
-            caption={
-              tempStats.daysOver100Increase > 0
-                ? `+${tempStats.daysOver100Increase} vs baseline`
-                : `Baseline ${tempStats.baseline.days_over_100}`
-            }
-            tone="red"
-          />
-          {wetBulbStats && (
-            <ImpactMetric
-              label="Wet bulb events"
-              value={String(wetBulbStats.current.wet_bulb_events ?? '—')}
-              caption={`Baseline ${wetBulbStats.baseline.wet_bulb_events ?? '—'}`}
-              tone="violet"
-            />
-          )}
-          <ImpactMetric
-            label="Temp anomaly"
-            value={`${tempStats.tempIncrease > 0 ? '+' : ''}${tempStats.tempIncrease.toFixed(1)}°F`}
-            caption={`At ${projectionYear}`}
-            tone="orange"
-          />
-        </ImpactGrid>
+        <LocationCityMetricsGrid stats={tempStats} projectionYear={projectionYear} />
       </div>
 
       <LocationMultiCityCharts

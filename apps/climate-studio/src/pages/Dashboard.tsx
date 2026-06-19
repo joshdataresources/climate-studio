@@ -8,7 +8,6 @@ import {
 import { getDefaultDashboardMetros } from '../utils/metroResolver'
 import { LocationCityView } from '../components/dashboard/LocationCityView'
 import { LocationCompareView } from '../components/dashboard/LocationCompareView'
-import { DashboardMapBackground } from '../components/dashboard/DashboardMapBackground'
 import { Callout } from '../components/ui/callout'
 import { Slider } from '../components/ui/slider'
 import {
@@ -18,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { PROJECTION_YEARS } from '../utils/metroChartData'
 import {
   DASHBOARD_SCENARIOS,
@@ -28,10 +27,9 @@ import {
   type SspScenario,
 } from '../utils/scenarioMapping'
 import { cn } from '../lib/utils'
-import { features } from '../config/features'
+import { MAX_DASHBOARD_CITIES } from '../config/dashboard'
 
 const COMPARE_TAB = '__compare__'
-const showCityCards = features.cityDashboardCards
 
 function defaultLocations(): LocationSelection[] {
   return getDefaultDashboardMetros().map(m => ({
@@ -43,51 +41,54 @@ function defaultLocations(): LocationSelection[] {
 }
 
 function defaultActiveTab(locations: LocationSelection[]): string {
-  if (!showCityCards || locations.length >= 2) return COMPARE_TAB
+  if (locations.length >= 2) return COMPARE_TAB
   return locations[0]?.metroKey ?? ''
 }
 
 interface CityTabTriggerProps {
   metroKey: string
   label: string
+  isActive: boolean
+  isLastCity: boolean
   onRemove: (metroKey: string) => void
 }
 
-function CityTabTrigger({ metroKey, label, onRemove }: CityTabTriggerProps) {
+function CityTabTrigger({ metroKey, label, isActive, isLastCity, onRemove }: CityTabTriggerProps) {
   return (
-    <TabsTrigger
-      value={metroKey}
+    <div
       className={cn(
-        'gap-1.5 pr-1.5 text-xs',
-        'data-[state=active]:border-[#5a7cec]',
-        'data-[state=active]:bg-[rgba(90,124,236,0.1)]',
-        'data-[state=active]:text-[#5a7cec]',
-        'data-[state=active]:shadow-none'
+        'inline-flex items-center rounded-md border border-transparent',
+        isActive && 'border-[#5a7cec] bg-[rgba(90,124,236,0.1)]'
       )}
     >
-      <span className="truncate">{label}</span>
-      <span
-        role="button"
-        tabIndex={0}
-        aria-label={`Close ${label}`}
-        className="ml-0.5 shrink-0 rounded p-0.5 text-[var(--cs-text-tertiary)] hover:bg-[var(--cs-interactive-hover)] hover:text-[var(--cs-text-primary)]"
-        onPointerDown={e => e.stopPropagation()}
-        onClick={e => {
-          e.preventDefault()
-          e.stopPropagation()
-          onRemove(metroKey)
-        }}
-        onKeyDown={e => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault()
-            e.stopPropagation()
-            onRemove(metroKey)
-          }
-        }}
+      <TabsTrigger
+        value={metroKey}
+        className={cn(
+          'gap-1.5 rounded-md border-0 bg-transparent px-3 py-1.5 text-xs shadow-none',
+          'data-[state=active]:border-0 data-[state=active]:bg-transparent data-[state=active]:shadow-none',
+          isActive
+            ? 'text-[#5a7cec]'
+            : 'text-[var(--cs-text-secondary)] data-[state=active]:text-[var(--cs-text-secondary)]'
+        )}
+      >
+        <span className="truncate">{label}</span>
+      </TabsTrigger>
+      <button
+        type="button"
+        aria-label={isLastCity ? 'Cannot remove last city' : `Close ${label}`}
+        title={isLastCity ? 'At least one city must remain selected' : undefined}
+        className={cn(
+          "mr-1 shrink-0 rounded p-0.5",
+          isLastCity
+            ? "cursor-not-allowed text-[var(--cs-text-muted)] opacity-30"
+            : "text-[var(--cs-text-tertiary)] hover:bg-[var(--cs-interactive-hover)] hover:text-[var(--cs-text-primary)]"
+        )}
+        onClick={() => !isLastCity && onRemove(metroKey)}
+        disabled={isLastCity}
       >
         <X className="h-3 w-3" />
-      </span>
-    </TabsTrigger>
+      </button>
+    </div>
   )
 }
 
@@ -106,19 +107,21 @@ const Dashboard: React.FC = () => {
   const handleLocationSelect = useCallback((selection: LocationSelection) => {
     setSelectedLocations(prev => {
       if (prev.some(l => l.metroKey === selection.metroKey)) return prev
+      if (prev.length >= MAX_DASHBOARD_CITIES) return prev
       return [...prev, selection]
     })
-    if (showCityCards) setActiveTab(selection.metroKey)
   }, [])
 
   const handleRemoveLocation = useCallback(
     (metroKey: string) => {
       setSelectedLocations(prev => {
+        // Don't allow removing the last city
+        if (prev.length <= 1) {
+          return prev
+        }
         const next = prev.filter(l => l.metroKey !== metroKey)
-        if (!showCityCards) {
-          setActiveTab(COMPARE_TAB)
-        } else if (activeTab === metroKey) {
-          setActiveTab(next[0]?.metroKey ?? '')
+        if (activeTab === metroKey) {
+          setActiveTab(next.length >= 2 ? COMPARE_TAB : next[0]?.metroKey ?? '')
         } else if (activeTab === COMPARE_TAB && next.length < 2) {
           setActiveTab(next[0]?.metroKey ?? '')
         }
@@ -134,51 +137,49 @@ const Dashboard: React.FC = () => {
       return
     }
 
-    if (!showCityCards) {
-      setActiveTab(selectedLocations.length >= 2 ? COMPARE_TAB : selectedLocations[0].metroKey)
-      return
-    }
-
-    const activeCityTab = selectedLocations.some(l => l.metroKey === activeTab)
-    if (activeTab === COMPARE_TAB && selectedLocations.length >= 2) return
-    if (activeCityTab) return
-
-    setActiveTab(
-      selectedLocations.length >= 2 ? COMPARE_TAB : selectedLocations[0].metroKey
-    )
-  }, [selectedLocations, activeTab])
+    setActiveTab(current => {
+      if (current === COMPARE_TAB && selectedLocations.length >= 2) return current
+      if (selectedLocations.some(l => l.metroKey === current)) return current
+      return selectedLocations.length >= 2 ? COMPARE_TAB : selectedLocations[0].metroKey
+    })
+  }, [selectedLocations])
 
   const existingMetroKeys = selectedLocations.map(l => l.metroKey)
   const showCompare = selectedLocations.length >= 2
+  const atMetroLimit = selectedLocations.length >= MAX_DASHBOARD_CITIES
 
-  const handleTabChange = useCallback(
-    (value: string) => {
-      if (!showCityCards) {
-        if (value === COMPARE_TAB) setActiveTab(COMPARE_TAB)
-        return
-      }
-      setActiveTab(value)
-    },
-    []
-  )
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value)
+  }, [])
 
   const locationAnalysisControls = (
     <>
       <Callout
         status="warning"
-        title="Test preview"
-        description="This dashboard is for exploration. I am still working on displayed data. I know data is redundant in places."
+        title="Preview"
+        description="This dashboard is still in development. Some charts and metrics may be incomplete, redundant, or inaccurate."
       />
       <h2 className="cs-h2">Location Analysis</h2>
       <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-[minmax(0,1fr)_11rem_minmax(0,1fr)]">
         <div className="min-w-0">
-          <label className="mb-1.5 block text-xs font-medium text-[var(--cs-text-tertiary)]">
-            Search Supported Metros
-          </label>
+          <div className="mb-1.5 flex items-center justify-between gap-2">
+            <label className="text-xs font-medium text-[var(--cs-text-tertiary)]">
+              Search Supported Metros
+            </label>
+            <span className="shrink-0 text-xs text-[var(--cs-text-tertiary)]">
+              {selectedLocations.length}/{MAX_DASHBOARD_CITIES}
+            </span>
+          </div>
           <LocationSearchBar
             onSelect={handleLocationSelect}
             existingMetroKeys={existingMetroKeys}
+            maxMetros={MAX_DASHBOARD_CITIES}
           />
+          {atMetroLimit && (
+            <p className="mt-1.5 text-xs text-[var(--cs-text-tertiary)]">
+              Metro limit reached. Remove a tab to add another.
+            </p>
+          )}
         </div>
 
         <div>
@@ -245,6 +246,8 @@ const Dashboard: React.FC = () => {
           key={loc.metroKey}
           metroKey={loc.metroKey}
           label={loc.metroName}
+          isActive={activeTab === loc.metroKey}
+          isLastCity={selectedLocations.length === 1}
           onRemove={handleRemoveLocation}
         />
       ))}
@@ -261,7 +264,6 @@ const Dashboard: React.FC = () => {
 
   return (
     <div className="dashboard-page">
-      <DashboardMapBackground />
       <div className="dashboard-page-inner flex flex-col gap-4">
         {selectedLocations.length === 0 ? (
           <>
@@ -283,23 +285,21 @@ const Dashboard: React.FC = () => {
               )}
             </div>
 
-            {showCityCards &&
-              selectedLocations.map(loc => (
-                <TabsContent key={loc.metroKey} value={loc.metroKey} className="mt-0">
+            {/* Only mount the active panel — hidden Radix tabs kept stale Recharts line layers alive */}
+            {showCompare && activeTab === COMPARE_TAB && (
+              <div className="mt-0">{compareView}</div>
+            )}
+
+            {selectedLocations.map(loc =>
+              activeTab === loc.metroKey ? (
+                <div key={loc.metroKey} className="mt-0">
                   <LocationCityView
                     location={loc}
                     scenario={scenario}
                     projectionYear={projectionYear}
                   />
-                </TabsContent>
-              ))}
-
-            {showCityCards && showCompare ? (
-              <TabsContent value={COMPARE_TAB} className="mt-0">
-                {compareView}
-              </TabsContent>
-            ) : (
-              !showCityCards && compareView
+                </div>
+              ) : null
             )}
           </Tabs>
         )}

@@ -50,17 +50,36 @@ export interface MetroChartInput {
   wetBulb: WetBulbRecord | null
 }
 
-/** Distinct line colors for multi-metro charts (up to 8 cities). */
+/** Primary palette for multi-metro charts; optimized for visibility and contrast */
 export const METRO_CHART_COLORS = [
-  '#ef4444',
-  '#3b82f6',
-  '#22c55e',
-  '#f97316',
-  '#8b5cf6',
-  '#06b6d4',
-  '#eab308',
-  '#ec4899',
+  '#ef4444', // red
+  '#3b82f6', // blue
+  '#22c55e', // green
+  '#f97316', // orange
+  '#8b5cf6', // purple
+  '#06b6d4', // cyan
+  '#eab308', // yellow
+  '#ec4899', // pink
+  '#14b8a6', // teal
+  '#f43f5e', // rose
+  '#84cc16', // lime
+  '#6366f1', // indigo
+  '#0ea5e9', // sky
+  '#d946ef', // fuchsia
+  '#64748b', // slate
+  '#a855f7', // violet
 ] as const
+
+/** Distinct stroke color for any metro index (supports all selected cities). */
+export function metroChartColor(index: number): string {
+  if (index < METRO_CHART_COLORS.length) return METRO_CHART_COLORS[index]
+  // Use golden angle for better color distribution
+  const hue = Math.round((index * 137.508) % 360)
+  // Vary saturation and lightness for better distinction
+  const saturation = 55 + ((index % 4) * 10) // 55-85%
+  const lightness = 45 + ((index % 3) * 8) // 45-61%
+  return `hsl(${hue}, ${saturation}%, ${lightness}%)`
+}
 
 function metroSeriesKey(metroKey: string): string {
   return metroKey.replace(/[^a-zA-Z0-9_]/g, '_')
@@ -69,13 +88,14 @@ function metroSeriesKey(metroKey: string): string {
 function unionProjectionYears(
   metros: MetroChartInput[],
   scenario: SspScenario,
-  preferWetBulb = false
+  includeWetBulb = false
 ): number[] {
   const yearSet = new Set<number>()
   for (const metro of metros) {
-    if (preferWetBulb && metro.wetBulb?.projections) {
+    if (includeWetBulb && metro.wetBulb?.projections) {
       wetBulbYears(metro.wetBulb).forEach(y => yearSet.add(y))
-    } else if (metro.temperature) {
+    }
+    if (metro.temperature) {
       projectionYears(metro.temperature, scenario).forEach(y => yearSet.add(y))
     }
   }
@@ -87,21 +107,34 @@ function buildMultiCitySeries(
   years: number[],
   getValue: (metro: MetroChartInput, year: number) => number | undefined
 ): { data: ChartDataPoint[]; series: { key: string; label: string; color: string }[] } {
-  const series = metros.map((metro, index) => ({
-    key: metroSeriesKey(metro.metroKey),
-    label: metro.metroName,
-    color: METRO_CHART_COLORS[index % METRO_CHART_COLORS.length],
-  }))
+  console.log('[buildMultiCitySeries] Input metros:', metros.length, metros.map(m => m.metroKey))
+
+  const series = metros.map((metro, index) => {
+    const s = {
+      key: metroSeriesKey(metro.metroKey),
+      label: metro.metroName,
+      color: metroChartColor(index),
+    }
+    console.log(`[buildMultiCitySeries] Series ${index}: key="${s.key}", label="${s.label}", color="${s.color}"`)
+    return s
+  })
 
   const data = years.map(year => {
     const row: ChartDataPoint = { year }
     for (const metro of metros) {
       const value = getValue(metro, year)
+      const key = metroSeriesKey(metro.metroKey)
       if (value != null) {
-        row[metroSeriesKey(metro.metroKey)] = value
+        row[key] = value
       }
     }
     return row
+  })
+
+  console.log('[buildMultiCitySeries] Output:', {
+    seriesCount: series.length,
+    dataRows: data.length,
+    sampleRow: data[0]
   })
 
   return { data, series }
@@ -112,10 +145,21 @@ export function buildMultiCityTemperatureTrajectory(
   scenario: SspScenario
 ): { data: ChartDataPoint[]; series: { key: string; label: string; color: string }[] } {
   const years = unionProjectionYears(metros, scenario)
-  return buildMultiCitySeries(metros, years, (metro, year) => {
+  const result = buildMultiCitySeries(metros, years, (metro, year) => {
     if (!metro.temperature) return undefined
     return rowAtYear(metro.temperature, scenario, year)?.annual_avg
   })
+
+  console.log('[buildMultiCityTemperatureTrajectory] Built chart:', {
+    metroCount: metros.length,
+    metroKeys: metros.map(m => m.metroKey),
+    seriesCount: result.series.length,
+    seriesKeys: result.series.map(s => s.key),
+    dataRows: result.data.length,
+    firstRow: result.data[0]
+  })
+
+  return result
 }
 
 export function buildMultiCitySummerSeries(
@@ -171,8 +215,12 @@ export function metrosToChartInputs(
   locations: { metroKey: string; metroName: string }[],
   loadBundle: (key: string) => MetroDataBundle
 ): MetroChartInput[] {
-  return locations.map(loc => {
+  console.log('[metrosToChartInputs] Processing locations:', locations.map(l => l.metroKey))
+
+  const result = locations.map((loc, idx) => {
     const bundle = loadBundle(loc.metroKey)
+    console.log(`[metrosToChartInputs] ${idx}: ${loc.metroKey} -> has temp: ${!!bundle.temperature}`)
+
     return {
       metroKey: loc.metroKey,
       metroName: loc.metroName,
@@ -180,6 +228,9 @@ export function metrosToChartInputs(
       wetBulb: bundle.wetBulb,
     }
   })
+
+  console.log('[metrosToChartInputs] Result count:', result.length)
+  return result
 }
 
 function wetBulbYears(wetBulb: WetBulbRecord): number[] {
@@ -711,7 +762,7 @@ function buildMultiCityRiverMetricSeries(
   const perMetro = locations
     .map((loc, index) => ({
       loc,
-      color: METRO_CHART_COLORS[index % METRO_CHART_COLORS.length],
+      color: metroChartColor(index),
       points: buildDroughtSeries(loc.metroName, scenario),
     }))
     .filter(entry => entry.points.length > 0)
@@ -785,7 +836,7 @@ export function buildMultiCityProjectedPrecipitation(
   const perMetro = locations
     .map((loc, index) => ({
       loc,
-      color: METRO_CHART_COLORS[index % METRO_CHART_COLORS.length],
+      color: metroChartColor(index),
       points: baselines[loc.metroKey]
         ? buildProjectedPrecipitationSeries(loc.metroName, baselines[loc.metroKey], scenario)
         : [],

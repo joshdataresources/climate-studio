@@ -480,24 +480,28 @@
   --cs-interactive-active: rgba(255, 255, 255, 0.15);
   --cs-interactive-selected: var(--cs-brand-primary-muted);
 
-  /* Ambient canvas mesh — warm anomaly-toned base (matches temp layer palette) */
+  /* Ambient canvas mesh — brand blue on near-black */
   --cs-canvas-mesh:
-    radial-gradient(ellipse 80% 60% at 82% -8%, rgba(251, 191, 36, 0.09), transparent 62%),
-    radial-gradient(ellipse 65% 50% at -2% 32%, rgba(251, 146, 60, 0.07), transparent 58%),
-    radial-gradient(ellipse 72% 52% at 102% 78%, rgba(254, 249, 195, 0.06), transparent 60%),
-    radial-gradient(ellipse 55% 42% at 48% 102%, rgba(245, 158, 11, 0.05), transparent 55%);
+    radial-gradient(ellipse 80% 60% at 82% -8%, rgba(67, 126, 252, 0.08), transparent 62%),
+    radial-gradient(ellipse 65% 50% at -2% 32%, rgba(42, 95, 212, 0.06), transparent 58%),
+    radial-gradient(ellipse 72% 52% at 102% 78%, rgba(107, 155, 255, 0.05), transparent 60%),
+    radial-gradient(ellipse 55% 42% at 48% 102%, rgba(67, 126, 252, 0.04), transparent 55%);
 
-  /* Animated atmosphere — ~60% wash parity with default temp-anomaly layer opacity */
+  /* Animated atmosphere — brand blue only on black */
   --cs-atmosphere-layer-a:
-    radial-gradient(ellipse 82% 68% at 88% -4%, rgba(254, 249, 195, 0.14), transparent 62%),
-    radial-gradient(ellipse 68% 56% at 0% 38%, rgba(250, 204, 21, 0.11), transparent 58%),
-    radial-gradient(ellipse 74% 58% at 100% 72%, rgba(251, 146, 60, 0.10), transparent 60%),
-    radial-gradient(ellipse 58% 46% at 44% 102%, rgba(245, 158, 11, 0.08), transparent 56%);
+    radial-gradient(ellipse 82% 68% at 88% -4%, rgba(67, 126, 252, 0.16), transparent 62%),
+    radial-gradient(ellipse 68% 56% at 0% 38%, rgba(42, 95, 212, 0.12), transparent 58%),
+    radial-gradient(ellipse 74% 58% at 100% 72%, rgba(107, 155, 255, 0.10), transparent 60%),
+    radial-gradient(ellipse 58% 46% at 44% 102%, rgba(67, 126, 252, 0.06), transparent 56%);
   --cs-atmosphere-layer-b:
-    radial-gradient(ellipse 52% 44% at 64% 44%, rgba(249, 115, 22, 0.09), transparent 62%),
-    radial-gradient(ellipse 46% 40% at 16% 66%, rgba(253, 224, 71, 0.08), transparent 58%);
-  --cs-atmosphere-opacity-min: 0.52;
-  --cs-atmosphere-opacity-max: 0.72;
+    radial-gradient(ellipse 52% 44% at 64% 44%, rgba(107, 155, 255, 0.11), transparent 62%),
+    radial-gradient(ellipse 46% 40% at 16% 66%, rgba(67, 126, 252, 0.09), transparent 58%),
+    radial-gradient(ellipse 40% 36% at 78% 28%, rgba(42, 95, 212, 0.07), transparent 55%);
+  --cs-atmosphere-opacity-min: 0.58;
+  --cs-atmosphere-opacity-max: 0.82;
+
+  --cs-atmosphere-blur-a: 48px;
+  --cs-atmosphere-blur-b: 52px;
 }
 
 [data-theme="light"] {
@@ -641,9 +645,23 @@
   --cs-gradient-precip: linear-gradient(to right, #f1f5f9, #e3f2fd, #90caf9, #42a5f5, #1e88e5, #0d47a1);
 
   --cs-canvas-mesh:
-    radial-gradient(60% 50% at 80% -10%, rgba(67, 126, 252, .10), transparent 60%),
-    radial-gradient(50% 40% at 0% 30%, rgba(168, 85, 247, .08), transparent 60%),
-    radial-gradient(70% 50% at 100% 80%, rgba(14, 165, 233, .08), transparent 60%);
+    radial-gradient(60% 50% at 80% -10%, rgba(67, 126, 252, 0.08), transparent 60%),
+    radial-gradient(50% 40% at 0% 30%, rgba(107, 155, 255, 0.06), transparent 60%),
+    radial-gradient(70% 50% at 100% 80%, rgba(67, 126, 252, 0.06), transparent 60%);
+
+  /* Animated atmosphere — soft blue wash on white */
+  --cs-atmosphere-layer-a:
+    radial-gradient(ellipse 80% 62% at 84% -6%, rgba(67, 126, 252, 0.10), transparent 62%),
+    radial-gradient(ellipse 66% 52% at -2% 36%, rgba(107, 155, 255, 0.08), transparent 58%),
+    radial-gradient(ellipse 72% 54% at 100% 74%, rgba(67, 126, 252, 0.07), transparent 60%);
+  --cs-atmosphere-layer-b:
+    radial-gradient(ellipse 50% 42% at 58% 48%, rgba(107, 155, 255, 0.08), transparent 62%),
+    radial-gradient(ellipse 44% 38% at 18% 68%, rgba(67, 126, 252, 0.06), transparent 58%);
+  --cs-atmosphere-opacity-min: 0.50;
+  --cs-atmosphere-opacity-max: 0.72;
+
+  --cs-atmosphere-blur-a: 56px;
+  --cs-atmosphere-blur-b: 64px;
 }
 
 :root body,

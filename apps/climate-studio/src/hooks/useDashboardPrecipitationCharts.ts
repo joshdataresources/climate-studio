@@ -46,6 +46,18 @@ export function useDashboardPrecipitationCharts(
     setState('loading')
     setError(null)
 
+    // Keep series count in sync while EE fetches — placeholders for new metros
+    setTrajectories(prev => {
+      const byKey = new Map(prev.map(t => [t.metroKey, t]))
+      return locations.map(loc =>
+        byKey.get(loc.metroKey) ?? {
+          metroKey: loc.metroKey,
+          metroName: loc.metroName,
+          points: [],
+        }
+      )
+    })
+
     Promise.all(
       locations.map(async loc => {
         const snap = await fetchDashboardPrecipitationSnapshot(
@@ -101,10 +113,17 @@ export function useDashboardPrecipitationCharts(
     return () => controller.abort()
   }, [locationKey, locations, scenario])
 
-  const charts = useMemo(
-    () => buildPrecipitationChartsFromTrajectories(trajectories),
-    [trajectories]
-  )
+  const charts = useMemo(() => {
+    const trajectoryByKey = new Map(trajectories.map(t => [t.metroKey, t]))
+    const aligned = locations.map(loc =>
+      trajectoryByKey.get(loc.metroKey) ?? {
+        metroKey: loc.metroKey,
+        metroName: loc.metroName,
+        points: [],
+      }
+    )
+    return buildPrecipitationChartsFromTrajectories(aligned)
+  }, [trajectories, locations])
 
   const singleCityBaselines = useMemo(() => {
     if (locations.length !== 1 || !trajectories.length) return null

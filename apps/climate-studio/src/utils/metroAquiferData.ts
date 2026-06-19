@@ -3,7 +3,7 @@ import { point } from '@turf/helpers'
 import aquifersData from '../data/aquifers.json'
 import {
   PROJECTION_YEARS,
-  METRO_CHART_COLORS,
+  metroChartColor,
   type ChartDataPoint,
 } from './metroChartData'
 
@@ -158,27 +158,31 @@ export function buildMultiCityAquiferStorageSeries(
   series: { key: string; label: string; color: string }[]
   aquiferNames: Record<string, string>
 } {
-  const perMetro = locations
-    .map((loc, index) => {
-      const match = findAquiferAt(loc.lat, loc.lon)
-      const points = buildAquiferStorageSeries(loc.lat, loc.lon)
-      return {
-        loc,
-        match,
-        color: METRO_CHART_COLORS[index % METRO_CHART_COLORS.length],
-        points,
-      }
-    })
-    .filter(entry => entry.points.length > 0 && entry.match)
-
-  if (!perMetro.length) {
+  if (!locations.length) {
     return { data: [], series: [], aquiferNames: {} }
   }
 
-  const series = perMetro.map(({ loc, color }) => ({
+  const perMetro = locations.map((loc, index) => {
+    const match = findAquiferAt(loc.lat, loc.lon)
+    const points = buildAquiferStorageSeries(loc.lat, loc.lon)
+    return {
+      loc,
+      match,
+      color: metroChartColor(index),
+      points,
+      hasData: points.length > 0 && !!match,
+    }
+  })
+
+  const hasAnyData = perMetro.some(entry => entry.hasData)
+  if (!hasAnyData) {
+    return { data: [], series: [], aquiferNames: {} }
+  }
+
+  const series = locations.map((loc, index) => ({
     key: metroSeriesKey(loc.metroKey),
     label: loc.metroName,
-    color,
+    color: metroChartColor(index),
   }))
 
   const aquiferNames: Record<string, string> = {}
@@ -188,7 +192,8 @@ export function buildMultiCityAquiferStorageSeries(
 
   const data = PROJECTION_YEARS.map(year => {
     const row: ChartDataPoint = { year }
-    for (const { loc, points } of perMetro) {
+    for (const { loc, points, hasData } of perMetro) {
+      if (!hasData) continue
       const pointRow = points.find(p => p.year === year)
       if (pointRow?.remainingPct != null) {
         row[metroSeriesKey(loc.metroKey)] = pointRow.remainingPct as number

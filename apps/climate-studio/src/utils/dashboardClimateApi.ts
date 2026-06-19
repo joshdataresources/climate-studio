@@ -1,5 +1,5 @@
 import { getBackendBaseUrl } from '../config/backend'
-import { PROJECTION_YEARS } from './metroChartData'
+import { PROJECTION_YEARS, metroChartColor } from './metroChartData'
 import { scenarioToSsp, sspToRcp, type SspScenario } from './scenarioMapping'
 
 export interface DashboardEarthEngineSnapshot {
@@ -201,17 +201,6 @@ export async function fetchDashboardPrecipitationSnapshot(
   }
 }
 
-const METRO_CHART_COLORS = [
-  '#ef4444',
-  '#3b82f6',
-  '#22c55e',
-  '#f97316',
-  '#8b5cf6',
-  '#06b6d4',
-  '#eab308',
-  '#ec4899',
-] as const
-
 function metroSeriesKey(metroKey: string): string {
   return metroKey.replace(/[^a-zA-Z0-9_]/g, '_')
 }
@@ -233,29 +222,29 @@ export function buildPrecipitationChartsFromTrajectories(
   soilMoisture: PrecipitationChartBundle
 } {
   const empty: PrecipitationChartBundle = { data: [], series: [] }
-  const valid = trajectories.filter(t => t.points.some(p => p.precipitationMm != null))
-  if (!valid.length) {
+  if (!trajectories.length) {
     return { precipitation: empty, drought: empty, soilMoisture: empty }
   }
 
   const years = [...PROJECTION_YEARS]
 
-  const series = valid.map((t, index) => ({
+  const series = trajectories.map((t, index) => ({
     key: metroSeriesKey(t.metroKey),
     label: t.metroName,
-    color: METRO_CHART_COLORS[index % METRO_CHART_COLORS.length],
+    color: metroChartColor(index),
   }))
 
   function build(valueKey: 'precipitationMm' | 'droughtIndex' | 'soilMoisture'): PrecipitationChartBundle {
     const data = years.map(year => {
       const row: { year: number; [key: string]: number | string } = { year }
-      for (const t of valid) {
+      for (const t of trajectories) {
         const point = t.points.find(p => p.year === year)
         const value = point?.[valueKey]
         if (value != null) row[metroSeriesKey(t.metroKey)] = value
       }
       return row
     })
+
     return { data, series }
   }
 

@@ -9,6 +9,7 @@ import {
   type MetroMatch,
 } from '../../utils/metroResolver'
 import { cn } from '../../lib/utils'
+import { MAX_DASHBOARD_CITIES } from '../../config/dashboard'
 
 export interface LocationSelection {
   metroKey: string
@@ -22,6 +23,8 @@ export interface LocationSelection {
 interface LocationSearchBarProps {
   onSelect: (selection: LocationSelection) => void
   existingMetroKeys?: string[]
+  /** Block adds when this many metros are already selected. */
+  maxMetros?: number
   className?: string
 }
 
@@ -55,6 +58,7 @@ function filterMetros(query: string): MetroMatch[] {
 export function LocationSearchBar({
   onSelect,
   existingMetroKeys = [],
+  maxMetros = MAX_DASHBOARD_CITIES,
   className,
 }: LocationSearchBarProps) {
   const listboxId = useId()
@@ -114,6 +118,10 @@ export function LocationSearchBar({
         setFeedback(`${metro.name} is already on the dashboard.`)
         return false
       }
+      if (existingMetroKeys.length >= maxMetros) {
+        setFeedback(`Maximum ${maxMetros} metros. Remove one to add another.`)
+        return false
+      }
       onSelect(matchToSelection(metro))
       setQuery('')
       setOpen(false)
@@ -121,7 +129,7 @@ export function LocationSearchBar({
       inputRef.current?.blur()
       return true
     },
-    [existingMetroKeys, onSelect]
+    [existingMetroKeys, maxMetros, onSelect]
   )
 
   const selectHighlighted = useCallback(() => {
@@ -249,7 +257,7 @@ export function LocationSearchBar({
               window.setTimeout(() => setOpen(false), 150)
             }}
             onKeyDown={handleInputKeyDown}
-            placeholder={`Filter ${SUPPORTED_METRO_COUNT} supported metros…`}
+            placeholder={`Filter ${SUPPORTED_METRO_COUNT} metros · up to ${maxMetros} on dashboard…`}
             className="pr-9"
             autoComplete="off"
           />
@@ -262,7 +270,7 @@ export function LocationSearchBar({
           type="button"
           variant="secondary"
           className="shrink-0"
-          disabled={filteredMetros.length === 0}
+          disabled={filteredMetros.length === 0 || existingMetroKeys.length >= maxMetros}
           onMouseDown={e => e.preventDefault()}
           onClick={selectHighlighted}
         >
