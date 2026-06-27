@@ -57,6 +57,9 @@ export function LocationMultiCityCharts({
   embedded = false,
   showBaselines,
 }: LocationMultiCityChartsProps) {
+  console.log('[LocationMultiCityCharts] ===================')
+  console.log('[LocationMultiCityCharts] Rendering with', locations.length, 'locations:', locations.map(l => l.metroKey))
+  console.log('[LocationMultiCityCharts] Scenario:', scenario)
   const compareMode = locations.length > 1
   const withBaselines = showBaselines ?? !compareMode
   const { charts: eeCharts, trajectories, singleCityBaselines } = useDashboardPrecipitationCharts(
@@ -65,19 +68,41 @@ export function LocationMultiCityCharts({
   )
 
   const locationsKey = locations.map(l => l.metroKey).join('|')
+  console.log('[LocationMultiCityCharts] locationsKey:', locationsKey)
+
   // Remove chart key from individual charts to prevent remounting when cities change
   // The key prop on charts was causing React to unmount/remount when cities were added/removed
 
-  // Build chart metros with proper memoization - use locationsKey for proper dependency tracking
+  // Build chart metros with proper memoization
+  // IMPORTANT: We must use locations in the dependency array since we access it in the callback
+  // The locationsKey helps us debug when it actually changes
   const chartMetros = useMemo(
-    () => metrosToChartInputs(locations, loadMetroBundle),
-    [locationsKey]
+    () => {
+      console.log('[LocationMultiCityCharts] Building chartMetros for:', locationsKey)
+      const result = metrosToChartInputs(locations, loadMetroBundle)
+      console.log('[LocationMultiCityCharts] chartMetros result:', result.map(m => ({
+        key: m.metroKey,
+        hasTemp: !!m.temperature,
+        hasWetBulb: !!m.wetBulb
+      })))
+      return result
+    },
+    [locations, locationsKey] // Both needed: locations for correctness, locationsKey for debugging
   )
 
   const cityLabels = locations.map(l => l.metroName).join(' · ')
 
   const annualChart = useMemo(
-    () => buildMultiCityTemperatureTrajectory(chartMetros, scenario),
+    () => {
+      console.log('[LocationMultiCityCharts] Building annual chart with', chartMetros.length, 'metros')
+      const result = buildMultiCityTemperatureTrajectory(chartMetros, scenario)
+      console.log('[LocationMultiCityCharts] Annual chart result:', {
+        seriesCount: result.series.length,
+        dataRows: result.data.length,
+        seriesKeys: result.series.map(s => s.key)
+      })
+      return result
+    },
     [chartMetros, scenario]
   )
 

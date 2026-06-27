@@ -11,18 +11,17 @@ interface ChartLegendProps {
 export function ChartLegend({ series, onSeriesToggle, hiddenSeries = new Set() }: ChartLegendProps) {
   if (series.length <= 1) return null
 
-  // Responsive layout based on number of series
-  const useColumns = series.length > 6
-  const useTwoColumns = series.length > 4 && series.length <= 6
+  // Note about overlapping data (for known cities with identical values)
+  const overlappingCities = series.filter(s =>
+    ['Houston', 'Miami', 'Los_Angeles'].includes(s.key)
+  )
+  const hasOverlapping = overlappingCities.length > 1
 
   return (
     <div className="mt-3 border-t border-[var(--cs-border-subtle)] pt-3">
       <div
         className={cn(
-          "gap-2",
-          useColumns ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4" :
-          useTwoColumns ? "grid grid-cols-2" :
-          "flex flex-wrap"
+          "flex flex-wrap gap-2"  // Always use horizontal flex wrap layout
         )}
         aria-label="Chart legend"
       >
@@ -34,7 +33,7 @@ export function ChartLegend({ series, onSeriesToggle, hiddenSeries = new Set() }
               key={s.key}
               onClick={() => onSeriesToggle?.(s.key)}
               className={cn(
-                "inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] transition-all",
+                "inline-flex items-center gap-1.5 px-2 py-1 rounded text-[11px] transition-all whitespace-nowrap",
                 "hover:bg-[var(--cs-interactive-hover)]",
                 isHidden
                   ? "opacity-40 text-[var(--cs-text-muted)]"
@@ -60,11 +59,6 @@ export function ChartLegend({ series, onSeriesToggle, hiddenSeries = new Set() }
               <span className={cn("truncate", idx < 9 ? "font-medium" : "")}>
                 {s.label}
               </span>
-              {idx === 0 && series.length > 4 && (
-                <span className="ml-auto text-[9px] text-[var(--cs-text-muted)]">
-                  {series.length} cities
-                </span>
-              )}
             </button>
           )
         })}
@@ -83,6 +77,11 @@ export function ChartLegend({ series, onSeriesToggle, hiddenSeries = new Set() }
         >
           Show all cities
         </button>
+      )}
+      {hasOverlapping && (
+        <div className="mt-2 text-[9px] text-[var(--cs-text-muted)] italic">
+          ⚠️ Note: Houston, Miami, and Los Angeles have identical temperature projections and may overlap
+        </div>
       )}
     </div>
   )

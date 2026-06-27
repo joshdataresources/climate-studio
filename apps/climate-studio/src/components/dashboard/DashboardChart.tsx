@@ -36,6 +36,11 @@ export function DashboardChart({
   className,
   chartId,
 }: DashboardChartProps) {
+  console.log(`[DashboardChart ${chartId || title}] Input:`, {
+    seriesCount: series.length,
+    dataRows: data.length,
+    seriesKeys: series.map(s => s.key)
+  })
   const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
 
   const handleSeriesToggle = (seriesKey: string) => {
@@ -51,15 +56,24 @@ export function DashboardChart({
   }
 
   // Filter data to exclude hidden series
-  // IMPORTANT: For 6 or fewer cities, always show all series (ignore hiddenSeries)
+  // Changed: Show all series by default, only filter if user explicitly hides them
   const visibleSeries = useMemo(
     () => {
-      if (series.length <= 6) {
-        return series // Always show all series for 6 or fewer cities
-      }
-      return series.filter(s => !hiddenSeries.has(s.key))
+      // Always show all series unless user has explicitly hidden some
+      const result = hiddenSeries.size > 0
+        ? series.filter(s => !hiddenSeries.has(s.key))
+        : series // Show all series by default
+
+      console.log(`[DashboardChart ${chartId || title}] Visible series:`, {
+        inputCount: series.length,
+        visibleCount: result.length,
+        hiddenCount: hiddenSeries.size,
+        showingAll: hiddenSeries.size === 0
+      })
+
+      return result
     },
-    [series, hiddenSeries]
+    [series, hiddenSeries, chartId, title]
   )
 
   return (
@@ -91,8 +105,8 @@ export function DashboardChart({
       </div>
       <ChartLegend
         series={series}
-        onSeriesToggle={series.length > 6 ? handleSeriesToggle : undefined} // Only allow toggling with many series
-        hiddenSeries={series.length > 6 ? hiddenSeries : new Set()} // Don't show hidden state for 6 or fewer
+        onSeriesToggle={series.length > 1 ? handleSeriesToggle : undefined} // Allow toggling for 2+ series
+        hiddenSeries={hiddenSeries}
       />
     </div>
   )

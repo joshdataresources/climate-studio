@@ -11,6 +11,7 @@ import DesignSystemPage from './design-system/DesignSystemPage'
 import GRACEDemo from './pages/GRACEDemo'
 import { SettingsPage } from './pages/SettingsPage'
 import Dashboard from './pages/Dashboard'
+import ChartVerification from './pages/ChartVerification'
 import { features } from './config/features'
 
 function AppProviders({ children }: { children: ReactNode }) {
@@ -54,6 +55,7 @@ const router = createBrowserRouter(
         path: 'dashboard',
         element: features.locationDashboard ? <Dashboard /> : <Navigate to="/" replace />,
       },
+      { path: 'chart-verify', element: <ChartVerification /> },
       { path: 'design-system', element: <DesignSystemPage /> },
       { path: 'settings', element: <SettingsPage /> },
     ],
