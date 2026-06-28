@@ -1,0 +1,18 @@
+# Local-dev deps with wheel-friendly version floors so pip installs prebuilt
+# binaries instead of trying to compile shapely/numpy from source on newer
+# Python (3.12 / 3.13). Leaves the pinned requirements.txt (used by Render)
+# untouched.
+#
+#   python3 -m venv .venv && source .venv/bin/activate
+#   pip install --upgrade pip
+#   pip install -r requirements-local.txt
+#
+flask>=3.0
+flask-cors>=4.0
+earthengine-api>=0.1.384
+h3>=4.1,<5            # code uses the h3 v4 API — stay below 5.x
+numpy>=1.26          # 2.x on Python 3.13; both have wheels
+shapely>=2.0.4       # first releases with cp312/cp313 wheels
+requests>=2.31
+python-dotenv>=1.0
+gunicorn>=21.2

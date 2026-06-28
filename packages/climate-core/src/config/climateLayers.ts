@@ -10,7 +10,8 @@ export type ClimateLayerId =
   | 'precipitation_drought'
   // | 'groundwater_depletion'  // Hidden until GRACE data access is obtained
   | 'megaregion_timeseries'
-  | 'wet_bulb';
+  | 'wet_bulb'
+  | 'river_flow_status';
 
 export type ClimateControl =
   | 'seaLevelFeet'
@@ -127,6 +128,38 @@ export const climateLayers: ClimateLayerDefinition[] = [
       layerType: 'raster',
       blendMode: 'normal',
       valueProperty: 'depth'
+    }
+  },
+  // 1b. Live River Flow (real-time USGS gauges)
+  {
+    id: 'river_flow_status',
+    title: 'Live River Flow (USGS)',
+    description: 'Real-time river discharge from USGS stream gauges. Zoom into a metro to see live cubic-feet-per-second readings; dot size scales with flow.',
+    category: 'coastal',
+    source: {
+      name: 'USGS NWIS Instantaneous Values (real-time)',
+      url: 'https://waterservices.usgs.gov/'
+    },
+    defaultActive: false,
+    controls: [],
+    fetch: {
+      method: 'GET',
+      route: '/api/usgs/streamflow',
+      query: ({ bounds }) => {
+        const b = bounds ?? { north: 41, south: 40, east: -73, west: -74 };
+        // USGS expects west,south,east,north and caps the bbox area, so this
+        // is meaningful at metro zoom (it returns nothing useful zoomed all the way out).
+        return {
+          bbox: `${b.west.toFixed(4)},${b.south.toFixed(4)},${b.east.toFixed(4)},${b.north.toFixed(4)}`
+        };
+      }
+    },
+    style: {
+      color: '#2563eb',
+      opacity: 0.9,
+      layerType: 'point',
+      blendMode: 'normal',
+      valueProperty: 'dischargeCfs'
     }
   },
   // 2. Metro Data Statistics (uses local data, no fetch needed)

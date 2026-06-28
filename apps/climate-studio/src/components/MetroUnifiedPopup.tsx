@@ -343,7 +343,7 @@ export function MetroUnifiedPopup({ metroName, visible, onClose }: MetroUnifiedP
                   </div>
 
                   <div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">At-Risk Population</div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Est. Pop. in Zone</div>
                     <div className="text-sm font-bold text-gray-900 dark:text-white">
                       {(wetBulbStats.current.estimated_at_risk_population || 0).toLocaleString()}
                     </div>

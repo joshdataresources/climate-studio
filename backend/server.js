@@ -2005,6 +2005,98 @@ app.get('/api/usgs/aquifers/regions', (req, res) => {
   });
 });
 
+/**
+ * GET /api/usgs/streamflow
+ * REAL-TIME river discharge from USGS NWIS Instantaneous Values service.
+ * No API key or Earth Engine required — this is a live public feed.
+ *
+ * Query params (one of):
+ *   - sites:  comma-separated USGS site numbers (e.g. 01646500,08313000)
+ *   - bbox:   west,south,east,north  (returns active gauges in the box)
+ *   - state:  two-letter code (e.g. NY) as a fallback
+ * Returns: GeoJSON FeatureCollection of gauges with the latest discharge (cfs).
+ */
+app.get('/api/usgs/streamflow', generalLimiter, async (req, res) => {
+  try {
+    const { sites, bbox, state } = req.query;
+
+    // USGS NWIS Instantaneous Values, parameter 00060 = discharge (cfs)
+    const params = {
+      format: 'json',
+      parameterCd: '00060',
+      siteStatus: 'active'
+    };
+    if (sites) {
+      params.sites = sites;
+    } else if (bbox) {
+      // USGS expects west,south,east,north and limits bbox area, so callers
+      // should pass a city-scale box.
+      params.bBox = bbox;
+    } else if (state) {
+      params.stateCd = state;
+    } else {
+      return res.status(400).json({
+        success: false,
+        error: 'Provide one of: sites (comma-separated), bbox (W,S,E,N), or state (2-letter code).'
+      });
+    }
+
+    const url = 'https://waterservices.usgs.gov/nwis/iv/';
+    const response = await axios.get(url, { params, timeout: 15000 });
+    const timeSeries = response.data?.value?.timeSeries || [];
+
+    const features = timeSeries
+      .map((ts) => {
+        const site = ts.sourceInfo || {};
+        const geo = site.geoLocation?.geogLocation || {};
+        const lat = parseFloat(geo.latitude);
+        const lon = parseFloat(geo.longitude);
+        if (Number.isNaN(lat) || Number.isNaN(lon)) return null;
+
+        const latest = ts.values?.[0]?.value?.slice(-1)?.[0];
+        const cfs = latest ? parseFloat(latest.value) : null;
+        // USGS uses -999999 as a no-data sentinel
+        const discharge = cfs != null && cfs > -100000 ? cfs : null;
+
+        return {
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [lon, lat] },
+          properties: {
+            siteName: site.siteName || 'Unknown gauge',
+            siteCode: site.siteCode?.[0]?.value || null,
+            dischargeCfs: discharge,
+            dateTime: latest?.dateTime || null,
+            unit: 'ft3/s'
+          }
+        };
+      })
+      .filter(Boolean);
+
+    res.json({
+      success: true,
+      data: {
+        type: 'FeatureCollection',
+        features,
+        metadata: {
+          source: 'USGS NWIS Instantaneous Values (real-time)',
+          sourceUrl: 'https://waterservices.usgs.gov/nwis/iv/',
+          parameter: 'Discharge, cubic feet per second (00060)',
+          retrievedAt: new Date().toISOString(),
+          gaugeCount: features.length,
+          isRealData: true
+        }
+      },
+      source: 'USGS NWIS'
+    });
+  } catch (error) {
+    console.error('❌ USGS streamflow error:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Start server
 const startServer = async () => {
   logEnvWarnings();

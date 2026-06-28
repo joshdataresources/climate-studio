@@ -293,9 +293,9 @@ export const MetroHumidityBubble: React.FC<MetroHumidityBubbleProps> = ({
               <div style={styles.section}>
                 <div style={styles.sectionHeader}>Temperature & Humidity</div>
                 <div style={styles.section2Grid}>
-                  {/* Humid Temp */}
+                  {/* Days over 95°F (was mislabeled "Humid Temp" — it's a day count, not a temperature) */}
                   <div style={styles.section2Item}>
-                    <div style={styles.label}>Humid Temp</div>
+                    <div style={styles.label}>95°+ Days</div>
                     <div style={styles.section2ValueRow}>
                       <span style={styles.valueBold}>{humidTemp}</span>
                     </div>

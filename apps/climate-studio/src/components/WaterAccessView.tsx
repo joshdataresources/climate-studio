@@ -2347,16 +2347,12 @@ export default function WaterAccessView() {
                 font-weight: 600;
                 color: #991b1b;
                 margin: 0;
-              ">Health Impact & Extent</p>
+              ">Danger Zone Extent</p>
             </div>
             <div style="display: flex; flex-direction: column; gap: 4px; padding: 4px 8px;">
               <div style="display: flex; justify-content: space-between;">
-                <p style="font-size: 9px; font-weight: 500; color: #101728; margin: 0;">At-Risk Population:</p>
+                <p style="font-size: 9px; font-weight: 500; color: #101728; margin: 0;">Est. population in zone:</p>
                 <p style="font-size: 10px; font-weight: 700; color: #dc2626; margin: 0;">${(humidityData.estimated_at_risk_population || 0).toLocaleString()}</p>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <p style="font-size: 9px; font-weight: 500; color: #101728; margin: 0;">Casualty Rate:</p>
-                <p style="font-size: 10px; font-weight: 700; color: #dc2626; margin: 0;">${humidityData.casualty_rate_percent || 0}%</p>
               </div>
               <div style="display: flex; justify-content: space-between;">
                 <p style="font-size: 9px; font-weight: 500; color: #101728; margin: 0;">Danger Zone Radius:</p>
@@ -7212,7 +7208,7 @@ export default function WaterAccessView() {
                     year={projectionYear}
                     peakHumidity={`${humidityData.peak_humidity}%`}
                     wetBulbEvents={`${humidityData.wet_bulb_events}`}
-                    humidTemp={`${humidityData.days_over_95F || 0}°`}
+                    humidTemp={`${humidityData.days_over_95F || 0}`}
                     daysOver100={humidityData.days_over_100F ? `${humidityData.days_over_100F}` : 'N/A'}
                     visible={true}
                     showHumidityWetBulb={showHumidityWetBulb}

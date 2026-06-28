@@ -1359,6 +1359,30 @@ export function DeckGLMap({
     controls.seaLevelOpacity
   ])
 
+  // Live River Flow — real-time USGS gauges as dots; radius scales with discharge (cfs)
+  const streamflowLayer = useMemo(() => {
+    if (!isLayerActive("river_flow_status")) return null
+    const data = layerStates.river_flow_status?.data as any
+    if (!data?.features?.length) return null
+    return new ScatterplotLayer({
+      id: 'usgs-streamflow',
+      data: data.features,
+      getPosition: (f: any) => f.geometry?.coordinates,
+      getRadius: (f: any) => {
+        const cfs = f.properties?.dischargeCfs
+        return cfs && cfs > 0 ? Math.min(8000, 600 + Math.sqrt(cfs) * 120) : 500
+      },
+      radiusMinPixels: 3,
+      radiusMaxPixels: 28,
+      getFillColor: (f: any) =>
+        f.properties?.dischargeCfs == null ? [148, 163, 184, 180] : [37, 99, 235, 210],
+      stroked: true,
+      getLineColor: [255, 255, 255, 200],
+      lineWidthMinPixels: 1,
+      pickable: true,
+    })
+  }, [isLayerActive("river_flow_status"), layerStates.river_flow_status])
+
   // Layer order: first in array renders first (bottom), last renders last (top)
   // Desired order (bottom to top): Relief → Sea Level → Precipitation → Future Temp → Heat Map → Population circles
   // Population labels render via Mapbox symbol layers (after DeckGL) to ensure they appear on top
@@ -1451,23 +1475,38 @@ export function DeckGLMap({
       border-top: 10px solid rgb(229, 223, 218);
     `
 
-    // Get temperature data (mock for now - will be replaced with real data)
+    // Get temperature data from the real CMIP6 projections (same source the
+    // map labels use) instead of a hard-coded linear mock.
     const getTempData = (metroName: string, year: number) => {
-      // This will be replaced with actual temperature lookup
-      // For now, return mock data that varies by year
-      const baselineYear = 2025
-      const yearDiff = year - baselineYear
-      const tempIncrease = (yearDiff / 70) * 4 // 4°F increase by 2095
+      const tempData = metroTemperatureData as any
+      const metro = tempData[metroName]
+      const scenario = (controls.scenario === 'rcp85' ? 'ssp585' : 'ssp245')
+
+      // No projection on file for this metro: report nulls rather than invent numbers.
+      if (!metro?.projections?.[scenario]) {
+        return {
+          summer: { temp: null as number | null, change: null as number | null },
+          winter: { temp: null as number | null, change: null as number | null }
+        }
+      }
+
+      const availableYears = Object.keys(metro.projections[scenario]).map(Number).sort((a, b) => a - b)
+      const closestYear = availableYears.reduce((prev, curr) =>
+        Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
+      )
+      const projection = metro.projections[scenario][closestYear]
+      const baseline = metro.baseline_1995_2014 || {}
+
+      const summerChange = baseline.summer_avg
+        ? Math.round(((projection.summer_avg - baseline.summer_avg) / baseline.summer_avg) * 100)
+        : 0
+      const winterChange = baseline.winter_avg
+        ? Math.round(((projection.winter_avg - baseline.winter_avg) / baseline.winter_avg) * 100)
+        : 0
 
       return {
-        summer: {
-          temp: Math.round(85 + tempIncrease),
-          change: Math.round((tempIncrease / 85) * 100)
-        },
-        winter: {
-          temp: Math.round(35 + tempIncrease * 0.8),
-          change: Math.round((tempIncrease * 0.8 / 35) * 100)
-        }
+        summer: { temp: Math.round(projection.summer_avg ?? projection.summer_max ?? 0), change: summerChange },
+        winter: { temp: Math.round(projection.winter_avg ?? projection.winter_min ?? 0), change: winterChange }
       }
     }
 
@@ -1559,6 +1598,7 @@ export function DeckGLMap({
   const layers = [
     topographicReliefTileLayer,    // 1. Bottom - Topographic Relief
     seaLevelTileLayer,             // 2. Sea Level Rise
+    streamflowLayer,               // 2b. Live USGS river flow
     precipitationDroughtLayer,     // 3. Precipitation & Drought (tiles)
     aquiferBoundaryLayer,          // 4. Aquifer boundary outlines (shown with groundwater)
     groundwaterDepletionLayer,     // 5. Groundwater Depletion (hexagons on aquifers)
@@ -1709,7 +1749,7 @@ export function DeckGLMap({
               }
 
               const currentYear = controls.projectionYear ?? 2050
-              const scenario = controls.projectionScenario || 'ssp585'
+              const scenario = (controls.scenario === 'rcp85' ? 'ssp585' : 'ssp245')
               const tempData = getTempData(name || '', currentYear, scenario)
 
               // Use MetroTooltipBubble component

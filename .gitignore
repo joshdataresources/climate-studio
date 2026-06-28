@@ -97,6 +97,11 @@ ee-service-account.json
 *.tmp
 *.temp
 vite.config.js.timestamp-*.mjs
+*.bak
+
+# Climate data regeneration artifacts (transient — the real data lives in the .json files)
+metro_regen_progress.json
+wet_bulb_progress.json
 
 LINKEDIN_TECH_INVENTORY.md
 .claude/
