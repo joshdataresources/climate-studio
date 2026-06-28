@@ -1,6 +1,6 @@
 // Main exports for embedding climate-studio in other apps
 export { GISAnalysisApp } from './components/GISAnalysisApp'
-export { default as WaterAccessView } from './components/WaterAccessView'
+export { default as WaterAccessView } from './components/ClimateStudioView'
 export { default as AquiferProjectionView } from './components/AquiferProjectionView'
 export { ClimateProvider, useClimate } from '@climate-studio/core'
 
@@ -25,3 +25,4 @@ export function ClimateStudioApp({ className }: ClimateStudioAppProps) {
     </ClimateProvider>
   )
 }
+export { default as ClimateStudioView } from './components/ClimateStudioView'

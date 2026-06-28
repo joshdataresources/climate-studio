@@ -25,7 +25,7 @@ async function ensureMapboxToken(): Promise<void> {
     mapboxgl.accessToken = fromEnv
     return
   }
-  const { MAPBOX_ACCESS_TOKEN } = await import('../WaterAccessView')
+  const { MAPBOX_ACCESS_TOKEN } = await import('../ClimateStudioView')
   mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
 }
 

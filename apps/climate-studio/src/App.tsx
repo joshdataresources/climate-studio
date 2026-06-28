@@ -6,7 +6,7 @@ import { ThemeProvider } from './contexts/ThemeContext'
 import { MapProvider } from './contexts/MapContext'
 import { LayerProvider } from './contexts/LayerContext'
 import { AppLayout } from './components/layout/AppLayout'
-import WaterAccessView from './components/WaterAccessView'
+import ClimateStudioView from './components/ClimateStudioView'
 import DesignSystemPage from './design-system/DesignSystemPage'
 import GRACEDemo from './pages/GRACEDemo'
 import { SettingsPage } from './pages/SettingsPage'
@@ -50,7 +50,7 @@ const router = createBrowserRouter(
       </AppProviders>
     ),
     children: [
-      { index: true, element: <WaterAccessView /> },
+      { index: true, element: <ClimateStudioView /> },
       {
         path: 'dashboard',
         element: features.locationDashboard ? <Dashboard /> : <Navigate to="/" replace />,

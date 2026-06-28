@@ -669,7 +669,7 @@ const NO_LAYERS_IN_WIDGET: LayersInWidgetState = {
   topographic: false,
 }
 
-export default function WaterAccessView() {
+export default function ClimateStudioView() {
   const mapContainer = useRef<HTMLDivElement>(null)
   const mapRef = useRef<mapboxgl.Map | null>(null)
   const isMountedRef = useRef(true)
