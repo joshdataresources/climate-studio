@@ -109,7 +109,7 @@ export function findAquiferAt(lat: number, lon: number): AquiferMatch | null {
   return null
 }
 
-function aquiferFeatureAt(lat: number, lon: number) {
+export function aquiferFeatureAt(lat: number, lon: number) {
   const pt = point([lon, lat])
   for (const feature of aquifersData.features) {
     const geom = feature.geometry

@@ -19,8 +19,8 @@ import {
   PROJECTION_YEARS,
 } from '../../utils/metroChartData'
 import {
-  buildWetBulbScatterPoints,
-  buildAquiferDepletionScatterPoints,
+  buildWetBulbBubbleChart,
+  buildAquiferDepletionBubbleChart,
 } from '../../utils/scatterChartData'
 import {
   PRECIP_DROUGHT_SOURCE,
@@ -49,8 +49,6 @@ const AQUIFER_COLOR = '#0891b2'
 interface LocationMultiCityChartsProps {
   locations: LocationSelection[]
   scenario: SspScenario
-  /** Selected projection year — drives the cross-metro scatter snapshots. */
-  projectionYear?: number
   className?: string
   /** When true, skip outer bleed wrapper (nested inside compare panel). */
   embedded?: boolean
@@ -62,7 +60,6 @@ interface LocationMultiCityChartsProps {
 export function LocationMultiCityCharts({
   locations,
   scenario,
-  projectionYear = 2050,
   className,
   embedded = false,
   showBaselines,
@@ -149,13 +146,13 @@ export function LocationMultiCityCharts({
     [locations]
   )
 
-  const wetBulbScatter = useMemo(
-    () => buildWetBulbScatterPoints(locations, projectionYear),
-    [locations, projectionYear]
+  const wetBulbBubbles = useMemo(
+    () => buildWetBulbBubbleChart(locations, WET_BULB_COLOR),
+    [locations]
   )
 
-  const aquiferScatter = useMemo(
-    () => buildAquiferDepletionScatterPoints(locations),
+  const aquiferBubbles = useMemo(
+    () => buildAquiferDepletionBubbleChart(locations, AQUIFER_COLOR),
     [locations]
   )
 
@@ -240,30 +237,31 @@ export function LocationMultiCityCharts({
 
   const scatterCharts = (
     <>
-      {wetBulbScatter.points.length > 0 && (
+      {wetBulbBubbles.points.length > 0 && (
         <DashboardScatterChart
-          title="Wet-Bulb Risk Across Metros"
-          subtitle={`All metros at ${wetBulbScatter.decade} · dot size = dangerous wet-bulb events/yr`}
+          title="Wet-Bulb Risk Over Time"
+          subtitle="Avg summer humidity by decade · bubble size = dangerous wet-bulb events/yr"
           source="NASA NEX-GDDP-CMIP6 · Stull wet-bulb"
-          points={wetBulbScatter.points}
-          xLabel="days over 95°F per year"
+          points={wetBulbBubbles.points}
+          series={wetBulbBubbles.series}
+          xLabel="year"
           yLabel="humidity"
-          highlightColor={WET_BULB_COLOR}
+          xTicks={[2025, 2035, 2045, 2055, 2065, 2075]}
           formatX={v => String(Math.round(v))}
           formatY={v => `${Math.round(v)}%`}
         />
       )}
-      {aquiferScatter.length > 0 && (
+      {aquiferBubbles.points.length > 0 && (
         <DashboardScatterChart
-          title="Aquifer Depletion by 2100"
-          subtitle="US principal aquifers · share of 2025 storage lost"
+          title="Aquifer Depletion Over Time"
+          subtitle="Share of 2025 storage lost · bubble size = aquifer footprint area"
           source={AQUIFER_SOURCE}
-          points={aquiferScatter}
-          xLabel="2025 storage (trillion gallons, log scale)"
+          points={aquiferBubbles.points}
+          series={aquiferBubbles.series}
+          xLabel="year"
           yLabel="% lost"
-          highlightColor={AQUIFER_COLOR}
-          xScale="log"
-          formatX={v => v.toLocaleString()}
+          xTicks={[2025, 2045, 2065, 2085]}
+          formatX={v => String(Math.round(v))}
           formatY={v => `${Math.round(v)}%`}
         />
       )}

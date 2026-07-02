@@ -1,5 +1,6 @@
 import React, { useRef, useLayoutEffect, useState } from 'react'
 import { cn } from '../../lib/utils'
+import { ChartLegend } from './ChartLegend'
 
 const MARGIN = { top: 20, right: 16, bottom: 34, left: 44 }
 const CONTEXT_FILL = 'rgba(148, 163, 184, 0.5)'
@@ -12,6 +13,8 @@ export interface ScatterPoint {
   y: number
   /** Marker radius in px (encodes a third variable when set). */
   r?: number
+  /** Series color for this point; falls back to highlight/context styling. */
+  color?: string
   /** Render in the accent color with a direct label. */
   highlight?: boolean
   /** Direct-label this point even when not highlighted (e.g. notable outliers). */
@@ -27,8 +30,12 @@ interface DashboardScatterChartProps {
   points: ScatterPoint[]
   xLabel: string
   yLabel: string
-  highlightColor: string
+  highlightColor?: string
+  /** When set (2+ series), a legend row identifies the point colors. */
+  series?: Array<{ key: string; label: string; color: string }>
   xScale?: 'linear' | 'log'
+  /** Explicit x tick values (e.g. decades on a time axis). */
+  xTicks?: number[]
   formatX?: (v: number) => string
   formatY?: (v: number) => string
   height?: number
@@ -67,8 +74,10 @@ export function DashboardScatterChart({
   points,
   xLabel,
   yLabel,
-  highlightColor,
+  highlightColor = '#8b5cf6',
+  series,
   xScale = 'linear',
+  xTicks: xTicksProp,
   formatX = v => String(v),
   formatY = v => String(v),
   height = 260,
@@ -119,7 +128,8 @@ export function DashboardScatterChart({
       : ((v - xMin) / (xMax - xMin || 1)) * plotW
   const yPos = (v: number) => plotH - ((v - yMin) / (yMax - yMin || 1)) * plotH
 
-  const xTicks = xScale === 'log' ? logTicks(xMin, xMax) : niceTicks(xMin, xMax)
+  const xTicks =
+    xTicksProp ?? (xScale === 'log' ? logTicks(xMin, xMax) : niceTicks(xMin, xMax))
   const yTicks = niceTicks(yMin, yMax)
 
   // Highlighted points render (and label) above the context cloud
@@ -204,7 +214,7 @@ export function DashboardScatterChart({
                     cx={cx}
                     cy={cy}
                     r={p.highlight ? Math.max(r, 6) : r}
-                    fill={p.highlight ? highlightColor : CONTEXT_FILL}
+                    fill={p.color ?? (p.highlight ? highlightColor : CONTEXT_FILL)}
                     stroke={p.highlight ? 'white' : SURFACE_RING}
                     strokeWidth={1.5}
                     opacity={isHovered ? 1 : p.highlight ? 0.95 : 0.85}
@@ -255,6 +265,7 @@ export function DashboardScatterChart({
           </div>
         )}
       </div>
+      {series && series.length > 1 && <ChartLegend series={series} />}
     </div>
   )
 }

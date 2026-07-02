@@ -91,7 +91,6 @@ export function LocationCompareView({
         <LocationMultiCityCharts
           locations={locations}
           scenario={scenario}
-          projectionYear={projectionYear}
           embedded
         />
       </div>
