@@ -1433,6 +1433,29 @@ export function DeckGLMap({
     if (!object) return null
     const layerId = object.layer?.id
 
+    // Live USGS streamflow gauges (ScatterplotLayer of GeoJSON features)
+    if (layerId === 'usgs-streamflow') {
+      const p = object.properties || {}
+      const discharge = p.dischargeCfs != null
+        ? `${Math.round(p.dischargeCfs).toLocaleString()} ft³/s`
+        : 'No current reading'
+      const asOf = p.dateTime
+        ? new Date(p.dateTime).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+        : null
+      return {
+        html: `
+          <div style="padding: 12px 14px; background: rgb(229, 223, 218); color: #1a1a1a; border-radius: 12px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; box-shadow: 0 4px 16px rgba(0,0,0,0.2); max-width: 280px;">
+            <div style="font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; color: #65758B; margin-bottom: 4px;">Live River Flow (USGS)</div>
+            <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px;">${p.siteName || 'Unknown gauge'}</div>
+            <div style="font-size: 24px; font-weight: 700; line-height: 1; color: ${p.dischargeCfs != null ? '#1d4ed8' : '#666'};">${discharge}</div>
+            ${asOf ? `<div style="font-size: 11px; color: #65758B; margin-top: 6px;">as of ${asOf}</div>` : ''}
+            ${p.siteCode ? `<div style="font-size: 10px; color: #65758B; margin-top: 2px;">Gauge ${p.siteCode}</div>` : ''}
+          </div>
+        `,
+        style: { pointerEvents: 'none', backgroundColor: 'transparent', padding: '0' }
+      }
+    }
+
     console.log('🎯 Tooltip hover:', {
       layerId,
       hasObject: !!object,

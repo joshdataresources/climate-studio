@@ -66,7 +66,6 @@ type ControlSetters = Pick<
   "setDroughtOpacity" |
   "setMegaregionOpacity" |
   "setMegaregionDataMode" |
-  "setMegaregionShowPopulation" |
   "setMegaregionShowTemperature" |
   "setWetBulbOpacity"
 >
@@ -471,15 +470,6 @@ const renderControl = (
             <label className="flex items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
-                checked={values.megaregionShowPopulation}
-                onChange={(e) => setters.setMegaregionShowPopulation(e.target.checked)}
-                className="h-4 w-4 accent-blue-500 rounded"
-              />
-              <span className="text-xs">Projected Population</span>
-            </label>
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
                 checked={values.megaregionShowTemperature}
                 onChange={(e) => setters.setMegaregionShowTemperature(e.target.checked)}
                 className="h-4 w-4 accent-blue-500 rounded"
@@ -682,7 +672,6 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
     setDroughtOpacity: climate.setDroughtOpacity,
     setMegaregionOpacity: climate.setMegaregionOpacity,
     setMegaregionDataMode: climate.setMegaregionDataMode,
-    setMegaregionShowPopulation: climate.setMegaregionShowPopulation,
     setMegaregionShowTemperature: climate.setMegaregionShowTemperature,
   }
 
@@ -854,24 +843,6 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
                     )}
                   </div>
                 </>
-              )}
-              {layer.id === "megaregion_timeseries" && climate.controls.megaregionShowPopulation && (
-                <div className="space-y-1">
-                  <div className="h-3 w-full rounded-full" style={{
-                    background: 'linear-gradient(to right, #dc2626 0%, #ef4444 10%, #f97316 20%, #eab308 30%, #a855f7 40%, #8b5cf6 50%, #3b82f6 60%, #0ea5e9 70%, #06b6d4 85%, #10b981 100%)'
-                  }} />
-                  <div className="flex justify-between text-[10px] text-muted-foreground">
-                    <span>-5%</span>
-                    <span>-3%</span>
-                    <span>-1%</span>
-                    <span>0%</span>
-                    <span>+2%</span>
-                    <span>+4%</span>
-                    <span>+6%</span>
-                    <span>+8%</span>
-                    <span>+10%</span>
-                  </div>
-                </div>
               )}
           </AccordionItem>
           );
