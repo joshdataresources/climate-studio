@@ -407,7 +407,6 @@ export function LocationMultiCityCharts({
               { key: 'remainingPct', label: 'Storage remaining', color: AQUIFER_COLOR },
               { key: 'baseline', label: '2025 baseline', color: BASELINE_COLOR, dashed: true },
             ]}
-            yDomain={[75, 100]}
           />
         )}
         {scatterCharts}
@@ -515,7 +514,6 @@ export function LocationMultiCityCharts({
           source={AQUIFER_SOURCE}
           data={aquiferCompare.data}
           series={aquiferCompare.series}
-          yDomain={[75, 100]}
         />
       )}
       {scatterCharts}

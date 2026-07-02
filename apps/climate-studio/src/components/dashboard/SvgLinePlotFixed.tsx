@@ -20,20 +20,6 @@ export function SvgLinePlotFixed({
   fitYDomain,
   yClamp,
 }: SvgLinePlotFixedProps) {
-  // DEBUG: Log what we're rendering
-  console.log('[SvgLinePlotFixed] ============ RENDER START ============')
-  console.log('[SvgLinePlotFixed] Series count:', series.length)
-  console.log('[SvgLinePlotFixed] Series details:')
-  series.forEach((s, i) => {
-    const hasData = data.some(row => typeof row[s.key] === 'number')
-    const dataCount = data.filter(row => typeof row[s.key] === 'number').length
-    console.log(`  [${i}] key="${s.key}", label="${s.label}", hasData=${hasData}, points=${dataCount}`)
-  })
-  console.log('[SvgLinePlotFixed] Data rows:', data.length)
-  if (data.length > 0) {
-    console.log('[SvgLinePlotFixed] Sample data:', data[0])
-  }
-
   const containerRef = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(320)
 
@@ -102,20 +88,13 @@ export function SvgLinePlotFixed({
 
   // Generate Y ticks
   const yTicks: number[] = []
-  const tickCount = 4
+  const tickCount = 5
   for (let i = 0; i < tickCount; i++) {
     yTicks.push(yMin + ((yMax - yMin) * i) / (tickCount - 1))
   }
 
   // X ticks
   const xTicks = years.filter((_, i) => i % 2 === 0 || years.length <= 5)
-
-  console.log('[SvgLinePlotFixed] Rendering:', {
-    seriesCount: series.length,
-    seriesKeys: series.map(s => s.key),
-    dataPoints: data.length,
-    dataKeys: Object.keys(data[0] || {})
-  })
 
   return (
     <div ref={containerRef} className="w-full" style={{ height }}>
@@ -159,9 +138,9 @@ export function SvgLinePlotFixed({
             </text>
           ))}
 
-          {/* Draw lines for each series */}
-          {series.map((s, idx) => {
-            // Build path for this series
+          {/* Draw lines for each series — thin marks, no offsets: coincident
+              lines are rendered where the data actually is */}
+          {series.map(s => {
             const points: string[] = []
             let firstPoint = true
 
@@ -176,72 +155,39 @@ export function SvgLinePlotFixed({
             }
 
             const pathData = points.join(' ')
-
-            // DEBUG: Log path generation
-            console.log(`  Path for ${s.key}: ${points.length} points, color: ${s.color}, has path: ${!!pathData}`)
-
             if (!pathData) return null
 
-            // Add subtle variation for overlapping lines
-            // Use a hash of the series key to create consistent but varied offsets
-            const hashCode = s.key.split('').reduce((acc, char) => {
-              return char.charCodeAt(0) + ((acc << 5) - acc)
-            }, 0)
-            const variation = (hashCode % 7) - 3 // Range: -3 to +3 pixels
-            const offsetY = variation * 0.3 // Subtle offset: -0.9 to +0.9 pixels
-
             return (
-              <g key={s.key}>
-                {/* Shadow/background for better visibility */}
-                <path
-                  d={pathData}
-                  fill="none"
-                  stroke="rgba(0,0,0,0.2)"
-                  strokeWidth={s.dashed ? 2.5 : 3.5}
-                  strokeDasharray={s.dashed ? '4 4' : undefined}
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  transform={`translate(0, ${offsetY})`}
-                />
-                {/* Main line */}
-                <path
-                  d={pathData}
-                  fill="none"
-                  stroke={s.color}
-                  strokeWidth={s.dashed ? 1.5 : 2.5}
-                  strokeDasharray={s.dashed ? '4 4' : undefined}
-                  strokeLinejoin="round"
-                  strokeLinecap="round"
-                  opacity={0.9}
-                  transform={`translate(0, ${offsetY})`}
-                />
-              </g>
+              <path
+                key={s.key}
+                d={pathData}
+                fill="none"
+                stroke={s.color}
+                strokeWidth={s.dashed ? 1.2 : 1.6}
+                strokeDasharray={s.dashed ? '4 4' : undefined}
+                strokeLinejoin="round"
+                strokeLinecap="round"
+                opacity={0.95}
+              />
             )
           })}
 
-          {/* Draw dots on non-dashed lines - with subtle variation to match lines */}
-          {series.map((s, idx) =>
+          {/* Small dots on non-dashed lines */}
+          {series.map(s =>
             s.dashed
               ? null
               : data.map(row => {
                   const v = row[s.key]
                   if (typeof v !== 'number' || !Number.isFinite(v)) return null
 
-                  // Match the line offset calculation
-                  const hashCode = s.key.split('').reduce((acc, char) => {
-                    return char.charCodeAt(0) + ((acc << 5) - acc)
-                  }, 0)
-                  const variation = (hashCode % 7) - 3
-                  const offsetY = variation * 0.3
-
                   return (
                     <circle
                       key={`${s.key}-${row.year}`}
                       cx={xScale(row.year)}
-                      cy={yScale(v) + offsetY}
-                      r={3}
+                      cy={yScale(v)}
+                      r={2.25}
                       fill={s.color}
-                      stroke="white"
+                      stroke="rgba(24,24,24,0.85)"
                       strokeWidth={1}
                       opacity={0.95}
                     />

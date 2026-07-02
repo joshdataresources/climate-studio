@@ -20,7 +20,7 @@ interface DashboardChartProps {
   chartId?: string
 }
 
-const DEFAULT_HEIGHT = 220
+const DEFAULT_HEIGHT = 264
 
 export function DashboardChart({
   title,
