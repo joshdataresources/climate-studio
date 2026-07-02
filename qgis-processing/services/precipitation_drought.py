@@ -170,6 +170,59 @@ class PrecipitationDroughtService:
             logger.error(traceback.format_exc())
             return None
 
+    def get_point_trajectory(self, lat, lon, scenario='rcp45', years=None):
+        """
+        Real CMIP6 precipitation trajectory at a point — one value per decade.
+
+        Same source as the map tiles (NASA/GDDP-CMIP6 'pr', ACCESS-CM2), so the
+        dashboard charts and the raster layer tell the same story.
+
+        Returns:
+            List of {'year': int, 'precipitation_mm_day': float | None}
+        """
+        if not self.initialized:
+            raise RuntimeError("Earth Engine not initialized. Please check server configuration and Earth Engine authentication.")
+
+        if years is None:
+            years = [2025, 2035, 2045, 2055, 2065, 2075, 2085, 2095]
+
+        ssp = {'rcp26': 'ssp126', 'rcp45': 'ssp245', 'rcp85': 'ssp585'}.get(scenario, scenario)
+        if not str(ssp).startswith('ssp'):
+            ssp = 'ssp245'
+
+        logger.info(f"Precipitation trajectory: lat={lat}, lon={lon}, scenario={ssp}, years={years[0]}–{years[-1]}")
+
+        region = ee.Geometry.Point([lon, lat]).buffer(15000)  # metro-scale sample
+        collection = (ee.ImageCollection('NASA/GDDP-CMIP6')
+                      .filter(ee.Filter.eq('model', 'ACCESS-CM2'))
+                      .filter(ee.Filter.eq('scenario', ssp))
+                      .select('pr'))
+
+        def yearly_mean(year):
+            year = ee.Number(year)
+            # 'pr' is precip flux (kg/m^2/s); x 86400 converts to mm/day
+            mean = collection.filter(ee.Filter.calendarRange(year, year, 'year')).mean().multiply(86400)
+            value = mean.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=region,
+                scale=27830  # CMIP6 native ~0.25 degree
+            ).get('pr')
+            return ee.Feature(None, {'year': year, 'pr': value})
+
+        # Single getInfo round-trip for the whole trajectory
+        features = ee.FeatureCollection(ee.List(list(years)).map(yearly_mean)).getInfo()['features']
+
+        trajectory = []
+        for feature in features:
+            props = feature.get('properties', {})
+            value = props.get('pr')
+            trajectory.append({
+                'year': int(props['year']),
+                'precipitation_mm_day': round(value, 2) if value is not None else None
+            })
+        trajectory.sort(key=lambda row: row['year'])
+        return trajectory
+
     def get_drought_data(self, bounds, scenario='rcp45', year=2050, metric='drought_index', resolution=7):
         """
         Get precipitation/drought data as hexagonal GeoJSON

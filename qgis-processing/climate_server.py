@@ -915,6 +915,57 @@ def precipitation_drought_tiles():
         }), 500
 
 
+@app.route('/api/climate/precipitation-drought/trajectory', methods=['GET'])
+def precipitation_drought_trajectory():
+    """
+    Per-decade CMIP6 precipitation at a point (real projection, same
+    NASA/GDDP-CMIP6 source as the tile layer). Powers the dashboard charts.
+
+    Query parameters:
+        lat, lon: Point coordinates
+        scenario: Climate scenario (rcp26/rcp45/rcp85 or ssp126/ssp245/ssp585), default rcp45
+    """
+    try:
+        lat = request.args.get('lat', type=float)
+        lon = request.args.get('lon', type=float)
+        scenario = request.args.get('scenario', default='rcp45', type=str)
+
+        if lat is None or lon is None:
+            return jsonify({
+                'success': False,
+                'error': 'Missing required parameters: lat, lon'
+            }), 400
+
+        if not (-90 <= lat <= 90) or not (-180 <= lon <= 180):
+            return jsonify({
+                'success': False,
+                'error': 'Invalid coordinates'
+            }), 400
+
+        trajectory = drought_service.get_point_trajectory(lat=lat, lon=lon, scenario=scenario)
+
+        return jsonify({
+            'success': True,
+            'data': {
+                'trajectory': trajectory,
+                'metadata': {
+                    'source': 'NASA NEX-GDDP-CMIP6 (pr, ACCESS-CM2) via Earth Engine',
+                    'scenario': scenario,
+                    'lat': lat,
+                    'lon': lon,
+                    'isRealData': True
+                }
+            }
+        })
+
+    except Exception as e:
+        logger.error(f"Error computing precipitation trajectory: {str(e)}", exc_info=True)
+        return jsonify({
+            'success': False,
+            'error': str(e)
+        }), 500
+
+
 @app.route('/api/climate/precipitation-drought', methods=['GET'])
 def precipitation_drought():
     """

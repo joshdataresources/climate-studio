@@ -1810,6 +1810,34 @@ app.get('/api/climate/precipitation-drought', async (req, res) => {
   }
 });
 
+// Per-decade CMIP6 precipitation at a point — powers the dashboard charts
+app.get('/api/climate/precipitation-drought/trajectory', async (req, res) => {
+  try {
+    const { lat, lon, scenario = 'rcp45' } = req.query;
+
+    if (!lat || !lon) {
+      return res.status(400).json({
+        success: false,
+        error: 'Point coordinates required (lat, lon)'
+      });
+    }
+
+    const params = new URLSearchParams({ lat, lon, scenario });
+    const response = await axios.get(
+      `${CLIMATE_SERVICE_URL}/api/climate/precipitation-drought/trajectory?${params.toString()}`,
+      { timeout: 120000 } // 8 EE yearly reductions in one call
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    console.error('❌ Precipitation trajectory error:', error.message);
+    res.status(error.response?.status || 500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
 // Urban Heat Island Tiles Endpoint - Proxy to Python Climate Service
 app.get('/api/climate/urban-heat-island/tiles', async (req, res) => {
   try {

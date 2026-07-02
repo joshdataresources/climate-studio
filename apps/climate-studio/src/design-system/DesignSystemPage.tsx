@@ -663,7 +663,7 @@ const paletteLayers: PaletteLayer[] = [
   { id: 'sea_level_rise', title: 'Sea Level Rise', source: 'Source: NOAA Sea Level Rise Viewer', tone: 'sky', icon: <WaveIcon /> },
   { id: 'urban_heat_island', title: 'Urban Heat Island', source: 'Source: Yale YCEO Summer UHI v4', tone: 'orange', icon: <HeatIcon /> },
   { id: 'temperature_projection', title: 'Future Temperature Anomaly', source: 'Source: NASA NEX-GDDP-CMIP6', tone: 'amber', icon: <WeatherIcon /> },
-  { id: 'precipitation_drought', title: 'Precipitation & Drought', source: 'Source: CHIRPS via Earth Engine', tone: 'violet', icon: <DropIcon /> },
+  { id: 'precipitation_drought', title: 'Precipitation & Drought', source: 'Source: NASA NEX-GDDP-CMIP6 via Earth Engine', tone: 'violet', icon: <DropIcon /> },
   { id: 'topographic_relief', title: 'Topographic Relief', source: 'Source: Copernicus DEM', tone: 'stone', icon: <MountainIcon /> },
   { id: 'megaregion_timeseries', title: 'Metro Data Statistics', source: 'Source: US Census + NASA', tone: 'emerald', icon: <PopulationIcon /> },
   { id: 'wet_bulb', title: 'Wet Bulb Temperature', source: 'Source: NASA NEX-GDDP-CMIP6', tone: 'orange', icon: <HeatIcon /> },
@@ -980,7 +980,7 @@ function LayerComposition() {
           <div className="widget-container space-y-2.5">
             <LayerStatus status="loading" title="Loading…" sub="Sea Level Rise — Connecting to NOAA" />
             <LayerStatus status="success" title="Real NASA data (1,248 features)" sub="Future Temperature Anomaly · NEX-GDDP-CMIP6" />
-            <LayerStatus status="fallback" title="Fallback data (Earth Engine timeout)" sub="Precipitation & Drought · CHIRPS" />
+            <LayerStatus status="fallback" title="Fallback data (Earth Engine timeout)" sub="Precipitation & Drought · CMIP6" />
             <LayerStatus status="error" title="Error: HTTP 503 — service unavailable" sub="Urban Heat Island · Yale YCEO" />
           </div>
 

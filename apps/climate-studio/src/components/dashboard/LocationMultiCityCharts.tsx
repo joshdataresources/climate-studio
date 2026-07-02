@@ -1,20 +1,27 @@
 import React, { useMemo, useEffect } from 'react'
 import { DashboardChart } from './DashboardChart'
+import { DashboardScatterChart } from './DashboardScatterChart'
 import { loadMetroBundle } from '../../utils/metroResolver'
 import {
   metrosToChartInputs,
   buildMultiCityTemperatureTrajectory,
+  buildMultiCityTemperatureAnomaly,
   buildMultiCitySummerSeries,
   buildMultiCityWinterSeries,
   buildMultiCityDaysOver100Series,
   buildMultiCityWetBulbSeries,
   buildTemperatureTrajectory,
+  buildTemperatureAnomalySeries,
   buildSummerTemperatureSeries,
   buildWinterTemperatureSeries,
   buildDaysOver100Series,
   buildWetBulbSeries,
   PROJECTION_YEARS,
 } from '../../utils/metroChartData'
+import {
+  buildWetBulbScatterPoints,
+  buildAquiferDepletionScatterPoints,
+} from '../../utils/scatterChartData'
 import {
   PRECIP_DROUGHT_SOURCE,
   useDashboardPrecipitationCharts,
@@ -37,11 +44,13 @@ const HEAT_COLOR = '#eab308'
 const WET_BULB_COLOR = '#8b5cf6'
 const PRECIP_COLOR = '#8b5cf6'
 const DROUGHT_COLOR = '#f59e0b'
-const AQUIFER_COLOR = '#06b6d4'
+const AQUIFER_COLOR = '#0891b2'
 
 interface LocationMultiCityChartsProps {
   locations: LocationSelection[]
   scenario: SspScenario
+  /** Selected projection year — drives the cross-metro scatter snapshots. */
+  projectionYear?: number
   className?: string
   /** When true, skip outer bleed wrapper (nested inside compare panel). */
   embedded?: boolean
@@ -53,6 +62,7 @@ interface LocationMultiCityChartsProps {
 export function LocationMultiCityCharts({
   locations,
   scenario,
+  projectionYear = 2050,
   className,
   embedded = false,
   showBaselines,
@@ -106,6 +116,11 @@ export function LocationMultiCityCharts({
     [chartMetros, scenario]
   )
 
+  const anomalyChart = useMemo(
+    () => buildMultiCityTemperatureAnomaly(chartMetros, scenario),
+    [chartMetros, scenario]
+  )
+
   const summerChart = useMemo(
     () => buildMultiCitySummerSeries(chartMetros, scenario),
     [chartMetros, scenario]
@@ -131,6 +146,16 @@ export function LocationMultiCityCharts({
 
   const aquiferCompare = useMemo(
     () => buildMultiCityAquiferStorageSeries(locations),
+    [locations]
+  )
+
+  const wetBulbScatter = useMemo(
+    () => buildWetBulbScatterPoints(locations, projectionYear),
+    [locations, projectionYear]
+  )
+
+  const aquiferScatter = useMemo(
+    () => buildAquiferDepletionScatterPoints(locations),
     [locations]
   )
 
@@ -179,6 +204,7 @@ export function LocationMultiCityCharts({
     return {
       loc: locations[0],
       annual: buildTemperatureTrajectory(temperature, scenario),
+      anomaly: buildTemperatureAnomalySeries(temperature, scenario),
       summer: buildSummerTemperatureSeries(temperature, scenario),
       winter: buildWinterTemperatureSeries(temperature, scenario),
       days100: buildDaysOver100Series(temperature, scenario, metro.wetBulb ?? null),
@@ -212,8 +238,40 @@ export function LocationMultiCityCharts({
     return null
   }
 
+  const scatterCharts = (
+    <>
+      {wetBulbScatter.points.length > 0 && (
+        <DashboardScatterChart
+          title="Wet-Bulb Risk Across Metros"
+          subtitle={`All metros at ${wetBulbScatter.decade} · dot size = dangerous wet-bulb events/yr`}
+          source="NASA NEX-GDDP-CMIP6 · Stull wet-bulb"
+          points={wetBulbScatter.points}
+          xLabel="days over 95°F per year"
+          yLabel="humidity"
+          highlightColor={WET_BULB_COLOR}
+          formatX={v => String(Math.round(v))}
+          formatY={v => `${Math.round(v)}%`}
+        />
+      )}
+      {aquiferScatter.length > 0 && (
+        <DashboardScatterChart
+          title="Aquifer Depletion by 2100"
+          subtitle="US principal aquifers · share of 2025 storage lost"
+          source={AQUIFER_SOURCE}
+          points={aquiferScatter}
+          xLabel="2025 storage (trillion gallons, log scale)"
+          yLabel="% lost"
+          highlightColor={AQUIFER_COLOR}
+          xScale="log"
+          formatX={v => v.toLocaleString()}
+          formatY={v => `${Math.round(v)}%`}
+        />
+      )}
+    </>
+  )
+
   if (singleCityCharts && withBaselines) {
-    const { loc, annual, summer, winter, days100, wetBulb, precip, drought } = singleCityCharts
+    const { loc, annual, anomaly, summer, winter, days100, wetBulb, precip, drought } = singleCityCharts
 
     return (
       <div
@@ -232,6 +290,19 @@ export function LocationMultiCityCharts({
             series={[
               { key: 'temp', label: 'Projected', color: TEMP_COLOR },
               { key: 'baseline', label: 'Baseline', color: BASELINE_COLOR, dashed: true },
+            ]}
+          />
+        )}
+        {anomaly.length > 0 && (
+          <DashboardChart
+            chartId={`${loc.metroKey}-anomaly`}
+            title="Temperature Anomaly"
+            subtitle="Warming vs the metro's own 1995–2014 average"
+            yAxisLabel="Δ°F"
+            data={anomaly}
+            series={[
+              { key: 'anomaly', label: 'Anomaly', color: TEMP_COLOR },
+              { key: 'baseline', label: 'Baseline (0)', color: BASELINE_COLOR, dashed: true },
             ]}
           />
         )}
@@ -290,14 +361,14 @@ export function LocationMultiCityCharts({
         {precip.length > 0 && (
           <DashboardChart
             chartId={`${loc.metroKey}-precip`}
-            title="Precipitation & Drought"
+            title="Precipitation"
             subtitle="Mean daily precipitation (mm/day)"
             yAxisLabel="mm/day"
             source={PRECIP_DROUGHT_SOURCE}
             data={precip}
             series={[
               { key: 'precip', label: 'Projected', color: PRECIP_COLOR },
-              { key: 'baseline', label: 'CHIRPS baseline', color: BASELINE_COLOR, dashed: true },
+              { key: 'baseline', label: '2025 baseline', color: BASELINE_COLOR, dashed: true },
             ]}
           />
         )}
@@ -341,6 +412,7 @@ export function LocationMultiCityCharts({
             yDomain={[75, 100]}
           />
         )}
+        {scatterCharts}
       </div>
     )
   }
@@ -360,6 +432,16 @@ export function LocationMultiCityCharts({
           yAxisLabel="°F"
           data={annualChart.data}
           series={annualChart.series}
+        />
+      )}
+      {anomalyChart.series.length > 0 && (
+        <DashboardChart
+          chartId={`compare-anomaly`}
+          title="Temperature Anomaly"
+          subtitle={compareSubtitle ?? "Warming vs each metro's own 1995–2014 average"}
+          yAxisLabel="Δ°F"
+          data={anomalyChart.data}
+          series={anomalyChart.series}
         />
       )}
       {summerChart.series.length > 0 && (
@@ -405,7 +487,7 @@ export function LocationMultiCityCharts({
       {compareMode && hasPrecipCompare && (
         <DashboardChart
           chartId={`compare-precip`}
-          title="Precipitation & Drought"
+          title="Precipitation"
           subtitle={compareMode ? 'mm/day' : `${cityLabels} · mm/day`}
           yAxisLabel="mm/day"
           source={PRECIP_DROUGHT_SOURCE}
@@ -438,6 +520,7 @@ export function LocationMultiCityCharts({
           yDomain={[75, 100]}
         />
       )}
+      {scatterCharts}
     </div>
   )
 }

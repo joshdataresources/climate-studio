@@ -311,11 +311,11 @@ export const climateLayers: ClimateLayerDefinition[] = [
   {
     id: 'precipitation_drought',
     title: 'Precipitation & Drought',
-    description: 'Projected precipitation changes and drought conditions from CHIRPS dataset via Earth Engine. Displays as smooth heatmap across all zoom levels.',
+    description: 'Projected precipitation by year and scenario from NASA NEX-GDDP-CMIP6 via Earth Engine (single model; drought index derived from precipitation). Displays as smooth heatmap across all zoom levels.',
     category: 'temperature',
     source: {
-      name: 'CHIRPS via Earth Engine',
-      url: 'https://www.chc.ucsb.edu/data/chirps'
+      name: 'NASA NEX-GDDP-CMIP6 via Earth Engine',
+      url: 'https://www.nasa.gov/nex/gddp'
     },
     defaultActive: false,
     controls: ['droughtMetric', 'droughtOpacity'],

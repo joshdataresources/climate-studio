@@ -201,6 +201,34 @@ export async function fetchDashboardPrecipitationSnapshot(
   }
 }
 
+export interface PrecipitationTrajectoryPoint {
+  year: number
+  precipitationMm: number | null
+}
+
+/** Real per-decade CMIP6 precipitation at a point — same source as the map tiles. */
+export async function fetchPrecipitationTrajectory(
+  lat: number,
+  lon: number,
+  scenario: SspScenario,
+  signal?: AbortSignal
+): Promise<PrecipitationTrajectoryPoint[]> {
+  const base = getBackendBaseUrl()
+  const params = new URLSearchParams({
+    lat: String(lat),
+    lon: String(lon),
+    scenario: sspToRcp(scenario),
+  })
+
+  const payload = await fetchJson(
+    `${base}/api/climate/precipitation-drought/trajectory?${params}`,
+    signal
+  )
+  const rows: Array<{ year: number; precipitation_mm_day: number | null }> =
+    payload?.data?.trajectory ?? []
+  return rows.map(row => ({ year: row.year, precipitationMm: row.precipitation_mm_day }))
+}
+
 function metroSeriesKey(metroKey: string): string {
   return metroKey.replace(/[^a-zA-Z0-9_]/g, '_')
 }

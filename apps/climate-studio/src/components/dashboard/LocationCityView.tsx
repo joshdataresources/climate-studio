@@ -76,6 +76,7 @@ export function LocationCityView({
       <LocationMultiCityCharts
         locations={[location]}
         scenario={scenario}
+        projectionYear={projectionYear}
         showBaselines
         embedded
       />

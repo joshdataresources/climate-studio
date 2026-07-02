@@ -790,7 +790,7 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
                         </div>
                         <p className="text-xs text-foreground">
                           {layerStates.precipitation_drought?.data?.metadata?.isRealData
-                            ? '✓ Real CHIRPS data (Earth Engine)'
+                            ? '✓ Real CMIP6 data (Earth Engine)'
                             : '⚠ Data unavailable (Earth Engine error)'}
                         </p>
                       </div>

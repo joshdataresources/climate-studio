@@ -369,6 +369,38 @@ export function buildTemperatureTrajectory(
   })
 }
 
+/** Warming relative to the metro's own 1995–2014 annual average (Δ°F). */
+export function buildTemperatureAnomalySeries(
+  temperature: MetroRecord | null,
+  scenario: SspScenario
+): ChartDataPoint[] {
+  if (!hasTemperatureScenario(temperature, scenario)) return []
+
+  const baseline = temperature.baseline_1995_2014.avg_annual as number
+  if (baseline == null) return []
+
+  return projectionYears(temperature, scenario).flatMap(year => {
+    const annual = rowAtYear(temperature, scenario, year)?.annual_avg
+    if (annual == null) return []
+    return [{ year, anomaly: Math.round((annual - baseline) * 10) / 10, baseline: 0 }]
+  })
+}
+
+export function buildMultiCityTemperatureAnomaly(
+  metros: MetroChartInput[],
+  scenario: SspScenario
+): { data: ChartDataPoint[]; series: { key: string; label: string; color: string }[] } {
+  const years = unionProjectionYears(metros, scenario)
+  return buildMultiCitySeries(metros, years, (metro, year) => {
+    if (!metro.temperature) return undefined
+    const baseline = metro.temperature.baseline_1995_2014?.avg_annual as number | undefined
+    if (baseline == null) return undefined
+    const annual = rowAtYear(metro.temperature, scenario, year)?.annual_avg
+    if (annual == null) return undefined
+    return Math.round((annual - baseline) * 10) / 10
+  })
+}
+
 export function buildSeasonalTemperatureSeries(
   temperature: MetroRecord | null,
   scenario: SspScenario

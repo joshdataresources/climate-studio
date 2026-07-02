@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   buildPrecipitationChartsFromTrajectories,
-  fetchDashboardPrecipitationSnapshot,
+  fetchPrecipitationTrajectory,
 } from '../utils/dashboardClimateApi'
-import { PROJECTION_YEARS, buildDroughtSeries } from '../utils/metroChartData'
+import { PROJECTION_YEARS } from '../utils/metroChartData'
 import type { LocationSelection } from '../components/dashboard/LocationSearchBar'
 import type { SspScenario } from '../utils/scenarioMapping'
 
@@ -13,7 +13,7 @@ function droughtIndexFromPrecip(precipMm: number): number {
   return Math.round(Math.max(0, Math.min(10, 10 - precipMm)) * 100) / 100
 }
 
-/** EE baseline at metro center, scaled by CMIP6 basin flow through time. */
+/** Real per-decade CMIP6 precipitation at each metro (same source as the map tiles). */
 export function useDashboardPrecipitationCharts(
   locations: LocationSelection[],
   scenario: SspScenario
@@ -60,39 +60,22 @@ export function useDashboardPrecipitationCharts(
 
     Promise.all(
       locations.map(async loc => {
-        const snap = await fetchDashboardPrecipitationSnapshot(
+        const rows = await fetchPrecipitationTrajectory(
           loc.lat,
           loc.lon,
-          PRECIP_BASELINE_YEAR,
           scenario,
           controller.signal
         )
-        const baselinePrecip = snap.precipitationMm
-        const flowSeries = buildDroughtSeries(loc.metroName, scenario)
-        const baseFlow =
-          (flowSeries.find(p => p.year === PRECIP_BASELINE_YEAR)?.flowPct as number | undefined) ??
-          (flowSeries[0]?.flowPct as number | undefined)
+        const byYear = new Map(rows.map(r => [r.year, r.precipitationMm]))
 
         const points = PROJECTION_YEARS.map(year => {
-          if (baselinePrecip == null || baselinePrecip <= 0 || !baseFlow) {
-            return {
-              year,
-              precipitationMm: baselinePrecip,
-              droughtIndex: snap.droughtIndex,
-              soilMoisture: snap.soilMoisture,
-            }
+          const precip = byYear.get(year) ?? null
+          return {
+            year,
+            precipitationMm: precip,
+            droughtIndex: precip != null ? droughtIndexFromPrecip(precip) : null,
+            soilMoisture: null,
           }
-
-          const flowPoint = flowSeries.find(p => p.year === year)
-          const flowPct = (flowPoint?.flowPct as number | undefined) ?? baseFlow
-          const precip = Math.round(baselinePrecip * (flowPct / baseFlow) * 100) / 100
-          const droughtIndex = droughtIndexFromPrecip(precip)
-          const soilMoisture =
-            snap.soilMoisture != null
-              ? Math.round(Math.min(100, Math.max(0, snap.soilMoisture * (precip / baselinePrecip))) * 10) / 10
-              : null
-
-          return { year, precipitationMm: precip, droughtIndex, soilMoisture }
         })
 
         return { metroKey: loc.metroKey, metroName: loc.metroName, points }
@@ -142,4 +125,5 @@ export function useDashboardPrecipitationCharts(
   return { state, error, charts, trajectories, singleCityBaselines }
 }
 
-export const PRECIP_DROUGHT_SOURCE = 'CHIRPS via Earth Engine · CMIP6 projections'
+export const PRECIP_DROUGHT_SOURCE =
+  'NASA NEX-GDDP-CMIP6 (pr, single model) · drought index derived from precipitation'
