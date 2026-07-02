@@ -240,7 +240,7 @@ export function LocationMultiCityCharts({
       {wetBulbBubbles.points.length > 0 && (
         <DashboardScatterChart
           title="Wet-Bulb Risk Over Time"
-          subtitle="Avg summer humidity by decade · bubble size = dangerous wet-bulb events/yr"
+          subtitle="Avg summer relative humidity by decade · bubble size = dangerous wet-bulb events/yr"
           source="NASA NEX-GDDP-CMIP6 · Stull wet-bulb"
           points={wetBulbBubbles.points}
           series={wetBulbBubbles.series}
@@ -254,7 +254,7 @@ export function LocationMultiCityCharts({
       {aquiferBubbles.points.length > 0 && (
         <DashboardScatterChart
           title="Aquifer Depletion Over Time"
-          subtitle="Share of 2025 storage lost · bubble size = aquifer footprint area"
+          subtitle="Share of 2025 storage lost · bubble size = remaining storage volume"
           source={AQUIFER_SOURCE}
           points={aquiferBubbles.points}
           series={aquiferBubbles.series}
@@ -347,9 +347,14 @@ export function LocationMultiCityCharts({
           <DashboardChart
             chartId={`${loc.metroKey}-wetbulb`}
             title="Wet Bulb Events"
-            subtitle="Dangerous heat-humidity days vs baseline"
+            subtitle={
+              wetBulb.some(row => (row.events as number) > 0)
+                ? 'Days/yr over 31°C wet-bulb vs baseline'
+                : 'No dangerous wet-bulb days (>31°C) projected for this metro'
+            }
             yAxisLabel="events"
             data={wetBulb}
+            yClamp={[0, 365]}
             series={[
               { key: 'events', label: 'Events', color: WET_BULB_COLOR },
               { key: 'baseline', label: 'Baseline', color: BASELINE_COLOR, dashed: true },
@@ -475,10 +480,11 @@ export function LocationMultiCityCharts({
         <DashboardChart
           chartId={`compare-wetbulb`}
           title="Wet Bulb Events"
-          subtitle={compareSubtitle ?? 'Dangerous heat-humidity days'}
+          subtitle={compareSubtitle ?? 'Days/yr over 31°C wet-bulb'}
           yAxisLabel="events"
           data={wetBulbChart.data}
           series={wetBulbChart.series}
+          yClamp={[0, 365]}
         />
       )}
       {compareMode && hasPrecipCompare && (

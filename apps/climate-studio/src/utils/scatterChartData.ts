@@ -1,4 +1,3 @@
-import area from '@turf/area'
 import wetBulbJson from '../data/expanded_wet_bulb_projections.json'
 import { aquiferFeatureAt, getAquiferStoragePercentAt } from './metroAquiferData'
 import { PROJECTION_YEARS, metroChartColor } from './metroChartData'
@@ -83,9 +82,14 @@ export function buildWetBulbBubbleChart(
   return { points, series }
 }
 
+function formatTrillionGal(v: number): string {
+  return v >= 100 ? Math.round(v).toLocaleString() : v >= 10 ? v.toFixed(0) : v.toFixed(1)
+}
+
 /**
  * Per selected city: share of the local aquifer's 2025 storage lost by each
- * decade, bubble size = the aquifer's real footprint area (USGS polygons).
+ * decade. Bubble AREA is proportional to the volume still stored that year,
+ * so bubbles start big at the bottom (full) and shrink as depletion climbs.
  */
 export function buildAquiferDepletionBubbleChart(
   locations: Array<{ metroKey: string; metroName: string; lat: number; lon: number }>,
@@ -96,34 +100,38 @@ export function buildAquiferDepletionBubbleChart(
 
   const withAquifer = locations.map(loc => {
     const feature = aquiferFeatureAt(loc.lat, loc.lon)
-    return { loc, feature, areaKm2: feature ? area(feature as GeoJSON.Feature) / 1e6 : 0 }
+    const props = feature?.properties as {
+      name?: string
+      volume_gallons_2025?: number
+      projections?: Record<string, number>
+    } | null
+    const baselineVolume = props?.volume_gallons_2025 ?? props?.projections?.['2025'] ?? 0
+    return { loc, name: props?.name, baselineVolume }
   })
-  const maxArea = Math.max(...withAquifer.map(e => e.areaKm2), 1)
+  const maxVolume = Math.max(...withAquifer.map(e => e.baselineVolume), 1)
 
-  withAquifer.forEach(({ loc, feature, areaKm2 }, index) => {
-    if (!feature) return
+  withAquifer.forEach(({ loc, name, baselineVolume }, index) => {
+    if (!name || !baselineVolume) return
 
-    const name = (feature.properties as { name?: string } | null)?.name
     const color = locations.length === 1 ? accentColor : metroChartColor(index)
-    // Bubble AREA proportional to footprint area → radius scales with sqrt
-    const radius = 4 + 9 * Math.sqrt(areaKm2 / maxArea)
     let added = false
 
     for (const year of PROJECTION_YEARS) {
       const storage = getAquiferStoragePercentAt(loc.lat, loc.lon, year)
       if (!storage) continue
       const lostPct = Math.round((100 - storage.remainingPct) * 10) / 10
+      const volumeYear = (baselineVolume * storage.remainingPct) / 100
       points.push({
         id: `${loc.metroKey}-${year}`,
         label: locations.length === 1 ? storage.name : loc.metroName,
         x: year,
         y: lostPct,
-        r: radius,
+        r: 3 + 11 * Math.sqrt(volumeYear / maxVolume),
         color,
         detail: [
           storage.name,
           `${year} · ${lostPct}% of 2025 storage lost`,
-          `~${Math.round(areaKm2).toLocaleString()} km² aquifer footprint`,
+          `${formatTrillionGal(volumeYear / 1e12)}T gallons remaining`,
         ],
       })
       added = true
@@ -132,7 +140,7 @@ export function buildAquiferDepletionBubbleChart(
     if (added) {
       series.push({
         key: loc.metroKey,
-        label: locations.length === 1 && name ? name : loc.metroName,
+        label: locations.length === 1 ? name : loc.metroName,
         color,
       })
     }
