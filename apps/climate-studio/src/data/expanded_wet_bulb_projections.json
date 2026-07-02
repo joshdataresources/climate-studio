@@ -2548,5 +2548,1025 @@
         "extent_radius_km": 82
       }
     }
+  },
+  "Buffalo": {
+    "name": "Buffalo, NY",
+    "lat": 42.8864,
+    "lon": -78.8784,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 77,
+      "wet_bulb_events": 0,
+      "days_over_95F": 1
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 76,
+        "peak_humidity": 96,
+        "days_over_95F": 3,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 76,
+        "peak_humidity": 96,
+        "days_over_95F": 3,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 75,
+        "peak_humidity": 95,
+        "days_over_95F": 5,
+        "days_over_100F": 1,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2055": {
+        "avg_summer_humidity": 75,
+        "peak_humidity": 96,
+        "days_over_95F": 6,
+        "days_over_100F": 1,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2065": {
+        "avg_summer_humidity": 74,
+        "peak_humidity": 94,
+        "days_over_95F": 11,
+        "days_over_100F": 3,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2075": {
+        "avg_summer_humidity": 72,
+        "peak_humidity": 94,
+        "days_over_95F": 16,
+        "days_over_100F": 5,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      }
+    }
+  },
+  "Baltimore": {
+    "name": "Baltimore",
+    "lat": 39.2904,
+    "lon": -76.6122,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 81,
+      "wet_bulb_events": 0,
+      "days_over_95F": 13
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 81,
+        "peak_humidity": 96,
+        "days_over_95F": 19,
+        "days_over_100F": 6,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 81,
+        "peak_humidity": 96,
+        "days_over_95F": 21,
+        "days_over_100F": 6,
+        "wet_bulb_events": 1,
+        "extent_radius_km": 31
+      },
+      "2045": {
+        "avg_summer_humidity": 80,
+        "peak_humidity": 96,
+        "days_over_95F": 29,
+        "days_over_100F": 10,
+        "wet_bulb_events": 1,
+        "extent_radius_km": 31
+      },
+      "2055": {
+        "avg_summer_humidity": 81,
+        "peak_humidity": 96,
+        "days_over_95F": 33,
+        "days_over_100F": 11,
+        "wet_bulb_events": 2,
+        "extent_radius_km": 32
+      },
+      "2065": {
+        "avg_summer_humidity": 80,
+        "peak_humidity": 95,
+        "days_over_95F": 46,
+        "days_over_100F": 17,
+        "wet_bulb_events": 3,
+        "extent_radius_km": 33
+      },
+      "2075": {
+        "avg_summer_humidity": 79,
+        "peak_humidity": 95,
+        "days_over_95F": 57,
+        "days_over_100F": 24,
+        "wet_bulb_events": 6,
+        "extent_radius_km": 36
+      }
+    }
+  },
+  "Cleveland": {
+    "name": "Cleveland",
+    "lat": 41.4993,
+    "lon": -81.6944,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 77,
+      "wet_bulb_events": 0,
+      "days_over_95F": 3
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 76,
+        "peak_humidity": 95,
+        "days_over_95F": 6,
+        "days_over_100F": 2,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 76,
+        "peak_humidity": 95,
+        "days_over_95F": 8,
+        "days_over_100F": 1,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 74,
+        "peak_humidity": 94,
+        "days_over_95F": 12,
+        "days_over_100F": 3,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2055": {
+        "avg_summer_humidity": 75,
+        "peak_humidity": 95,
+        "days_over_95F": 12,
+        "days_over_100F": 3,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2065": {
+        "avg_summer_humidity": 73,
+        "peak_humidity": 93,
+        "days_over_95F": 20,
+        "days_over_100F": 7,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2075": {
+        "avg_summer_humidity": 72,
+        "peak_humidity": 93,
+        "days_over_95F": 27,
+        "days_over_100F": 10,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      }
+    }
+  },
+  "Pittsburgh": {
+    "name": "Pittsburgh",
+    "lat": 40.4406,
+    "lon": -79.9959,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 79,
+      "wet_bulb_events": 0,
+      "days_over_95F": 5
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 78,
+        "peak_humidity": 96,
+        "days_over_95F": 8,
+        "days_over_100F": 2,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 77,
+        "peak_humidity": 96,
+        "days_over_95F": 9,
+        "days_over_100F": 2,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 76,
+        "peak_humidity": 95,
+        "days_over_95F": 14,
+        "days_over_100F": 5,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2055": {
+        "avg_summer_humidity": 77,
+        "peak_humidity": 95,
+        "days_over_95F": 15,
+        "days_over_100F": 4,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2065": {
+        "avg_summer_humidity": 75,
+        "peak_humidity": 94,
+        "days_over_95F": 23,
+        "days_over_100F": 8,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2075": {
+        "avg_summer_humidity": 74,
+        "peak_humidity": 93,
+        "days_over_95F": 31,
+        "days_over_100F": 12,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      }
+    }
+  },
+  "Milwaukee": {
+    "name": "Milwaukee",
+    "lat": 43.0389,
+    "lon": -87.9065,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 74,
+      "wet_bulb_events": 0,
+      "days_over_95F": 1
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 73,
+        "peak_humidity": 93,
+        "days_over_95F": 5,
+        "days_over_100F": 1,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 72,
+        "peak_humidity": 93,
+        "days_over_95F": 5,
+        "days_over_100F": 1,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 71,
+        "peak_humidity": 92,
+        "days_over_95F": 10,
+        "days_over_100F": 2,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2055": {
+        "avg_summer_humidity": 71,
+        "peak_humidity": 92,
+        "days_over_95F": 10,
+        "days_over_100F": 2,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2065": {
+        "avg_summer_humidity": 70,
+        "peak_humidity": 91,
+        "days_over_95F": 19,
+        "days_over_100F": 6,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2075": {
+        "avg_summer_humidity": 70,
+        "peak_humidity": 91,
+        "days_over_95F": 26,
+        "days_over_100F": 9,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      }
+    }
+  },
+  "Greensboro": {
+    "name": "Greensboro",
+    "lat": 36.0726,
+    "lon": -79.792,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 86,
+      "wet_bulb_events": 0,
+      "days_over_95F": 14
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 85,
+        "peak_humidity": 97,
+        "days_over_95F": 20,
+        "days_over_100F": 5,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 85,
+        "peak_humidity": 97,
+        "days_over_95F": 22,
+        "days_over_100F": 6,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 85,
+        "peak_humidity": 97,
+        "days_over_95F": 30,
+        "days_over_100F": 9,
+        "wet_bulb_events": 1,
+        "extent_radius_km": 31
+      },
+      "2055": {
+        "avg_summer_humidity": 85,
+        "peak_humidity": 97,
+        "days_over_95F": 33,
+        "days_over_100F": 10,
+        "wet_bulb_events": 2,
+        "extent_radius_km": 32
+      },
+      "2065": {
+        "avg_summer_humidity": 84,
+        "peak_humidity": 96,
+        "days_over_95F": 45,
+        "days_over_100F": 16,
+        "wet_bulb_events": 3,
+        "extent_radius_km": 33
+      },
+      "2075": {
+        "avg_summer_humidity": 84,
+        "peak_humidity": 96,
+        "days_over_95F": 60,
+        "days_over_100F": 25,
+        "wet_bulb_events": 6,
+        "extent_radius_km": 36
+      }
+    }
+  },
+  "Greenville SC": {
+    "name": "Greenville SC",
+    "lat": 34.8526,
+    "lon": -82.394,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 88,
+      "wet_bulb_events": 0,
+      "days_over_95F": 13
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 88,
+        "peak_humidity": 97,
+        "days_over_95F": 20,
+        "days_over_100F": 4,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 88,
+        "peak_humidity": 97,
+        "days_over_95F": 22,
+        "days_over_100F": 5,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 87,
+        "peak_humidity": 97,
+        "days_over_95F": 32,
+        "days_over_100F": 8,
+        "wet_bulb_events": 1,
+        "extent_radius_km": 31
+      },
+      "2055": {
+        "avg_summer_humidity": 87,
+        "peak_humidity": 97,
+        "days_over_95F": 36,
+        "days_over_100F": 10,
+        "wet_bulb_events": 2,
+        "extent_radius_km": 32
+      },
+      "2065": {
+        "avg_summer_humidity": 87,
+        "peak_humidity": 97,
+        "days_over_95F": 47,
+        "days_over_100F": 15,
+        "wet_bulb_events": 3,
+        "extent_radius_km": 33
+      },
+      "2075": {
+        "avg_summer_humidity": 86,
+        "peak_humidity": 96,
+        "days_over_95F": 62,
+        "days_over_100F": 25,
+        "wet_bulb_events": 7,
+        "extent_radius_km": 37
+      }
+    }
+  },
+  "San Diego": {
+    "name": "San Diego",
+    "lat": 32.7157,
+    "lon": -117.1611,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 55,
+      "wet_bulb_events": 0,
+      "days_over_95F": 0
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 55,
+        "peak_humidity": 68,
+        "days_over_95F": 1,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 55,
+        "peak_humidity": 67,
+        "days_over_95F": 2,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 55,
+        "peak_humidity": 67,
+        "days_over_95F": 3,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2055": {
+        "avg_summer_humidity": 55,
+        "peak_humidity": 67,
+        "days_over_95F": 4,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2065": {
+        "avg_summer_humidity": 55,
+        "peak_humidity": 67,
+        "days_over_95F": 8,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2075": {
+        "avg_summer_humidity": 55,
+        "peak_humidity": 67,
+        "days_over_95F": 12,
+        "days_over_100F": 1,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      }
+    }
+  },
+  "Colorado Springs": {
+    "name": "Colorado Springs",
+    "lat": 38.8339,
+    "lon": -104.8214,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 53,
+      "wet_bulb_events": 0,
+      "days_over_95F": 4
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 53,
+        "peak_humidity": 84,
+        "days_over_95F": 10,
+        "days_over_100F": 2,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 52,
+        "peak_humidity": 82,
+        "days_over_95F": 11,
+        "days_over_100F": 3,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 52,
+        "peak_humidity": 84,
+        "days_over_95F": 16,
+        "days_over_100F": 4,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2055": {
+        "avg_summer_humidity": 51,
+        "peak_humidity": 82,
+        "days_over_95F": 19,
+        "days_over_100F": 6,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2065": {
+        "avg_summer_humidity": 52,
+        "peak_humidity": 83,
+        "days_over_95F": 24,
+        "days_over_100F": 8,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2075": {
+        "avg_summer_humidity": 48,
+        "peak_humidity": 78,
+        "days_over_95F": 40,
+        "days_over_100F": 18,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      }
+    }
+  },
+  "Tucson": {
+    "name": "Tucson",
+    "lat": 32.2226,
+    "lon": -110.9747,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 28,
+      "wet_bulb_events": 0,
+      "days_over_95F": 83
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 26,
+        "peak_humidity": 46,
+        "days_over_95F": 113,
+        "days_over_100F": 67,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 27,
+        "peak_humidity": 48,
+        "days_over_95F": 118,
+        "days_over_100F": 72,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 27,
+        "peak_humidity": 49,
+        "days_over_95F": 135,
+        "days_over_100F": 87,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2055": {
+        "avg_summer_humidity": 28,
+        "peak_humidity": 51,
+        "days_over_95F": 136,
+        "days_over_100F": 91,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2065": {
+        "avg_summer_humidity": 28,
+        "peak_humidity": 51,
+        "days_over_95F": 150,
+        "days_over_100F": 106,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2075": {
+        "avg_summer_humidity": 27,
+        "peak_humidity": 48,
+        "days_over_95F": 166,
+        "days_over_100F": 125,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      }
+    }
+  },
+  "Salt Lake City": {
+    "name": "Salt Lake City",
+    "lat": 40.7608,
+    "lon": -111.891,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 33,
+      "wet_bulb_events": 0,
+      "days_over_95F": 5
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 32,
+        "peak_humidity": 62,
+        "days_over_95F": 15,
+        "days_over_100F": 3,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 33,
+        "peak_humidity": 65,
+        "days_over_95F": 18,
+        "days_over_100F": 4,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 32,
+        "peak_humidity": 63,
+        "days_over_95F": 24,
+        "days_over_100F": 7,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2055": {
+        "avg_summer_humidity": 32,
+        "peak_humidity": 63,
+        "days_over_95F": 32,
+        "days_over_100F": 11,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2065": {
+        "avg_summer_humidity": 32,
+        "peak_humidity": 64,
+        "days_over_95F": 39,
+        "days_over_100F": 15,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2075": {
+        "avg_summer_humidity": 32,
+        "peak_humidity": 61,
+        "days_over_95F": 49,
+        "days_over_100F": 23,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      }
+    }
+  },
+  "San Jose": {
+    "name": "San Jose",
+    "lat": 37.3382,
+    "lon": -121.8863,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 63,
+      "wet_bulb_events": 0,
+      "days_over_95F": 0
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 63,
+        "peak_humidity": 76,
+        "days_over_95F": 1,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 63,
+        "peak_humidity": 76,
+        "days_over_95F": 1,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 64,
+        "peak_humidity": 77,
+        "days_over_95F": 1,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2055": {
+        "avg_summer_humidity": 63,
+        "peak_humidity": 75,
+        "days_over_95F": 2,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2065": {
+        "avg_summer_humidity": 63,
+        "peak_humidity": 76,
+        "days_over_95F": 3,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2075": {
+        "avg_summer_humidity": 63,
+        "peak_humidity": 76,
+        "days_over_95F": 4,
+        "days_over_100F": 1,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      }
+    }
+  },
+  "Sacramento": {
+    "name": "Sacramento",
+    "lat": 38.5816,
+    "lon": -121.4944,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 52,
+      "wet_bulb_events": 0,
+      "days_over_95F": 45
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 51,
+        "peak_humidity": 69,
+        "days_over_95F": 61,
+        "days_over_100F": 26,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 52,
+        "peak_humidity": 71,
+        "days_over_95F": 70,
+        "days_over_100F": 31,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 52,
+        "peak_humidity": 72,
+        "days_over_95F": 80,
+        "days_over_100F": 40,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2055": {
+        "avg_summer_humidity": 51,
+        "peak_humidity": 69,
+        "days_over_95F": 92,
+        "days_over_100F": 52,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2065": {
+        "avg_summer_humidity": 51,
+        "peak_humidity": 69,
+        "days_over_95F": 102,
+        "days_over_100F": 60,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2075": {
+        "avg_summer_humidity": 51,
+        "peak_humidity": 68,
+        "days_over_95F": 108,
+        "days_over_100F": 66,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      }
+    }
+  },
+  "Richmond": {
+    "name": "Richmond",
+    "lat": 37.5407,
+    "lon": -77.436,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 83,
+      "wet_bulb_events": 1,
+      "days_over_95F": 18
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 82,
+        "peak_humidity": 96,
+        "days_over_95F": 25,
+        "days_over_100F": 8,
+        "wet_bulb_events": 1,
+        "extent_radius_km": 31
+      },
+      "2035": {
+        "avg_summer_humidity": 83,
+        "peak_humidity": 96,
+        "days_over_95F": 28,
+        "days_over_100F": 8,
+        "wet_bulb_events": 1,
+        "extent_radius_km": 31
+      },
+      "2045": {
+        "avg_summer_humidity": 82,
+        "peak_humidity": 96,
+        "days_over_95F": 38,
+        "days_over_100F": 13,
+        "wet_bulb_events": 2,
+        "extent_radius_km": 32
+      },
+      "2055": {
+        "avg_summer_humidity": 82,
+        "peak_humidity": 96,
+        "days_over_95F": 42,
+        "days_over_100F": 14,
+        "wet_bulb_events": 3,
+        "extent_radius_km": 33
+      },
+      "2065": {
+        "avg_summer_humidity": 82,
+        "peak_humidity": 96,
+        "days_over_95F": 55,
+        "days_over_100F": 22,
+        "wet_bulb_events": 6,
+        "extent_radius_km": 36
+      },
+      "2075": {
+        "avg_summer_humidity": 81,
+        "peak_humidity": 95,
+        "days_over_95F": 69,
+        "days_over_100F": 31,
+        "wet_bulb_events": 10,
+        "extent_radius_km": 40
+      }
+    }
+  },
+  "Louisville": {
+    "name": "Louisville",
+    "lat": 38.2527,
+    "lon": -85.7585,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 83,
+      "wet_bulb_events": 0,
+      "days_over_95F": 11
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 83,
+        "peak_humidity": 97,
+        "days_over_95F": 16,
+        "days_over_100F": 4,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 83,
+        "peak_humidity": 97,
+        "days_over_95F": 18,
+        "days_over_100F": 5,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 82,
+        "peak_humidity": 96,
+        "days_over_95F": 25,
+        "days_over_100F": 9,
+        "wet_bulb_events": 1,
+        "extent_radius_km": 31
+      },
+      "2055": {
+        "avg_summer_humidity": 83,
+        "peak_humidity": 96,
+        "days_over_95F": 27,
+        "days_over_100F": 8,
+        "wet_bulb_events": 1,
+        "extent_radius_km": 31
+      },
+      "2065": {
+        "avg_summer_humidity": 81,
+        "peak_humidity": 96,
+        "days_over_95F": 42,
+        "days_over_100F": 16,
+        "wet_bulb_events": 1,
+        "extent_radius_km": 31
+      },
+      "2075": {
+        "avg_summer_humidity": 80,
+        "peak_humidity": 95,
+        "days_over_95F": 54,
+        "days_over_100F": 23,
+        "wet_bulb_events": 3,
+        "extent_radius_km": 33
+      }
+    }
+  },
+  "Albuquerque": {
+    "name": "Albuquerque",
+    "lat": 35.0844,
+    "lon": -106.6504,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 40,
+      "wet_bulb_events": 0,
+      "days_over_95F": 6
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 38,
+        "peak_humidity": 73,
+        "days_over_95F": 20,
+        "days_over_100F": 5,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 39,
+        "peak_humidity": 74,
+        "days_over_95F": 19,
+        "days_over_100F": 4,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 39,
+        "peak_humidity": 72,
+        "days_over_95F": 28,
+        "days_over_100F": 7,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2055": {
+        "avg_summer_humidity": 40,
+        "peak_humidity": 75,
+        "days_over_95F": 34,
+        "days_over_100F": 10,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2065": {
+        "avg_summer_humidity": 41,
+        "peak_humidity": 74,
+        "days_over_95F": 40,
+        "days_over_100F": 14,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2075": {
+        "avg_summer_humidity": 37,
+        "peak_humidity": 69,
+        "days_over_95F": 63,
+        "days_over_100F": 29,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      }
+    }
+  },
+  "Duluth": {
+    "name": "Duluth",
+    "lat": 46.7867,
+    "lon": -92.1005,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 75,
+      "wet_bulb_events": 0,
+      "days_over_95F": 0
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 75,
+        "peak_humidity": 94,
+        "days_over_95F": 2,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2035": {
+        "avg_summer_humidity": 74,
+        "peak_humidity": 94,
+        "days_over_95F": 2,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2045": {
+        "avg_summer_humidity": 73,
+        "peak_humidity": 94,
+        "days_over_95F": 3,
+        "days_over_100F": 1,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2055": {
+        "avg_summer_humidity": 72,
+        "peak_humidity": 93,
+        "days_over_95F": 6,
+        "days_over_100F": 1,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2065": {
+        "avg_summer_humidity": 71,
+        "peak_humidity": 93,
+        "days_over_95F": 10,
+        "days_over_100F": 3,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      },
+      "2075": {
+        "avg_summer_humidity": 70,
+        "peak_humidity": 91,
+        "days_over_95F": 17,
+        "days_over_100F": 5,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30
+      }
+    }
   }
 }

@@ -66,18 +66,24 @@ class PrecipitationDroughtService:
         try:
             logger.info(f"Generating tile URL for precipitation/drought: metric={metric}, scenario={scenario}, year={year}")
 
-            # Use CHIRPS precipitation data
-            # TODO: Replace with NOAA LOCA2 projections when available
-            dataset = ee.ImageCollection('UCSB-CHG/CHIRPS/DAILY') \
-                .filterDate('2020-01-01', '2023-12-31')
+            # Real CMIP6 precipitation projection (NASA NEX-GDDP-CMIP6 'pr' band),
+            # selected by the requested year + emissions scenario so the slider projects.
+            ssp = {'rcp26': 'ssp126', 'rcp45': 'ssp245', 'rcp85': 'ssp585'}.get(scenario, 'ssp245')
+            proj_year = int(year)
+            dataset = (ee.ImageCollection('NASA/GDDP-CMIP6')
+                       .filter(ee.Filter.eq('model', 'ACCESS-CM2'))
+                       .filter(ee.Filter.eq('scenario', ssp))
+                       .filter(ee.Filter.calendarRange(proj_year, proj_year, 'year'))
+                       .select('pr'))
 
-            # Calculate mean precipitation
-            mean_precip = dataset.mean().select('precipitation')
+            # 'pr' is precip flux (kg/m^2/s); convert to mm/day (x 86400). Rename to
+            # 'precipitation' so the downstream stats lookup stays unchanged.
+            mean_precip = dataset.mean().multiply(86400).rename('precipitation')
 
             # Resample for smoother appearance at high zoom
             precip_resampled = mean_precip.resample('bilinear').reproject(
                 crs='EPSG:4326',
-                scale=2500  # 2.5km resolution (CHIRPS native is ~5km)
+                scale=5000  # ~5km (CMIP6 native is ~25km)
             )
 
             # Define visualization based on metric
@@ -146,7 +152,7 @@ class PrecipitationDroughtService:
             return {
                 'tile_url': tile_url,
                 'metadata': {
-                    'source': 'CHIRPS via Earth Engine (proxy for LOCA2)',
+                    'source': 'NASA NEX-GDDP-CMIP6 (pr) via Earth Engine',
                     'metric': metric,
                     'scenario': scenario,
                     'year': year,

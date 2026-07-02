@@ -1447,7 +1447,7 @@ export function DeckGLMap({
       ? object // ScatterplotLayer data
       : object.properties // GeoJsonLayer properties
 
-    const showPop = controls.megaregionShowPopulation
+    const showPop = false  // population data was fabricated/broken — removed; temperature stays real
     const showTemp = controls.megaregionShowTemperature
 
     // Tooltip container - beige/tan background from Figma
@@ -1607,7 +1607,6 @@ export function DeckGLMap({
     urbanExpansionLayer,           // 8. Urban Expansion (if present)
     temperatureHeatmapLayer,       // 9. Temperature Heatmap (if present)
     wetBulbDangerZoneLayer,        // 10. Wet Bulb Temperature Danger Zones
-    megaregionCirclesLayer,        // 11. Metro Data Statistics population bubbles (conditional)
     megaregionCenterDotsLayer,     // 12. Metro center dots (always on top for tooltips)
   ].filter(Boolean)
 
@@ -1700,7 +1699,7 @@ export function DeckGLMap({
               const [lng, lat] = feature.geometry.coordinates
               const { name, population, percentage, isGrowing, isDecline, displayYear } = feature.properties
 
-              const showPop = controls.megaregionShowPopulation
+              const showPop = false  // population data was fabricated/broken — removed; temperature stays real
               const showTemp = controls.megaregionShowTemperature
 
               // Get temperature data from real projections

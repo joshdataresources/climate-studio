@@ -102,6 +102,7 @@ vite.config.js.timestamp-*.mjs
 # Climate data regeneration artifacts (transient — the real data lives in the .json files)
 metro_regen_progress.json
 wet_bulb_progress.json
+wetbulb_backfill_progress.json
 
 LINKEDIN_TECH_INVENTORY.md
 .claude/
