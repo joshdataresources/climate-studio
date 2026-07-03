@@ -240,15 +240,28 @@ export function LocationMultiCityCharts({
       {wetBulbBubbles.points.length > 0 && (
         <DashboardScatterChart
           title="Wet-Bulb Risk Over Time"
-          subtitle="Avg summer relative humidity by decade · bubble size = dangerous wet-bulb events/yr"
+          subtitle={
+            wetBulbBubbles.metric === 'wetbulb'
+              ? 'Peak summer wet-bulb (p95) by decade · bubble size = days/yr over 88°F'
+              : 'Avg summer relative humidity by decade · bubble size = dangerous wet-bulb events/yr'
+          }
           source="NASA NEX-GDDP-CMIP6 · Stull wet-bulb"
           points={wetBulbBubbles.points}
           series={wetBulbBubbles.series}
           xLabel="year"
-          yLabel="humidity"
+          yLabel={wetBulbBubbles.metric === 'wetbulb' ? '°F' : 'humidity'}
           xTicks={[2025, 2035, 2045, 2055, 2065, 2075]}
+          yReference={
+            wetBulbBubbles.metric === 'wetbulb'
+              ? { value: 88, label: '88°F danger line' }
+              : undefined
+          }
           formatX={v => String(Math.round(v))}
-          formatY={v => `${Math.round(v)}%`}
+          formatY={
+            wetBulbBubbles.metric === 'wetbulb'
+              ? v => `${Math.round(v)}°`
+              : v => `${Math.round(v)}%`
+          }
         />
       )}
       {aquiferBubbles.points.length > 0 && (

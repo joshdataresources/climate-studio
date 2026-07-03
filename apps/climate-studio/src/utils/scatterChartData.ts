@@ -13,6 +13,8 @@ interface WetBulbProjectionRow {
   avg_summer_humidity?: number
   wet_bulb_events?: number
   days_over_95F?: number
+  summer_wet_bulb_F?: number
+  peak_wet_bulb_F?: number
 }
 
 interface WetBulbMetro {
@@ -36,40 +38,60 @@ function findWetBulbEntry(metroKey: string, metroName: string): WetBulbMetro | n
 }
 
 /**
- * Per selected city: summer humidity by decade, bubble size = dangerous
- * wet-bulb events/yr. (The dataset's extent_radius_km is a fabricated
- * display value — events are the real measure, so they size the bubbles.)
+ * Per selected city, by decade: peak summer wet-bulb temperature (°F) when
+ * the dataset has it (see backfill_wetbulb_temps.py), else relative humidity.
+ * Bubble size = dangerous wet-bulb events/yr. (The dataset's extent_radius_km
+ * is a fabricated display value — events are the real measure.)
  */
 export function buildWetBulbBubbleChart(
   locations: Array<{ metroKey: string; metroName: string }>,
   accentColor: string
-): { points: ScatterPoint[]; series: BubbleChartSeries[] } {
+): { points: ScatterPoint[]; series: BubbleChartSeries[]; metric: 'wetbulb' | 'humidity' } {
   const points: ScatterPoint[] = []
   const series: BubbleChartSeries[] = []
 
-  locations.forEach((loc, index) => {
-    const record = findWetBulbEntry(loc.metroKey, loc.metroName)
-    if (!record?.projections) return
+  const entries = locations
+    .map((loc, index) => ({ loc, index, record: findWetBulbEntry(loc.metroKey, loc.metroName) }))
+    .filter(e => e.record?.projections)
 
+  // One axis: only plot wet-bulb °F when every selected metro has it
+  const useTemp =
+    entries.length > 0 &&
+    entries.every(({ record }) =>
+      Object.values(record!.projections!).some(row => typeof row?.peak_wet_bulb_F === 'number')
+    )
+
+  for (const { loc, index, record } of entries) {
     const color = locations.length === 1 ? accentColor : metroChartColor(index)
     let added = false
 
-    for (const [yearKey, row] of Object.entries(record.projections)) {
+    for (const [yearKey, row] of Object.entries(record!.projections!)) {
       const year = Number(yearKey)
-      if (!Number.isFinite(year) || row?.avg_summer_humidity == null) continue
+      const y = useTemp ? row?.peak_wet_bulb_F : row?.avg_summer_humidity
+      if (!Number.isFinite(year) || y == null) continue
       const events = row.wet_bulb_events ?? 0
       points.push({
         id: `${loc.metroKey}-${year}`,
         label: loc.metroName,
         x: year,
-        y: row.avg_summer_humidity,
+        y,
         r: 4 + events * 2.5,
         color,
-        detail: [
-          `${yearKey} · ${row.avg_summer_humidity}% avg summer humidity`,
-          `${events} dangerous wet-bulb event${events === 1 ? '' : 's'}/yr`,
-          ...(row.days_over_95F != null ? [`${row.days_over_95F} days over 95°F`] : []),
-        ],
+        detail: useTemp
+          ? [
+              `${yearKey} · ${row.peak_wet_bulb_F}°F peak wet-bulb (p95)`,
+              ...(row.summer_wet_bulb_F != null
+                ? [`${row.summer_wet_bulb_F}°F avg summer wet-bulb`]
+                : []),
+              `${events} day${events === 1 ? '' : 's'}/yr over the 88°F danger line`,
+              'Wet-bulb = heat + humidity combined; ~95°F exceeds human cooling',
+            ]
+          : [
+              `${yearKey} · ${row.avg_summer_humidity}% avg summer relative humidity`,
+              `${events} dangerous wet-bulb event${events === 1 ? '' : 's'}/yr`,
+              ...(row.days_over_95F != null ? [`${row.days_over_95F} days over 95°F`] : []),
+              'RH is temperature-relative — cooler cities can read higher than muggier ones',
+            ],
       })
       added = true
     }
@@ -77,9 +99,9 @@ export function buildWetBulbBubbleChart(
     if (added) {
       series.push({ key: loc.metroKey, label: loc.metroName, color })
     }
-  })
+  }
 
-  return { points, series }
+  return { points, series, metric: useTemp ? 'wetbulb' : 'humidity' }
 }
 
 function formatTrillionGal(v: number): string {

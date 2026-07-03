@@ -103,6 +103,8 @@ vite.config.js.timestamp-*.mjs
 metro_regen_progress.json
 wet_bulb_progress.json
 wetbulb_backfill_progress.json
+wetbulb_temps_progress.json
+wetbulb_temps.log
 
 LINKEDIN_TECH_INVENTORY.md
 .claude/

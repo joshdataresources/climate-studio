@@ -36,6 +36,8 @@ interface DashboardScatterChartProps {
   xScale?: 'linear' | 'log'
   /** Explicit x tick values (e.g. decades on a time axis). */
   xTicks?: number[]
+  /** Horizontal threshold line (e.g. a danger limit); extends the y-domain to include it. */
+  yReference?: { value: number; label: string }
   formatX?: (v: number) => string
   formatY?: (v: number) => string
   height?: number
@@ -78,6 +80,7 @@ export function DashboardScatterChart({
   series,
   xScale = 'linear',
   xTicks: xTicksProp,
+  yReference,
   formatX = v => String(v),
   formatY = v => String(v),
   height = 260,
@@ -118,6 +121,10 @@ export function DashboardScatterChart({
   const yPad = (yMax - yMin) * 0.1 || 1
   yMin = Math.max(0, yMin - yPad)
   yMax += yPad
+  if (yReference) {
+    yMin = Math.min(yMin, yReference.value - yPad)
+    yMax = Math.max(yMax, yReference.value + yPad)
+  }
 
   const plotW = width - MARGIN.left - MARGIN.right
   const plotH = height - MARGIN.top - MARGIN.bottom
@@ -202,6 +209,30 @@ export function DashboardScatterChart({
             >
               {xLabel}
             </text>
+
+            {yReference && (
+              <g>
+                <line
+                  x1={0}
+                  x2={plotW}
+                  y1={yPos(yReference.value)}
+                  y2={yPos(yReference.value)}
+                  stroke="rgba(239, 68, 68, 0.65)"
+                  strokeWidth={1.2}
+                  strokeDasharray="6 4"
+                />
+                <text
+                  x={plotW - 2}
+                  y={yPos(yReference.value) - 5}
+                  textAnchor="end"
+                  fill="rgba(239, 68, 68, 0.9)"
+                  fontSize={10}
+                  fontWeight={600}
+                >
+                  {yReference.label}
+                </text>
+              </g>
+            )}
 
             {ordered.map(p => {
               const r = p.r ?? 4.5
