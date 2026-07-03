@@ -20,7 +20,9 @@
         "days_over_100F": 25,
         "estimated_at_risk_population": 142434,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 45
+        "extent_radius_km": 45,
+        "summer_wet_bulb_F": 78.8,
+        "peak_wet_bulb_F": 81.9
       },
       "2035": {
         "avg_summer_humidity": 74,
@@ -30,7 +32,9 @@
         "days_over_100F": 21,
         "estimated_at_risk_population": 213651,
         "casualty_rate_percent": 3,
-        "extent_radius_km": 52
+        "extent_radius_km": 52,
+        "summer_wet_bulb_F": 79.2,
+        "peak_wet_bulb_F": 82.3
       },
       "2045": {
         "avg_summer_humidity": 72,
@@ -40,7 +44,9 @@
         "days_over_100F": 32,
         "estimated_at_risk_population": 356085,
         "casualty_rate_percent": 5,
-        "extent_radius_km": 62
+        "extent_radius_km": 62,
+        "summer_wet_bulb_F": 80.2,
+        "peak_wet_bulb_F": 83.2
       },
       "2055": {
         "avg_summer_humidity": 71,
@@ -50,7 +56,9 @@
         "days_over_100F": 44,
         "estimated_at_risk_population": 569736,
         "casualty_rate_percent": 8,
-        "extent_radius_km": 75
+        "extent_radius_km": 75,
+        "summer_wet_bulb_F": 81.0,
+        "peak_wet_bulb_F": 84.1
       },
       "2065": {
         "avg_summer_humidity": 71,
@@ -60,7 +68,9 @@
         "days_over_100F": 51,
         "estimated_at_risk_population": 854604,
         "casualty_rate_percent": 12,
-        "extent_radius_km": 88
+        "extent_radius_km": 88,
+        "summer_wet_bulb_F": 81.7,
+        "peak_wet_bulb_F": 85.0
       },
       "2075": {
         "avg_summer_humidity": 72,
@@ -70,7 +80,9 @@
         "days_over_100F": 66,
         "estimated_at_risk_population": 1068672,
         "casualty_rate_percent": 15,
-        "extent_radius_km": 98
+        "extent_radius_km": 98,
+        "summer_wet_bulb_F": 82.8,
+        "peak_wet_bulb_F": 85.7
       }
     }
   },
@@ -95,7 +107,9 @@
         "days_over_100F": 5,
         "estimated_at_risk_population": 25421,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 38
+        "extent_radius_km": 38,
+        "summer_wet_bulb_F": 79.5,
+        "peak_wet_bulb_F": 82.7
       },
       "2035": {
         "avg_summer_humidity": 80,
@@ -105,7 +119,9 @@
         "days_over_100F": 4,
         "estimated_at_risk_population": 50842,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 48
+        "extent_radius_km": 48,
+        "summer_wet_bulb_F": 80.0,
+        "peak_wet_bulb_F": 83.1
       },
       "2045": {
         "avg_summer_humidity": 79,
@@ -115,7 +131,9 @@
         "days_over_100F": 7,
         "estimated_at_risk_population": 88869,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 58
+        "extent_radius_km": 58,
+        "summer_wet_bulb_F": 81.0,
+        "peak_wet_bulb_F": 84.2
       },
       "2055": {
         "avg_summer_humidity": 79,
@@ -125,7 +143,9 @@
         "days_over_100F": 11,
         "estimated_at_risk_population": 139163,
         "casualty_rate_percent": 11,
-        "extent_radius_km": 72
+        "extent_radius_km": 72,
+        "summer_wet_bulb_F": 81.8,
+        "peak_wet_bulb_F": 84.6
       },
       "2065": {
         "avg_summer_humidity": 78,
@@ -135,7 +155,9 @@
         "days_over_100F": 17,
         "estimated_at_risk_population": 190579,
         "casualty_rate_percent": 15,
-        "extent_radius_km": 84
+        "extent_radius_km": 84,
+        "summer_wet_bulb_F": 82.6,
+        "peak_wet_bulb_F": 85.8
       },
       "2075": {
         "avg_summer_humidity": 78,
@@ -145,7 +167,9 @@
         "days_over_100F": 26,
         "estimated_at_risk_population": 228095,
         "casualty_rate_percent": 18,
-        "extent_radius_km": 94
+        "extent_radius_km": 94,
+        "summer_wet_bulb_F": 83.6,
+        "peak_wet_bulb_F": 86.6
       }
     }
   },
@@ -170,7 +194,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 122767,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 42
+        "extent_radius_km": 42,
+        "summer_wet_bulb_F": 80.3,
+        "peak_wet_bulb_F": 82.3
       },
       "2035": {
         "avg_summer_humidity": 80,
@@ -180,7 +206,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 245533,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 54
+        "extent_radius_km": 54,
+        "summer_wet_bulb_F": 80.7,
+        "peak_wet_bulb_F": 82.8
       },
       "2045": {
         "avg_summer_humidity": 80,
@@ -190,7 +218,9 @@
         "days_over_100F": 1,
         "estimated_at_risk_population": 429683,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 66
+        "extent_radius_km": 66,
+        "summer_wet_bulb_F": 81.4,
+        "peak_wet_bulb_F": 83.7
       },
       "2055": {
         "avg_summer_humidity": 80,
@@ -200,7 +230,9 @@
         "days_over_100F": 1,
         "estimated_at_risk_population": 675218,
         "casualty_rate_percent": 11,
-        "extent_radius_km": 78
+        "extent_radius_km": 78,
+        "summer_wet_bulb_F": 82.1,
+        "peak_wet_bulb_F": 84.3
       },
       "2065": {
         "avg_summer_humidity": 80,
@@ -210,7 +242,9 @@
         "days_over_100F": 3,
         "estimated_at_risk_population": 920752,
         "casualty_rate_percent": 15,
-        "extent_radius_km": 92
+        "extent_radius_km": 92,
+        "summer_wet_bulb_F": 83.0,
+        "peak_wet_bulb_F": 85.2
       },
       "2075": {
         "avg_summer_humidity": 79,
@@ -220,7 +254,9 @@
         "days_over_100F": 7,
         "estimated_at_risk_population": 1104600,
         "casualty_rate_percent": 18,
-        "extent_radius_km": 102
+        "extent_radius_km": 102,
+        "summer_wet_bulb_F": 83.8,
+        "peak_wet_bulb_F": 86.1
       }
     }
   },
@@ -245,7 +281,9 @@
         "days_over_100F": 10,
         "estimated_at_risk_population": 63505,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 40
+        "extent_radius_km": 40,
+        "summer_wet_bulb_F": 80.8,
+        "peak_wet_bulb_F": 83.9
       },
       "2035": {
         "avg_summer_humidity": 83,
@@ -255,7 +293,9 @@
         "days_over_100F": 13,
         "estimated_at_risk_population": 127011,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 50
+        "extent_radius_km": 50,
+        "summer_wet_bulb_F": 81.3,
+        "peak_wet_bulb_F": 84.4
       },
       "2045": {
         "avg_summer_humidity": 83,
@@ -265,7 +305,9 @@
         "days_over_100F": 18,
         "estimated_at_risk_population": 222269,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 60
+        "extent_radius_km": 60,
+        "summer_wet_bulb_F": 82.0,
+        "peak_wet_bulb_F": 85.0
       },
       "2055": {
         "avg_summer_humidity": 82,
@@ -275,7 +317,9 @@
         "days_over_100F": 24,
         "estimated_at_risk_population": 349280,
         "casualty_rate_percent": 11,
-        "extent_radius_km": 74
+        "extent_radius_km": 74,
+        "summer_wet_bulb_F": 82.8,
+        "peak_wet_bulb_F": 86.3
       },
       "2065": {
         "avg_summer_humidity": 83,
@@ -285,7 +329,9 @@
         "days_over_100F": 30,
         "estimated_at_risk_population": 476291,
         "casualty_rate_percent": 15,
-        "extent_radius_km": 86
+        "extent_radius_km": 86,
+        "summer_wet_bulb_F": 83.8,
+        "peak_wet_bulb_F": 87.0
       },
       "2075": {
         "avg_summer_humidity": 82,
@@ -295,7 +341,9 @@
         "days_over_100F": 47,
         "estimated_at_risk_population": 571549,
         "casualty_rate_percent": 18,
-        "extent_radius_km": 96
+        "extent_radius_km": 96,
+        "summer_wet_bulb_F": 84.7,
+        "peak_wet_bulb_F": 88.3
       }
     }
   },
@@ -320,7 +368,9 @@
         "days_over_100F": 13,
         "estimated_at_risk_population": 53838,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 38
+        "extent_radius_km": 38,
+        "summer_wet_bulb_F": 80.2,
+        "peak_wet_bulb_F": 83.7
       },
       "2035": {
         "avg_summer_humidity": 83,
@@ -330,7 +380,9 @@
         "days_over_100F": 20,
         "estimated_at_risk_population": 107677,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 46
+        "extent_radius_km": 46,
+        "summer_wet_bulb_F": 80.9,
+        "peak_wet_bulb_F": 84.2
       },
       "2045": {
         "avg_summer_humidity": 83,
@@ -340,7 +392,9 @@
         "days_over_100F": 25,
         "estimated_at_risk_population": 188434,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 56
+        "extent_radius_km": 56,
+        "summer_wet_bulb_F": 81.6,
+        "peak_wet_bulb_F": 84.8
       },
       "2055": {
         "avg_summer_humidity": 82,
@@ -350,7 +404,9 @@
         "days_over_100F": 30,
         "estimated_at_risk_population": 296112,
         "casualty_rate_percent": 11,
-        "extent_radius_km": 68
+        "extent_radius_km": 68,
+        "summer_wet_bulb_F": 82.4,
+        "peak_wet_bulb_F": 85.9
       },
       "2065": {
         "avg_summer_humidity": 82,
@@ -360,7 +416,9 @@
         "days_over_100F": 38,
         "estimated_at_risk_population": 403789,
         "casualty_rate_percent": 15,
-        "extent_radius_km": 80
+        "extent_radius_km": 80,
+        "summer_wet_bulb_F": 83.3,
+        "peak_wet_bulb_F": 86.6
       },
       "2075": {
         "avg_summer_humidity": 81,
@@ -370,7 +428,9 @@
         "days_over_100F": 59,
         "estimated_at_risk_population": 484547,
         "casualty_rate_percent": 18,
-        "extent_radius_km": 90
+        "extent_radius_km": 90,
+        "summer_wet_bulb_F": 84.2,
+        "peak_wet_bulb_F": 87.7
       }
     }
   },
@@ -395,7 +455,9 @@
         "days_over_100F": 6,
         "estimated_at_risk_population": 32117,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 36
+        "extent_radius_km": 36,
+        "summer_wet_bulb_F": 79.7,
+        "peak_wet_bulb_F": 82.9
       },
       "2035": {
         "avg_summer_humidity": 84,
@@ -405,7 +467,9 @@
         "days_over_100F": 11,
         "estimated_at_risk_population": 64234,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 44
+        "extent_radius_km": 44,
+        "summer_wet_bulb_F": 80.3,
+        "peak_wet_bulb_F": 83.5
       },
       "2045": {
         "avg_summer_humidity": 84,
@@ -415,7 +479,9 @@
         "days_over_100F": 15,
         "estimated_at_risk_population": 112409,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 54
+        "extent_radius_km": 54,
+        "summer_wet_bulb_F": 81.3,
+        "peak_wet_bulb_F": 84.5
       },
       "2055": {
         "avg_summer_humidity": 84,
@@ -425,7 +491,9 @@
         "days_over_100F": 17,
         "estimated_at_risk_population": 176643,
         "casualty_rate_percent": 11,
-        "extent_radius_km": 66
+        "extent_radius_km": 66,
+        "summer_wet_bulb_F": 82.2,
+        "peak_wet_bulb_F": 85.4
       },
       "2065": {
         "avg_summer_humidity": 84,
@@ -435,7 +503,9 @@
         "days_over_100F": 24,
         "estimated_at_risk_population": 240877,
         "casualty_rate_percent": 15,
-        "extent_radius_km": 78
+        "extent_radius_km": 78,
+        "summer_wet_bulb_F": 83.0,
+        "peak_wet_bulb_F": 86.2
       },
       "2075": {
         "avg_summer_humidity": 83,
@@ -445,7 +515,9 @@
         "days_over_100F": 41,
         "estimated_at_risk_population": 289053,
         "casualty_rate_percent": 18,
-        "extent_radius_km": 88
+        "extent_radius_km": 88,
+        "summer_wet_bulb_F": 84.1,
+        "peak_wet_bulb_F": 87.4
       }
     }
   },
@@ -470,7 +542,9 @@
         "days_over_100F": 3,
         "estimated_at_risk_population": 61441,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 35
+        "extent_radius_km": 35,
+        "summer_wet_bulb_F": 77.2,
+        "peak_wet_bulb_F": 82.4
       },
       "2035": {
         "avg_summer_humidity": 87,
@@ -480,7 +554,9 @@
         "days_over_100F": 4,
         "estimated_at_risk_population": 122881,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 42
+        "extent_radius_km": 42,
+        "summer_wet_bulb_F": 77.8,
+        "peak_wet_bulb_F": 82.7
       },
       "2045": {
         "avg_summer_humidity": 86,
@@ -490,7 +566,9 @@
         "days_over_100F": 7,
         "estimated_at_risk_population": 245162,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 52
+        "extent_radius_km": 52,
+        "summer_wet_bulb_F": 79.1,
+        "peak_wet_bulb_F": 84.0
       },
       "2055": {
         "avg_summer_humidity": 87,
@@ -500,7 +578,9 @@
         "days_over_100F": 8,
         "estimated_at_risk_population": 429284,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 64
+        "extent_radius_km": 64,
+        "summer_wet_bulb_F": 80.1,
+        "peak_wet_bulb_F": 84.9
       },
       "2065": {
         "avg_summer_humidity": 86,
@@ -510,7 +590,9 @@
         "days_over_100F": 14,
         "estimated_at_risk_population": 614405,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 76
+        "extent_radius_km": 76,
+        "summer_wet_bulb_F": 81.0,
+        "peak_wet_bulb_F": 86.0
       },
       "2075": {
         "avg_summer_humidity": 85,
@@ -520,7 +602,9 @@
         "days_over_100F": 23,
         "estimated_at_risk_population": 799326,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 86
+        "extent_radius_km": 86,
+        "summer_wet_bulb_F": 82.1,
+        "peak_wet_bulb_F": 87.0
       }
     }
   },
@@ -545,7 +629,9 @@
         "days_over_100F": 47,
         "estimated_at_risk_population": 76941,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 38
+        "extent_radius_km": 38,
+        "summer_wet_bulb_F": 76.7,
+        "peak_wet_bulb_F": 80.6
       },
       "2035": {
         "avg_summer_humidity": 66,
@@ -555,7 +641,9 @@
         "days_over_100F": 42,
         "estimated_at_risk_population": 153882,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 46
+        "extent_radius_km": 46,
+        "summer_wet_bulb_F": 77.4,
+        "peak_wet_bulb_F": 81.4
       },
       "2045": {
         "avg_summer_humidity": 62,
@@ -565,7 +653,9 @@
         "days_over_100F": 59,
         "estimated_at_risk_population": 307764,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 56
+        "extent_radius_km": 56,
+        "summer_wet_bulb_F": 78.3,
+        "peak_wet_bulb_F": 82.1
       },
       "2055": {
         "avg_summer_humidity": 61,
@@ -575,7 +665,9 @@
         "days_over_100F": 70,
         "estimated_at_risk_population": 538588,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 68
+        "extent_radius_km": 68,
+        "summer_wet_bulb_F": 79.2,
+        "peak_wet_bulb_F": 83.3
       },
       "2065": {
         "avg_summer_humidity": 61,
@@ -585,7 +677,9 @@
         "days_over_100F": 74,
         "estimated_at_risk_population": 769411,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 82
+        "extent_radius_km": 82,
+        "summer_wet_bulb_F": 79.9,
+        "peak_wet_bulb_F": 84.0
       },
       "2075": {
         "avg_summer_humidity": 60,
@@ -595,7 +689,9 @@
         "days_over_100F": 93,
         "estimated_at_risk_population": 1000234,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 94
+        "extent_radius_km": 94,
+        "summer_wet_bulb_F": 81.2,
+        "peak_wet_bulb_F": 85.0
       }
     }
   },
@@ -620,7 +716,9 @@
         "days_over_100F": 48,
         "estimated_at_risk_population": 22834,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 34
+        "extent_radius_km": 34,
+        "summer_wet_bulb_F": 76.3,
+        "peak_wet_bulb_F": 79.6
       },
       "2035": {
         "avg_summer_humidity": 66,
@@ -630,7 +728,9 @@
         "days_over_100F": 44,
         "estimated_at_risk_population": 45667,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 42
+        "extent_radius_km": 42,
+        "summer_wet_bulb_F": 76.8,
+        "peak_wet_bulb_F": 80.1
       },
       "2045": {
         "avg_summer_humidity": 62,
@@ -640,7 +740,9 @@
         "days_over_100F": 64,
         "estimated_at_risk_population": 91335,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 52
+        "extent_radius_km": 52,
+        "summer_wet_bulb_F": 77.7,
+        "peak_wet_bulb_F": 81.1
       },
       "2055": {
         "avg_summer_humidity": 62,
@@ -650,7 +752,9 @@
         "days_over_100F": 76,
         "estimated_at_risk_population": 159836,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 64
+        "extent_radius_km": 64,
+        "summer_wet_bulb_F": 78.5,
+        "peak_wet_bulb_F": 81.9
       },
       "2065": {
         "avg_summer_humidity": 62,
@@ -660,7 +764,9 @@
         "days_over_100F": 80,
         "estimated_at_risk_population": 228337,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 76
+        "extent_radius_km": 76,
+        "summer_wet_bulb_F": 79.3,
+        "peak_wet_bulb_F": 83.0
       },
       "2075": {
         "avg_summer_humidity": 62,
@@ -670,7 +776,9 @@
         "days_over_100F": 99,
         "estimated_at_risk_population": 296838,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 86
+        "extent_radius_km": 86,
+        "summer_wet_bulb_F": 80.3,
+        "peak_wet_bulb_F": 83.5
       }
     }
   },
@@ -695,7 +803,9 @@
         "days_over_100F": 49,
         "estimated_at_risk_population": 25581,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 35
+        "extent_radius_km": 35,
+        "summer_wet_bulb_F": 76.1,
+        "peak_wet_bulb_F": 79.4
       },
       "2035": {
         "avg_summer_humidity": 64,
@@ -705,7 +815,9 @@
         "days_over_100F": 48,
         "estimated_at_risk_population": 51163,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 43
+        "extent_radius_km": 43,
+        "summer_wet_bulb_F": 76.6,
+        "peak_wet_bulb_F": 79.9
       },
       "2045": {
         "avg_summer_humidity": 61,
@@ -715,7 +827,9 @@
         "days_over_100F": 67,
         "estimated_at_risk_population": 102326,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 53
+        "extent_radius_km": 53,
+        "summer_wet_bulb_F": 77.5,
+        "peak_wet_bulb_F": 80.8
       },
       "2055": {
         "avg_summer_humidity": 61,
@@ -725,7 +839,9 @@
         "days_over_100F": 79,
         "estimated_at_risk_population": 179070,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 65
+        "extent_radius_km": 65,
+        "summer_wet_bulb_F": 78.4,
+        "peak_wet_bulb_F": 81.7
       },
       "2065": {
         "avg_summer_humidity": 61,
@@ -735,7 +851,9 @@
         "days_over_100F": 86,
         "estimated_at_risk_population": 255814,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 77
+        "extent_radius_km": 77,
+        "summer_wet_bulb_F": 79.2,
+        "peak_wet_bulb_F": 82.7
       },
       "2075": {
         "avg_summer_humidity": 61,
@@ -745,7 +863,9 @@
         "days_over_100F": 104,
         "estimated_at_risk_population": 332558,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 87
+        "extent_radius_km": 87,
+        "summer_wet_bulb_F": 80.1,
+        "peak_wet_bulb_F": 83.2
       }
     }
   },
@@ -770,7 +890,9 @@
         "days_over_100F": 107,
         "estimated_at_risk_population": 48458,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 40
+        "extent_radius_km": 40,
+        "summer_wet_bulb_F": 66.5,
+        "peak_wet_bulb_F": 75.0
       },
       "2035": {
         "avg_summer_humidity": 26,
@@ -780,7 +902,9 @@
         "days_over_100F": 112,
         "estimated_at_risk_population": 96917,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 48
+        "extent_radius_km": 48,
+        "summer_wet_bulb_F": 67.1,
+        "peak_wet_bulb_F": 75.6
       },
       "2045": {
         "avg_summer_humidity": 26,
@@ -790,7 +914,9 @@
         "days_over_100F": 125,
         "estimated_at_risk_population": 193833,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 58
+        "extent_radius_km": 58,
+        "summer_wet_bulb_F": 68.2,
+        "peak_wet_bulb_F": 76.6
       },
       "2055": {
         "avg_summer_humidity": 27,
@@ -800,7 +926,9 @@
         "days_over_100F": 127,
         "estimated_at_risk_population": 339208,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 70
+        "extent_radius_km": 70,
+        "summer_wet_bulb_F": 69.5,
+        "peak_wet_bulb_F": 77.3
       },
       "2065": {
         "avg_summer_humidity": 27,
@@ -810,7 +938,9 @@
         "days_over_100F": 139,
         "estimated_at_risk_population": 484583,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 84
+        "extent_radius_km": 84,
+        "summer_wet_bulb_F": 70.4,
+        "peak_wet_bulb_F": 78.3
       },
       "2075": {
         "avg_summer_humidity": 26,
@@ -820,7 +950,9 @@
         "days_over_100F": 152,
         "estimated_at_risk_population": 629958,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 96
+        "extent_radius_km": 96,
+        "summer_wet_bulb_F": 71.3,
+        "peak_wet_bulb_F": 79.6
       }
     }
   },
@@ -845,7 +977,9 @@
         "days_over_100F": 65,
         "estimated_at_risk_population": 22655,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 36
+        "extent_radius_km": 36,
+        "summer_wet_bulb_F": 62.0,
+        "peak_wet_bulb_F": 70.6
       },
       "2035": {
         "avg_summer_humidity": 25,
@@ -855,7 +989,9 @@
         "days_over_100F": 72,
         "estimated_at_risk_population": 45309,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 44
+        "extent_radius_km": 44,
+        "summer_wet_bulb_F": 62.5,
+        "peak_wet_bulb_F": 70.7
       },
       "2045": {
         "avg_summer_humidity": 25,
@@ -865,7 +1001,9 @@
         "days_over_100F": 81,
         "estimated_at_risk_population": 90618,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 54
+        "extent_radius_km": 54,
+        "summer_wet_bulb_F": 63.6,
+        "peak_wet_bulb_F": 71.7
       },
       "2055": {
         "avg_summer_humidity": 25,
@@ -875,7 +1013,9 @@
         "days_over_100F": 86,
         "estimated_at_risk_population": 158582,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 66
+        "extent_radius_km": 66,
+        "summer_wet_bulb_F": 64.8,
+        "peak_wet_bulb_F": 73.0
       },
       "2065": {
         "avg_summer_humidity": 25,
@@ -885,7 +1025,9 @@
         "days_over_100F": 97,
         "estimated_at_risk_population": 226546,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 78
+        "extent_radius_km": 78,
+        "summer_wet_bulb_F": 65.9,
+        "peak_wet_bulb_F": 73.4
       },
       "2075": {
         "avg_summer_humidity": 26,
@@ -895,7 +1037,9 @@
         "days_over_100F": 106,
         "estimated_at_risk_population": 294510,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 88
+        "extent_radius_km": 88,
+        "summer_wet_bulb_F": 67.2,
+        "peak_wet_bulb_F": 75.7
       }
     }
   },
@@ -920,7 +1064,9 @@
         "days_over_100F": 10,
         "estimated_at_risk_population": 13378,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 32
+        "extent_radius_km": 32,
+        "summer_wet_bulb_F": 78.2,
+        "peak_wet_bulb_F": 83.9
       },
       "2035": {
         "avg_summer_humidity": 83,
@@ -930,7 +1076,9 @@
         "days_over_100F": 12,
         "estimated_at_risk_population": 26756,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 40
+        "extent_radius_km": 40,
+        "summer_wet_bulb_F": 78.7,
+        "peak_wet_bulb_F": 84.2
       },
       "2045": {
         "avg_summer_humidity": 81,
@@ -940,7 +1088,9 @@
         "days_over_100F": 19,
         "estimated_at_risk_population": 53511,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 50
+        "extent_radius_km": 50,
+        "summer_wet_bulb_F": 80.0,
+        "peak_wet_bulb_F": 85.4
       },
       "2055": {
         "avg_summer_humidity": 82,
@@ -950,7 +1100,9 @@
         "days_over_100F": 22,
         "estimated_at_risk_population": 93644,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 62
+        "extent_radius_km": 62,
+        "summer_wet_bulb_F": 80.8,
+        "peak_wet_bulb_F": 85.9
       },
       "2065": {
         "avg_summer_humidity": 79,
@@ -960,7 +1112,9 @@
         "days_over_100F": 33,
         "estimated_at_risk_population": 133778,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 74
+        "extent_radius_km": 74,
+        "summer_wet_bulb_F": 81.5,
+        "peak_wet_bulb_F": 86.8
       },
       "2075": {
         "avg_summer_humidity": 78,
@@ -970,7 +1124,9 @@
         "days_over_100F": 46,
         "estimated_at_risk_population": 173911,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 84
+        "extent_radius_km": 84,
+        "summer_wet_bulb_F": 82.7,
+        "peak_wet_bulb_F": 87.9
       }
     }
   },
@@ -995,7 +1151,9 @@
         "days_over_100F": 5,
         "estimated_at_risk_population": 19895,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 32
+        "extent_radius_km": 32,
+        "summer_wet_bulb_F": 76.2,
+        "peak_wet_bulb_F": 82.8
       },
       "2035": {
         "avg_summer_humidity": 84,
@@ -1005,7 +1163,9 @@
         "days_over_100F": 7,
         "estimated_at_risk_population": 39790,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 40
+        "extent_radius_km": 40,
+        "summer_wet_bulb_F": 76.6,
+        "peak_wet_bulb_F": 82.8
       },
       "2045": {
         "avg_summer_humidity": 83,
@@ -1015,7 +1175,9 @@
         "days_over_100F": 11,
         "estimated_at_risk_population": 79581,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 50
+        "extent_radius_km": 50,
+        "summer_wet_bulb_F": 78.1,
+        "peak_wet_bulb_F": 84.4
       },
       "2055": {
         "avg_summer_humidity": 84,
@@ -1025,7 +1187,9 @@
         "days_over_100F": 11,
         "estimated_at_risk_population": 139266,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 62
+        "extent_radius_km": 62,
+        "summer_wet_bulb_F": 78.9,
+        "peak_wet_bulb_F": 84.9
       },
       "2065": {
         "avg_summer_humidity": 81,
@@ -1035,7 +1199,9 @@
         "days_over_100F": 22,
         "estimated_at_risk_population": 198952,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 74
+        "extent_radius_km": 74,
+        "summer_wet_bulb_F": 79.6,
+        "peak_wet_bulb_F": 85.7
       },
       "2075": {
         "avg_summer_humidity": 80,
@@ -1045,7 +1211,9 @@
         "days_over_100F": 31,
         "estimated_at_risk_population": 258637,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 84
+        "extent_radius_km": 84,
+        "summer_wet_bulb_F": 80.7,
+        "peak_wet_bulb_F": 86.8
       }
     }
   },
@@ -1070,7 +1238,9 @@
         "days_over_100F": 6,
         "estimated_at_risk_population": 28051,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 34
+        "extent_radius_km": 34,
+        "summer_wet_bulb_F": 77.8,
+        "peak_wet_bulb_F": 84.2
       },
       "2035": {
         "avg_summer_humidity": 87,
@@ -1080,7 +1250,9 @@
         "days_over_100F": 8,
         "estimated_at_risk_population": 56102,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 42
+        "extent_radius_km": 42,
+        "summer_wet_bulb_F": 78.6,
+        "peak_wet_bulb_F": 84.7
       },
       "2045": {
         "avg_summer_humidity": 86,
@@ -1090,7 +1262,9 @@
         "days_over_100F": 12,
         "estimated_at_risk_population": 112205,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 52
+        "extent_radius_km": 52,
+        "summer_wet_bulb_F": 79.8,
+        "peak_wet_bulb_F": 86.0
       },
       "2055": {
         "avg_summer_humidity": 86,
@@ -1100,7 +1274,9 @@
         "days_over_100F": 14,
         "estimated_at_risk_population": 196358,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 64
+        "extent_radius_km": 64,
+        "summer_wet_bulb_F": 80.7,
+        "peak_wet_bulb_F": 86.9
       },
       "2065": {
         "avg_summer_humidity": 86,
@@ -1110,7 +1286,9 @@
         "days_over_100F": 20,
         "estimated_at_risk_population": 280512,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 76
+        "extent_radius_km": 76,
+        "summer_wet_bulb_F": 81.7,
+        "peak_wet_bulb_F": 87.5
       },
       "2075": {
         "avg_summer_humidity": 85,
@@ -1120,7 +1298,9 @@
         "days_over_100F": 31,
         "estimated_at_risk_population": 364665,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 86
+        "extent_radius_km": 86,
+        "summer_wet_bulb_F": 83.1,
+        "peak_wet_bulb_F": 88.9
       }
     }
   },
@@ -1145,7 +1325,9 @@
         "days_over_100F": 8,
         "estimated_at_risk_population": 28203,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 34
+        "extent_radius_km": 34,
+        "summer_wet_bulb_F": 75.1,
+        "peak_wet_bulb_F": 82.3
       },
       "2035": {
         "avg_summer_humidity": 79,
@@ -1155,7 +1337,9 @@
         "days_over_100F": 9,
         "estimated_at_risk_population": 56405,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 42
+        "extent_radius_km": 42,
+        "summer_wet_bulb_F": 75.7,
+        "peak_wet_bulb_F": 82.8
       },
       "2045": {
         "avg_summer_humidity": 78,
@@ -1165,7 +1349,9 @@
         "days_over_100F": 16,
         "estimated_at_risk_population": 112810,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 52
+        "extent_radius_km": 52,
+        "summer_wet_bulb_F": 77.0,
+        "peak_wet_bulb_F": 83.9
       },
       "2055": {
         "avg_summer_humidity": 79,
@@ -1175,7 +1361,9 @@
         "days_over_100F": 16,
         "estimated_at_risk_population": 197418,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 64
+        "extent_radius_km": 64,
+        "summer_wet_bulb_F": 77.8,
+        "peak_wet_bulb_F": 84.6
       },
       "2065": {
         "avg_summer_humidity": 75,
@@ -1185,7 +1373,9 @@
         "days_over_100F": 30,
         "estimated_at_risk_population": 282025,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 76
+        "extent_radius_km": 76,
+        "summer_wet_bulb_F": 78.5,
+        "peak_wet_bulb_F": 85.4
       },
       "2075": {
         "avg_summer_humidity": 76,
@@ -1195,7 +1385,9 @@
         "days_over_100F": 38,
         "estimated_at_risk_population": 366633,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 86
+        "extent_radius_km": 86,
+        "summer_wet_bulb_F": 80.0,
+        "peak_wet_bulb_F": 86.8
       }
     }
   },
@@ -1220,7 +1412,9 @@
         "days_over_100F": 15,
         "estimated_at_risk_population": 21920,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 33
+        "extent_radius_km": 33,
+        "summer_wet_bulb_F": 73.0,
+        "peak_wet_bulb_F": 79.2
       },
       "2035": {
         "avg_summer_humidity": 71,
@@ -1230,7 +1424,9 @@
         "days_over_100F": 15,
         "estimated_at_risk_population": 43841,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 41
+        "extent_radius_km": 41,
+        "summer_wet_bulb_F": 73.6,
+        "peak_wet_bulb_F": 79.6
       },
       "2045": {
         "avg_summer_humidity": 70,
@@ -1240,7 +1436,9 @@
         "days_over_100F": 23,
         "estimated_at_risk_population": 87681,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 51
+        "extent_radius_km": 51,
+        "summer_wet_bulb_F": 74.9,
+        "peak_wet_bulb_F": 80.7
       },
       "2055": {
         "avg_summer_humidity": 69,
@@ -1250,7 +1448,9 @@
         "days_over_100F": 29,
         "estimated_at_risk_population": 153442,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 63
+        "extent_radius_km": 63,
+        "summer_wet_bulb_F": 75.7,
+        "peak_wet_bulb_F": 81.5
       },
       "2065": {
         "avg_summer_humidity": 68,
@@ -1260,7 +1460,9 @@
         "days_over_100F": 36,
         "estimated_at_risk_population": 219204,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 75
+        "extent_radius_km": 75,
+        "summer_wet_bulb_F": 76.6,
+        "peak_wet_bulb_F": 82.4
       },
       "2075": {
         "avg_summer_humidity": 68,
@@ -1270,7 +1472,9 @@
         "days_over_100F": 46,
         "estimated_at_risk_population": 284965,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 85
+        "extent_radius_km": 85,
+        "summer_wet_bulb_F": 78.0,
+        "peak_wet_bulb_F": 83.6
       }
     }
   },
@@ -1295,7 +1499,9 @@
         "days_over_100F": 3,
         "estimated_at_risk_population": 21110,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 32
+        "extent_radius_km": 32,
+        "summer_wet_bulb_F": 71.8,
+        "peak_wet_bulb_F": 80.5
       },
       "2035": {
         "avg_summer_humidity": 81,
@@ -1305,7 +1511,9 @@
         "days_over_100F": 3,
         "estimated_at_risk_population": 42221,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 40
+        "extent_radius_km": 40,
+        "summer_wet_bulb_F": 72.5,
+        "peak_wet_bulb_F": 81.1
       },
       "2045": {
         "avg_summer_humidity": 80,
@@ -1315,7 +1523,9 @@
         "days_over_100F": 6,
         "estimated_at_risk_population": 84442,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 50
+        "extent_radius_km": 50,
+        "summer_wet_bulb_F": 73.9,
+        "peak_wet_bulb_F": 82.4
       },
       "2055": {
         "avg_summer_humidity": 81,
@@ -1325,7 +1535,9 @@
         "days_over_100F": 5,
         "estimated_at_risk_population": 147773,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 62
+        "extent_radius_km": 62,
+        "summer_wet_bulb_F": 74.7,
+        "peak_wet_bulb_F": 82.9
       },
       "2065": {
         "avg_summer_humidity": 79,
@@ -1335,7 +1547,9 @@
         "days_over_100F": 13,
         "estimated_at_risk_population": 211104,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 74
+        "extent_radius_km": 74,
+        "summer_wet_bulb_F": 75.5,
+        "peak_wet_bulb_F": 83.6
       },
       "2075": {
         "avg_summer_humidity": 79,
@@ -1345,7 +1559,9 @@
         "days_over_100F": 19,
         "estimated_at_risk_population": 274435,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 84
+        "extent_radius_km": 84,
+        "summer_wet_bulb_F": 77.0,
+        "peak_wet_bulb_F": 85.2
       }
     }
   },
@@ -1370,7 +1586,9 @@
         "days_over_100F": 2,
         "estimated_at_risk_population": 21389,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 32
+        "extent_radius_km": 32,
+        "summer_wet_bulb_F": 70.3,
+        "peak_wet_bulb_F": 79.9
       },
       "2035": {
         "avg_summer_humidity": 80,
@@ -1380,7 +1598,9 @@
         "days_over_100F": 3,
         "estimated_at_risk_population": 42779,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 40
+        "extent_radius_km": 40,
+        "summer_wet_bulb_F": 70.9,
+        "peak_wet_bulb_F": 80.4
       },
       "2045": {
         "avg_summer_humidity": 78,
@@ -1390,7 +1610,9 @@
         "days_over_100F": 6,
         "estimated_at_risk_population": 85557,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 50
+        "extent_radius_km": 50,
+        "summer_wet_bulb_F": 72.1,
+        "peak_wet_bulb_F": 81.7
       },
       "2055": {
         "avg_summer_humidity": 80,
@@ -1400,7 +1622,9 @@
         "days_over_100F": 5,
         "estimated_at_risk_population": 149725,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 62
+        "extent_radius_km": 62,
+        "summer_wet_bulb_F": 73.1,
+        "peak_wet_bulb_F": 82.3
       },
       "2065": {
         "avg_summer_humidity": 78,
@@ -1410,7 +1634,9 @@
         "days_over_100F": 10,
         "estimated_at_risk_population": 213893,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 74
+        "extent_radius_km": 74,
+        "summer_wet_bulb_F": 74.1,
+        "peak_wet_bulb_F": 82.9
       },
       "2075": {
         "avg_summer_humidity": 77,
@@ -1420,7 +1646,9 @@
         "days_over_100F": 15,
         "estimated_at_risk_population": 278060,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 84
+        "extent_radius_km": 84,
+        "summer_wet_bulb_F": 75.4,
+        "peak_wet_bulb_F": 84.3
       }
     }
   },
@@ -1445,7 +1673,9 @@
         "days_over_100F": 3,
         "estimated_at_risk_population": 22569,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 33
+        "extent_radius_km": 33,
+        "summer_wet_bulb_F": 72.7,
+        "peak_wet_bulb_F": 81.2
       },
       "2035": {
         "avg_summer_humidity": 83,
@@ -1455,7 +1685,9 @@
         "days_over_100F": 4,
         "estimated_at_risk_population": 45138,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 41
+        "extent_radius_km": 41,
+        "summer_wet_bulb_F": 73.4,
+        "peak_wet_bulb_F": 81.8
       },
       "2045": {
         "avg_summer_humidity": 82,
@@ -1465,7 +1697,9 @@
         "days_over_100F": 8,
         "estimated_at_risk_population": 90275,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 51
+        "extent_radius_km": 51,
+        "summer_wet_bulb_F": 74.8,
+        "peak_wet_bulb_F": 83.1
       },
       "2055": {
         "avg_summer_humidity": 83,
@@ -1475,7 +1709,9 @@
         "days_over_100F": 6,
         "estimated_at_risk_population": 157982,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 63
+        "extent_radius_km": 63,
+        "summer_wet_bulb_F": 75.6,
+        "peak_wet_bulb_F": 83.8
       },
       "2065": {
         "avg_summer_humidity": 80,
@@ -1485,7 +1721,9 @@
         "days_over_100F": 13,
         "estimated_at_risk_population": 225688,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 75
+        "extent_radius_km": 75,
+        "summer_wet_bulb_F": 76.4,
+        "peak_wet_bulb_F": 84.4
       },
       "2075": {
         "avg_summer_humidity": 80,
@@ -1495,7 +1733,9 @@
         "days_over_100F": 20,
         "estimated_at_risk_population": 293395,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 85
+        "extent_radius_km": 85,
+        "summer_wet_bulb_F": 77.8,
+        "peak_wet_bulb_F": 85.9
       }
     }
   },
@@ -1520,7 +1760,9 @@
         "days_over_100F": 42,
         "estimated_at_risk_population": 14257,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 32
+        "extent_radius_km": 32,
+        "summer_wet_bulb_F": 73.9,
+        "peak_wet_bulb_F": 78.6
       },
       "2035": {
         "avg_summer_humidity": 62,
@@ -1530,7 +1772,9 @@
         "days_over_100F": 37,
         "estimated_at_risk_population": 28514,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 40
+        "extent_radius_km": 40,
+        "summer_wet_bulb_F": 74.3,
+        "peak_wet_bulb_F": 78.9
       },
       "2045": {
         "avg_summer_humidity": 57,
@@ -1540,7 +1784,9 @@
         "days_over_100F": 59,
         "estimated_at_risk_population": 57028,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 50
+        "extent_radius_km": 50,
+        "summer_wet_bulb_F": 75.5,
+        "peak_wet_bulb_F": 79.7
       },
       "2055": {
         "avg_summer_humidity": 58,
@@ -1550,7 +1796,9 @@
         "days_over_100F": 67,
         "estimated_at_risk_population": 99799,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 62
+        "extent_radius_km": 62,
+        "summer_wet_bulb_F": 76.5,
+        "peak_wet_bulb_F": 81.0
       },
       "2065": {
         "avg_summer_humidity": 57,
@@ -1560,7 +1808,9 @@
         "days_over_100F": 72,
         "estimated_at_risk_population": 142570,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 74
+        "extent_radius_km": 74,
+        "summer_wet_bulb_F": 77.1,
+        "peak_wet_bulb_F": 81.6
       },
       "2075": {
         "avg_summer_humidity": 55,
@@ -1570,7 +1820,9 @@
         "days_over_100F": 92,
         "estimated_at_risk_population": 185340,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 84
+        "extent_radius_km": 84,
+        "summer_wet_bulb_F": 78.5,
+        "peak_wet_bulb_F": 82.7
       }
     }
   },
@@ -1595,7 +1847,9 @@
         "days_over_100F": 7,
         "estimated_at_risk_population": 63852,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 36
+        "extent_radius_km": 36,
+        "summer_wet_bulb_F": 75.0,
+        "peak_wet_bulb_F": 83.9
       },
       "2035": {
         "avg_summer_humidity": 82,
@@ -1605,7 +1859,9 @@
         "days_over_100F": 8,
         "estimated_at_risk_population": 127703,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 44
+        "extent_radius_km": 44,
+        "summer_wet_bulb_F": 76.0,
+        "peak_wet_bulb_F": 84.6
       },
       "2045": {
         "avg_summer_humidity": 81,
@@ -1615,7 +1871,9 @@
         "days_over_100F": 11,
         "estimated_at_risk_population": 255406,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 54
+        "extent_radius_km": 54,
+        "summer_wet_bulb_F": 77.1,
+        "peak_wet_bulb_F": 85.5
       },
       "2055": {
         "avg_summer_humidity": 81,
@@ -1625,7 +1883,9 @@
         "days_over_100F": 13,
         "estimated_at_risk_population": 446961,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 66
+        "extent_radius_km": 66,
+        "summer_wet_bulb_F": 78.1,
+        "peak_wet_bulb_F": 86.6
       },
       "2065": {
         "avg_summer_humidity": 80,
@@ -1635,7 +1895,9 @@
         "days_over_100F": 20,
         "estimated_at_risk_population": 638516,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 78
+        "extent_radius_km": 78,
+        "summer_wet_bulb_F": 79.3,
+        "peak_wet_bulb_F": 87.2
       },
       "2075": {
         "avg_summer_humidity": 79,
@@ -1645,7 +1907,9 @@
         "days_over_100F": 28,
         "estimated_at_risk_population": 830071,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 90
+        "extent_radius_km": 90,
+        "summer_wet_bulb_F": 80.6,
+        "peak_wet_bulb_F": 88.5
       }
     }
   },
@@ -1670,7 +1934,9 @@
         "days_over_100F": 3,
         "estimated_at_risk_population": 62451,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 36
+        "extent_radius_km": 36,
+        "summer_wet_bulb_F": 72.7,
+        "peak_wet_bulb_F": 81.6
       },
       "2035": {
         "avg_summer_humidity": 81,
@@ -1680,7 +1946,9 @@
         "days_over_100F": 3,
         "estimated_at_risk_population": 124901,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 44
+        "extent_radius_km": 44,
+        "summer_wet_bulb_F": 73.6,
+        "peak_wet_bulb_F": 82.6
       },
       "2045": {
         "avg_summer_humidity": 80,
@@ -1690,7 +1958,9 @@
         "days_over_100F": 5,
         "estimated_at_risk_population": 249802,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 54
+        "extent_radius_km": 54,
+        "summer_wet_bulb_F": 74.6,
+        "peak_wet_bulb_F": 83.3
       },
       "2055": {
         "avg_summer_humidity": 80,
@@ -1700,7 +1970,9 @@
         "days_over_100F": 6,
         "estimated_at_risk_population": 437154,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 66
+        "extent_radius_km": 66,
+        "summer_wet_bulb_F": 75.7,
+        "peak_wet_bulb_F": 84.3
       },
       "2065": {
         "avg_summer_humidity": 80,
@@ -1710,7 +1982,9 @@
         "days_over_100F": 11,
         "estimated_at_risk_population": 624505,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 78
+        "extent_radius_km": 78,
+        "summer_wet_bulb_F": 77.0,
+        "peak_wet_bulb_F": 85.2
       },
       "2075": {
         "avg_summer_humidity": 79,
@@ -1720,7 +1994,9 @@
         "days_over_100F": 15,
         "estimated_at_risk_population": 811857,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 90
+        "extent_radius_km": 90,
+        "summer_wet_bulb_F": 78.2,
+        "peak_wet_bulb_F": 86.2
       }
     }
   },
@@ -1745,7 +2021,9 @@
         "days_over_100F": 1,
         "estimated_at_risk_population": 196182,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 45
+        "extent_radius_km": 45,
+        "summer_wet_bulb_F": 72.3,
+        "peak_wet_bulb_F": 80.8
       },
       "2035": {
         "avg_summer_humidity": 81,
@@ -1755,7 +2033,9 @@
         "days_over_100F": 1,
         "estimated_at_risk_population": 392364,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 55
+        "extent_radius_km": 55,
+        "summer_wet_bulb_F": 73.3,
+        "peak_wet_bulb_F": 82.1
       },
       "2045": {
         "avg_summer_humidity": 81,
@@ -1765,7 +2045,9 @@
         "days_over_100F": 1,
         "estimated_at_risk_population": 784728,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 68
+        "extent_radius_km": 68,
+        "summer_wet_bulb_F": 74.3,
+        "peak_wet_bulb_F": 82.6
       },
       "2055": {
         "avg_summer_humidity": 81,
@@ -1775,7 +2057,9 @@
         "days_over_100F": 2,
         "estimated_at_risk_population": 1373275,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 82
+        "extent_radius_km": 82,
+        "summer_wet_bulb_F": 75.3,
+        "peak_wet_bulb_F": 83.4
       },
       "2065": {
         "avg_summer_humidity": 80,
@@ -1785,7 +2069,9 @@
         "days_over_100F": 6,
         "estimated_at_risk_population": 1961821,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 98
+        "extent_radius_km": 98,
+        "summer_wet_bulb_F": 76.6,
+        "peak_wet_bulb_F": 84.4
       },
       "2075": {
         "avg_summer_humidity": 80,
@@ -1795,7 +2081,9 @@
         "days_over_100F": 8,
         "estimated_at_risk_population": 2550367,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 112
+        "extent_radius_km": 112,
+        "summer_wet_bulb_F": 77.9,
+        "peak_wet_bulb_F": 85.5
       }
     }
   },
@@ -1820,7 +2108,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 49416,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 35
+        "extent_radius_km": 35,
+        "summer_wet_bulb_F": 69.8,
+        "peak_wet_bulb_F": 78.3
       },
       "2035": {
         "avg_summer_humidity": 83,
@@ -1830,7 +2120,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 98833,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 42
+        "extent_radius_km": 42,
+        "summer_wet_bulb_F": 71.0,
+        "peak_wet_bulb_F": 79.7
       },
       "2045": {
         "avg_summer_humidity": 83,
@@ -1840,7 +2132,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 197665,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 52
+        "extent_radius_km": 52,
+        "summer_wet_bulb_F": 71.9,
+        "peak_wet_bulb_F": 80.3
       },
       "2055": {
         "avg_summer_humidity": 83,
@@ -1850,7 +2144,9 @@
         "days_over_100F": 1,
         "estimated_at_risk_population": 345914,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 64
+        "extent_radius_km": 64,
+        "summer_wet_bulb_F": 73.1,
+        "peak_wet_bulb_F": 81.2
       },
       "2065": {
         "avg_summer_humidity": 83,
@@ -1860,7 +2156,9 @@
         "days_over_100F": 2,
         "estimated_at_risk_population": 494163,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 76
+        "extent_radius_km": 76,
+        "summer_wet_bulb_F": 74.4,
+        "peak_wet_bulb_F": 82.3
       },
       "2075": {
         "avg_summer_humidity": 83,
@@ -1870,7 +2168,9 @@
         "days_over_100F": 3,
         "estimated_at_risk_population": 642412,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 86
+        "extent_radius_km": 86,
+        "summer_wet_bulb_F": 75.8,
+        "peak_wet_bulb_F": 83.6
       }
     }
   },
@@ -1895,7 +2195,9 @@
         "days_over_100F": 2,
         "estimated_at_risk_population": 94902,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 40
+        "extent_radius_km": 40,
+        "summer_wet_bulb_F": 68.4,
+        "peak_wet_bulb_F": 78.0
       },
       "2035": {
         "avg_summer_humidity": 74,
@@ -1905,7 +2207,9 @@
         "days_over_100F": 2,
         "estimated_at_risk_population": 189805,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 50
+        "extent_radius_km": 50,
+        "summer_wet_bulb_F": 69.2,
+        "peak_wet_bulb_F": 78.9
       },
       "2045": {
         "avg_summer_humidity": 73,
@@ -1915,7 +2219,9 @@
         "days_over_100F": 4,
         "estimated_at_risk_population": 379610,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 62
+        "extent_radius_km": 62,
+        "summer_wet_bulb_F": 70.3,
+        "peak_wet_bulb_F": 79.8
       },
       "2055": {
         "avg_summer_humidity": 74,
@@ -1925,7 +2231,9 @@
         "days_over_100F": 3,
         "estimated_at_risk_population": 664317,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 76
+        "extent_radius_km": 76,
+        "summer_wet_bulb_F": 71.2,
+        "peak_wet_bulb_F": 80.3
       },
       "2065": {
         "avg_summer_humidity": 72,
@@ -1935,7 +2243,9 @@
         "days_over_100F": 9,
         "estimated_at_risk_population": 949024,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 92
+        "extent_radius_km": 92,
+        "summer_wet_bulb_F": 72.2,
+        "peak_wet_bulb_F": 81.2
       },
       "2075": {
         "avg_summer_humidity": 72,
@@ -1945,7 +2255,9 @@
         "days_over_100F": 13,
         "estimated_at_risk_population": 1233731,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 105
+        "extent_radius_km": 105,
+        "summer_wet_bulb_F": 73.6,
+        "peak_wet_bulb_F": 82.6
       }
     }
   },
@@ -1970,7 +2282,9 @@
         "days_over_100F": 1,
         "estimated_at_risk_population": 43423,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 35
+        "extent_radius_km": 35,
+        "summer_wet_bulb_F": 67.3,
+        "peak_wet_bulb_F": 78.5
       },
       "2035": {
         "avg_summer_humidity": 72,
@@ -1980,7 +2294,9 @@
         "days_over_100F": 1,
         "estimated_at_risk_population": 86846,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 43
+        "extent_radius_km": 43,
+        "summer_wet_bulb_F": 68.0,
+        "peak_wet_bulb_F": 79.1
       },
       "2045": {
         "avg_summer_humidity": 71,
@@ -1990,7 +2306,9 @@
         "days_over_100F": 3,
         "estimated_at_risk_population": 173692,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 53
+        "extent_radius_km": 53,
+        "summer_wet_bulb_F": 68.9,
+        "peak_wet_bulb_F": 80.0
       },
       "2055": {
         "avg_summer_humidity": 71,
@@ -2000,7 +2318,9 @@
         "days_over_100F": 3,
         "estimated_at_risk_population": 303961,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 65
+        "extent_radius_km": 65,
+        "summer_wet_bulb_F": 70.0,
+        "peak_wet_bulb_F": 80.6
       },
       "2065": {
         "avg_summer_humidity": 70,
@@ -2010,7 +2330,9 @@
         "days_over_100F": 7,
         "estimated_at_risk_population": 434230,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 77
+        "extent_radius_km": 77,
+        "summer_wet_bulb_F": 71.1,
+        "peak_wet_bulb_F": 81.4
       },
       "2075": {
         "avg_summer_humidity": 69,
@@ -2020,7 +2342,9 @@
         "days_over_100F": 11,
         "estimated_at_risk_population": 564500,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 87
+        "extent_radius_km": 87,
+        "summer_wet_bulb_F": 72.4,
+        "peak_wet_bulb_F": 82.3
       }
     }
   },
@@ -2045,7 +2369,9 @@
         "days_over_100F": 2,
         "estimated_at_risk_population": 36905,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 34
+        "extent_radius_km": 34,
+        "summer_wet_bulb_F": 68.1,
+        "peak_wet_bulb_F": 77.9
       },
       "2035": {
         "avg_summer_humidity": 75,
@@ -2055,7 +2381,9 @@
         "days_over_100F": 2,
         "estimated_at_risk_population": 73810,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 42
+        "extent_radius_km": 42,
+        "summer_wet_bulb_F": 69.1,
+        "peak_wet_bulb_F": 78.8
       },
       "2045": {
         "avg_summer_humidity": 75,
@@ -2065,7 +2393,9 @@
         "days_over_100F": 5,
         "estimated_at_risk_population": 147620,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 52
+        "extent_radius_km": 52,
+        "summer_wet_bulb_F": 70.2,
+        "peak_wet_bulb_F": 79.8
       },
       "2055": {
         "avg_summer_humidity": 74,
@@ -2075,7 +2405,9 @@
         "days_over_100F": 7,
         "estimated_at_risk_population": 258336,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 64
+        "extent_radius_km": 64,
+        "summer_wet_bulb_F": 71.2,
+        "peak_wet_bulb_F": 80.2
       },
       "2065": {
         "avg_summer_humidity": 72,
@@ -2085,7 +2417,9 @@
         "days_over_100F": 14,
         "estimated_at_risk_population": 369051,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 76
+        "extent_radius_km": 76,
+        "summer_wet_bulb_F": 72.5,
+        "peak_wet_bulb_F": 81.5
       },
       "2075": {
         "avg_summer_humidity": 71,
@@ -2095,7 +2429,9 @@
         "days_over_100F": 21,
         "estimated_at_risk_population": 479767,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 86
+        "extent_radius_km": 86,
+        "summer_wet_bulb_F": 73.9,
+        "peak_wet_bulb_F": 82.7
       }
     }
   },
@@ -2120,7 +2456,9 @@
         "days_over_100F": 2,
         "estimated_at_risk_population": 29638,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 33
+        "extent_radius_km": 33,
+        "summer_wet_bulb_F": 59.2,
+        "peak_wet_bulb_F": 64.9
       },
       "2035": {
         "avg_summer_humidity": 52,
@@ -2130,7 +2468,9 @@
         "days_over_100F": 2,
         "estimated_at_risk_population": 59276,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 40
+        "extent_radius_km": 40,
+        "summer_wet_bulb_F": 59.4,
+        "peak_wet_bulb_F": 64.9
       },
       "2045": {
         "avg_summer_humidity": 53,
@@ -2140,7 +2480,9 @@
         "days_over_100F": 4,
         "estimated_at_risk_population": 118553,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 50
+        "extent_radius_km": 50,
+        "summer_wet_bulb_F": 60.7,
+        "peak_wet_bulb_F": 66.5
       },
       "2055": {
         "avg_summer_humidity": 52,
@@ -2150,7 +2492,9 @@
         "days_over_100F": 6,
         "estimated_at_risk_population": 207467,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 62
+        "extent_radius_km": 62,
+        "summer_wet_bulb_F": 61.8,
+        "peak_wet_bulb_F": 67.3
       },
       "2065": {
         "avg_summer_humidity": 52,
@@ -2160,7 +2504,9 @@
         "days_over_100F": 9,
         "estimated_at_risk_population": 296382,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 74
+        "extent_radius_km": 74,
+        "summer_wet_bulb_F": 62.5,
+        "peak_wet_bulb_F": 68.3
       },
       "2075": {
         "avg_summer_humidity": 49,
@@ -2170,7 +2516,9 @@
         "days_over_100F": 21,
         "estimated_at_risk_population": 385297,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 84
+        "extent_radius_km": 84,
+        "summer_wet_bulb_F": 63.8,
+        "peak_wet_bulb_F": 69.2
       }
     }
   },
@@ -2195,7 +2543,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 129974,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 45
+        "extent_radius_km": 45,
+        "summer_wet_bulb_F": 60.7,
+        "peak_wet_bulb_F": 65.3
       },
       "2035": {
         "avg_summer_humidity": 54,
@@ -2205,7 +2555,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 259947,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 55
+        "extent_radius_km": 55,
+        "summer_wet_bulb_F": 61.2,
+        "peak_wet_bulb_F": 65.7
       },
       "2045": {
         "avg_summer_humidity": 54,
@@ -2215,7 +2567,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 519894,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 68
+        "extent_radius_km": 68,
+        "summer_wet_bulb_F": 62.0,
+        "peak_wet_bulb_F": 66.5
       },
       "2055": {
         "avg_summer_humidity": 54,
@@ -2225,7 +2579,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 909815,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 82
+        "extent_radius_km": 82,
+        "summer_wet_bulb_F": 63.2,
+        "peak_wet_bulb_F": 68.0
       },
       "2065": {
         "avg_summer_humidity": 54,
@@ -2235,7 +2591,9 @@
         "days_over_100F": 1,
         "estimated_at_risk_population": 1299735,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 98
+        "extent_radius_km": 98,
+        "summer_wet_bulb_F": 64.2,
+        "peak_wet_bulb_F": 68.5
       },
       "2075": {
         "avg_summer_humidity": 54,
@@ -2245,7 +2603,9 @@
         "days_over_100F": 1,
         "estimated_at_risk_population": 1689656,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 112
+        "extent_radius_km": 112,
+        "summer_wet_bulb_F": 65.2,
+        "peak_wet_bulb_F": 70.1
       }
     }
   },
@@ -2270,7 +2630,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 45670,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 35
+        "extent_radius_km": 35,
+        "summer_wet_bulb_F": 59.2,
+        "peak_wet_bulb_F": 63.7
       },
       "2035": {
         "avg_summer_humidity": 66,
@@ -2280,7 +2642,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 91339,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 42
+        "extent_radius_km": 42,
+        "summer_wet_bulb_F": 60.1,
+        "peak_wet_bulb_F": 64.4
       },
       "2045": {
         "avg_summer_humidity": 66,
@@ -2290,7 +2654,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 182678,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 52
+        "extent_radius_km": 52,
+        "summer_wet_bulb_F": 60.7,
+        "peak_wet_bulb_F": 65.2
       },
       "2055": {
         "avg_summer_humidity": 66,
@@ -2300,7 +2666,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 319687,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 64
+        "extent_radius_km": 64,
+        "summer_wet_bulb_F": 61.8,
+        "peak_wet_bulb_F": 66.1
       },
       "2065": {
         "avg_summer_humidity": 66,
@@ -2310,7 +2678,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 456696,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 76
+        "extent_radius_km": 76,
+        "summer_wet_bulb_F": 62.9,
+        "peak_wet_bulb_F": 67.4
       },
       "2075": {
         "avg_summer_humidity": 66,
@@ -2320,7 +2690,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 593705,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 86
+        "extent_radius_km": 86,
+        "summer_wet_bulb_F": 63.8,
+        "peak_wet_bulb_F": 68.7
       }
     }
   },
@@ -2345,7 +2717,9 @@
         "days_over_100F": 1,
         "estimated_at_risk_population": 40188,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 34
+        "extent_radius_km": 34,
+        "summer_wet_bulb_F": 60.4,
+        "peak_wet_bulb_F": 68.0
       },
       "2035": {
         "avg_summer_humidity": 69,
@@ -2355,7 +2729,9 @@
         "days_over_100F": 0,
         "estimated_at_risk_population": 80375,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 42
+        "extent_radius_km": 42,
+        "summer_wet_bulb_F": 61.7,
+        "peak_wet_bulb_F": 69.4
       },
       "2045": {
         "avg_summer_humidity": 68,
@@ -2365,7 +2741,9 @@
         "days_over_100F": 1,
         "estimated_at_risk_population": 160750,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 52
+        "extent_radius_km": 52,
+        "summer_wet_bulb_F": 62.5,
+        "peak_wet_bulb_F": 69.9
       },
       "2055": {
         "avg_summer_humidity": 67,
@@ -2375,7 +2753,9 @@
         "days_over_100F": 2,
         "estimated_at_risk_population": 281313,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 64
+        "extent_radius_km": 64,
+        "summer_wet_bulb_F": 63.8,
+        "peak_wet_bulb_F": 70.8
       },
       "2065": {
         "avg_summer_humidity": 67,
@@ -2385,7 +2765,9 @@
         "days_over_100F": 2,
         "estimated_at_risk_population": 401876,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 76
+        "extent_radius_km": 76,
+        "summer_wet_bulb_F": 64.9,
+        "peak_wet_bulb_F": 72.2
       },
       "2075": {
         "avg_summer_humidity": 67,
@@ -2395,7 +2777,9 @@
         "days_over_100F": 4,
         "estimated_at_risk_population": 522439,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 86
+        "extent_radius_km": 86,
+        "summer_wet_bulb_F": 65.8,
+        "peak_wet_bulb_F": 72.7
       }
     }
   },
@@ -2420,7 +2804,9 @@
         "days_over_100F": 1,
         "estimated_at_risk_population": 25081,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 33
+        "extent_radius_km": 33,
+        "summer_wet_bulb_F": 60.2,
+        "peak_wet_bulb_F": 67.6
       },
       "2035": {
         "avg_summer_humidity": 66,
@@ -2430,7 +2816,9 @@
         "days_over_100F": 1,
         "estimated_at_risk_population": 50161,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 41
+        "extent_radius_km": 41,
+        "summer_wet_bulb_F": 61.6,
+        "peak_wet_bulb_F": 68.9
       },
       "2045": {
         "avg_summer_humidity": 65,
@@ -2440,7 +2828,9 @@
         "days_over_100F": 3,
         "estimated_at_risk_population": 100322,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 51
+        "extent_radius_km": 51,
+        "summer_wet_bulb_F": 62.3,
+        "peak_wet_bulb_F": 69.7
       },
       "2055": {
         "avg_summer_humidity": 64,
@@ -2450,7 +2840,9 @@
         "days_over_100F": 4,
         "estimated_at_risk_population": 175564,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 63
+        "extent_radius_km": 63,
+        "summer_wet_bulb_F": 63.6,
+        "peak_wet_bulb_F": 70.8
       },
       "2065": {
         "avg_summer_humidity": 64,
@@ -2460,7 +2852,9 @@
         "days_over_100F": 5,
         "estimated_at_risk_population": 250805,
         "casualty_rate_percent": 10,
-        "extent_radius_km": 75
+        "extent_radius_km": 75,
+        "summer_wet_bulb_F": 64.6,
+        "peak_wet_bulb_F": 72.0
       },
       "2075": {
         "avg_summer_humidity": 63,
@@ -2470,7 +2864,9 @@
         "days_over_100F": 8,
         "estimated_at_risk_population": 326046,
         "casualty_rate_percent": 13,
-        "extent_radius_km": 85
+        "extent_radius_km": 85,
+        "summer_wet_bulb_F": 65.5,
+        "peak_wet_bulb_F": 72.5
       }
     }
   },
@@ -2495,7 +2891,9 @@
         "days_over_100F": 9,
         "estimated_at_risk_population": 14026,
         "casualty_rate_percent": 1,
-        "extent_radius_km": 32
+        "extent_radius_km": 32,
+        "summer_wet_bulb_F": 76.9,
+        "peak_wet_bulb_F": 84.3
       },
       "2035": {
         "avg_summer_humidity": 86,
@@ -2505,7 +2903,9 @@
         "days_over_100F": 10,
         "estimated_at_risk_population": 28052,
         "casualty_rate_percent": 2,
-        "extent_radius_km": 40
+        "extent_radius_km": 40,
+        "summer_wet_bulb_F": 77.9,
+        "peak_wet_bulb_F": 84.7
       },
       "2045": {
         "avg_summer_humidity": 85,
@@ -2515,7 +2915,9 @@
         "days_over_100F": 15,
         "estimated_at_risk_population": 56103,
         "casualty_rate_percent": 4,
-        "extent_radius_km": 48
+        "extent_radius_km": 48,
+        "summer_wet_bulb_F": 79.0,
+        "peak_wet_bulb_F": 86.2
       },
       "2055": {
         "avg_summer_humidity": 85,
@@ -2525,7 +2927,9 @@
         "days_over_100F": 17,
         "estimated_at_risk_population": 98181,
         "casualty_rate_percent": 7,
-        "extent_radius_km": 58
+        "extent_radius_km": 58,
+        "summer_wet_bulb_F": 80.0,
+        "peak_wet_bulb_F": 87.0
       },
       "2065": {
         "avg_summer_humidity": 84,
@@ -2535,7 +2939,9 @@
         "days_over_100F": 24,
         "estimated_at_risk_population": 154284,
         "casualty_rate_percent": 11,
-        "extent_radius_km": 70
+        "extent_radius_km": 70,
+        "summer_wet_bulb_F": 80.9,
+        "peak_wet_bulb_F": 87.6
       },
       "2075": {
         "avg_summer_humidity": 84,
@@ -2545,7 +2951,9 @@
         "days_over_100F": 34,
         "estimated_at_risk_population": 210388,
         "casualty_rate_percent": 15,
-        "extent_radius_km": 82
+        "extent_radius_km": 82,
+        "summer_wet_bulb_F": 82.3,
+        "peak_wet_bulb_F": 88.9
       }
     }
   },
@@ -2565,7 +2973,9 @@
         "days_over_95F": 3,
         "days_over_100F": 0,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 66.4,
+        "peak_wet_bulb_F": 77.8
       },
       "2035": {
         "avg_summer_humidity": 76,
@@ -2573,7 +2983,9 @@
         "days_over_95F": 3,
         "days_over_100F": 0,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 67.3,
+        "peak_wet_bulb_F": 79.0
       },
       "2045": {
         "avg_summer_humidity": 75,
@@ -2581,7 +2993,9 @@
         "days_over_95F": 5,
         "days_over_100F": 1,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 68.1,
+        "peak_wet_bulb_F": 79.3
       },
       "2055": {
         "avg_summer_humidity": 75,
@@ -2589,7 +3003,9 @@
         "days_over_95F": 6,
         "days_over_100F": 1,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 69.2,
+        "peak_wet_bulb_F": 80.2
       },
       "2065": {
         "avg_summer_humidity": 74,
@@ -2597,7 +3013,9 @@
         "days_over_95F": 11,
         "days_over_100F": 3,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 70.5,
+        "peak_wet_bulb_F": 81.1
       },
       "2075": {
         "avg_summer_humidity": 72,
@@ -2605,7 +3023,9 @@
         "days_over_95F": 16,
         "days_over_100F": 5,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 71.5,
+        "peak_wet_bulb_F": 81.8
       }
     }
   },
@@ -2625,7 +3045,9 @@
         "days_over_95F": 19,
         "days_over_100F": 6,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 73.9,
+        "peak_wet_bulb_F": 82.9
       },
       "2035": {
         "avg_summer_humidity": 81,
@@ -2633,7 +3055,9 @@
         "days_over_95F": 21,
         "days_over_100F": 6,
         "wet_bulb_events": 1,
-        "extent_radius_km": 31
+        "extent_radius_km": 31,
+        "summer_wet_bulb_F": 74.8,
+        "peak_wet_bulb_F": 83.7
       },
       "2045": {
         "avg_summer_humidity": 80,
@@ -2641,7 +3065,9 @@
         "days_over_95F": 29,
         "days_over_100F": 10,
         "wet_bulb_events": 1,
-        "extent_radius_km": 31
+        "extent_radius_km": 31,
+        "summer_wet_bulb_F": 75.9,
+        "peak_wet_bulb_F": 84.6
       },
       "2055": {
         "avg_summer_humidity": 81,
@@ -2649,7 +3075,9 @@
         "days_over_95F": 33,
         "days_over_100F": 11,
         "wet_bulb_events": 2,
-        "extent_radius_km": 32
+        "extent_radius_km": 32,
+        "summer_wet_bulb_F": 76.9,
+        "peak_wet_bulb_F": 85.6
       },
       "2065": {
         "avg_summer_humidity": 80,
@@ -2657,7 +3085,9 @@
         "days_over_95F": 46,
         "days_over_100F": 17,
         "wet_bulb_events": 3,
-        "extent_radius_km": 33
+        "extent_radius_km": 33,
+        "summer_wet_bulb_F": 78.1,
+        "peak_wet_bulb_F": 86.2
       },
       "2075": {
         "avg_summer_humidity": 79,
@@ -2665,7 +3095,9 @@
         "days_over_95F": 57,
         "days_over_100F": 24,
         "wet_bulb_events": 6,
-        "extent_radius_km": 36
+        "extent_radius_km": 36,
+        "summer_wet_bulb_F": 79.4,
+        "peak_wet_bulb_F": 87.5
       }
     }
   },
@@ -2685,7 +3117,9 @@
         "days_over_95F": 6,
         "days_over_100F": 2,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 67.8,
+        "peak_wet_bulb_F": 78.7
       },
       "2035": {
         "avg_summer_humidity": 76,
@@ -2693,7 +3127,9 @@
         "days_over_95F": 8,
         "days_over_100F": 1,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 68.5,
+        "peak_wet_bulb_F": 79.3
       },
       "2045": {
         "avg_summer_humidity": 74,
@@ -2701,7 +3137,9 @@
         "days_over_95F": 12,
         "days_over_100F": 3,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 69.3,
+        "peak_wet_bulb_F": 80.3
       },
       "2055": {
         "avg_summer_humidity": 75,
@@ -2709,7 +3147,9 @@
         "days_over_95F": 12,
         "days_over_100F": 3,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 70.4,
+        "peak_wet_bulb_F": 80.8
       },
       "2065": {
         "avg_summer_humidity": 73,
@@ -2717,7 +3157,9 @@
         "days_over_95F": 20,
         "days_over_100F": 7,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 71.5,
+        "peak_wet_bulb_F": 81.5
       },
       "2075": {
         "avg_summer_humidity": 72,
@@ -2725,7 +3167,9 @@
         "days_over_95F": 27,
         "days_over_100F": 10,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 72.7,
+        "peak_wet_bulb_F": 82.5
       }
     }
   },
@@ -2745,7 +3189,9 @@
         "days_over_95F": 8,
         "days_over_100F": 2,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 68.7,
+        "peak_wet_bulb_F": 79.0
       },
       "2035": {
         "avg_summer_humidity": 77,
@@ -2753,7 +3199,9 @@
         "days_over_95F": 9,
         "days_over_100F": 2,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 69.4,
+        "peak_wet_bulb_F": 79.7
       },
       "2045": {
         "avg_summer_humidity": 76,
@@ -2761,7 +3209,9 @@
         "days_over_95F": 14,
         "days_over_100F": 5,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 70.2,
+        "peak_wet_bulb_F": 80.4
       },
       "2055": {
         "avg_summer_humidity": 77,
@@ -2769,7 +3219,9 @@
         "days_over_95F": 15,
         "days_over_100F": 4,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 71.3,
+        "peak_wet_bulb_F": 81.2
       },
       "2065": {
         "avg_summer_humidity": 75,
@@ -2777,7 +3229,9 @@
         "days_over_95F": 23,
         "days_over_100F": 8,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 72.3,
+        "peak_wet_bulb_F": 81.7
       },
       "2075": {
         "avg_summer_humidity": 74,
@@ -2785,7 +3239,9 @@
         "days_over_95F": 31,
         "days_over_100F": 12,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 73.5,
+        "peak_wet_bulb_F": 82.8
       }
     }
   },
@@ -2805,7 +3261,9 @@
         "days_over_95F": 5,
         "days_over_100F": 1,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 66.7,
+        "peak_wet_bulb_F": 77.0
       },
       "2035": {
         "avg_summer_humidity": 72,
@@ -2813,7 +3271,9 @@
         "days_over_95F": 5,
         "days_over_100F": 1,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 67.5,
+        "peak_wet_bulb_F": 77.9
       },
       "2045": {
         "avg_summer_humidity": 71,
@@ -2821,7 +3281,9 @@
         "days_over_95F": 10,
         "days_over_100F": 2,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 68.5,
+        "peak_wet_bulb_F": 79.0
       },
       "2055": {
         "avg_summer_humidity": 71,
@@ -2829,7 +3291,9 @@
         "days_over_95F": 10,
         "days_over_100F": 2,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 69.5,
+        "peak_wet_bulb_F": 79.8
       },
       "2065": {
         "avg_summer_humidity": 70,
@@ -2837,7 +3301,9 @@
         "days_over_95F": 19,
         "days_over_100F": 6,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 70.6,
+        "peak_wet_bulb_F": 80.5
       },
       "2075": {
         "avg_summer_humidity": 70,
@@ -2845,7 +3311,9 @@
         "days_over_95F": 26,
         "days_over_100F": 9,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 72.0,
+        "peak_wet_bulb_F": 81.6
       }
     }
   },
@@ -2865,7 +3333,9 @@
         "days_over_95F": 20,
         "days_over_100F": 5,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 75.8,
+        "peak_wet_bulb_F": 83.0
       },
       "2035": {
         "avg_summer_humidity": 85,
@@ -2873,7 +3343,9 @@
         "days_over_95F": 22,
         "days_over_100F": 6,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 76.8,
+        "peak_wet_bulb_F": 83.4
       },
       "2045": {
         "avg_summer_humidity": 85,
@@ -2881,7 +3353,9 @@
         "days_over_95F": 30,
         "days_over_100F": 9,
         "wet_bulb_events": 1,
-        "extent_radius_km": 31
+        "extent_radius_km": 31,
+        "summer_wet_bulb_F": 78.0,
+        "peak_wet_bulb_F": 84.9
       },
       "2055": {
         "avg_summer_humidity": 85,
@@ -2889,7 +3363,9 @@
         "days_over_95F": 33,
         "days_over_100F": 10,
         "wet_bulb_events": 2,
-        "extent_radius_km": 32
+        "extent_radius_km": 32,
+        "summer_wet_bulb_F": 78.9,
+        "peak_wet_bulb_F": 85.6
       },
       "2065": {
         "avg_summer_humidity": 84,
@@ -2897,7 +3373,9 @@
         "days_over_95F": 45,
         "days_over_100F": 16,
         "wet_bulb_events": 3,
-        "extent_radius_km": 33
+        "extent_radius_km": 33,
+        "summer_wet_bulb_F": 79.9,
+        "peak_wet_bulb_F": 86.3
       },
       "2075": {
         "avg_summer_humidity": 84,
@@ -2905,7 +3383,9 @@
         "days_over_95F": 60,
         "days_over_100F": 25,
         "wet_bulb_events": 6,
-        "extent_radius_km": 36
+        "extent_radius_km": 36,
+        "summer_wet_bulb_F": 81.3,
+        "peak_wet_bulb_F": 87.5
       }
     }
   },
@@ -2925,7 +3405,9 @@
         "days_over_95F": 20,
         "days_over_100F": 4,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 76.5,
+        "peak_wet_bulb_F": 82.4
       },
       "2035": {
         "avg_summer_humidity": 88,
@@ -2933,7 +3415,9 @@
         "days_over_95F": 22,
         "days_over_100F": 5,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 77.2,
+        "peak_wet_bulb_F": 82.8
       },
       "2045": {
         "avg_summer_humidity": 87,
@@ -2941,7 +3425,9 @@
         "days_over_95F": 32,
         "days_over_100F": 8,
         "wet_bulb_events": 1,
-        "extent_radius_km": 31
+        "extent_radius_km": 31,
+        "summer_wet_bulb_F": 78.5,
+        "peak_wet_bulb_F": 84.1
       },
       "2055": {
         "avg_summer_humidity": 87,
@@ -2949,7 +3435,9 @@
         "days_over_95F": 36,
         "days_over_100F": 10,
         "wet_bulb_events": 2,
-        "extent_radius_km": 32
+        "extent_radius_km": 32,
+        "summer_wet_bulb_F": 79.4,
+        "peak_wet_bulb_F": 85.1
       },
       "2065": {
         "avg_summer_humidity": 87,
@@ -2957,7 +3445,9 @@
         "days_over_95F": 47,
         "days_over_100F": 15,
         "wet_bulb_events": 3,
-        "extent_radius_km": 33
+        "extent_radius_km": 33,
+        "summer_wet_bulb_F": 80.4,
+        "peak_wet_bulb_F": 85.8
       },
       "2075": {
         "avg_summer_humidity": 86,
@@ -2965,7 +3455,9 @@
         "days_over_95F": 62,
         "days_over_100F": 25,
         "wet_bulb_events": 7,
-        "extent_radius_km": 37
+        "extent_radius_km": 37,
+        "summer_wet_bulb_F": 81.6,
+        "peak_wet_bulb_F": 87.2
       }
     }
   },
@@ -2985,7 +3477,9 @@
         "days_over_95F": 1,
         "days_over_100F": 0,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 62.4,
+        "peak_wet_bulb_F": 66.7
       },
       "2035": {
         "avg_summer_humidity": 55,
@@ -2993,7 +3487,9 @@
         "days_over_95F": 2,
         "days_over_100F": 0,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 62.8,
+        "peak_wet_bulb_F": 66.9
       },
       "2045": {
         "avg_summer_humidity": 55,
@@ -3001,7 +3497,9 @@
         "days_over_95F": 3,
         "days_over_100F": 0,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 63.5,
+        "peak_wet_bulb_F": 67.9
       },
       "2055": {
         "avg_summer_humidity": 55,
@@ -3009,7 +3507,9 @@
         "days_over_95F": 4,
         "days_over_100F": 0,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 64.7,
+        "peak_wet_bulb_F": 69.0
       },
       "2065": {
         "avg_summer_humidity": 55,
@@ -3017,7 +3517,9 @@
         "days_over_95F": 8,
         "days_over_100F": 0,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 65.5,
+        "peak_wet_bulb_F": 69.7
       },
       "2075": {
         "avg_summer_humidity": 55,
@@ -3025,7 +3527,9 @@
         "days_over_95F": 12,
         "days_over_100F": 1,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 66.3,
+        "peak_wet_bulb_F": 70.8
       }
     }
   },
@@ -3045,7 +3549,9 @@
         "days_over_95F": 10,
         "days_over_100F": 2,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 58.2,
+        "peak_wet_bulb_F": 63.6
       },
       "2035": {
         "avg_summer_humidity": 52,
@@ -3053,7 +3559,9 @@
         "days_over_95F": 11,
         "days_over_100F": 3,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 58.3,
+        "peak_wet_bulb_F": 63.7
       },
       "2045": {
         "avg_summer_humidity": 52,
@@ -3061,7 +3569,9 @@
         "days_over_95F": 16,
         "days_over_100F": 4,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 59.6,
+        "peak_wet_bulb_F": 65.1
       },
       "2055": {
         "avg_summer_humidity": 51,
@@ -3069,7 +3579,9 @@
         "days_over_95F": 19,
         "days_over_100F": 6,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 60.7,
+        "peak_wet_bulb_F": 66.0
       },
       "2065": {
         "avg_summer_humidity": 52,
@@ -3077,7 +3589,9 @@
         "days_over_95F": 24,
         "days_over_100F": 8,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 61.5,
+        "peak_wet_bulb_F": 67.0
       },
       "2075": {
         "avg_summer_humidity": 48,
@@ -3085,7 +3599,9 @@
         "days_over_95F": 40,
         "days_over_100F": 18,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 62.6,
+        "peak_wet_bulb_F": 67.9
       }
     }
   },
@@ -3105,7 +3621,9 @@
         "days_over_95F": 113,
         "days_over_100F": 67,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 63.4,
+        "peak_wet_bulb_F": 70.7
       },
       "2035": {
         "avg_summer_humidity": 27,
@@ -3113,7 +3631,9 @@
         "days_over_95F": 118,
         "days_over_100F": 72,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 63.9,
+        "peak_wet_bulb_F": 71.3
       },
       "2045": {
         "avg_summer_humidity": 27,
@@ -3121,7 +3641,9 @@
         "days_over_95F": 135,
         "days_over_100F": 87,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 65.0,
+        "peak_wet_bulb_F": 72.3
       },
       "2055": {
         "avg_summer_humidity": 28,
@@ -3129,7 +3651,9 @@
         "days_over_95F": 136,
         "days_over_100F": 91,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 66.1,
+        "peak_wet_bulb_F": 72.8
       },
       "2065": {
         "avg_summer_humidity": 28,
@@ -3137,7 +3661,9 @@
         "days_over_95F": 150,
         "days_over_100F": 106,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 67.1,
+        "peak_wet_bulb_F": 74.0
       },
       "2075": {
         "avg_summer_humidity": 27,
@@ -3145,7 +3671,9 @@
         "days_over_95F": 166,
         "days_over_100F": 125,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 67.9,
+        "peak_wet_bulb_F": 74.9
       }
     }
   },
@@ -3165,7 +3693,9 @@
         "days_over_95F": 15,
         "days_over_100F": 3,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 54.0,
+        "peak_wet_bulb_F": 60.6
       },
       "2035": {
         "avg_summer_humidity": 33,
@@ -3173,7 +3703,9 @@
         "days_over_95F": 18,
         "days_over_100F": 4,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 54.9,
+        "peak_wet_bulb_F": 61.4
       },
       "2045": {
         "avg_summer_humidity": 32,
@@ -3181,7 +3713,9 @@
         "days_over_95F": 24,
         "days_over_100F": 7,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 56.0,
+        "peak_wet_bulb_F": 62.5
       },
       "2055": {
         "avg_summer_humidity": 32,
@@ -3189,7 +3723,9 @@
         "days_over_95F": 32,
         "days_over_100F": 11,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 57.2,
+        "peak_wet_bulb_F": 63.8
       },
       "2065": {
         "avg_summer_humidity": 32,
@@ -3197,7 +3733,9 @@
         "days_over_95F": 39,
         "days_over_100F": 15,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 58.1,
+        "peak_wet_bulb_F": 64.5
       },
       "2075": {
         "avg_summer_humidity": 32,
@@ -3205,7 +3743,9 @@
         "days_over_95F": 49,
         "days_over_100F": 23,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 59.2,
+        "peak_wet_bulb_F": 66.2
       }
     }
   },
@@ -3225,7 +3765,9 @@
         "days_over_95F": 1,
         "days_over_100F": 0,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 58.6,
+        "peak_wet_bulb_F": 63.2
       },
       "2035": {
         "avg_summer_humidity": 63,
@@ -3233,7 +3775,9 @@
         "days_over_95F": 1,
         "days_over_100F": 0,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 59.4,
+        "peak_wet_bulb_F": 63.8
       },
       "2045": {
         "avg_summer_humidity": 64,
@@ -3241,7 +3785,9 @@
         "days_over_95F": 1,
         "days_over_100F": 0,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 60.0,
+        "peak_wet_bulb_F": 64.6
       },
       "2055": {
         "avg_summer_humidity": 63,
@@ -3249,7 +3795,9 @@
         "days_over_95F": 2,
         "days_over_100F": 0,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 61.2,
+        "peak_wet_bulb_F": 65.5
       },
       "2065": {
         "avg_summer_humidity": 63,
@@ -3257,7 +3805,9 @@
         "days_over_95F": 3,
         "days_over_100F": 0,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 62.3,
+        "peak_wet_bulb_F": 66.8
       },
       "2075": {
         "avg_summer_humidity": 63,
@@ -3265,7 +3815,9 @@
         "days_over_95F": 4,
         "days_over_100F": 1,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 63.2,
+        "peak_wet_bulb_F": 68.2
       }
     }
   },
@@ -3285,7 +3837,9 @@
         "days_over_95F": 61,
         "days_over_100F": 26,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 64.8,
+        "peak_wet_bulb_F": 71.1
       },
       "2035": {
         "avg_summer_humidity": 52,
@@ -3293,7 +3847,9 @@
         "days_over_95F": 70,
         "days_over_100F": 31,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 65.7,
+        "peak_wet_bulb_F": 71.9
       },
       "2045": {
         "avg_summer_humidity": 52,
@@ -3301,7 +3857,9 @@
         "days_over_95F": 80,
         "days_over_100F": 40,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 66.6,
+        "peak_wet_bulb_F": 72.5
       },
       "2055": {
         "avg_summer_humidity": 51,
@@ -3309,7 +3867,9 @@
         "days_over_95F": 92,
         "days_over_100F": 52,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 67.6,
+        "peak_wet_bulb_F": 73.4
       },
       "2065": {
         "avg_summer_humidity": 51,
@@ -3317,7 +3877,9 @@
         "days_over_95F": 102,
         "days_over_100F": 60,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 68.8,
+        "peak_wet_bulb_F": 74.6
       },
       "2075": {
         "avg_summer_humidity": 51,
@@ -3325,7 +3887,9 @@
         "days_over_95F": 108,
         "days_over_100F": 66,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 69.9,
+        "peak_wet_bulb_F": 76.3
       }
     }
   },
@@ -3345,7 +3909,9 @@
         "days_over_95F": 25,
         "days_over_100F": 8,
         "wet_bulb_events": 1,
-        "extent_radius_km": 31
+        "extent_radius_km": 31,
+        "summer_wet_bulb_F": 75.9,
+        "peak_wet_bulb_F": 83.9
       },
       "2035": {
         "avg_summer_humidity": 83,
@@ -3353,7 +3919,9 @@
         "days_over_95F": 28,
         "days_over_100F": 8,
         "wet_bulb_events": 1,
-        "extent_radius_km": 31
+        "extent_radius_km": 31,
+        "summer_wet_bulb_F": 76.8,
+        "peak_wet_bulb_F": 84.5
       },
       "2045": {
         "avg_summer_humidity": 82,
@@ -3361,7 +3929,9 @@
         "days_over_95F": 38,
         "days_over_100F": 13,
         "wet_bulb_events": 2,
-        "extent_radius_km": 32
+        "extent_radius_km": 32,
+        "summer_wet_bulb_F": 78.0,
+        "peak_wet_bulb_F": 85.9
       },
       "2055": {
         "avg_summer_humidity": 82,
@@ -3369,7 +3939,9 @@
         "days_over_95F": 42,
         "days_over_100F": 14,
         "wet_bulb_events": 3,
-        "extent_radius_km": 33
+        "extent_radius_km": 33,
+        "summer_wet_bulb_F": 79.0,
+        "peak_wet_bulb_F": 86.7
       },
       "2065": {
         "avg_summer_humidity": 82,
@@ -3377,7 +3949,9 @@
         "days_over_95F": 55,
         "days_over_100F": 22,
         "wet_bulb_events": 6,
-        "extent_radius_km": 36
+        "extent_radius_km": 36,
+        "summer_wet_bulb_F": 80.1,
+        "peak_wet_bulb_F": 87.5
       },
       "2075": {
         "avg_summer_humidity": 81,
@@ -3385,7 +3959,9 @@
         "days_over_95F": 69,
         "days_over_100F": 31,
         "wet_bulb_events": 10,
-        "extent_radius_km": 40
+        "extent_radius_km": 40,
+        "summer_wet_bulb_F": 81.4,
+        "peak_wet_bulb_F": 88.7
       }
     }
   },
@@ -3405,7 +3981,9 @@
         "days_over_95F": 16,
         "days_over_100F": 4,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 74.0,
+        "peak_wet_bulb_F": 82.0
       },
       "2035": {
         "avg_summer_humidity": 83,
@@ -3413,7 +3991,9 @@
         "days_over_95F": 18,
         "days_over_100F": 5,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 74.6,
+        "peak_wet_bulb_F": 82.3
       },
       "2045": {
         "avg_summer_humidity": 82,
@@ -3421,7 +4001,9 @@
         "days_over_95F": 25,
         "days_over_100F": 9,
         "wet_bulb_events": 1,
-        "extent_radius_km": 31
+        "extent_radius_km": 31,
+        "summer_wet_bulb_F": 76.1,
+        "peak_wet_bulb_F": 83.9
       },
       "2055": {
         "avg_summer_humidity": 83,
@@ -3429,7 +4011,9 @@
         "days_over_95F": 27,
         "days_over_100F": 8,
         "wet_bulb_events": 1,
-        "extent_radius_km": 31
+        "extent_radius_km": 31,
+        "summer_wet_bulb_F": 76.9,
+        "peak_wet_bulb_F": 84.5
       },
       "2065": {
         "avg_summer_humidity": 81,
@@ -3437,7 +4021,9 @@
         "days_over_95F": 42,
         "days_over_100F": 16,
         "wet_bulb_events": 1,
-        "extent_radius_km": 31
+        "extent_radius_km": 31,
+        "summer_wet_bulb_F": 77.6,
+        "peak_wet_bulb_F": 85.1
       },
       "2075": {
         "avg_summer_humidity": 80,
@@ -3445,7 +4031,9 @@
         "days_over_95F": 54,
         "days_over_100F": 23,
         "wet_bulb_events": 3,
-        "extent_radius_km": 33
+        "extent_radius_km": 33,
+        "summer_wet_bulb_F": 79.0,
+        "peak_wet_bulb_F": 86.4
       }
     }
   },
@@ -3465,7 +4053,9 @@
         "days_over_95F": 20,
         "days_over_100F": 5,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 56.4,
+        "peak_wet_bulb_F": 62.6
       },
       "2035": {
         "avg_summer_humidity": 39,
@@ -3473,7 +4063,9 @@
         "days_over_95F": 19,
         "days_over_100F": 4,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 56.9,
+        "peak_wet_bulb_F": 63.1
       },
       "2045": {
         "avg_summer_humidity": 39,
@@ -3481,7 +4073,9 @@
         "days_over_95F": 28,
         "days_over_100F": 7,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 58.0,
+        "peak_wet_bulb_F": 63.9
       },
       "2055": {
         "avg_summer_humidity": 40,
@@ -3489,7 +4083,9 @@
         "days_over_95F": 34,
         "days_over_100F": 10,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 59.1,
+        "peak_wet_bulb_F": 64.9
       },
       "2065": {
         "avg_summer_humidity": 41,
@@ -3497,7 +4093,9 @@
         "days_over_95F": 40,
         "days_over_100F": 14,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 60.2,
+        "peak_wet_bulb_F": 66.2
       },
       "2075": {
         "avg_summer_humidity": 37,
@@ -3505,7 +4103,9 @@
         "days_over_95F": 63,
         "days_over_100F": 29,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 61.0,
+        "peak_wet_bulb_F": 66.9
       }
     }
   },
@@ -3525,7 +4125,9 @@
         "days_over_95F": 2,
         "days_over_100F": 0,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 62.5,
+        "peak_wet_bulb_F": 72.9
       },
       "2035": {
         "avg_summer_humidity": 74,
@@ -3533,7 +4135,9 @@
         "days_over_95F": 2,
         "days_over_100F": 0,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 63.4,
+        "peak_wet_bulb_F": 74.3
       },
       "2045": {
         "avg_summer_humidity": 73,
@@ -3541,7 +4145,9 @@
         "days_over_95F": 3,
         "days_over_100F": 1,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 64.4,
+        "peak_wet_bulb_F": 74.7
       },
       "2055": {
         "avg_summer_humidity": 72,
@@ -3549,7 +4155,9 @@
         "days_over_95F": 6,
         "days_over_100F": 1,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 65.4,
+        "peak_wet_bulb_F": 75.3
       },
       "2065": {
         "avg_summer_humidity": 71,
@@ -3557,7 +4165,9 @@
         "days_over_95F": 10,
         "days_over_100F": 3,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 66.7,
+        "peak_wet_bulb_F": 76.7
       },
       "2075": {
         "avg_summer_humidity": 70,
@@ -3565,7 +4175,81 @@
         "days_over_95F": 17,
         "days_over_100F": 5,
         "wet_bulb_events": 0,
-        "extent_radius_km": 30
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 68.0,
+        "peak_wet_bulb_F": 77.8
+      }
+    }
+  },
+  "Merrick": {
+    "name": "Merrick, NY",
+    "lat": 40.6523325,
+    "lon": -73.5512469,
+    "baseline_1995_2014": {
+      "avg_summer_humidity": 81,
+      "wet_bulb_events": 0,
+      "days_over_95F": 1
+    },
+    "projections": {
+      "2025": {
+        "avg_summer_humidity": 82,
+        "peak_humidity": 96,
+        "days_over_95F": 3,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 72.2,
+        "peak_wet_bulb_F": 80.1
+      },
+      "2035": {
+        "avg_summer_humidity": 82,
+        "peak_humidity": 95,
+        "days_over_95F": 4,
+        "days_over_100F": 0,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 73.3,
+        "peak_wet_bulb_F": 81.5
+      },
+      "2045": {
+        "avg_summer_humidity": 81,
+        "peak_humidity": 95,
+        "days_over_95F": 6,
+        "days_over_100F": 1,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 74.1,
+        "peak_wet_bulb_F": 82.0
+      },
+      "2055": {
+        "avg_summer_humidity": 81,
+        "peak_humidity": 95,
+        "days_over_95F": 9,
+        "days_over_100F": 1,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 75.2,
+        "peak_wet_bulb_F": 82.8
+      },
+      "2065": {
+        "avg_summer_humidity": 81,
+        "peak_humidity": 95,
+        "days_over_95F": 16,
+        "days_over_100F": 3,
+        "wet_bulb_events": 0,
+        "extent_radius_km": 30,
+        "summer_wet_bulb_F": 76.5,
+        "peak_wet_bulb_F": 83.8
+      },
+      "2075": {
+        "avg_summer_humidity": 81,
+        "peak_humidity": 95,
+        "days_over_95F": 22,
+        "days_over_100F": 5,
+        "wet_bulb_events": 1,
+        "extent_radius_km": 31,
+        "summer_wet_bulb_F": 77.7,
+        "peak_wet_bulb_F": 84.9
       }
     }
   }
