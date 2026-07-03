@@ -242,7 +242,7 @@ export function LocationMultiCityCharts({
           title="Wet-Bulb Risk Over Time"
           subtitle={
             wetBulbBubbles.metric === 'wetbulb'
-              ? 'Peak summer wet-bulb (p95) by decade · bubble size = days/yr over 88°F'
+              ? 'Wet-bulb temp on the hottest summer days — how close each decade gets to the 88°F danger line'
               : 'Avg summer relative humidity by decade · bubble size = dangerous wet-bulb events/yr'
           }
           source="NASA NEX-GDDP-CMIP6 · Stull wet-bulb"

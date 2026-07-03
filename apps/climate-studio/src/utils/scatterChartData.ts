@@ -79,12 +79,13 @@ export function buildWetBulbBubbleChart(
         color,
         detail: useTemp
           ? [
-              `${yearKey} · ${row.peak_wet_bulb_F}°F peak wet-bulb (p95)`,
+              `${yearKey} · ${row.peak_wet_bulb_F}°F on the hottest ~5% of summer days`,
               ...(row.summer_wet_bulb_F != null
-                ? [`${row.summer_wet_bulb_F}°F avg summer wet-bulb`]
+                ? [`${row.summer_wet_bulb_F}°F on a typical summer day`]
                 : []),
               `${events} day${events === 1 ? '' : 's'}/yr over the 88°F danger line`,
-              'Wet-bulb = heat + humidity combined; ~95°F exceeds human cooling',
+              'Wet-bulb = the lowest temperature sweating can cool you to.',
+              'Above 88°F outdoor exertion turns dangerous; ~95°F is fatal in hours.',
             ]
           : [
               `${yearKey} · ${row.avg_summer_humidity}% avg summer relative humidity`,
