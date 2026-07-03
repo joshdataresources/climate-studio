@@ -204,7 +204,13 @@ export function buildMultiCityDaysOver100Series(
 export function buildMultiCityWetBulbSeries(
   metros: MetroChartInput[]
 ): { data: ChartDataPoint[]; series: { key: string; label: string; color: string }[] } {
-  const years = unionProjectionYears(metros, 'ssp245', true)
+  // Wet-bulb years only — unioning in temperature years (which run further)
+  // would extend the axis past where the wet-bulb data ends
+  const yearSet = new Set<number>()
+  for (const metro of metros) {
+    if (metro.wetBulb?.projections) wetBulbYears(metro.wetBulb).forEach(y => yearSet.add(y))
+  }
+  const years = [...yearSet].sort((a, b) => a - b)
   return buildMultiCitySeries(metros, years, (metro, year) => {
     const row = metro.wetBulb?.projections?.[String(year)] as Record<string, number> | undefined
     return row?.wet_bulb_events

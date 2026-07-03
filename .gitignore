@@ -105,6 +105,8 @@ wet_bulb_progress.json
 wetbulb_backfill_progress.json
 wetbulb_temps_progress.json
 wetbulb_temps.log
+wetbulb_decades_progress.json
+wetbulb_decades.log
 
 LINKEDIN_TECH_INVENTORY.md
 .claude/

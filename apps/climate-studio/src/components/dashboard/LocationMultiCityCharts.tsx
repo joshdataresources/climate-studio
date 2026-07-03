@@ -156,6 +156,14 @@ export function LocationMultiCityCharts({
     [locations]
   )
 
+  const wetBulbTicks = useMemo(() => {
+    const years = [...new Set(wetBulbBubbles.points.map(p => p.x))].sort((a, b) => a - b)
+    if (!years.length) return undefined
+    const ticks: number[] = []
+    for (let y = years[0]; y <= years[years.length - 1]; y += 20) ticks.push(y)
+    return ticks
+  }, [wetBulbBubbles])
+
   const singleAquifer = useMemo(() => {
     if (compareMode || locations.length !== 1) return null
     const loc = locations[0]
@@ -250,7 +258,7 @@ export function LocationMultiCityCharts({
           series={wetBulbBubbles.series}
           xLabel="year"
           yLabel={wetBulbBubbles.metric === 'wetbulb' ? '°F' : 'humidity'}
-          xTicks={[2025, 2035, 2045, 2055, 2065, 2075]}
+          xTicks={wetBulbTicks}
           yReference={
             wetBulbBubbles.metric === 'wetbulb'
               ? { value: 88, label: '88°F danger line' }

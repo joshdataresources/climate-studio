@@ -179,11 +179,15 @@ export function buildMultiCityAquiferStorageSeries(
     return { data: [], series: [], aquiferNames: {} }
   }
 
-  const series = locations.map((loc, index) => ({
-    key: metroSeriesKey(loc.metroKey),
-    label: loc.metroName,
-    color: metroChartColor(index),
-  }))
+  // Only metros that actually sit on a mapped aquifer get a legend entry;
+  // colors still follow the location index so they match the other charts
+  const series = perMetro
+    .filter(entry => entry.hasData)
+    .map(({ loc, color }) => ({
+      key: metroSeriesKey(loc.metroKey),
+      label: loc.metroName,
+      color,
+    }))
 
   const aquiferNames: Record<string, string> = {}
   for (const { loc, match } of perMetro) {
