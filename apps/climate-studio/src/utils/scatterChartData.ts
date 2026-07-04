@@ -72,6 +72,7 @@ export function buildWetBulbBubbleChart(
       const events = row.wet_bulb_events ?? 0
       points.push({
         id: `${loc.metroKey}-${year}`,
+        seriesKey: loc.metroKey,
         label: loc.metroName,
         x: year,
         y,
@@ -146,6 +147,7 @@ export function buildAquiferDepletionBubbleChart(
       const volumeYear = (baselineVolume * storage.remainingPct) / 100
       points.push({
         id: `${loc.metroKey}-${year}`,
+        seriesKey: loc.metroKey,
         label: locations.length === 1 ? storage.name : loc.metroName,
         x: year,
         y: lostPct,

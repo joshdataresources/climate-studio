@@ -13,6 +13,8 @@ export interface ScatterPoint {
   y: number
   /** Marker radius in px (encodes a third variable when set). */
   r?: number
+  /** Series this point belongs to (legend key) — enables legend toggling. */
+  seriesKey?: string
   /** Series color for this point; falls back to highlight/context styling. */
   color?: string
   /** Render in the accent color with a direct label. */
@@ -89,6 +91,20 @@ export function DashboardScatterChart({
   const containerRef = useRef<HTMLDivElement>(null)
   const [width, setWidth] = useState(320)
   const [hovered, setHovered] = useState<ScatterPoint | null>(null)
+  const [hiddenSeries, setHiddenSeries] = useState<Set<string>>(new Set())
+
+  const handleSeriesToggle = (seriesKey: string) => {
+    setHovered(null)
+    setHiddenSeries(prev => {
+      const next = new Set(prev)
+      if (next.has(seriesKey)) {
+        next.delete(seriesKey)
+      } else {
+        next.add(seriesKey)
+      }
+      return next
+    })
+  }
 
   useLayoutEffect(() => {
     const el = containerRef.current
@@ -102,8 +118,15 @@ export function DashboardScatterChart({
 
   if (!points.length) return null
 
-  const xs = points.map(p => p.x)
-  const ys = points.map(p => p.y)
+  const visiblePoints =
+    hiddenSeries.size > 0
+      ? points.filter(p => !p.seriesKey || !hiddenSeries.has(p.seriesKey))
+      : points
+
+  // Axes stay sensible even with every series toggled off
+  const boundsSource = visiblePoints.length ? visiblePoints : points
+  const xs = boundsSource.map(p => p.x)
+  const ys = boundsSource.map(p => p.y)
   let xMin = Math.min(...xs)
   let xMax = Math.max(...xs)
   let yMin = Math.min(...ys)
@@ -140,7 +163,9 @@ export function DashboardScatterChart({
   const yTicks = niceTicks(yMin, yMax)
 
   // Highlighted points render (and label) above the context cloud
-  const ordered = [...points].sort((a, b) => Number(a.highlight ?? false) - Number(b.highlight ?? false))
+  const ordered = [...visiblePoints].sort(
+    (a, b) => Number(a.highlight ?? false) - Number(b.highlight ?? false)
+  )
 
   return (
     <div className={cn('widget-container flex flex-col', className)}>
@@ -296,7 +321,13 @@ export function DashboardScatterChart({
           </div>
         )}
       </div>
-      {series && series.length > 1 && <ChartLegend series={series} />}
+      {series && series.length > 1 && (
+        <ChartLegend
+          series={series}
+          onSeriesToggle={handleSeriesToggle}
+          hiddenSeries={hiddenSeries}
+        />
+      )}
     </div>
   )
 }
