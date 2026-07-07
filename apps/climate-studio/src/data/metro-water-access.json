@@ -1,0 +1,877 @@
+{
+  "_meta": {
+    "generated": "2026-07-06",
+    "source": "Municipal utility supply portfolios, researched + cited per metro (utility/state/USGS documents, ~2024-2025 mixes)",
+    "method": "share by source type per metro, rounded to 0.05, sums to 1.0; confidence high/medium per metro; citations inline",
+    "types": [
+      "river",
+      "reservoir",
+      "groundwater",
+      "imported",
+      "desalination",
+      "recycled"
+    ],
+    "caveats": "shares are approximate and vary year-to-year (esp. CA/AZ); imported shares reflect normal years; used by resilienceScore.ts waterScore as the access-weighted portfolio"
+  },
+  "metros": {
+    "Albuquerque": {
+      "utility": "Albuquerque Bernalillo County Water Utility Authority (ABCWUA)",
+      "portfolio": [
+        {
+          "type": "imported",
+          "share": 0.5,
+          "name": "San Juan-Chama Project (Colorado River basin water via Rio Grande diversion, Drinking Water Project)"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.5,
+          "name": "Santa Fe Group aquifer wells (Rio Grande Valley basin)"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "ABCWUA Your Drinking Water / Water 2120 (2024-2025): 'more than half' from San Juan-Chama in normal years, but 2022-2025 drought pushed groundwater to 50-75%; mix highly year-dependent"
+    },
+    "Atlanta": {
+      "utility": "City of Atlanta Department of Watershed Management (metro coordinated by Metro North Georgia Water Planning District)",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 0.7,
+          "name": "Chattahoochee River regulated by Lake Lanier/Buford Dam (city intakes for Hemphill & Chattahoochee WTPs)"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.3,
+          "name": "Lake Allatoona (Etowah River) & ~20 other small metro reservoirs"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "Metro North Georgia Water Planning District / Chattahoochee Riverkeeper (~70% Lanier-Chattahoochee, ~30% Allatoona+others); City of Atlanta water is 100% Chattahoochee River, ~2024"
+    },
+    "Austin": {
+      "utility": "Austin Water",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 1.0,
+          "name": "Colorado River (TX) - Highland Lakes: Lake Travis (Handcox WTP) & Lake Austin (Davis/Ullrich WTPs), stored upstream in Lakes Buchanan/Travis (LCRA)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "Austin Water / LCRA water supply operations (100% Colorado River-Highland Lakes), ~2024"
+    },
+    "Baltimore": {
+      "utility": "Baltimore City DPW",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 0.95,
+          "name": "Loch Raven + Prettyboy (Gunpowder Falls) + Liberty (Patapsco) reservoirs"
+        },
+        {
+          "type": "river",
+          "share": 0.05,
+          "name": "Susquehanna River (Conowingo pool, drought/supplemental only)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "Baltimore City DPW + USGS SIR 2011-5101; ~2024 \u2014 three reservoirs supply normal demand, Susquehanna used only in drought"
+    },
+    "Boston": {
+      "utility": "MWRA (Massachusetts Water Resources Authority)",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 1.0,
+          "name": "Quabbin & Wachusett reservoirs (Swift/Nashua basins, unfiltered protected supply)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "MWRA reservoirs & watersheds pages (2025): Quabbin (412 BG) + Wachusett (65 BG) supply the metro Boston system"
+    },
+    "Buffalo": {
+      "utility": "Buffalo Water",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 1.0,
+          "name": "Lake Erie (Emerald Channel intake, Col. Ward Pumping Station)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "Buffalo Water raw water sources page / WQR 2022 \u2014 sole source Lake Erie"
+    },
+    "Charlotte": {
+      "utility": "Charlotte Water",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 0.95,
+          "name": "Mountain Island Lake (Catawba River; Franklin & Vest WTPs)"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.05,
+          "name": "Lake Norman (Catawba River; Lee S. Dukes WTP)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "Charlotte Water blog / NC DEQ (2023); MIL plants 240 MGD capacity vs Dukes 18 MGD on Lake Norman"
+    },
+    "Chicago": {
+      "utility": "Chicago Department of Water Management",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 1.0,
+          "name": "Lake Michigan (Dever & Dunne intake cribs; Jardine & Sawyer WTPs)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "City of Chicago DWM water supply page (2024): 100% Lake Michigan via offshore cribs, serving city + ~120 suburbs"
+    },
+    "Cincinnati": {
+      "utility": "Greater Cincinnati Water Works",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 0.9,
+          "name": "Ohio River (Richard Miller WTP)"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.1,
+          "name": "Great Miami buried-valley aquifer (Bolton WTP, 13 wells)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "GCWW water sources / treatment pages (2024): Miller ~88%, Bolton ~12%; rounded to 0.90/0.10"
+    },
+    "Cleveland": {
+      "utility": "Cleveland Water",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 1.0,
+          "name": "Lake Erie (four offshore intakes)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "Cleveland Water 2025 WQR \u2014 sole source Lake Erie"
+    },
+    "Colorado Springs": {
+      "utility": "Colorado Springs Utilities",
+      "portfolio": [
+        {
+          "type": "imported",
+          "share": 0.65,
+          "name": "Transmountain Colorado River basin diversions (Homestake, Fryingpan-Arkansas, Blue River, Twin Lakes; incl. reusable return flows)"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.35,
+          "name": "Local Pikes Peak watershed and Arkansas basin reservoirs (North/South Slope, Rampart, Pueblo Reservoir via Southern Delivery System)"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "Colorado Springs Utilities (csu.org, ~2024): ~half of raw supply from Colorado River basin, ~70% of total use with reuse; published figures range 50-75%"
+    },
+    "Columbus": {
+      "utility": "Columbus Division of Water",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 0.85,
+          "name": "Griggs & O'Shaughnessy (Scioto R.) + Hoover Reservoir (Big Walnut Cr.), Alum Creek supplemental"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.15,
+          "name": "Parsons Avenue wellfield (south Franklin Co. aquifer)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "City of Columbus CCR (2022-23) and reservoirs brochure: reservoirs ~85% of daily supply, wells ~15%"
+    },
+    "Dallas": {
+      "utility": "Dallas Water Utilities (DWU)",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 1.0,
+          "name": "Lakes Ray Roberts, Lewisville, Grapevine, Ray Hubbard, Tawakoni & Fork (Trinity + Sabine basins, conveyed partly via Elm Fork Trinity River)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "Dallas Water Utilities FAQ/fact sheet (six-reservoir surface water system), ~2024"
+    },
+    "Denver": {
+      "utility": "Denver Water",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 0.5,
+          "name": "South Platte basin system (Cheesman, Strontia Springs, Eleven Mile, Antero reservoirs)"
+        },
+        {
+          "type": "imported",
+          "share": 0.5,
+          "name": "Colorado River basin transbasin (Fraser River via Moffat Tunnel; Blue River/Dillon Reservoir via Roberts Tunnel)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "Denver Water / Water Education Colorado, ~2020s \u2014 ~50% Colorado River basin transbasin, ~50% South Platte basin"
+    },
+    "Detroit": {
+      "utility": "Great Lakes Water Authority (GLWA)",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 0.7,
+          "name": "Detroit River (Belle Isle + Fighting Island intakes; Water Works Park, Springwells, Northeast, Southwest WTPs)"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.3,
+          "name": "Lake Huron (Lake Huron WTP, Port Huron intake)"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "GLWA CIP Appendix D (FY2025-29) + Detroit WQR 2024; no official % split published \u2014 estimated from plant capacities/production ranking (Detroit River plants ~1,320 MGD capacity vs Lake Huron 400 MGD)"
+    },
+    "Duluth": {
+      "utility": "City of Duluth Public Works & Utilities",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 1.0,
+          "name": "Lake Superior (Lakewood intake and WTP, since 1898)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "City of Duluth water utility pages + MDH Source Water Assessment: 100% Lake Superior surface water"
+    },
+    "Greensboro": {
+      "utility": "City of Greensboro Water Resources",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 0.8,
+          "name": "Lakes Townsend, Brandt, Higgins (city-owned, Reedy Fork/Cape Fear basin)"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.2,
+          "name": "Randleman Lake (PTRWA regional allocation, 25.5 MGD share; Deep River)"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "City of Greensboro Water Resources 'Greensboro's Water Sources' + NC DWR Local Water Supply Plan (2022); split between city lakes and Randleman is approximate"
+    },
+    "Greenville SC": {
+      "utility": "Greenville Water",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 0.5,
+          "name": "Lake Keowee (Adkins WTP; permitted 153 MGD)"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.25,
+          "name": "Table Rock Reservoir (protected mountain watershed)"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.25,
+          "name": "North Saluda (Poinsett) Reservoir (protected mountain watershed)"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "Greenville Water water-resources pages / CCR (2021-2023); shares approximated from permitted capacity (Keowee 153 of 280 MGD), actual draw varies by season"
+    },
+    "Houston": {
+      "utility": "City of Houston Public Works (Houston Water)",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 0.85,
+          "name": "Lake Livingston (Trinity River), Lake Conroe & Lake Houston (San Jacinto River)"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.15,
+          "name": "Gulf Coast aquifer system (Evangeline & Chicot aquifers)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "Houston Public Works, Drinking Water Operations (86% surface / 14% groundwater), ~2024"
+    },
+    "Indianapolis": {
+      "utility": "Citizens Energy Group (Citizens Water)",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 0.6,
+          "name": "White River (via Central Canal) & Fall Creek, backed by Morse & Geist reservoirs"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.15,
+          "name": "Eagle Creek Reservoir (T.W. Moses WTP)"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.25,
+          "name": "Local aquifers (5 groundwater stations: Geist, Harding, South Wellfield, Harbour, Ford Rd)"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "Citizens Energy Group supply-and-sources page (2025); Mirror Indy (2024): ~75% surface / ~25% groundwater; river-vs-reservoir split estimated by plant"
+    },
+    "Jacksonville": {
+      "utility": "JEA",
+      "portfolio": [
+        {
+          "type": "groundwater",
+          "share": 1.0,
+          "name": "Floridan Aquifer (130+ wells, ~39 water treatment plants)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "JEA 2024 Water Quality Report (100% Floridan Aquifer), 2024"
+    },
+    "Kansas City": {
+      "utility": "KC Water",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 0.8,
+          "name": "Missouri River (main WTP intake)"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.2,
+          "name": "Missouri River alluvial aquifer (14 wells)"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "KC Water FAQ (2020): 14 alluvial wells supply up to ~20%, remainder direct Missouri River intake"
+    },
+    "Las Vegas": {
+      "utility": "Southern Nevada Water Authority / Las Vegas Valley Water District",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 0.9,
+          "name": "Colorado River at Lake Mead (SNWA deep-lake intakes)"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.1,
+          "name": "Las Vegas Valley groundwater basin wells (peaking supply)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "SNWA/LVVWD 'Where your water comes from' (~90% Colorado River, ~10% groundwater; return-flow credits extend the river allocation), ~2025"
+    },
+    "Los Angeles": {
+      "utility": "LADWP",
+      "portfolio": [
+        {
+          "type": "imported",
+          "share": 0.85,
+          "name": "LA Aqueduct (Owens Valley/Mono Basin) + MWD purchases (State Water Project + Colorado River Aqueduct)"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.1,
+          "name": "San Fernando + other local basins"
+        },
+        {
+          "type": "recycled",
+          "share": 0.05,
+          "name": "Recycled water / potable reuse (Pure Water LA)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "LADWP water sources, multi-year average FY2016-2024 (LAA 15-48% and MWD 41-73% swing with snowpack; combined imports stable at ~85-90%, groundwater ~9-12%, recycled ~2%)"
+    },
+    "Louisville": {
+      "utility": "Louisville Water Company",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 0.75,
+          "name": "Ohio River direct intake (Crescent Hill WTP, 180-240 MGD capacity)"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.25,
+          "name": "Riverbank filtration wells/tunnel in Ohio River alluvial aquifer (B.E. Payne WTP, 60 MGD)"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "Louisville Water Company riverbank filtration pages + CCR (2023); split approximated from plant capacities (Payne ~25% of combined capacity)"
+    },
+    "Memphis": {
+      "utility": "Memphis Light, Gas and Water (MLGW)",
+      "portfolio": [
+        {
+          "type": "groundwater",
+          "share": 1.0,
+          "name": "Memphis Sand (Memphis) aquifer, ~10 wellfields; minor deeper Fort Pillow aquifer wells"
+        }
+      ],
+      "confidence": "high",
+      "citation": "MLGW Water Quality Report; Univ. of Memphis CAESER (largest US city 100% on groundwater), ~2024"
+    },
+    "Merrick": {
+      "utility": "Liberty Utilities (New York Water; formerly New York American Water), Merrick Operations District",
+      "portfolio": [
+        {
+          "type": "groundwater",
+          "share": 1.0,
+          "name": "Long Island aquifer system, 16 wells (primarily Magothy aquifer)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "Liberty NY Water Merrick Annual Water Quality Report (2024-2026) + USGS Long Island aquifer studies: 100% groundwater"
+    },
+    "Miami": {
+      "utility": "Miami-Dade Water and Sewer Department (WASD)",
+      "portfolio": [
+        {
+          "type": "groundwater",
+          "share": 1.0,
+          "name": "Biscayne Aquifer (supplemented by small Floridan Aquifer withdrawals)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "Miami-Dade WASD Water Supply & Treatment page; USGS HA-730-G (Biscayne supplies ~98% of local public supply), ~2024"
+    },
+    "Milwaukee": {
+      "utility": "Milwaukee Water Works",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 1.0,
+          "name": "Lake Michigan (Linnwood + Howard Ave plant intakes)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "Milwaukee Water Works, city.milwaukee.gov ~2024 \u2014 sole source Lake Michigan"
+    },
+    "Minneapolis": {
+      "utility": "Minneapolis Water Works",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 1.0,
+          "name": "Mississippi River (Fridley intake)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "City of Minneapolis / MN Dept of Health, 2024 \u2014 100% Mississippi River"
+    },
+    "Nashville": {
+      "utility": "Metro Water Services (Nashville)",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 1.0,
+          "name": "Cumberland River (Omohundro & K.R. Harrington WTPs)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "Nashville.gov Metro Water Services, About Us / plant pages (2024); both WTPs draw from the Cumberland River"
+    },
+    "New Orleans": {
+      "utility": "Sewerage & Water Board of New Orleans (SWBNO)",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 1.0,
+          "name": "Mississippi River (Carrollton & Algiers WTP intakes)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "SWBNO Drinking Water pages (sole source: Mississippi River), 2024"
+    },
+    "New York": {
+      "utility": "NYC DEP",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 0.9,
+          "name": "Catskill/Delaware system (West-of-Hudson reservoirs)"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.1,
+          "name": "Croton system (East-of-Hudson reservoirs)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "NYC DEP Drinking Water Supply & Quality Report (2025): Catskill/Delaware ~90%, Croton ~10%, 19 reservoirs + 3 lakes"
+    },
+    "Oklahoma City": {
+      "utility": "Oklahoma City Water Utilities Trust",
+      "portfolio": [
+        {
+          "type": "imported",
+          "share": 0.6,
+          "name": "Lake Atoka & McGee Creek Reservoir (SE Oklahoma) via 100-mi Atoka pipeline into Lake Stanley Draper (Draper WTP)"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.4,
+          "name": "Lakes Hefner & Overholser (North Canadian River, incl. Canton Lake releases; Hefner WTP)"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "OCWUT / Municipal Water Leader (2021) and OKC CCR (2020); city stated ~70% from Draper/Atoka/McGee in 2015 drought, normal-year import share estimated ~60%"
+    },
+    "Orlando": {
+      "utility": "Orlando Utilities Commission (OUC)",
+      "portfolio": [
+        {
+          "type": "groundwater",
+          "share": 1.0,
+          "name": "Lower Floridan Aquifer (used since 1957)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "OUC Water Services & 2022-2024 Water Quality Reports (100% Lower Floridan Aquifer), ~2024"
+    },
+    "Philadelphia": {
+      "utility": "Philadelphia Water Department",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 0.6,
+          "name": "Delaware River (Baxter WTP)"
+        },
+        {
+          "type": "river",
+          "share": 0.4,
+          "name": "Schuylkill River (Queen Lane & Belmont WTPs)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "PWD / Philadelphia Inquirer plant map (2023): Baxter serves ~58% of city, Schuylkill plants ~42%"
+    },
+    "Phoenix": {
+      "utility": "City of Phoenix Water Services Department",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 0.55,
+          "name": "Salt & Verde River reservoirs (SRP system: Roosevelt, Bartlett, Horseshoe, etc.)"
+        },
+        {
+          "type": "imported",
+          "share": 0.4,
+          "name": "Central Arizona Project (CAP) canal - Colorado River"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.05,
+          "name": "Salt River Valley aquifer wells (backup/conjunctive use)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "City of Phoenix Water Services Supply & Availability (~60% SRP, ~40% CAP, ~2% groundwater), ~2025"
+    },
+    "Pittsburgh": {
+      "utility": "Pittsburgh Water (PWSA)",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 1.0,
+          "name": "Allegheny River (Aspinwall intake/WTP)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "PWSA pgh2o.com / WQR 2021-2024 \u2014 exclusively Allegheny River, no groundwater"
+    },
+    "Portland": {
+      "utility": "Portland Water Bureau",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 0.9,
+          "name": "Bull Run watershed reservoirs (Dam 1 and Dam 2)"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.1,
+          "name": "Columbia South Shore Well Field"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "Portland.gov 2025-26 \u2014 Bull Run primary, groundwater used ~1 month/yr typically but heavily in 2025-26 (45-50% summer blend during conduit repair/filtration work); typical-year annual share shown"
+    },
+    "Raleigh": {
+      "utility": "Raleigh Water",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 0.8,
+          "name": "Falls Lake (Neuse River; E.M. Johnson WTP)"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.2,
+          "name": "Lake Benson + Lake Wheeler (Swift Creek; Dempsey E. Benton WTP)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "Raleighnc.gov 'Where Does My Drinking Water Come From', ~2024 \u2014 Falls Lake ~80%, Benson/Wheeler ~20%"
+    },
+    "Richmond": {
+      "utility": "City of Richmond Department of Public Utilities",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 1.0,
+          "name": "James River (Williams Island dam intake, Richmond WTP, 132 MGD capacity)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "City of Richmond DPU / rvah2o.org (2024): James River is the sole raw water source; also wholesales to surrounding counties"
+    },
+    "Sacramento": {
+      "utility": "City of Sacramento Department of Utilities",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 0.8,
+          "name": "Sacramento River (SRWTP) + American River (E.A. Fairbairn WTP) direct intakes"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.2,
+          "name": "~28 municipal wells (North/South American subbasins)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "City of Sacramento / Sacramento City Express (2023): ~80% river water, ~20% groundwater"
+    },
+    "Salt Lake City": {
+      "utility": "Salt Lake City Department of Public Utilities",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 0.55,
+          "name": "Wasatch canyon creeks (Big & Little Cottonwood, Parleys incl. Mountain Dell/Little Dell, City Creek)"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.3,
+          "name": "Deer Creek Reservoir (Provo River Project via Salt Lake Aqueduct, MWDSLS)"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.15,
+          "name": "Deep wells and springs in Salt Lake Valley (summer peaking)"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "SLC DPU Water Quality Report (2024) + Central Wasatch Commission: 50-60% canyon creeks, ~30% Deer Creek, remainder wells/springs"
+    },
+    "San Antonio": {
+      "utility": "San Antonio Water System (SAWS)",
+      "portfolio": [
+        {
+          "type": "groundwater",
+          "share": 0.6,
+          "name": "Edwards Aquifer"
+        },
+        {
+          "type": "imported",
+          "share": 0.2,
+          "name": "Vista Ridge pipeline (Carrizo-Simsboro aquifer, Burleson County, 142-mile pipeline)"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.15,
+          "name": "Trinity, local & regional Carrizo aquifers + Twin Oaks ASR"
+        },
+        {
+          "type": "desalination",
+          "share": 0.05,
+          "name": "H2Oaks brackish Wilcox groundwater desalination plant"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "SAWS water management/sources pages & 2024 Water Conservation Plan (Edwards ~60%; Vista Ridge ~50k AF/yr; mix varies with Edwards conditions), 2024"
+    },
+    "San Diego": {
+      "utility": "San Diego County Water Authority / City of San Diego",
+      "portfolio": [
+        {
+          "type": "imported",
+          "share": 0.7,
+          "name": "Colorado River (QSA: IID transfer + All-American/Coachella canal lining) + MWD/State Water Project purchases"
+        },
+        {
+          "type": "desalination",
+          "share": 0.1,
+          "name": "Claude 'Bud' Lewis Carlsbad Desalination Plant"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.1,
+          "name": "Local surface reservoirs (San Vicente, El Capitan, Lake Hodges, etc.)"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.05,
+          "name": "Local groundwater basins"
+        },
+        {
+          "type": "recycled",
+          "share": 0.05,
+          "name": "Recycled water incl. Pure Water San Diego (potable reuse ramping)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "SDCWA 2024 supply statements (~60% Colorado River, ~9% MWD) + SDCWA/City of San Diego supply pages; local shares rounded"
+    },
+    "San Francisco": {
+      "utility": "SFPUC",
+      "portfolio": [
+        {
+          "type": "imported",
+          "share": 0.85,
+          "name": "Hetch Hetchy Reservoir (Tuolumne River, Sierra Nevada) via Hetch Hetchy Aqueduct"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.15,
+          "name": "Local Alameda (Calaveras, San Antonio) + Peninsula (Crystal Springs, San Andreas, Pilarcitos) watersheds"
+        }
+      ],
+      "confidence": "high",
+      "citation": "SFPUC / BAWSCA, ~2024 \u2014 85% Hetch Hetchy Sierra supply, 15% local Bay Area watershed reservoirs"
+    },
+    "San Jose": {
+      "utility": "Valley Water (wholesaler) / San Jose Water Company + San Jose Municipal Water (retail)",
+      "portfolio": [
+        {
+          "type": "imported",
+          "share": 0.45,
+          "name": "State Water Project + Central Valley Project via Sacramento-San Joaquin Delta (San Luis Reservoir, South Bay Aqueduct); small SFPUC Hetch Hetchy share in north San Jose"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.4,
+          "name": "Santa Clara Valley groundwater basin (managed recharge)"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.1,
+          "name": "Local reservoirs (Anderson, Calero) and Los Gatos Creek watershed"
+        },
+        {
+          "type": "recycled",
+          "share": 0.05,
+          "name": "South Bay Water Recycling (non-potable; potable reuse planned)"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "Valley Water 'Where Your Water Comes From' (~55% imported county-wide) + San Jose Water Company supply FAQs (~40% groundwater), ~2023-2024"
+    },
+    "Seattle": {
+      "utility": "Seattle Public Utilities (SPU)",
+      "portfolio": [
+        {
+          "type": "reservoir",
+          "share": 0.65,
+          "name": "Cedar River watershed (Chester Morse Lake / Lake Youngs)"
+        },
+        {
+          "type": "reservoir",
+          "share": 0.35,
+          "name": "South Fork Tolt River Reservoir"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "SPU water system pages ~2024 (Cedar ~70%) vs Seattle Times/SPU normal-supply figure (Cedar 60/Tolt 40); midpoint used"
+    },
+    "St. Louis": {
+      "utility": "City of St. Louis Water Division",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 0.6,
+          "name": "Mississippi River (Chain of Rocks WTP)"
+        },
+        {
+          "type": "river",
+          "share": 0.4,
+          "name": "Missouri River (Howard Bend WTP)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "stlwater.com / stlouis-mo.gov Water Division (2024); two river plants, 380 MGD combined capacity; split approximate by plant size"
+    },
+    "Tampa": {
+      "utility": "Tampa Bay Water (regional wholesaler for City of Tampa, Hillsborough/Pinellas/Pasco)",
+      "portfolio": [
+        {
+          "type": "groundwater",
+          "share": 0.55,
+          "name": "Floridan Aquifer regional wellfields (Consolidated Permit, ~11 wellfields)"
+        },
+        {
+          "type": "river",
+          "share": 0.4,
+          "name": "Hillsborough & Alafia rivers + Tampa Bypass Canal (stored in C.W. Bill Young Regional Reservoir)"
+        },
+        {
+          "type": "desalination",
+          "share": 0.05,
+          "name": "Tampa Bay Seawater Desalination Plant (25 MGD)"
+        }
+      ],
+      "confidence": "medium",
+      "citation": "Tampa Bay Water source pages & 2025 supply overview (~53% groundwater / 43% river / 4% desal typical; FY-recent 64/30/6 \u2014 mix varies with rainfall), 2025"
+    },
+    "Tucson": {
+      "utility": "Tucson Water",
+      "portfolio": [
+        {
+          "type": "imported",
+          "share": 0.8,
+          "name": "CAP Colorado River water recharged/recovered in Avra Valley (CAVSARP/SAVSARP) and Clearwater blend"
+        },
+        {
+          "type": "groundwater",
+          "share": 0.1,
+          "name": "Native Tucson basin groundwater wells"
+        },
+        {
+          "type": "recycled",
+          "share": 0.1,
+          "name": "Reclaimed water system (non-potable irrigation reuse; ~10% of total demand)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "Tucson One Water 2100 Plan (2023) + tucsonaz.gov reclaimed water pages; CAP allocation ~144,000 AF/yr vs ~100,000 AF/yr demand"
+    },
+    "Washington DC": {
+      "utility": "DC Water (supplied by US Army Corps Washington Aqueduct)",
+      "portfolio": [
+        {
+          "type": "river",
+          "share": 1.0,
+          "name": "Potomac River (Great Falls & Little Falls intakes; Dalecarlia & McMillan WTPs)"
+        }
+      ],
+      "confidence": "high",
+      "citation": "DC Water / Washington Aqueduct (USACE, NPS pages, 2024): 100% Potomac River"
+    }
+  }
+}

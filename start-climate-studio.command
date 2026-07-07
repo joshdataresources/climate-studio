@@ -1,6 +1,6 @@
 #!/bin/bash
 # Auto-generated launcher — boots Vite for climate-studio on http://localhost:8080
-cd "/Users/joshuabutler/Documents/github-project/climate-suite" || exit 1
+cd "/Users/joshuabutler/Documents/GitHub/climate-studio" || exit 1
 
 echo "▶ killing any leftover dev servers on 8080/8081…"
 for port in 8080 8081; do
@@ -23,7 +23,7 @@ echo "▶ starting climate-studio dev server (port 8080, force re-optimize)…"
   for i in $(seq 1 90); do
     if curl -fsS -o /dev/null --max-time 1 http://localhost:8080; then
       sleep 1
-      open -a "Google Chrome" "http://localhost:8080"
+      open -a "Google Chrome" "http://localhost:8080/prototype"
       break
     fi
     sleep 1

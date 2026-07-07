@@ -19,7 +19,7 @@ import {
   interpolateWetBulbProjection,
   calculateWetBulbC
 } from "../utils/wetBulbCalculator"
-import { MetroTooltipBubble } from './MetroTooltipBubble'
+import { MetroMapCard } from './MetroMapCard'
 import 'mapbox-gl/dist/mapbox-gl.css'
 
 // Resolve relative tile URLs (e.g. "/api/climate/...") to absolute backend URLs for production
@@ -1720,78 +1720,15 @@ export function DeckGLMap({
             {/* Metro Data Statistics labels - HTML Markers render on top of all canvas elements */}
             {megaregionLabelsGeoJSON && megaregionLabelsGeoJSON.features && megaregionLabelsGeoJSON.features.map((feature: any, index: number) => {
               const [lng, lat] = feature.geometry.coordinates
-              const { name, population, percentage, isGrowing, isDecline, displayYear } = feature.properties
-
-              const showPop = false  // population data was fabricated/broken — removed; temperature stays real
-              const showTemp = controls.megaregionShowTemperature
-
-              // Get temperature data from real projections
-              const getTempData = (metroName: string, year: number, scenario: string) => {
-                const tempData = metroTemperatureData as any
-                const metro = tempData[metroName]
-
-                console.log('🌡️ Temperature lookup:', { metroName, year, scenario, found: !!metro, availableMetros: Object.keys(tempData).slice(0, 5) })
-
-                if (!metro || !metro.projections || !metro.projections[scenario]) {
-                  // Fallback to mock data if metro not found
-                  console.warn(`⚠️ Temperature data not found for ${metroName} under scenario ${scenario}`)
-                  return {
-                    summer: { temp: 85, change: 0 },
-                    winter: { temp: 35, change: 0 }
-                  }
-                }
-
-                // Find closest year in available data
-                const availableYears = Object.keys(metro.projections[scenario]).map(Number).sort((a, b) => a - b)
-                const closestYear = availableYears.reduce((prev, curr) =>
-                  Math.abs(curr - year) < Math.abs(prev - year) ? curr : prev
-                )
-
-                const projection = metro.projections[scenario][closestYear]
-                const baseline = metro.baseline_1995_2014
-
-                // Calculate changes
-                const summerChange = baseline.summer_avg
-                  ? Math.round(((projection.summer_avg - baseline.summer_avg) / baseline.summer_avg) * 100)
-                  : 0
-                const winterChange = baseline.winter_avg
-                  ? Math.round(((projection.winter_avg - baseline.winter_avg) / baseline.winter_avg) * 100)
-                  : 0
-
-                return {
-                  summer: {
-                    temp: Math.round(projection.summer_avg || projection.summer_max || 85),
-                    change: summerChange
-                  },
-                  winter: {
-                    temp: Math.round(projection.winter_avg || projection.winter_min || 35),
-                    change: winterChange
-                  }
-                }
-              }
+              const { name, displayYear } = feature.properties
 
               const currentYear = controls.projectionYear ?? 2050
-              const scenario = (controls.scenario === 'rcp85' ? 'ssp585' : 'ssp245')
-              const tempData = getTempData(name || '', currentYear, scenario)
 
-              // Use MetroTooltipBubble component
+              // Unified metro card: collapsed score header, expandable
+              // resilience dimensions (old Metro Weather metrics live under Heat)
               return (
-                <Marker key={`label-${index}`} longitude={lng} latitude={lat} anchor="center" offset={[0, 0]}>
-                  <MetroTooltipBubble
-                    metroName={name || 'Unknown'}
-                    year={displayYear || currentYear}
-                    population={population || '0'}
-                    populationChange={percentage || '(+0%)'}
-                    populationChangeColor={isGrowing ? '#00a03c' : isDecline ? '#ef4444' : '#666'}
-                    summerTemp={`${tempData.summer.temp}°`}
-                    summerTempChange={`(+${tempData.summer.change}%)`}
-                    winterTemp={`${tempData.winter.temp}°`}
-                    winterTempChange={`(+${tempData.winter.change}%)`}
-                    visible={true}
-                    showPopulation={showPop}
-                    showTemperature={showTemp}
-                    onClose={() => {}}
-                  />
+                <Marker key={`label-${index}`} longitude={lng} latitude={lat} anchor="bottom" offset={[0, -10]}>
+                  <MetroMapCard metroName={name || 'Unknown'} year={displayYear || currentYear} />
                 </Marker>
               )
             })}

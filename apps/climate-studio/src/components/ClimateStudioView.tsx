@@ -6,7 +6,7 @@ import 'mapbox-gl/dist/mapbox-gl.css'
 import { useMap } from '../contexts/MapContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { useSidebar } from '../contexts/SidebarContext'
-import { MetroHumidityBubble } from './MetroHumidityBubble'
+import { MetroMapCard } from './MetroMapCard'
 import { useClimate } from '@climate-studio/core'
 import { climateLayers } from '@climate-studio/core/config'
 import { useClimateLayerData } from '../hooks/useClimateLayerData'
@@ -798,8 +798,6 @@ export default function ClimateStudioView() {
   const [showSeaLevelRiseLayer, setShowSeaLevelRiseLayer] = useState(false)
   const [seaLevelRiseFeet, setSeaLevelRiseFeet] = useState(3)
   const [showHumidityWetBulb, setShowHumidityWetBulb] = useState(true)
-  const [showTempHumidity, setShowTempHumidity] = useState(true)
-  const [showAverageTemperatures, setShowAverageTemperatures] = useState(false)
   const [showMetroDataStatistics, setShowMetroDataStatistics] = useState(false)
   const [showTopographicRelief, setShowTopographicRelief] = useState(true) // Default ON at 20% opacity
   const [activeBubbleIndex, setActiveBubbleIndex] = useState<number | null>(null) // Track which bubble is active
@@ -2204,165 +2202,6 @@ export default function ClimateStudioView() {
       }
     }
 
-    // Helper function to create popup HTML
-    const createMetroPopupHTML = (cityName: string, year: number) => {
-      const cityFeature = (metroHumidityData as any).features.find((f: any) => f.properties.city === cityName)
-      if (!cityFeature) return ''
-
-      const humidityData = getHumidityDataForYear(cityFeature.properties.humidity_projections, year)
-
-      return `
-        <div style="
-          background: rgba(255, 255, 255, 0.5);
-          backdrop-filter: blur(2px);
-          border-radius: 8px;
-          padding: 4px;
-          min-width: 260px;
-          font-family: Inter, sans-serif;
-        ">
-          <!-- Header -->
-          <div style="padding: 4px 8px; margin-bottom: 4px;">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-              <p style="
-                font-size: 10px;
-                font-weight: 700;
-                text-transform: uppercase;
-                color: #101728;
-                margin: 0;
-              ">${cityName.toUpperCase()}</p>
-              <p style="
-                font-size: 10px;
-                font-weight: 600;
-                color: #101728;
-                margin: 0;
-              ">${year}</p>
-            </div>
-          </div>
-
-          ${showHumidityWetBulb ? `
-          <!-- Humidity & Wet Bulb Events -->
-          <div style="margin-bottom: 4px; border-radius: 4px; overflow: hidden;">
-            <div style="
-              background: rgba(255, 255, 255, 0.35);
-              padding: 4px 8px;
-              border-radius: 4px;
-            ">
-              <p style="
-                font-size: 10px;
-                font-weight: 600;
-                color: #697487;
-                margin: 0;
-              ">Humidity & Wet Bulb Events</p>
-            </div>
-            <div style="display: flex;">
-              <div style="flex: 1; padding: 4px 8px;">
-                <p style="
-                  font-size: 9px;
-                  font-weight: 500;
-                  color: #101728;
-                  margin: 0 0 2px 0;
-                ">Peak Humidity</p>
-                <p style="
-                  font-size: 12px;
-                  font-weight: 700;
-                  color: #101728;
-                  margin: 0;
-                ">${humidityData.peak_humidity}%</p>
-              </div>
-              <div style="flex: 1; padding: 4px 8px;">
-                <p style="
-                  font-size: 9px;
-                  font-weight: 500;
-                  color: #101728;
-                  margin: 0 0 2px 0;
-                "># Wet Bulbs</p>
-                <p style="
-                  font-size: 12px;
-                  font-weight: 700;
-                  color: #101728;
-                  margin: 0;
-                  text-align: center;
-                ">${humidityData.wet_bulb_events}</p>
-              </div>
-            </div>
-          </div>
-          ` : ''}
-
-          <!-- Extreme Heat Days -->
-          <div style="margin-bottom: 4px; border-radius: 4px; overflow: hidden;">
-            <div style="
-              background: rgba(255, 255, 255, 0.35);
-              padding: 4px 8px;
-              border-radius: 4px;
-            ">
-              <p style="
-                font-size: 10px;
-                font-weight: 600;
-                color: #697487;
-                margin: 0;
-              ">Extreme Heat Days</p>
-            </div>
-            <div style="display: flex;">
-              <div style="flex: 1; padding: 4px 8px;">
-                <p style="
-                  font-size: 9px;
-                  font-weight: 500;
-                  color: #101728;
-                  margin: 0 0 2px 0;
-                ">95°F+ Days</p>
-                <p style="
-                  font-size: 12px;
-                  font-weight: 700;
-                  color: #101728;
-                  margin: 0;
-                ">${humidityData.days_over_95F || 0}</p>
-              </div>
-              <div style="flex: 1; padding: 4px 8px;">
-                <p style="
-                  font-size: 9px;
-                  font-weight: 500;
-                  color: #101728;
-                  margin: 0 0 2px 0;
-                ">100°F+ Days</p>
-                <p style="
-                  font-size: 12px;
-                  font-weight: 700;
-                  color: #101728;
-                  margin: 0;
-                  text-align: center;
-                ">${humidityData.days_over_100F || 0}</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Health Impact Statistics -->
-          <div style="border-radius: 4px; overflow: hidden;">
-            <div style="
-              background: rgba(239, 68, 68, 0.15);
-              padding: 4px 8px;
-              border-radius: 4px;
-            ">
-              <p style="
-                font-size: 10px;
-                font-weight: 600;
-                color: #991b1b;
-                margin: 0;
-              ">Danger Zone Extent</p>
-            </div>
-            <div style="display: flex; flex-direction: column; gap: 4px; padding: 4px 8px;">
-              <div style="display: flex; justify-content: space-between;">
-                <p style="font-size: 9px; font-weight: 500; color: #101728; margin: 0;">Est. population in zone:</p>
-                <p style="font-size: 10px; font-weight: 700; color: #dc2626; margin: 0;">${(humidityData.estimated_at_risk_population || 0).toLocaleString()}</p>
-              </div>
-              <div style="display: flex; justify-content: space-between;">
-                <p style="font-size: 9px; font-weight: 500; color: #101728; margin: 0;">Danger Zone Radius:</p>
-                <p style="font-size: 10px; font-weight: 700; color: #dc2626; margin: 0;">${humidityData.extent_radius_km || 0} km</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      `
-    }
 
     // Metro humidity handlers are now set up in a separate useEffect below
 
@@ -5001,35 +4840,26 @@ export default function ClimateStudioView() {
                       </div>
                       {!collapsedFeatures.has('metroWeather') && (
                         <>
-                          {/* Bubble Data Toggles */}
-                          <div className="space-y-3">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                className="h-4 w-4 accent-blue-500"
-                                checked={showHumidityWetBulb}
-                                onChange={() => setShowHumidityWetBulb(!showHumidityWetBulb)}
-                              />
-                              <span className="text-[13px] text-foreground">Humidity & Wet Bulb Events</span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                className="h-4 w-4 accent-blue-500"
-                                checked={showTempHumidity}
-                                onChange={() => setShowTempHumidity(!showTempHumidity)}
-                              />
-                              <span className="text-[13px] text-foreground">Temperature & Humidity</span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input
-                                type="checkbox"
-                                className="h-4 w-4 accent-blue-500"
-                                checked={showAverageTemperatures}
-                                onChange={() => setShowAverageTemperatures(!showAverageTemperatures)}
-                              />
-                              <span className="text-[13px] text-foreground">Average Temperature</span>
-                            </label>
+                          {/* Resilience score legend — matches MetroMapCard score colors */}
+                          <div className="pt-0.5">
+                            <p className="mb-1.5 text-xs font-medium text-[var(--cs-text-secondary)]">Resilience score</p>
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="h-2.5 w-2.5 rounded-sm" style={{ background: 'var(--cs-tone-emerald-text)' }} />
+                                <span className="text-[11px] text-foreground">66–100 · resilient</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="h-2.5 w-2.5 rounded-sm" style={{ background: 'var(--cs-tone-amber-text)' }} />
+                                <span className="text-[11px] text-foreground">40–65 · moderate</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="h-2.5 w-2.5 rounded-sm" style={{ background: 'var(--cs-tone-red-text)' }} />
+                                <span className="text-[11px] text-foreground">0–39 · exposed</span>
+                              </div>
+                            </div>
+                            <p className="mt-1.5 text-[11px] leading-snug text-[var(--cs-text-tertiary)]">
+                              Colors the metro card score and dimension bars · 0–100, higher = more resilient
+                            </p>
                           </div>
                         </>
                       )}
@@ -6318,19 +6148,25 @@ export default function ClimateStudioView() {
                           <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('metroWeather') ? '-rotate-90' : ''}`} />
                         </div>
                         {!collapsedFeatures.has('metroWeather') && (
-                          <div className="space-y-3">
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input type="checkbox" className="h-4 w-4 accent-blue-500" checked={showHumidityWetBulb} onChange={() => setShowHumidityWetBulb(!showHumidityWetBulb)} />
-                              <span className="text-[13px] text-foreground">Humidity & Wet Bulb Events</span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input type="checkbox" className="h-4 w-4 accent-blue-500" checked={showTempHumidity} onChange={() => setShowTempHumidity(!showTempHumidity)} />
-                              <span className="text-[13px] text-foreground">Temperature & Humidity</span>
-                            </label>
-                            <label className="flex items-center gap-2 cursor-pointer">
-                              <input type="checkbox" className="h-4 w-4 accent-blue-500" checked={showAverageTemperatures} onChange={() => setShowAverageTemperatures(!showAverageTemperatures)} />
-                              <span className="text-[13px] text-foreground">Average Temperature</span>
-                            </label>
+                          <div>
+                            <p className="mb-1.5 text-xs font-medium text-[var(--cs-text-secondary)]">Resilience score</p>
+                            <div className="space-y-1">
+                              <div className="flex items-center gap-2">
+                                <span className="h-2.5 w-2.5 rounded-sm" style={{ background: 'var(--cs-tone-emerald-text)' }} />
+                                <span className="text-[11px] text-foreground">66–100 · resilient</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="h-2.5 w-2.5 rounded-sm" style={{ background: 'var(--cs-tone-amber-text)' }} />
+                                <span className="text-[11px] text-foreground">40–65 · moderate</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <span className="h-2.5 w-2.5 rounded-sm" style={{ background: 'var(--cs-tone-red-text)' }} />
+                                <span className="text-[11px] text-foreground">0–39 · exposed</span>
+                              </div>
+                            </div>
+                            <p className="mt-1.5 text-[11px] leading-snug text-[var(--cs-text-tertiary)]">
+                              Colors the metro card score and dimension bars · 0–100, higher = more resilient
+                            </p>
                           </div>
                         )}
                       </div>
@@ -7198,31 +7034,20 @@ export default function ClimateStudioView() {
                     position: 'absolute',
                     left: `${point.x}px`,
                     top: `${point.y}px`,
-                    transform: 'translate(-50%, -50%)',
+                    // Bottom-anchored above the metro point: the caret points at the
+                    // location and expanding the card grows it upward, keeping the
+                    // bottom edge fixed.
+                    transform: 'translate(-50%, calc(-100% - 10px))',
                     pointerEvents: 'auto',
                     zIndex: isActive ? 1000 : 100 // Higher z-index when active
                   }}
                 >
-                  <MetroHumidityBubble
-                    metroName={city}
-                    year={projectionYear}
-                    peakHumidity={`${humidityData.peak_humidity}%`}
-                    wetBulbEvents={`${humidityData.wet_bulb_events}`}
-                    humidTemp={`${humidityData.days_over_95F || 0}`}
-                    daysOver100={humidityData.days_over_100F ? `${humidityData.days_over_100F}` : 'N/A'}
-                    visible={true}
-                    showHumidityWetBulb={showHumidityWetBulb}
-                    showTempHumidity={showTempHumidity}
-                    showAverageTemperatures={showAverageTemperatures}
-                    summerAvg={tempData?.summer_avg ? `${tempData.summer_avg.toFixed(1)}°F` : undefined}
-                    winterAvg={tempData?.winter_avg ? `${tempData.winter_avg.toFixed(1)}°F` : undefined}
-                    onClose={() => { }}
-                    isActive={isActive}
-                    onClick={() => {
-                      // Toggle: if clicking the same bubble, deactivate it; otherwise activate the clicked one
-                      setActiveBubbleIndex(isActive ? null : index)
-                    }}
-                  />
+                  {/* Unified metro card (collapsed by default; dimensions expand like Heat).
+                      Replaces MetroHumidityBubble; old humidityData/tempData feeds above are
+                      superseded — the card reads the same source JSONs itself. */}
+                  <div onClick={() => setActiveBubbleIndex(index)}>
+                    <MetroMapCard metroName={city} year={projectionYear} />
+                  </div>
                 </div>
               )
             })}

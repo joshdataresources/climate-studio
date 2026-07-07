@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Climate Studio — Environmental Resilience Index</title>
+<style>
+  :root{
+    --ink:#1f1d1a; --muted:#6b6862; --faint:#9b978f; --line:#e7e3da;
+    --paper:#ffffff; --panel:#faf8f3; --accent:#d85a30;
+    --good:#1d9e75; --warn:#ba7517; --bad:#a32d2d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#f4f1ea;color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.6;font-size:15px}
+  .sheet{max-width:860px;margin:32px auto;background:var(--paper);
+    border:1px solid var(--line);border-radius:16px;padding:44px 52px;
+    box-shadow:0 1px 3px rgba(0,0,0,.04)}
+  .kicker{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .bar{width:4px;height:20px;background:var(--accent);border-radius:2px}
+  .kicker span{font-size:13px;color:var(--muted);font-weight:600;letter-spacing:.01em}
+  h1{font-size:30px;line-height:1.2;margin:0 0 10px;font-weight:600}
+  .lede{font-size:17px;color:var(--muted);margin:0 0 8px;max-width:60ch}
+  h2{font-size:19px;margin:34px 0 12px;font-weight:600}
+  h3{font-size:15px;margin:20px 0 6px;font-weight:600}
+  p{margin:0 0 12px}
+  .meta{font-size:12.5px;color:var(--faint);margin-top:6px}
+  .flow{display:flex;flex-direction:column;gap:8px;margin:14px 0}
+  .tier{background:var(--panel);border:1px solid var(--line);border-radius:10px;
+    padding:12px 16px;font-size:14px}
+  .tier.accent{background:#fbeee7;border-color:#f0cdbc;color:#8a3a1c;font-weight:600}
+  .cols{display:flex;gap:10px}
+  .col{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+  .col h4{margin:0 0 10px;font-size:13.5px;font-weight:600;display:flex;align-items:center;gap:6px}
+  .col.exp h4{color:var(--warn)} .col.cap h4{color:var(--good)}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{padding:5px 9px;border-radius:7px;font-size:12px;border:1px dashed #cfcbc1;color:var(--muted)}
+  .chip.live{border:1px solid var(--accent);color:var(--ink);background:#fff}
+  .arrow{text-align:center;color:var(--faint);font-size:14px}
+  table{width:100%;border-collapse:collapse;margin:10px 0;font-size:13.5px}
+  th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line)}
+  th{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+  td.n{text-align:right;font-variant-numeric:tabular-nums}
+  .rank{color:var(--faint);width:28px}
+  .track{height:7px;background:#eceae3;border-radius:4px;overflow:hidden;min-width:80px}
+  .fill{height:100%;border-radius:4px}
+  .two{display:flex;gap:22px}.two>div{flex:1}
+  pre{background:#1f1d1a;color:#f2efe8;border-radius:10px;padding:16px 18px;overflow:auto;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12.5px;line-height:1.55}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.92em;
+    background:#f0ede6;padding:1px 5px;border-radius:4px}
+  pre code{background:none;padding:0}
+  .callout{background:#fbeee7;border:1px solid #f0cdbc;border-radius:10px;padding:14px 18px;
+    font-size:13.5px;color:#7a3517;margin:14px 0}
+  .foot{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);
+    font-size:12px;color:var(--faint)}
+  ul{margin:6px 0 12px;padding-left:20px}li{margin:4px 0}
+  @media print{body{background:#fff}.sheet{border:none;box-shadow:none;margin:0;max-width:none}}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <div class="kicker"><span class="bar"></span><span>Climate Studio · product framework</span></div>
+  <h1>The Environmental Resilience Index</h1>
+  <p class="lede">A decision tool that ranks US metros by how well they hold up to a changing climate — not a map of danger, but a comparable, defensible score that tells you where to live, build, and invest.</p>
+  <p class="meta">Draft framework · 52 metros · projections to 2100 · heat live · water prototype · fire / flood / capacity live (FEMA NRI) · weights tunable</p>
+
+  <h2>The idea in one line</h2>
+  <p>Environmental resilience is <strong>hazard exposure</strong> (how hard the climate hits a city) balanced against <strong>adaptive capacity</strong> (how well the city can absorb it), measured <strong>every decade to 2100</strong>. Climate Studio already has the hard part most tools skip — the time axis — so the job is to turn per-hazard layers into one comparable ranking.</p>
+
+  <h2>How the index is built</h2>
+  <div class="flow">
+    <div class="cols">
+      <div class="col exp">
+        <h4>▲ Hazard exposure</h4>
+        <div class="chips">
+          <span class="chip live">Heat / wet-bulb ✓ live</span>
+          <span class="chip" style="border:1px solid var(--warn);color:var(--ink)">Water stress · prototype</span>
+          <span class="chip live">Flooding ✓ live (NRI)</span>
+          <span class="chip live">Wildfire ✓ live (NRI)</span>
+          <span class="chip">Air quality</span>
+          <span class="chip">Storms</span>
+        </div>
+      </div>
+      <div class="col cap">
+        <h4>◆ Adaptive capacity</h4>
+        <div class="chips">
+          <span class="chip live">Community resilience ✓ live (NRI)</span>
+          <span class="chip live">Social vulnerability ✓ live (NRI)</span>
+          <span class="chip">Water supply</span>
+          <span class="chip">Infrastructure</span>
+          <span class="chip">Economy</span>
+        </div>
+      </div>
+    </div>
+    <div class="arrow">↓</div>
+    <div class="tier">Normalize every indicator <strong>0–100</strong> across all 52 metros (min–max on a fixed scale so absolute change over time is visible)</div>
+    <div class="arrow">↓</div>
+    <div class="tier accent">Weight + combine → resilience score (0–100)</div>
+    <div class="arrow">↓</div>
+    <div class="tier">🏆 Ranked leaderboard — most resilient metros, refreshed each decade to 2100</div>
+  </div>
+  <p>Every new dimension plugs in identically: <strong>measure → normalize → weight</strong>. The index grows without re-architecting.</p>
+
+  <h2>Scoring method</h2>
+  <p>Each indicator becomes a 0–100 sub-score where <strong>100 = most resilient</strong>. For a hazard, higher raw hazard means a lower score:</p>
+  <pre><code>hazard   = 0.5 · norm(peak_wet_bulb) + 0.5 · norm(extreme_heat_days)
+score    = 100 − hazard                       // 0–100, higher = better
+norm(x)  = (x − min) / (max − min) · 100       // min/max across all metros</code></pre>
+  <p>Normalizing on a <strong>fixed</strong> scale (across all cities <em>and</em> all decades) matters: it keeps rankings comparable and lets a city's absolute decline show up, rather than hiding it behind a per-year re-normalization.</p>
+
+  <div class="callout"><strong>Weighting — now tunable, not buried in code.</strong> The engine takes a <code>ResilienceWeights</code> object: a relative weight per hazard dimension (heat, water, fire, flood) plus a <code>capacityShare</code> blend between exposure and adaptive capacity. Defaults: <strong>equal hazard weights, 60/40 exposure-to-capacity</strong>. The Dashboard leaderboard exposes all five as live sliders, so stakeholders can challenge the numbers by moving them. Hazard weights are normalized over whichever dimensions a metro actually has, so a missing dimension never silently zeroes a score.</div>
+
+  <h2>Worked example — the heat dimension (real data)</h2>
+  <p>Computed from the live wet-bulb dataset for <strong>2055</strong>, high-emissions scenario. Coastal California and the mountain west top out; Texas, Florida, and the desert southwest sit at the bottom — the split passes the sanity check.</p>
+  <div class="two">
+    <div>
+      <h3 style="color:var(--good)">Most heat-resilient</h3>
+      <table>
+        <tr><td class="rank">1</td><td>San Jose</td><td style="width:38%"><div class="track"><div class="fill" style="width:96%;background:var(--good)"></div></div></td><td class="n">96</td></tr>
+        <tr><td class="rank">2</td><td>San Francisco</td><td><div class="track"><div class="fill" style="width:95%;background:var(--good)"></div></div></td><td class="n">95</td></tr>
+        <tr><td class="rank">3</td><td>Salt Lake City</td><td><div class="track"><div class="fill" style="width:90%;background:var(--good)"></div></div></td><td class="n">90</td></tr>
+        <tr><td class="rank">4</td><td>Los Angeles</td><td><div class="track"><div class="fill" style="width:90%;background:var(--good)"></div></div></td><td class="n">90</td></tr>
+        <tr><td class="rank">5</td><td>Colorado Springs</td><td><div class="track"><div class="fill" style="width:90%;background:var(--good)"></div></div></td><td class="n">90</td></tr>
+        <tr><td class="rank">6</td><td>San Diego</td><td><div class="track"><div class="fill" style="width:88%;background:var(--good)"></div></div></td><td class="n">88</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3 style="color:var(--bad)">Least heat-resilient</h3>
+      <table>
+        <tr><td class="rank">52</td><td>Phoenix</td><td style="width:38%"><div class="track"><div class="fill" style="width:21%;background:var(--bad)"></div></div></td><td class="n">21</td></tr>
+        <tr><td class="rank">51</td><td>San Antonio</td><td><div class="track"><div class="fill" style="width:24%;background:var(--bad)"></div></div></td><td class="n">24</td></tr>
+        <tr><td class="rank">50</td><td>Orlando</td><td><div class="track"><div class="fill" style="width:25%;background:var(--bad)"></div></div></td><td class="n">25</td></tr>
+        <tr><td class="rank">49</td><td>Tampa</td><td><div class="track"><div class="fill" style="width:25%;background:var(--bad)"></div></div></td><td class="n">25</td></tr>
+        <tr><td class="rank">48</td><td>Austin</td><td><div class="track"><div class="fill" style="width:25%;background:var(--bad)"></div></div></td><td class="n">25</td></tr>
+        <tr><td class="rank">47</td><td>Dallas</td><td><div class="track"><div class="fill" style="width:26%;background:var(--bad)"></div></div></td><td class="n">26</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <h3>Trajectories to 2095</h3>
+  <p>On a fixed scale, the <strong>average metro loses ~25 points</strong> (65.6 → 40.9, 2025→2095). Marine California declines slowest (San Jose 96→81); Gulf and desert metros fall off a cliff (Miami 62→17, Phoenix 40→16). Rankings also reshuffle — <strong>Salt Lake City slips from #1 to #6</strong> as extreme-heat days accumulate, and San Jose / San Francisco inherit the top. Resilience is a moving target, which is exactly why the decade axis matters.</p>
+
+  <h2>Dimension 2 — water access (portfolio model)</h2>
+  <p>Water is now scored as <strong>access</strong>: each metro's utility-documented supply portfolio (<code>metro-water-access.json</code>, researched and cited per metro from utility/state sources, ~2024–25 mixes) is weighted by share across six source types — river, reservoir, groundwater, imported, desalination, recycled. Each source carries its own climate health: river- and reservoir-fed sources inherit the matched river's <strong>projected flow decline</strong> (Colorado-basin imports like CAP, SNWA, and QSA transfers inherit the Colorado's decline minus a conveyance-risk margin), Great Lakes intakes count as deep buffered storage, groundwater inherits the spatial aquifer join's stress class, and desal/reuse are near climate-independent. NYC's protected reservoirs score ~96 while Tucson's CAP-recharged basin supply scores ~48 — the same score now means the same thing everywhere: "how well does what this city actually drinks hold up."</p>
+  <p><strong>Groundwater is now spatial, not a stub.</strong> Each metro is point-in-polygon joined against the app's USGS principal-aquifer polygons (<code>scripts/build-metro-aquifers.py</code> → <code>metro-aquifers.json</code>), classified by stress (dataset recharge-vs-consumption fields + documented overrides like Biscayne saltwater intrusion and Houston subsidence), and scaled by <strong>documented municipal dependence</strong> — being over an aquifer is not the same as drinking from it. Metros over no productive aquifer (Raleigh, on Piedmont crystalline rock) get no adjustment; sole-source groundwater cities (Memphis, Miami, Nassau County) feel their aquifer's stress at full weight; surface-supplied cities over stressed aquifers (Oklahoma City, Denver) barely notice it. This replaced a flat −10 penalty that hit only OKC and Memphis.</p>
+
+  <div class="callout"><strong>Provenance — read before trusting.</strong> The river flow-decline figures are <strong>literature-parameterized regional rates</strong> (USGS, Bureau of Reclamation, EPA, Colorado River studies) applied to curated 2025 baselines and interpolated by decade — not raw per-river climate-model output. Directionally sound and transparent, but label it as an estimate. (Separately, the live precipitation service currently runs on CHIRPS as a proxy, not the intended NOAA LOCA2.)</p></div>
+
+  <h3>Coverage is the real constraint</h3>
+  <p>Heat is uniform — the NASA grid covers all 52 metros identically. Water isn't. Only <strong>~19 of 52 metros</strong> map to a river with real projection data; the other <strong>~33 fall back to a placeholder default</strong>. Those fallbacks are the weakest part of the prototype and the top data task before any public ranking. There is no repo source for the missing metros — closing the gap needs external supply data, not a heavier formula.</p>
+
+  <h3>Adding water redraws the map</h3>
+  <p>This is why the second dimension matters: it overturns the heat-only story. Southwest heat-havens are living on shrinking rivers; humid eastern metros sit on secure ones. Composite here is an illustrative <code>0.5 · heat + 0.5 · water</code>.</p>
+  <div class="two">
+    <div>
+      <h3 style="color:var(--bad)">Water exposes them</h3>
+      <table>
+        <tr><th>Metro</th><th class="n">Heat</th><th class="n">Composite</th></tr>
+        <tr><td>Albuquerque</td><td class="n">87</td><td class="n">65 <span style="color:var(--bad)">−23</span></td></tr>
+        <tr><td>San Diego</td><td class="n">88</td><td class="n">68 <span style="color:var(--bad)">−20</span></td></tr>
+        <tr><td>Los Angeles</td><td class="n">90</td><td class="n">70 <span style="color:var(--bad)">−20</span></td></tr>
+      </table>
+    </div>
+    <div>
+      <h3 style="color:var(--good)">Water lifts them</h3>
+      <table>
+        <tr><th>Metro</th><th class="n">Heat</th><th class="n">Composite</th></tr>
+        <tr><td>Philadelphia</td><td class="n">49</td><td class="n">70 <span style="color:var(--good)">+21</span></td></tr>
+        <tr><td>New Orleans</td><td class="n">38</td><td class="n">59 <span style="color:var(--good)">+21</span></td></tr>
+        <tr><td>New York</td><td class="n">54</td><td class="n">73 <span style="color:var(--good)">+19</span></td></tr>
+      </table>
+    </div>
+  </div>
+  <p>The genuine losers are exposed on <em>both</em> axes: <strong>Phoenix</strong> (heat 21 / composite 32) and <strong>Las Vegas</strong> (44 / 44). The winners hold up on both — Portland and the Great Lakes metros — while heat champions San Jose and San Francisco carry an asterisk until their water supply is actually mapped.</p>
+
+  <h2>Dimensions 3–5 — fire, flood, adaptive capacity (FEMA NRI, live)</h2>
+  <p>Three dimensions come from one authoritative source: the <strong>FEMA National Risk Index</strong> (NRI 2.0), fetched per <strong>principal county</strong> for all 52 metros (county resolved by spatial point query on each metro's coordinates, so no name-matching errors). Stored in <code>src/data/fema_nri_metros.json</code>; scored in <code>resilienceScore.ts</code>:</p>
+  <pre><code>fire     = 100 − WFIR_RISKS                              // wildfire risk percentile
+flood    = 100 − max(IFLD_ALR_NPCTL, CFLD_ALR_NPCTL)     // EAL *rate* percentiles; null coastal = no exposure
+capacity = ½ · RESL_SCORE + ½ · (100 − SOVI_SCORE)
+composite = (1 − capacityShare) · Σ wᵢ·hazardᵢ / Σ wᵢ  +  capacityShare · capacity</code></pre>
+  <p>NRI 2.0 renamed riverine flooding: the field is <code>IFLD_RISKS</code> ("Inland Flooding") — there is no RFLD. <code>RESL_SCORE</code> is Community Resilience (higher = better, used as-is); <code>SOVI_SCORE</code> is Social Vulnerability (higher = worse, inverted).</p>
+  <div class="callout"><strong>Two caveats worth keeping visible.</strong> ① NRI is a <strong>present-day snapshot</strong>: fire, flood, and capacity are held flat across projection decades while heat and water carry the time trend. A 2095 composite mixes 2095 heat with 2026 wildfire. ② Magnitude vs. rate: NRI <code>*_RISKS</code> scores are <strong>percentiles of expected-annual-loss magnitude</strong>, which scale with exposed population and property — on inland flood they pinned every big-metro county at ~100, leaving the flood sub-score between 0 and 17 (median 2, pure dead weight). Flood therefore uses the <strong>EAL-<em>rate</em> percentiles</strong> (<code>IFLD_ALR_NPCTL</code> / <code>CFLD_ALR_NPCTL</code>), which normalize out exposure; the sub-score now spans ~5–95 (median ~45). Fire still uses <code>WFIR_RISKS</code> — its spread (0–91) is already adequate.</div>
+  <h3>What the new dimensions change (2055, default weights)</h3>
+  <p>The sanity checks pass: wildfire drags the West (fire-only ranking bottoms out at Colorado Springs, Phoenix, Tucson, LA, San Diego — San Diego's WFIR is literally 100); the rate-based flood dimension flags flash-flood and coastal loss-rate hotspots (worst: Tucson 5, Los Angeles 5, San Jose 5, Houston 15, Merrick/Nassau 14; best: Salt Lake City 95, Cincinnati 76, Minneapolis 74) rather than merely-populous counties; capacity lifts low-vulnerability metros (Minneapolis 89, Raleigh 88, Seattle 86). One result cuts against intuition: <strong>New York's capacity is only 36</strong> — Manhattan's Social Vulnerability percentile is 96, swamping its decent Community Resilience score. County granularity is doing real work there (Merrick/Nassau County scores 86), which is an argument for metro-level aggregation later, not a bug in the pipeline. With all five dimensions live, the 2055 top tier is <strong>Portland, Minneapolis, Milwaukee, San Francisco, Salt Lake City</strong>; the bottom is <strong>San Antonio, Las Vegas, Phoenix, Houston, Tucson</strong> — exposed on several axes at once with little capacity to compensate.</p>
+
+  <h2>Data model</h2>
+  <p>A single shape carries an indicator from raw measurement to normalized sub-score, so exposure and capacity are handled uniformly:</p>
+  <pre><code>// One indicator, from raw numbers to a 0–100 sub-score
+interface IndicatorScore {
+  key: 'heat' | 'water' | 'flood' | 'wildfire' | 'air' | 'storms'
+      | 'waterSupply' | 'infrastructure' | 'economy' | 'cooling'
+  raw: Record&lt;string, number&gt;   // underlying measurements (e.g. peakWetBulbF)
+  score: number                  // normalized 0–100, 100 = most resilient
+  status: 'live' | 'planned'
+}
+
+// Shipped in resilienceScore.ts — five live sliders in the leaderboard
+interface ResilienceWeights {
+  heat: number                   // relative hazard weights,
+  water: number                  // normalized over the dimensions
+  fire: number                   // a metro actually has
+  flood: number
+  capacityShare: number          // 0–1 exposure↔capacity blend, default 0.4
+}
+
+interface CityResilienceScore {
+  metroKey: string
+  name: string
+  lat: number
+  lon: number
+  year: number                   // decade, 2025…2095
+  exposure: IndicatorScore[]
+  capacity: IndicatorScore[]
+  composite: number              // final 0–100 resilience score
+  rank: number                   // 1 = most resilient that year
+}
+
+// city key → year → score
+type ResilienceProjection =
+  Record&lt;string, Record&lt;number, CityResilienceScore&gt;&gt;</code></pre>
+
+  <h2>What's next</h2>
+  <ul>
+    <li><strong>Close the water coverage gap.</strong> Highest priority: map the ~33 unscored metros to a real supply source so the composite means something everywhere, not just the 19 river-linked cities.</li>
+    <li><strong>Ground the flow numbers.</strong> Confirm or replace the literature-parameterized river declines with modeled streamflow, and wire the precipitation service to real LOCA2 instead of the CHIRPS proxy.</li>
+    <li><strong>Retire the heat proxy.</strong> The index needs one trustworthy wet-bulb number per city — building it forces the fix for the map/chart discrepancy from the code review.</li>
+    <li><strong>Put resilience on the map.</strong> The engine already exposes <code>resilienceColorRGBA()</code> + <code>rankMetros()</code>; the blocker is architectural — the layer registry assumes server-fetched layers, so a client-computed layer needs a small new path (decide approach before wiring it).</li>
+    <li><strong>Sharpen the FEMA dimensions.</strong> Flood now uses rate-based <code>*_ALR_NPCTL</code> percentiles (done — see caveat ②). Remaining: metro-level aggregation instead of a single principal county (the Manhattan SOVI effect), and a forward-looking trend on fire/flood instead of holding them flat to 2100.</li>
+  </ul>
+
+  <div class="foot">Climate Studio · Environmental Resilience Index · draft framework. Heat computed from the project's wet-bulb projections (NASA NEX-GDDP-CMIP6, 4-model ensemble, ssp585). Water is a prototype from river-flow projections (literature-parameterized) with ~19/52 real coverage. Fire, flood, and adaptive capacity from FEMA National Risk Index 2.0, principal county per metro, fetched July 2026 (present-day snapshot, held flat by decade). Air quality and storms remain scaffolding.</div>
+</div>
+</body>
+</html>

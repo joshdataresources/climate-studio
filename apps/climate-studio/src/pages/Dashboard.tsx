@@ -8,6 +8,7 @@ import {
 import { getDefaultDashboardMetros } from '../utils/metroResolver'
 import { LocationCityView } from '../components/dashboard/LocationCityView'
 import { LocationCompareView } from '../components/dashboard/LocationCompareView'
+import { ResilienceSection } from '../components/dashboard/ResilienceLeaderboard'
 import { Callout } from '../components/ui/callout'
 import { Slider } from '../components/ui/slider'
 import {
@@ -270,6 +271,7 @@ const Dashboard: React.FC = () => {
             <div className="widget-container shrink-0 flex flex-col gap-4">
               {locationAnalysisControls}
             </div>
+            <ResilienceSection year={projectionYear} pinnedKeys={existingMetroKeys} />
             <div className="widget-container py-12 text-center text-sm text-[var(--cs-text-tertiary)]">
               Choose a supported metro above to add it to the dashboard.
             </div>
@@ -284,6 +286,8 @@ const Dashboard: React.FC = () => {
                 </div>
               )}
             </div>
+
+            <ResilienceSection year={projectionYear} pinnedKeys={existingMetroKeys} />
 
             {/* Only mount the active panel — hidden Radix tabs kept stale Recharts line layers alive */}
             {showCompare && activeTab === COMPARE_TAB && (

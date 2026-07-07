@@ -1,0 +1,545 @@
+{
+  "_meta": {
+    "generated": "2026-07-06",
+    "method": "point-in-polygon join against src/data/aquifers.json (USGS principal aquifers); stress from dataset recharge/consumption fields + documented overrides; municipal dependence curated (utility sources). Regenerate: python3 scripts/build-metro-aquifers.py",
+    "adjust_semantics": "signed points applied to the water sub-score: healthy aquifer = small buffer bonus, stressed aquifer = penalty, scaled by municipal dependence (effects {'severe': -14, 'high': -8, 'moderate': -3, 'low': 4}, multipliers {'primary': 1.0, 'partial': 0.6, 'minimal': 0.25})",
+    "caveats": "polygons are simplified; dependence table covers documented cases and defaults to partial elsewhere; stress classes are coarse (dataset-field heuristic + literature overrides), not modeled head declines"
+  },
+  "metros": {
+    "Albuquerque": {
+      "aquifer": "Rio Grande aquifer system",
+      "rock_type": "Unconsolidated Sand",
+      "stress": "severe",
+      "stress_basis": "dataset status \"High Stress\"; river-linked declines (USGS/NM OSE)",
+      "dependence": "partial",
+      "dependence_note": "ABCWUA shifted to San Juan-Chama surface + GW",
+      "adjust": -8,
+      "all_hits": [
+        "Rio Grande aquifer system"
+      ]
+    },
+    "Atlanta": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Austin": {
+      "aquifer": "Edwards-Trinity aquifer system",
+      "rock_type": "Limestone (Karst)",
+      "stress": "high",
+      "stress_basis": "karst; extreme drought sensitivity, pumping capped by Edwards Aquifer Authority",
+      "dependence": "minimal",
+      "dependence_note": "Austin Water is Colorado River surface supply",
+      "adjust": -2,
+      "all_hits": [
+        "Edwards-Trinity aquifer system",
+        "Carrizo-Wilcox Aquifer"
+      ]
+    },
+    "Baltimore": {
+      "aquifer": "Early Mesozoic basin aquifers",
+      "rock_type": "Sandstone",
+      "stress": "moderate",
+      "stress_basis": "consumption \u2248 recharge (dataset fields)",
+      "dependence": "partial",
+      "dependence_note": "default: aquifer present, dependence unverified",
+      "adjust": -2,
+      "all_hits": [
+        "Early Mesozoic basin aquifers"
+      ]
+    },
+    "Boston": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Buffalo": {
+      "aquifer": "Glacial sand and gravel aquifers",
+      "rock_type": "Sand and Gravel",
+      "stress": "low",
+      "stress_basis": "recharge exceeds consumption (dataset fields)",
+      "dependence": "partial",
+      "dependence_note": "default: aquifer present, dependence unverified",
+      "adjust": 2,
+      "all_hits": [
+        "Glacial sand and gravel aquifers"
+      ]
+    },
+    "Charlotte": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Chicago": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Cincinnati": {
+      "aquifer": "Midwestern basins and arches aquifer system",
+      "rock_type": "Carbonate/Sandstone",
+      "stress": "moderate",
+      "stress_basis": "consumption \u2248 recharge (dataset fields)",
+      "dependence": "partial",
+      "dependence_note": "default: aquifer present, dependence unverified",
+      "adjust": -2,
+      "all_hits": [
+        "Midwestern basins and arches aquifer system"
+      ]
+    },
+    "Cleveland": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Colorado Springs": {
+      "aquifer": "Denver Basin aquifer system",
+      "rock_type": "Sandstone",
+      "stress": "severe",
+      "stress_basis": "consumption far exceeds recharge (dataset fields)",
+      "dependence": "partial",
+      "dependence_note": "default: aquifer present, dependence unverified",
+      "adjust": -8,
+      "all_hits": [
+        "Denver Basin aquifer system"
+      ]
+    },
+    "Columbus": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Dallas": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Denver": {
+      "aquifer": "Denver Basin aquifer system",
+      "rock_type": "Sandstone",
+      "stress": "severe",
+      "stress_basis": "consumption far exceeds recharge (dataset fields)",
+      "dependence": "minimal",
+      "dependence_note": "Denver Water is surface-fed; Denver Basin serves suburbs",
+      "adjust": -4,
+      "all_hits": [
+        "Denver Basin aquifer system"
+      ]
+    },
+    "Detroit": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Duluth": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Greensboro": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Greenville SC": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Houston": {
+      "aquifer": "Coastal Lowlands aquifer system",
+      "rock_type": "Semiconsolidated Sand",
+      "stress": "high",
+      "stress_basis": "Houston-area land subsidence drove regulatory pumping cutbacks (HGSD)",
+      "dependence": "partial",
+      "dependence_note": "subsidence rules shifted Houston toward surface water; GW still meaningful",
+      "adjust": -5,
+      "all_hits": [
+        "Coastal Lowlands aquifer system"
+      ]
+    },
+    "Indianapolis": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Jacksonville": {
+      "aquifer": "Floridan Aquifer System",
+      "rock_type": "Karst / Carbonate",
+      "stress": "low",
+      "stress_basis": "recharge exceeds consumption (dataset fields)",
+      "dependence": "primary",
+      "dependence_note": "JEA supply is Floridan groundwater",
+      "adjust": 4,
+      "all_hits": [
+        "Floridan Aquifer System",
+        "Surficial aquifer system"
+      ]
+    },
+    "Kansas City": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Las Vegas": {
+      "aquifer": "Basin and Range basin-fill aquifers",
+      "rock_type": "Unconsolidated Sand and Gravel",
+      "stress": "severe",
+      "stress_basis": "arid, very low recharge, urban + ag overdraft (USGS/ADWR)",
+      "dependence": "minimal",
+      "dependence_note": "~10% groundwater (SNWA); Colorado River dominant",
+      "adjust": -4,
+      "all_hits": [
+        "Basin and Range basin-fill aquifers"
+      ]
+    },
+    "Los Angeles": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Louisville": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Memphis": {
+      "aquifer": "Mississippi Embayment aquifer system",
+      "rock_type": "Semiconsolidated Sand",
+      "stress": "high",
+      "stress_basis": "Memphis Sand cone of depression; declining heads (USGS)",
+      "dependence": "primary",
+      "dependence_note": "~100% groundwater (Memphis Light Gas & Water)",
+      "adjust": -8,
+      "all_hits": [
+        "Mississippi River Valley Alluvial",
+        "Mississippi Embayment aquifer system"
+      ]
+    },
+    "Merrick": {
+      "aquifer": "Long Island - Magothy Aquifer",
+      "rock_type": "Sand and Gravel",
+      "stress": "moderate",
+      "stress_basis": "primary Nassau supply; contamination plumes + saltwater risk, actively managed (NYSDEC)",
+      "dependence": "primary",
+      "dependence_note": "Nassau County is 100% groundwater",
+      "adjust": -3,
+      "all_hits": [
+        "Northern Atlantic Coastal Plain",
+        "Long Island - Upper Glacial Aquifer",
+        "Long Island - Magothy Aquifer",
+        "Long Island - Lloyd Aquifer"
+      ]
+    },
+    "Miami": {
+      "aquifer": "Biscayne aquifer",
+      "rock_type": "Limestone (Karst)",
+      "stress": "high",
+      "stress_basis": "sole-source for Miami-Dade; saltwater intrusion pressure (USGS/SFWMD)",
+      "dependence": "primary",
+      "dependence_note": "~100% Biscayne (Miami-Dade WASD)",
+      "adjust": -8,
+      "all_hits": [
+        "Biscayne aquifer"
+      ]
+    },
+    "Milwaukee": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Minneapolis": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Nashville": {
+      "aquifer": "Ordovician aquifers",
+      "rock_type": "Carbonate",
+      "stress": "low",
+      "stress_basis": "recharge exceeds consumption (dataset fields)",
+      "dependence": "partial",
+      "dependence_note": "default: aquifer present, dependence unverified",
+      "adjust": 2,
+      "all_hits": [
+        "Mississippian aquifers",
+        "Ordovician aquifers"
+      ]
+    },
+    "New Orleans": {
+      "aquifer": "Coastal Lowlands aquifer system",
+      "rock_type": "Semiconsolidated Sand",
+      "stress": "high",
+      "stress_basis": "Houston-area land subsidence drove regulatory pumping cutbacks (HGSD)",
+      "dependence": "minimal",
+      "dependence_note": "Mississippi River supply",
+      "adjust": -2,
+      "all_hits": [
+        "Coastal Lowlands aquifer system"
+      ]
+    },
+    "New York": {
+      "aquifer": "Northern Atlantic Coastal Plain",
+      "rock_type": "Sand",
+      "stress": "moderate",
+      "stress_basis": "dataset status \"Moderate / Recovering\"",
+      "dependence": "minimal",
+      "dependence_note": "NYC upstate surface supply",
+      "adjust": -1,
+      "all_hits": [
+        "Northern Atlantic Coastal Plain"
+      ]
+    },
+    "Oklahoma City": {
+      "aquifer": "Central Oklahoma aquifer",
+      "rock_type": "Sandstone",
+      "stress": "severe",
+      "stress_basis": "consumption far exceeds recharge (dataset fields)",
+      "dependence": "minimal",
+      "dependence_note": "OKC supply is surface reservoirs; Garber-Wellington serves suburbs",
+      "adjust": -4,
+      "all_hits": [
+        "Central Oklahoma aquifer"
+      ]
+    },
+    "Orlando": {
+      "aquifer": "Floridan Aquifer System",
+      "rock_type": "Karst / Carbonate",
+      "stress": "low",
+      "stress_basis": "recharge exceeds consumption (dataset fields)",
+      "dependence": "primary",
+      "dependence_note": "OUC supply is Floridan groundwater",
+      "adjust": 4,
+      "all_hits": [
+        "Floridan Aquifer System"
+      ]
+    },
+    "Philadelphia": {
+      "aquifer": "Early Mesozoic basin aquifers",
+      "rock_type": "Sandstone",
+      "stress": "moderate",
+      "stress_basis": "consumption \u2248 recharge (dataset fields)",
+      "dependence": "minimal",
+      "dependence_note": "river surface supply",
+      "adjust": -1,
+      "all_hits": [
+        "Early Mesozoic basin aquifers"
+      ]
+    },
+    "Phoenix": {
+      "aquifer": "Basin and Range basin-fill aquifers",
+      "rock_type": "Unconsolidated Sand and Gravel",
+      "stress": "severe",
+      "stress_basis": "arid, very low recharge, urban + ag overdraft (USGS/ADWR)",
+      "dependence": "partial",
+      "dependence_note": "~40% groundwater (ADWR); SRP/CAP surface the rest",
+      "adjust": -8,
+      "all_hits": [
+        "Basin and Range basin-fill aquifers"
+      ]
+    },
+    "Pittsburgh": {
+      "aquifer": "Appalachian Plateaus aquifers",
+      "rock_type": "Carbonate/Sandstone",
+      "stress": "low",
+      "stress_basis": "recharge exceeds consumption (dataset fields)",
+      "dependence": "partial",
+      "dependence_note": "default: aquifer present, dependence unverified",
+      "adjust": 2,
+      "all_hits": [
+        "Appalachian Plateaus aquifers"
+      ]
+    },
+    "Portland": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Raleigh": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Richmond": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Sacramento": {
+      "aquifer": "Central Valley Aquifer System",
+      "rock_type": "Unconsolidated Sand and Gravel",
+      "stress": "severe",
+      "stress_basis": "~0.73%/yr storage loss (dataset + Konikow USGS)",
+      "dependence": "partial",
+      "dependence_note": "default: aquifer present, dependence unverified",
+      "adjust": -8,
+      "all_hits": [
+        "Central Valley Aquifer System"
+      ]
+    },
+    "Salt Lake City": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "San Antonio": {
+      "aquifer": "Edwards-Trinity aquifer system",
+      "rock_type": "Limestone (Karst)",
+      "stress": "high",
+      "stress_basis": "karst; extreme drought sensitivity, pumping capped by Edwards Aquifer Authority",
+      "dependence": "primary",
+      "dependence_note": "Edwards is the dominant SAWS source",
+      "adjust": -8,
+      "all_hits": [
+        "Carrizo-Wilcox Aquifer"
+      ]
+    },
+    "San Diego": {
+      "aquifer": "California Coastal Basin aquifers",
+      "rock_type": "Unconsolidated Sand",
+      "stress": "moderate",
+      "stress_basis": "dataset status \"Managed\" \u2014 SGMA-managed basins",
+      "dependence": "partial",
+      "dependence_note": "default: aquifer present, dependence unverified",
+      "adjust": -2,
+      "all_hits": [
+        "California Coastal Basin aquifers"
+      ]
+    },
+    "San Francisco": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "San Jose": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Seattle": {
+      "aquifer": "Pacific Northwest basin-fill aquifers",
+      "rock_type": "Unconsolidated Sand",
+      "stress": "low",
+      "stress_basis": "recharge exceeds consumption (dataset fields)",
+      "dependence": "partial",
+      "dependence_note": "default: aquifer present, dependence unverified",
+      "adjust": 2,
+      "all_hits": [
+        "Pacific Northwest basin-fill aquifers"
+      ]
+    },
+    "St. Louis": {
+      "aquifer": null,
+      "stress": null,
+      "dependence": null,
+      "adjust": 0,
+      "note": "no productive principal aquifer underfoot \u2014 surface-water dependent",
+      "all_hits": []
+    },
+    "Tampa": {
+      "aquifer": "Floridan Aquifer System",
+      "rock_type": "Karst / Carbonate",
+      "stress": "low",
+      "stress_basis": "recharge exceeds consumption (dataset fields)",
+      "dependence": "partial",
+      "dependence_note": "Tampa Bay Water blends Floridan wells, river, desal",
+      "adjust": 2,
+      "all_hits": [
+        "Floridan Aquifer System"
+      ]
+    },
+    "Tucson": {
+      "aquifer": "Basin and Range basin-fill aquifers",
+      "rock_type": "Unconsolidated Sand and Gravel",
+      "stress": "severe",
+      "stress_basis": "arid, very low recharge, urban + ag overdraft (USGS/ADWR)",
+      "dependence": "primary",
+      "dependence_note": "historically ~100% GW, now CAP-recharged basin supply",
+      "adjust": -14,
+      "all_hits": [
+        "Basin and Range basin-fill aquifers"
+      ]
+    },
+    "Washington DC": {
+      "aquifer": "Early Mesozoic basin aquifers",
+      "rock_type": "Sandstone",
+      "stress": "moderate",
+      "stress_basis": "consumption \u2248 recharge (dataset fields)",
+      "dependence": "partial",
+      "dependence_note": "default: aquifer present, dependence unverified",
+      "adjust": -2,
+      "all_hits": [
+        "Early Mesozoic basin aquifers"
+      ]
+    }
+  }
+}
