@@ -455,7 +455,7 @@ export default function FactoriesView() {
 
       {/* Bottom Center - Factory Detail Panel */}
       {selectedFactory && !selectedDataCenter && (
-        <div className="detail-popup-panel safari-modal-fix z-[1000] pointer-events-auto">
+        <div className="detail-popup-panel safari-modal-fix z-[4000] pointer-events-auto">
           <FactoryDetailPanel
             factory={selectedFactory}
             onClose={() => setSelectedFactory(null)}
@@ -465,7 +465,7 @@ export default function FactoriesView() {
 
       {/* Bottom Center - AI Data Center Detail Panel */}
       {selectedDataCenter && !selectedFactory && (
-        <div className="detail-popup-panel safari-modal-fix z-[1000] pointer-events-auto">
+        <div className="detail-popup-panel safari-modal-fix z-[4000] pointer-events-auto">
           <AIDataCenterDetailPanel
             datacenter={selectedDataCenter}
             onClose={() => setSelectedDataCenter(null)}

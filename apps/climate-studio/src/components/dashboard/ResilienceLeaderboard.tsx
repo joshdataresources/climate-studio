@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react'
+import { FileText } from 'lucide-react'
 import { DashboardChart } from './DashboardChart'
+import { CityReportModal } from '../CityReportModal'
 import type { ChartDataPoint, ChartSeries } from './chartTypes'
 import {
   rankMetros,
@@ -46,6 +48,7 @@ interface LeaderboardCardProps {
 }
 
 function ResilienceLeaderboardCard({ year, ranked, topN, pinnedKeys, weights, setWeights }: LeaderboardCardProps) {
+  const [reportKey, setReportKey] = useState<string | null>(null)
   // topN is the TOTAL row budget: pinned metros ranked below the cutoff take
   // their seats from the top of the list (e.g. 3 pinned below → top 7 + 3).
   const pinnedRanks = (pinnedKeys ?? [])
@@ -80,10 +83,20 @@ function ResilienceLeaderboardCard({ year, ranked, topN, pinnedKeys, weights, se
         />
       </div>
       <span className="w-7 text-right text-sm font-semibold tabular-nums">{Math.round(m.composite)}</span>
+      <button
+        type="button"
+        onClick={() => setReportKey(m.metroKey)}
+        title={`Generate report for ${m.name}`}
+        aria-label={`Generate report for ${m.name}`}
+        className="shrink-0 rounded p-0.5 text-[var(--cs-text-tertiary)] hover:text-[var(--cs-text-primary)]"
+      >
+        <FileText className="h-3.5 w-3.5" />
+      </button>
     </div>
   )
 
   return (
+    <>
     <div className="widget-container flex h-full flex-col">
       <h4 className="widget-title shrink-0">Resilience leaderboard · {year}</h4>
       <p className="mb-2 shrink-0 text-xs text-[var(--cs-text-tertiary)]">
@@ -163,6 +176,10 @@ function ResilienceLeaderboardCard({ year, ranked, topN, pinnedKeys, weights, se
         </div>
       </div>
     </div>
+    {reportKey && (
+      <CityReportModal metroKey={reportKey} year={year} weights={weights} onClose={() => setReportKey(null)} />
+    )}
+    </>
   )
 }
 

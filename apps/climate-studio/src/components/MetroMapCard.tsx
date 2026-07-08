@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, FileText } from 'lucide-react'
+import { CityReportModal } from './CityReportModal'
 import {
   metroResilience,
   rankMetros,
@@ -79,7 +80,7 @@ function DimensionRow({ label, score, expanded, onToggle, children }: RowProps) 
         </span>
         {expanded ? <ChevronUp className="h-3.5 w-3.5 opacity-50" /> : <ChevronDown className="h-3.5 w-3.5 opacity-50" />}
       </button>
-      <div className="mt-1 h-1.5 overflow-hidden rounded bg-[var(--cs-surface-sunken)]">
+      <div className="mt-1 h-1.5 overflow-hidden rounded" style={{ background: 'rgba(0,0,0,0.10)' }}>
         <div
           className="h-full rounded"
           style={{ width: `${Math.max(2, Math.min(100, score ?? 0))}%`, background: scoreColor(score ?? 0) }}
@@ -110,6 +111,7 @@ export interface MetroMapCardProps {
 
 export function MetroMapCard({ metroName, year }: MetroMapCardProps) {
   const [open, setOpen] = useState(false)
+  const [showReport, setShowReport] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null) // all dimensions collapsed by default
   const toggle = (k: string) => setExpanded(e => (e === k ? null : k))
 
@@ -136,12 +138,6 @@ export function MetroMapCard({ metroName, year }: MetroMapCardProps) {
       className="pointer-events-auto relative rounded-xl border border-[var(--cs-border-default)] bg-[var(--cs-surface-overlay)] px-3 py-2 shadow-lg backdrop-blur"
       style={{ width: open ? 300 : 232 }}
     >
-      {/* caret pointing at the metro's exact location (card is bottom-anchored) */}
-      <div
-        aria-hidden="true"
-        className="absolute left-1/2 border-b border-r border-[var(--cs-border-default)] bg-[var(--cs-surface-overlay)]"
-        style={{ bottom: -7, width: 12, height: 12, transform: 'translateX(-50%) rotate(45deg)' }}
-      />
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
@@ -227,7 +223,19 @@ export function MetroMapCard({ metroName, year }: MetroMapCardProps) {
               capacity = ½·RESL + ½·(100 − SOVI) · county granularity
             </p>
           </DimensionRow>
+
+          <button
+            type="button"
+            onClick={() => setShowReport(true)}
+            className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-md py-2 text-[12px] font-medium text-white transition-opacity hover:opacity-90"
+            style={{ background: 'var(--cs-brand-primary)' }}
+          >
+            <FileText className="h-3.5 w-3.5" /> Generate report
+          </button>
         </div>
+      )}
+      {showReport && (
+        <CityReportModal metroKey={metroKey} year={year} onClose={() => setShowReport(false)} />
       )}
     </div>
   )

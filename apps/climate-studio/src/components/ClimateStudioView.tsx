@@ -6768,7 +6768,7 @@ export default function ClimateStudioView() {
       {/* Groundwater Details Panel - Bottom Center */}
       {
         selectedAquifer && (
-          <div className="detail-popup-panel safari-modal-fix z-[1000] pointer-events-auto">
+          <div className="detail-popup-panel safari-modal-fix z-[4000] pointer-events-auto">
             <GroundwaterDetailsPanel
               selectedAquifer={selectedAquifer}
               projectionYear={projectionYear}
@@ -6781,7 +6781,7 @@ export default function ClimateStudioView() {
       {/* Factory Details Panel - Bottom Center */}
       {
         selectedFactory && (
-          <div className="detail-popup-panel safari-modal-fix z-[1000] pointer-events-auto">
+          <div className="detail-popup-panel safari-modal-fix z-[4000] pointer-events-auto">
             <FactoryDetailPanel
               factory={selectedFactory}
               onClose={() => setSelectedFactory(null)}
@@ -6793,7 +6793,7 @@ export default function ClimateStudioView() {
       {/* AI Data Center Details Panel - Bottom Center */}
       {
         selectedDataCenter && (
-          <div className="detail-popup-panel safari-modal-fix z-[1000] pointer-events-auto">
+          <div className="detail-popup-panel safari-modal-fix z-[4000] pointer-events-auto">
             <AIDataCenterDetailPanel
               datacenter={selectedDataCenter}
               onClose={() => setSelectedDataCenter(null)}
@@ -6805,7 +6805,7 @@ export default function ClimateStudioView() {
       {/* Dam Details Panel - Bottom Center */}
       {
         selectedDam && (
-          <div className="detail-popup-panel safari-modal-fix z-[1000] pointer-events-auto">
+          <div className="detail-popup-panel safari-modal-fix z-[4000] pointer-events-auto">
             <DamDetailsPanel
               selectedDam={selectedDam}
               onClose={() => setSelectedDam(null)}
