@@ -1,6 +1,6 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { Map as MapboxMap } from 'mapbox-gl';
+import { Map as MapboxMap } from 'maplibre-gl';
 import * as turf from '@turf/turf';
 import { calculateDistance, calculateArea, formatDistance, formatArea } from '../utils/mapboxHelpers';
 

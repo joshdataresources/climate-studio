@@ -9,7 +9,7 @@
  * 5. Maintains context across view changes and theme switches
  */
 
-import mapboxgl from 'mapbox-gl'
+import mapboxgl from 'maplibre-gl'
 import { LayerDefinition } from '../config/layerDefinitions'
 import { addLayerToMap, removeLayerFromMap, setLayerOpacity } from '../utils/layerRenderer'
 import { getOrchestratorMemory, OrchestratorMemory } from '../services/OrchestratorMemory'

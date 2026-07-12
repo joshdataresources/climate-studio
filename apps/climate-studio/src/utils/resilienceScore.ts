@@ -118,27 +118,34 @@ function norm(x: number, lo: number, hi: number): number {
   return hi === lo ? 0 : ((x - lo) / (hi - lo)) * 100
 }
 
-// ---- heat: min-max normalized across all metros, per decade (cached) ----
-const heatRangeCache: Record<number, { pmin: number; pmax: number; dmin: number; dmax: number }> = {}
+// ---- heat: min-max normalized on a FIXED global scale (all metros × all
+// decades), so heat is ABSOLUTE and a metro's score falls as its wet-bulb /
+// heat-days rise over time. Per-decade normalization hid that trend (every
+// metro warmed together, so relative position — and the score — stayed flat),
+// which made composite trajectories look straight. ----
+let heatGlobalRange: { pmin: number; pmax: number; dmin: number; dmax: number } | null = null
 
-function heatRange(dec: number) {
-  if (heatRangeCache[dec]) return heatRangeCache[dec]
+function heatRange() {
+  if (heatGlobalRange) return heatGlobalRange
   let pmin = Infinity, pmax = -Infinity, dmin = Infinity, dmax = -Infinity
   for (const c of Object.values(wetBulb)) {
-    const p = (c as any).projections?.[String(dec)]
-    if (!p) continue
-    if (p.peak_wet_bulb_F != null) { pmin = Math.min(pmin, p.peak_wet_bulb_F); pmax = Math.max(pmax, p.peak_wet_bulb_F) }
-    if (p.days_over_95F != null) { dmin = Math.min(dmin, p.days_over_95F); dmax = Math.max(dmax, p.days_over_95F) }
+    const proj = (c as any).projections ?? {}
+    for (const y of RESILIENCE_DECADES) {
+      const p = proj[String(y)]
+      if (!p) continue
+      if (p.peak_wet_bulb_F != null) { pmin = Math.min(pmin, p.peak_wet_bulb_F); pmax = Math.max(pmax, p.peak_wet_bulb_F) }
+      if (p.days_over_95F != null) { dmin = Math.min(dmin, p.days_over_95F); dmax = Math.max(dmax, p.days_over_95F) }
+    }
   }
-  heatRangeCache[dec] = { pmin, pmax, dmin, dmax }
-  return heatRangeCache[dec]
+  heatGlobalRange = { pmin, pmax, dmin, dmax }
+  return heatGlobalRange
 }
 
 export function heatScore(metroKey: string, year: number): number | null {
   const dec = snapDecade(year)
   const p = wetBulb[metroKey]?.projections?.[String(dec)]
   if (!p || p.peak_wet_bulb_F == null || p.days_over_95F == null) return null
-  const { pmin, pmax, dmin, dmax } = heatRange(dec)
+  const { pmin, pmax, dmin, dmax } = heatRange()
   const hazard = 0.5 * norm(p.peak_wet_bulb_F, pmin, pmax) + 0.5 * norm(p.days_over_95F, dmin, dmax)
   return round1(100 - hazard)
 }
@@ -310,11 +317,17 @@ export function waterScore(metroName: string, year: number, metroKey?: string): 
 
 // ---- fire / flood / capacity: FEMA NRI (present-day, held flat by decade) ----
 
-/** 100 − NRI wildfire risk percentile. Null when the metro has no NRI record. */
+/** 100 − NRI wildfire percentile. Prefers the annualized-loss-RATE percentile
+ * (wildfire_alr_pctl = WFIR_ALR_NPCTL), which normalizes out exposed
+ * population/property the same way the flood dimension does; falls back to the
+ * magnitude percentile (wildfire_risk = WFIR_RISKS) until the ALR field is
+ * populated. Null when the metro has no NRI record. */
 export function fireScore(metroKey: string): number | null {
   const rec = nri[metroKey]
   if (!rec) return null
-  return round1(100 - (rec.wildfire_risk ?? 0))
+  const pctl = rec.wildfire_alr_pctl ?? rec.wildfire_risk
+  if (pctl == null) return null
+  return round1(100 - pctl)
 }
 
 /** 100 − max(inland, coastal) NRI expected-annual-loss RATE percentile

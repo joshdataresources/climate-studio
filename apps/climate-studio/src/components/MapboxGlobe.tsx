@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from "react"
-import Map, { NavigationControl, GeolocateControl, ScaleControl, Source, Layer } from "react-map-gl"
-import 'mapbox-gl/dist/mapbox-gl.css'
+import Map, { NavigationControl, GeolocateControl, ScaleControl, Source, Layer } from "react-map-gl/maplibre"
+import 'maplibre-gl/dist/maplibre-gl.css'
 import type { LayerStateMap } from "../hooks/useClimateLayerData"
 import { LatLngBoundsLiteral } from "../types/geography"
-import type { MapRef } from "react-map-gl"
+import type { MapRef } from "react-map-gl/maplibre"
 import { useClimate } from "@climate-studio/core"
 import { MegaregionLayer } from "./MegaregionLayer"
 
@@ -222,7 +222,7 @@ export function MapboxGlobe({
         // Add 3D terrain
         map.addSource('mapbox-dem', {
           type: 'raster-dem',
-          url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+          tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'], encoding: 'terrarium',
           tileSize: 512,
           maxzoom: 14
         })
@@ -268,8 +268,7 @@ export function MapboxGlobe({
         onLoad={handleLoad}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
-        mapboxAccessToken={MAPBOX_TOKEN}
-        mapStyle="mapbox://styles/mapbox/dark-v11"
+        mapStyle="https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"
         style={{ width: '100%', height: '100%' }}
         attributionControl={true}
         projection="globe"

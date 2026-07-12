@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { X } from 'lucide-react'
 import { buildCityReportHtml } from '../utils/cityReport'
 import { DEFAULT_WEIGHTS, type ResilienceWeights } from '../utils/resilienceScore'
 
@@ -76,10 +77,10 @@ export function CityReportModal({ metroKey, year, weights = DEFAULT_WEIGHTS, onC
               type="button"
               onClick={onClose}
               aria-label="Close report"
-              className="rounded-md px-2 py-1.5 text-sm"
-              style={{ color: 'var(--cs-text-tertiary)' }}
+              className="flex items-center justify-center rounded-lg p-2 transition-colors hover:bg-[var(--cs-surface-sunken)]"
+              style={{ border: '1px solid var(--cs-border-default)', color: 'var(--cs-text-tertiary)' }}
             >
-              ✕
+              <X className="h-4 w-4" />
             </button>
           </div>
         </div>

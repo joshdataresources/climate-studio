@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
+import mapboxgl from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { useTheme } from '../contexts/ThemeContext'
 import aquiferProjectionsData from '../data/aquifer-projections.json'
 
 // Use environment variable or fallback to the token from DeckGLMap
 const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1Ijoiam9zaHVhYmJ1dGxlciIsImEiOiJjbWcwNXpyNXUwYTdrMmtva2tiZ2NjcGxhIn0.Fc3d_CloJGiw9-BE4nI_Kw'
-mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
 
 // Default view for US
 const DEFAULT_VIEW = {
@@ -129,8 +128,8 @@ export default function AquiferProjectionView({ aquiferData: propAquiferData }: 
   
   // Determine map style based on theme
   const mapStyle = theme === 'light' 
-    ? 'mapbox://styles/mapbox/light-v11' 
-    : 'mapbox://styles/mapbox/dark-v11'
+    ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json' 
+    : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
 
   // Load aquifer data if not provided
   useEffect(() => {
@@ -175,7 +174,7 @@ export default function AquiferProjectionView({ aquiferData: propAquiferData }: 
   // Update map style when theme changes
   useEffect(() => {
     if (mapRef.current && mapLoaded) {
-      mapRef.current.setStyle(mapStyle)
+      mapRef.current.setStyle(mapStyle as any)
     }
   }, [mapStyle, mapLoaded])
 
@@ -201,7 +200,7 @@ export default function AquiferProjectionView({ aquiferData: propAquiferData }: 
 
     // Calculate colors for each aquifer based on selected year
     const featuresWithColors = aquiferData.features.map((feature) => {
-      const aquifer = feature as AquiferFeature
+      const aquifer = feature as unknown as AquiferFeature
       const depletionPercent = calculateDepletionPercentage(aquifer, selectedYear)
       const color = getDepletionColor(depletionPercent)
       
@@ -273,7 +272,7 @@ export default function AquiferProjectionView({ aquiferData: propAquiferData }: 
     // Add click handler
     map.on('click', 'aquifer-fill', (e) => {
       if (e.features && e.features.length > 0) {
-        const feature = e.features[0] as AquiferFeature
+        const feature = e.features[0] as unknown as AquiferFeature
         setSelectedAquifer(feature)
 
         // Update selected layer

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
+import mapboxgl from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { useClimate } from '@climate-studio/core'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useMap } from '../../contexts/MapContext'
@@ -19,14 +19,11 @@ const MAP_MAX_BOUNDS: mapboxgl.LngLatBoundsLike = [
 
 /** Match Climate Suite — env var in CI, otherwise same public pk fallback. */
 async function ensureMapboxToken(): Promise<void> {
-  if (mapboxgl.accessToken) return
   const fromEnv = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN
   if (fromEnv) {
-    mapboxgl.accessToken = fromEnv
     return
   }
   const { MAPBOX_ACCESS_TOKEN } = await import('../ClimateStudioView')
-  mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
 }
 
 function findLabelLayerBeforeId(map: mapboxgl.Map): string | undefined {
@@ -133,8 +130,8 @@ export function DashboardMapBackground() {
       const map = new mapboxgl.Map({
         container: containerRef.current,
         style: isDark
-          ? 'mapbox://styles/mapbox/dark-v11'
-          : 'mapbox://styles/mapbox/light-v11',
+          ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+          : 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
         center: [viewport.center.lng, viewport.center.lat],
         zoom: viewport.zoom,
         maxBounds: MAP_MAX_BOUNDS,
@@ -197,13 +194,13 @@ export function DashboardMapBackground() {
     if (!map || !mapLoaded) return
 
     const nextStyle = isDark
-      ? 'mapbox://styles/mapbox/dark-v11'
-      : 'mapbox://styles/mapbox/light-v11'
+      ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
+      : 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
     const sprite = map.getStyle()?.sprite ?? ''
     const isCurrentlyDark = sprite.includes('dark')
     if (isCurrentlyDark === isDark) return
 
-    map.setStyle(nextStyle)
+    map.setStyle(nextStyle as any)
     map.once('style.load', () => {
       applyTemperatureLayer()
     })

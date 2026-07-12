@@ -414,13 +414,13 @@ def temperature_projection_proxy_tile_downscaled(year, scenario, mode, z, x, y):
         }
     except Exception as e:
         logger.error(f"Error proxying downscaled tile {z}/{x}/{y}: {e}")
-        import io
-        from PIL import Image
-        img = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
-        buf = io.BytesIO()
-        img.save(buf, format='PNG')
-        buf.seek(0)
-        return buf.getvalue(), 200, {'Content-Type': 'image/png'}
+        # Dependency-free transparent tile. (Pillow is NOT installed here — building
+        # the fallback with PIL raised ImportError and turned every failed tile into a 500.)
+        import base64
+        transparent = base64.b64decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+        )
+        return transparent, 200, {'Content-Type': 'image/png'}
 
 
 @app.route('/api/climate/temperature-projection/proxy-tile/<int:year>/<scenario>/<mode>/<int:z>/<int:x>/<int:y>', methods=['GET'])
@@ -451,13 +451,13 @@ def temperature_projection_proxy_tile(year, scenario, mode, z, x, y):
         }
     except Exception as e:
         logger.error(f"Error proxying temperature tile {z}/{x}/{y}: {e}")
-        import io
-        from PIL import Image
-        img = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
-        buf = io.BytesIO()
-        img.save(buf, format='PNG')
-        buf.seek(0)
-        return buf.getvalue(), 200, {'Content-Type': 'image/png'}
+        # Dependency-free transparent tile. (Pillow is NOT installed here — building
+        # the fallback with PIL raised ImportError and turned every failed tile into a 500.)
+        import base64
+        transparent = base64.b64decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+        )
+        return transparent, 200, {'Content-Type': 'image/png'}
 
 
 @app.route('/api/tiles/noaa-slr-metadata', methods=['GET'])
@@ -516,24 +516,99 @@ def noaa_slr_tile(feet, z, x, y):
             return response.content, 200, {'Content-Type': 'image/png'}
         else:
             # Return empty PNG on error
-            import io
-            from PIL import Image
-            img = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
-            buf = io.BytesIO()
-            img.save(buf, format='PNG')
-            buf.seek(0)
-            return buf.getvalue(), 200, {'Content-Type': 'image/png'}
+            # Dependency-free transparent tile. (Pillow is NOT installed here — building
+            # the fallback with PIL raised ImportError and turned every failed tile into a 500.)
+            import base64
+            transparent = base64.b64decode(
+                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+            )
+            return transparent, 200, {'Content-Type': 'image/png'}
 
     except Exception as e:
         logger.error(f"Error fetching NOAA tile {z}/{x}/{y}: {str(e)}")
         # Return empty PNG on error
-        import io
-        from PIL import Image
-        img = Image.new('RGBA', (256, 256), (0, 0, 0, 0))
-        buf = io.BytesIO()
-        img.save(buf, format='PNG')
-        buf.seek(0)
-        return buf.getvalue(), 200, {'Content-Type': 'image/png'}
+        # Dependency-free transparent tile. (Pillow is NOT installed here — building
+        # the fallback with PIL raised ImportError and turned every failed tile into a 500.)
+        import base64
+        transparent = base64.b64decode(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+        )
+        return transparent, 200, {'Content-Type': 'image/png'}
+
+
+@app.route('/api/tiles/wildfire-whp/<int:z>/<int:x>/<int:y>.png', methods=['GET'])
+def wildfire_whp_tile(z, x, y):
+    """
+    USFS Wildfire Hazard Potential (Wildfire Risk to Communities, 2024, 30m).
+
+    Source: the Living Atlas / geoplatform.gov mirror. The apps.fs.usda.gov host
+    sits behind a WAF that 403s any programmatic client (browser User-Agent and all),
+    so it is unusable; geoplatform.gov serves the identical authoritative data.
+
+    Two details that matter, both learned the hard way:
+      * The service has NO colormap ("hasColormap": false). Requesting raw pixels
+        returns meaningless U16 values that render as a flat green wash. The
+        renderingRule below invokes the service's own "WHP" raster function, which
+        applies the official Very Low -> Very High symbology.
+      * WHP is CATEGORICAL, so resampling is nearest-neighbour — averaging class
+        codes across zoom levels smears everything toward the low class.
+
+    Proxied server-side (rather than fetched from the browser) to sidestep CORS.
+    Always returns a PNG: a transparent tile on failure, so a bad tile can never
+    break the map.
+    """
+    import base64
+    transparent = base64.b64decode(
+        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+    )
+
+    HALF = 20037508.342789244  # half the Web Mercator world, in metres
+    n = 2 ** z
+    min_x = (x / n) * 2 * HALF - HALF
+    max_x = ((x + 1) / n) * 2 * HALF - HALF
+    max_y = HALF - (y / n) * 2 * HALF
+    min_y = HALF - ((y + 1) / n) * 2 * HALF
+
+    url = ('https://imagery.geoplatform.gov/iipp/rest/services/Fire_Aviation/'
+           'USFS_EDW_RMRS_WRC_WildfireHazardPotential/ImageServer/exportImage')
+    params = {
+        'bbox': f'{min_x},{min_y},{max_x},{max_y}',
+        'bboxSR': '3857',
+        'imageSR': '3857',
+        'size': '256,256',
+        'format': 'png32',
+        'transparent': 'true',
+        'interpolation': 'RSP_NearestNeighbor',
+        'renderingRule': '{"rasterFunction":"WHP"}',
+        'f': 'image',
+    }
+    headers = {
+        'User-Agent': ('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 '
+                       '(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'),
+        'Accept': 'image/png,image/*;q=0.8,*/*;q=0.5',
+    }
+
+    try:
+        r = requests.get(url, params=params, headers=headers, timeout=20)
+        ctype = r.headers.get('Content-Type', '')
+        if r.status_code == 200 and 'image' in ctype:
+            if z <= 6:
+                logger.info(f'WHP {z}/{x}/{y}: OK — {ctype}, {len(r.content)} bytes')
+            return r.content, 200, {
+                'Content-Type': 'image/png',
+                'Cache-Control': 'public, max-age=86400',
+                'X-WHP-Source': 'geoplatform'
+            }
+
+        detail = f'HTTP {r.status_code} {ctype} {(r.text[:200] if r.text else "")}'
+        logger.error(f'WHP {z}/{x}/{y} FAILED — {detail}')
+        safe = ''.join(ch for ch in detail if 32 <= ord(ch) < 127)[:400]
+        return transparent, 200, {'Content-Type': 'image/png', 'X-WHP-Source': 'failed', 'X-WHP-Error': safe}
+
+    except Exception as e:
+        logger.error(f'WHP {z}/{x}/{y} FAILED — {e}')
+        safe = ''.join(ch for ch in str(e) if 32 <= ord(ch) < 127)[:400]
+        return transparent, 200, {'Content-Type': 'image/png', 'X-WHP-Source': 'failed', 'X-WHP-Error': safe}
 
 
 @app.route('/api/climate/sea-level-rise', methods=['GET'])

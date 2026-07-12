@@ -1348,6 +1348,49 @@ app.get('/api/tiles/noaa-slr/:feet/:z/:x/:y.png', async (req, res) => {
   }
 });
 
+// USFS Wildfire Hazard Potential (Wildfire Risk to Communities), 30m national raster.
+// Proxied server-side on purpose: the USFS ArcGIS host is unreliable from the browser
+// (no dependable CORS headers), so we fetch it here and serve same-origin PNG tiles.
+// Converts the XYZ tile to a Web Mercator bbox and asks the ImageServer to render it.
+app.get('/api/tiles/wildfire-whp/:z/:x/:y.png', async (req, res) => {
+  try {
+    const z = parseInt(req.params.z, 10);
+    const x = parseInt(req.params.x, 10);
+    const y = parseInt(req.params.y, 10);
+
+    const HALF = 20037508.342789244; // half the Web Mercator world, in metres
+    const n = Math.pow(2, z);
+    const minX = (x / n) * 2 * HALF - HALF;
+    const maxX = ((x + 1) / n) * 2 * HALF - HALF;
+    const maxY = HALF - (y / n) * 2 * HALF;
+    const minY = HALF - ((y + 1) / n) * 2 * HALF;
+    const bbox = `${minX},${minY},${maxX},${maxY}`;
+
+    const whpUrl =
+      'https://apps.fs.usda.gov/fsgisx01/rest/services/RDW_Wildfire/RMRS_WRC_WildfireHazardPotential/ImageServer/exportImage' +
+      `?bbox=${bbox}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image`;
+
+    const response = await axios.get(whpUrl, {
+      responseType: 'arraybuffer',
+      timeout: 15000,
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+      }
+    });
+
+    res.set('Content-Type', 'image/png');
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(response.data);
+
+  } catch (error) {
+    // Log loudly — this is how we find out whether USFS is refusing us, timing out, or 4xx-ing.
+    console.error('🔥❌ Wildfire WHP tile error:', error.response?.status || '', error.message);
+    const transparent = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+    res.set('Content-Type', 'image/png');
+    res.send(transparent);
+  }
+});
+
 // USGS Elevation endpoint
 app.get('/api/usgs/elevation', async (req, res) => {
   try {

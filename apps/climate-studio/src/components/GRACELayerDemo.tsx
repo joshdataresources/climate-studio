@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useState } from 'react'
-import mapboxgl from 'mapbox-gl'
+import mapboxgl from 'maplibre-gl'
 import graceMockData from '../data/grace-mock-data.json'
 
 interface GRACELayerProps {

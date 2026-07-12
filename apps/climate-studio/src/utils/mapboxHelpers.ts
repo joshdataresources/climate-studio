@@ -1,4 +1,4 @@
-import type mapboxgl from 'mapbox-gl'
+import type mapboxgl from 'maplibre-gl'
 
 /** True when the map instance can safely accept style/layer API calls. */
 export function isMapUsable(map: mapboxgl.Map | null | undefined): map is mapboxgl.Map {
