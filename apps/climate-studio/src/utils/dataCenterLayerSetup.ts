@@ -5,7 +5,7 @@
  * Uses circle markers with lightning bolt text overlay for reliable rendering.
  */
 
-import type { Map as MapboxMap } from 'mapbox-gl'
+import type { Map as MapboxMap } from 'maplibre-gl'
 
 export interface DataCenterFeature {
   type: 'Feature'

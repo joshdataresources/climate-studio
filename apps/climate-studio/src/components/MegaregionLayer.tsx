@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo } from "react"
-import { Source, Layer } from "react-map-gl"
+import { Source, Layer } from "react-map-gl/maplibre"
 import { useTheme } from "../contexts/ThemeContext"
 import megaregionData from "../data/megaregion-data.json"
 

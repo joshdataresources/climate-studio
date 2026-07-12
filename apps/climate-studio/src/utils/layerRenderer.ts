@@ -1,5 +1,5 @@
 // Universal Layer Renderer - Renders layers on Mapbox maps based on layerDefinitions.ts
-import mapboxgl from 'mapbox-gl'
+import mapboxgl from 'maplibre-gl'
 import { LayerDefinition } from '../config/layerDefinitions'
 
 /**

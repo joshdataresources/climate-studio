@@ -1,8 +1,8 @@
 import React, { useMemo, useState } from 'react'
-import Map, { useControl } from 'react-map-gl'
+import Map, { useControl } from 'react-map-gl/maplibre'
 import { MapboxOverlay } from '@deck.gl/mapbox'
 import { ScatterplotLayer } from '@deck.gl/layers'
-import 'mapbox-gl/dist/mapbox-gl.css'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { rankMetros, resilienceColorRGBA, RESILIENCE_DECADES } from '../utils/resilienceScore'
 import wetBulbData from '../data/expanded_wet_bulb_projections.json'
 import { MetroPanel } from '../components/prototype/MetroPanel'
@@ -119,7 +119,7 @@ export default function MapPrototype() {
       <Map
         mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
         initialViewState={{ longitude: -96.5, latitude: 38.5, zoom: 3.6 }}
-        mapStyle="mapbox://styles/mapbox/light-v11"
+        mapStyle="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
         style={{ width: '100%', height: '100%' }}
       >
         <DeckGLOverlay layers={layers} />

@@ -1,8 +1,8 @@
 // Water Access View - Groundwater, Rivers, Lakes, Metro Humidity
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
+import mapboxgl from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMap } from '../contexts/MapContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { useSidebar } from '../contexts/SidebarContext'
@@ -76,7 +76,6 @@ export const MAPBOX_ACCESS_TOKEN =
   import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ||
   'pk.eyJ1Ijoiam9zaHVhYmJ1dGxlciIsImEiOiJjbWcwNXpyNXUwYTdrMmtva2tiZ2NjcGxhIn0.Fc3d_CloJGiw9-BE4nI_Kw'
 
-mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
 
 const AQUIFER_LAYER_IDS = ['aquifer-fill', 'aquifer-outline', 'aquifer-hover'] as const
 
@@ -773,8 +772,8 @@ export default function ClimateStudioView() {
 
   // Determine map style based on theme
   const mapStyle = theme === 'light'
-    ? 'mapbox://styles/mapbox/light-v11'
-    : 'mapbox://styles/mapbox/dark-v11'
+    ? 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
+    : 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json'
 
   // Local state for editing views
   const [showSaveDialog, setShowSaveDialog] = useState(false)
@@ -797,6 +796,7 @@ export default function ClimateStudioView() {
   const [selectedDataCenter, setSelectedDataCenter] = useState<SelectedDataCenter | null>(null)
   const [showSeaLevelRiseLayer, setShowSeaLevelRiseLayer] = useState(false)
   const [seaLevelRiseFeet, setSeaLevelRiseFeet] = useState(3)
+  const [showWildfireLayer, setShowWildfireLayer] = useState(false)
   const [showHumidityWetBulb, setShowHumidityWetBulb] = useState(true)
   const [showMetroDataStatistics, setShowMetroDataStatistics] = useState(false)
   const [showTopographicRelief, setShowTopographicRelief] = useState(true) // Default ON at 20% opacity
@@ -2042,10 +2042,10 @@ export default function ClimateStudioView() {
         center: [viewport.center.lng, viewport.center.lat],
         zoom: viewport.zoom,
         maxBounds: [
-          [-130, 20], // Southwest coordinates (west of CA, south of TX)
-          [-60, 55]   // Northeast coordinates (east of ME, north of US-Canada border)
+          [-142, 12],  // SW — room west of CA and south of FL/TX
+          [-52, 60]    // NE — room east of ME and north of the border
         ],
-        minZoom: 3,
+        minZoom: 2.5,
       })
     } catch (error) {
       console.error('Failed to create Mapbox map:', error)
@@ -2407,7 +2407,7 @@ export default function ClimateStudioView() {
     console.log('📦 Current aquifer data:', currentAquiferData ? `${currentAquiferData.features.length} features` : 'none')
 
     // Change the style
-    map.setStyle(mapStyle)
+    map.setStyle(mapStyle as any)
 
     // Function to restore everything after style loads with retry logic
     const restoreLayersAndData = (retryCount = 0) => {
@@ -2846,6 +2846,38 @@ export default function ClimateStudioView() {
     }
   }, [showSeaLevelRiseLayer, seaLevelRiseFeet, controls.projectionYear, mapLoaded])
 
+  // Manage Wildfire Hazard Potential layer (USFS raster ImageServer, client-side — no backend)
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return
+    const map = mapRef.current
+    const sourceId = 'wildfire-whp-tiles'
+    const layerId = 'wildfire-whp-layer'
+
+    if (showWildfireLayer) {
+      // Served through our backend as same-origin PNG tiles. The USFS ArcGIS host isn't
+      // reliably CORS-enabled, so fetching it straight from the browser fails silently.
+      const tileUrl = `${BACKEND_BASE_URL}/api/tiles/wildfire-whp/{z}/{x}/{y}.png?v=3`
+      if (!map.getSource(sourceId)) {
+        map.addSource(sourceId, {
+          type: 'raster',
+          tiles: [tileUrl],
+          tileSize: 256,
+          attribution: 'USFS Wildfire Risk to Communities (RMRS / Pyrologix, LANDFIRE)',
+        })
+      }
+      if (!map.getLayer(layerId)) {
+        map.addLayer({ id: layerId, type: 'raster', source: sourceId, paint: { 'raster-opacity': 0.6 } })
+      }
+    } else {
+      try {
+        if (map.getLayer(layerId)) map.removeLayer(layerId)
+        if (map.getSource(sourceId)) map.removeSource(sourceId)
+      } catch (error) {
+        console.log('Map already removed during wildfire layer cleanup')
+      }
+    }
+  }, [showWildfireLayer, mapLoaded])
+
   // Manage GRACE groundwater tile layer
   useEffect(() => {
     if (!mapRef.current || !mapLoaded || !graceTileUrl) return
@@ -2969,6 +3001,9 @@ export default function ClimateStudioView() {
 
         // If factory layer doesn't exist, try labels
         if (!map.getLayer(beforeId)) {
+          // No factory layer. Fall back to a label layer; if none exist (MapLibre/CARTO
+          // has none of these Mapbox-only ids), leave undefined — a missing beforeId throws.
+          beforeId = undefined
           const labelLayerIds = ['waterway-label', 'place-labels', 'poi-label', 'road-label']
           for (const layerId of labelLayerIds) {
             if (map.getLayer(layerId)) {
@@ -3840,8 +3875,9 @@ export default function ClimateStudioView() {
     // Add DEM source for hillshading
     map.addSource('mapbox-dem', {
       type: 'raster-dem',
-      url: 'mapbox://mapbox.terrain-rgb',
-      tileSize: 512,
+      tiles: ['https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png'],
+      encoding: 'terrarium',
+      tileSize: 256,
       maxzoom: 14
     })
 
@@ -4603,6 +4639,22 @@ export default function ClimateStudioView() {
                   </div>
                 )}
 
+                {/* Wildfire Hazard Potential Layer (USFS, client-side raster) */}
+                <div className={`layer-card cursor-pointer ${showWildfireLayer ? 'active' : ''}`} onClick={() => setShowWildfireLayer(!showWildfireLayer)}>
+                  <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 23c4.4 0 8-3.1 8-7 0-2.6-1.6-5-3-6.5.2 1.4-.6 2.5-1.7 2.5C14.7 12 15 8 12 5c-.3 3-2 4.5-3.5 6C7 12.5 6 14 6 16c0 3.9 3.6 7 6 7z" />
+                  </svg>
+                  <div className="flex-1 min-w-0 flex flex-col gap-1">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="text-sm font-semibold">Wildfire Hazard</h4>
+                    </div>
+                    {showSourceInfo && (
+                      <p className="text-[11px] text-muted-foreground/80 truncate">
+                        Source: <span className="font-medium text-foreground">USFS Wildfire Risk to Communities</span>
+                      </p>
+                    )}
+                  </div>
+                </div>
 
                 {/* Aquifers Layer */}
                 {layersInWidget.aquifers && (

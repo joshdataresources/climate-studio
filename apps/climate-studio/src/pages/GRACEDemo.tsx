@@ -8,14 +8,13 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
-import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
+import mapboxgl from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { GRACELayer } from '../components/GRACELayerDemo'
 
 const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ||
   'pk.eyJ1Ijoiam9zaHVhYmJ1dGxlciIsImEiOiJjbWcwNXpyNXUwYTdrMmtva2tiZ2NjcGxhIn0.Fc3d_CloJGiw9-BE4nI_Kw'
 
-mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
 
 export default function GRACEDemo() {
   const mapContainer = useRef<HTMLDivElement>(null)
@@ -29,7 +28,7 @@ export default function GRACEDemo() {
     // Initialize map centered on High Plains Aquifer
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/mapbox/dark-v11',
+      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
       center: [-100.5, 39.5], // Center of High Plains Aquifer
       zoom: 5,
       pitch: 0,

@@ -6,7 +6,7 @@
  * creation and configuration of Mapbox GL sources and layers based on layer definitions.
  */
 
-import mapboxgl from 'mapbox-gl'
+import mapboxgl from 'maplibre-gl'
 import type { LayerDefinition } from '../contexts/LayerContext'
 
 /**

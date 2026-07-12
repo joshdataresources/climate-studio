@@ -35,7 +35,7 @@
  *    ```
  */
 
-import type { Map as MapboxMap } from 'mapbox-gl'
+import type { Map as MapboxMap } from 'maplibre-gl'
 
 export interface FactoryFeature {
   type: 'Feature'

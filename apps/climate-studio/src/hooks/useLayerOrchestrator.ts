@@ -21,7 +21,7 @@
  */
 
 import { useEffect, useRef, useCallback, useState } from 'react'
-import mapboxgl from 'mapbox-gl'
+import mapboxgl from 'maplibre-gl'
 import { LayerDefinition } from '../config/layerDefinitions'
 import { getLayerOrchestrator, LayerOrchestrator } from '../orchestrators/LayerOrchestrator'
 

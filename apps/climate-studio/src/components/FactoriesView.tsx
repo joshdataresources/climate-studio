@@ -1,7 +1,7 @@
 // Factories View - Manufacturing facilities with environmental risk analysis
 import { useEffect, useRef, useState, useCallback } from 'react'
-import mapboxgl from 'mapbox-gl'
-import 'mapbox-gl/dist/mapbox-gl.css'
+import mapboxgl from 'maplibre-gl'
+import 'maplibre-gl/dist/maplibre-gl.css'
 import { useTheme } from '../contexts/ThemeContext'
 import { useSidebar } from '../contexts/SidebarContext'
 import { useLayer } from '../contexts/LayerContext'
@@ -23,7 +23,6 @@ import aiDatacentersData from '../data/ai-datacenters.json'
 
 // Use environment variable or fallback to the token
 const MAPBOX_ACCESS_TOKEN = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || 'pk.eyJ1Ijoiam9zaHVhYmJ1dGxlciIsImEiOiJjbWcwNXpyNXUwYTdrMmtva2tiZ2NjcGxhIn0.Fc3d_CloJGiw9-BE4nI_Kw'
-mapboxgl.accessToken = MAPBOX_ACCESS_TOKEN
 
 export default function FactoriesView() {
   const mapContainerRef = useRef<HTMLDivElement>(null)
@@ -256,7 +255,7 @@ export default function FactoriesView() {
 
     console.log('🗺️ Initializing Factories map...')
 
-    const mapStyle = isDark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11'
+    const mapStyle = isDark ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json' : 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
 
     const map = new mapboxgl.Map({
       container: mapContainerRef.current,
@@ -264,10 +263,10 @@ export default function FactoriesView() {
       center: [-98.5795, 39.8283], // Center of USA
       zoom: 4,
       maxBounds: [
-        [-130, 20], // Southwest coordinates
-        [-60, 55]   // Northeast coordinates
+        [-142, 12],  // SW — room west of CA and south of FL/TX
+        [-52, 60]    // NE — room east of ME and north of the border
       ],
-      minZoom: 3,
+      minZoom: 2.5,
     })
 
     mapRef.current = map
@@ -303,7 +302,7 @@ export default function FactoriesView() {
 
     const map = mapRef.current
     const currentStyle = map.getStyle()
-    const newStyleUrl = isDark ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11'
+    const newStyleUrl = isDark ? 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json' : 'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json'
 
     // Only update if style actually changed
     if (currentStyle?.sprite?.includes(isDark ? 'dark' : 'light')) {
@@ -311,7 +310,7 @@ export default function FactoriesView() {
     }
 
     console.log('🎨 Updating map style to:', isDark ? 'dark' : 'light')
-    map.setStyle(newStyleUrl)
+    map.setStyle(newStyleUrl as any)
 
     map.once('style.load', () => {
       console.log('🎨 Style loaded, re-adding factory layers...')

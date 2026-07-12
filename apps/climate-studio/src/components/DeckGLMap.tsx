@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useMemo, useRef, useState, useCallback, memo } from "react"
-import { Map, useControl, Source, Layer, Marker } from 'react-map-gl'
+import { Map, useControl, Source, Layer, Marker } from 'react-map-gl/maplibre'
 import { MapboxOverlay } from '@deck.gl/mapbox'
 import { GeoJsonLayer, BitmapLayer, TextLayer, ScatterplotLayer } from '@deck.gl/layers'
 import { HeatmapLayer } from '@deck.gl/aggregation-layers'
@@ -20,7 +20,7 @@ import {
   calculateWetBulbC
 } from "../utils/wetBulbCalculator"
 import { MetroMapCard } from './MetroMapCard'
-import 'mapbox-gl/dist/mapbox-gl.css'
+import 'maplibre-gl/dist/maplibre-gl.css'
 
 // Resolve relative tile URLs (e.g. "/api/climate/...") to absolute backend URLs for production
 const BACKEND_BASE_URL =
@@ -89,8 +89,8 @@ export function DeckGLMap({
 
   // Determine map style based on theme
   const mapStyle = theme === 'light'
-    ? "mapbox://styles/mapbox/light-v11"  // Monochrome light style
-    : "mapbox://styles/mapbox/dark-v11"  // Dark style
+    ? "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"  // Monochrome light style
+    : "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json"  // Dark style
 
   // Auto-select relief style based on theme and force layer refresh
   useEffect(() => {
@@ -289,7 +289,7 @@ export function DeckGLMap({
     console.log('🎨 DeckGLMap: Changing map style to:', mapStyle)
     
     // Change the style
-    map.setStyle(mapStyle)
+    map.setStyle(mapStyle as any)
     
     // After style loads, restore viewport and refresh DeckGL overlay
     // The overlay needs to be refreshed to ensure it renders correctly with the new map style
@@ -1686,7 +1686,6 @@ export function DeckGLMap({
             ref={mapRef}
             {...viewState}
             onMove={(evt) => onViewStateChange({ viewState: evt.viewState })}
-            mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
             mapStyle={mapStyle}
             style={{ width: '100%', height: '100%' }}
             // Performance optimizations

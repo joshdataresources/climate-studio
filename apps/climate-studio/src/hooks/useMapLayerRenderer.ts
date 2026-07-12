@@ -15,7 +15,7 @@
  */
 
 import { useEffect, useCallback, useRef } from 'react'
-import mapboxgl from 'mapbox-gl'
+import mapboxgl from 'maplibre-gl'
 import { useLayer } from '../contexts/LayerContext'
 import type { LayerDefinition } from '../contexts/LayerContext'
 import {

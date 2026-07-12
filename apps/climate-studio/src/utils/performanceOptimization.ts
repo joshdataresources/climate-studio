@@ -1,5 +1,5 @@
 // Performance Optimization Utilities for Mapbox GL JS
-import { Map as MapboxMap, GeoJSONSource } from 'mapbox-gl';
+import { Map as MapboxMap, GeoJSONSource } from 'maplibre-gl';
 import { MapboxFeatureCollection } from './mapboxHelpers';
 
 // Types
