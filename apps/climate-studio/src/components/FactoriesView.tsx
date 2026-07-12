@@ -263,10 +263,10 @@ export default function FactoriesView() {
       center: [-98.5795, 39.8283], // Center of USA
       zoom: 4,
       maxBounds: [
-        [-142, 12],  // SW — room west of CA and south of FL/TX
-        [-52, 60]    // NE — room east of ME and north of the border
+        [-133, 19],  // SW — just west of CA, just south of FL/TX
+        [-60, 53]    // NE — just east of ME, just north of the border
       ],
-      minZoom: 2.5,
+      minZoom: 3,
     })
 
     mapRef.current = map

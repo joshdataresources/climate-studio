@@ -626,6 +626,7 @@ type LayersInWidgetState = {
   rivers: boolean
   canals: boolean
   seaLevel: boolean
+  wildfire: boolean
   aquifers: boolean
   groundwater: boolean
   precipitation: boolean
@@ -643,6 +644,7 @@ const ALL_LAYERS_IN_WIDGET: LayersInWidgetState = {
   rivers: true,
   canals: true,
   seaLevel: true,
+  wildfire: true,
   aquifers: true,
   groundwater: true,
   precipitation: true,
@@ -660,6 +662,7 @@ const NO_LAYERS_IN_WIDGET: LayersInWidgetState = {
   rivers: false,
   canals: false,
   seaLevel: false,
+  wildfire: false,
   aquifers: false,
   groundwater: false,
   precipitation: false,
@@ -797,6 +800,7 @@ export default function ClimateStudioView() {
   const [showSeaLevelRiseLayer, setShowSeaLevelRiseLayer] = useState(false)
   const [seaLevelRiseFeet, setSeaLevelRiseFeet] = useState(3)
   const [showWildfireLayer, setShowWildfireLayer] = useState(false)
+  const [wildfireOpacity, setWildfireOpacity] = useState(0.2)
   const [showHumidityWetBulb, setShowHumidityWetBulb] = useState(true)
   const [showMetroDataStatistics, setShowMetroDataStatistics] = useState(false)
   const [showTopographicRelief, setShowTopographicRelief] = useState(true) // Default ON at 20% opacity
@@ -2041,11 +2045,15 @@ export default function ClimateStudioView() {
         style: mapStyle,
         center: [viewport.center.lng, viewport.center.lat],
         zoom: viewport.zoom,
+        // Snug around CONUS: wide enough that the full span (Pacific coast to Maine)
+        // fits without the camera clamping, tight enough that you can't drift off
+        // the country. maxBounds limits zoom-out too — zooming past this would push
+        // the viewport outside the box.
         maxBounds: [
-          [-142, 12],  // SW — room west of CA and south of FL/TX
-          [-52, 60]    // NE — room east of ME and north of the border
+          [-133, 19],  // SW — just west of CA, just south of FL/TX
+          [-60, 53]    // NE — just east of ME, just north of the border
         ],
-        minZoom: 2.5,
+        minZoom: 3,
       })
     } catch (error) {
       console.error('Failed to create Mapbox map:', error)
@@ -2156,9 +2164,9 @@ export default function ClimateStudioView() {
     })
 
     map.on('error', (e: any) => {
-      console.error('Mapbox error:', e)
+      console.error('Map error:', e)
       if (e.error?.status === 401 || e.error?.message?.includes('401')) {
-        setError('Mapbox access token is invalid or expired.')
+        setError('Map tiles failed to load.')
       }
     })
 
@@ -2866,7 +2874,9 @@ export default function ClimateStudioView() {
         })
       }
       if (!map.getLayer(layerId)) {
-        map.addLayer({ id: layerId, type: 'raster', source: sourceId, paint: { 'raster-opacity': 0.6 } })
+        map.addLayer({ id: layerId, type: 'raster', source: sourceId, paint: { 'raster-opacity': wildfireOpacity } })
+      } else {
+        map.setPaintProperty(layerId, 'raster-opacity', wildfireOpacity)
       }
     } else {
       try {
@@ -2876,7 +2886,7 @@ export default function ClimateStudioView() {
         console.log('Map already removed during wildfire layer cleanup')
       }
     }
-  }, [showWildfireLayer, mapLoaded])
+  }, [showWildfireLayer, wildfireOpacity, mapLoaded])
 
   // Manage GRACE groundwater tile layer
   useEffect(() => {
@@ -4393,6 +4403,15 @@ export default function ClimateStudioView() {
                       <input
                         type="checkbox"
                         className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                        checked={layersInWidget.wildfire}
+                        onChange={() => setLayersInWidget({ ...layersInWidget, wildfire: !layersInWidget.wildfire })}
+                      />
+                      <span className="text-xs font-semibold text-foreground">Wildfire Hazard</span>
+                    </label>
+                    <label className="flex items-start gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
                         checked={layersInWidget.aquifers}
                         onChange={() => setLayersInWidget({ ...layersInWidget, aquifers: !layersInWidget.aquifers })}
                       />
@@ -4639,22 +4658,33 @@ export default function ClimateStudioView() {
                   </div>
                 )}
 
-                {/* Wildfire Hazard Potential Layer (USFS, client-side raster) */}
-                <div className={`layer-card cursor-pointer ${showWildfireLayer ? 'active' : ''}`} onClick={() => setShowWildfireLayer(!showWildfireLayer)}>
-                  <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 23c4.4 0 8-3.1 8-7 0-2.6-1.6-5-3-6.5.2 1.4-.6 2.5-1.7 2.5C14.7 12 15 8 12 5c-.3 3-2 4.5-3.5 6C7 12.5 6 14 6 16c0 3.9 3.6 7 6 7z" />
-                  </svg>
-                  <div className="flex-1 min-w-0 flex flex-col gap-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="text-sm font-semibold">Wildfire Hazard</h4>
+                {/* Wildfire Hazard Layer */}
+                {layersInWidget.wildfire && (
+                  <div className={`layer-card cursor-pointer ${showWildfireLayer ? 'active' : ''}`} onClick={() => setShowWildfireLayer(!showWildfireLayer)}>
+                    <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 23c4.4 0 8-3.1 8-7 0-2.6-1.6-5-3-6.5.2 1.4-.6 2.5-1.7 2.5C14.7 12 15 8 12 5c-.3 3-2 4.5-3.5 6C7 12.5 6 14 6 16c0 3.9 3.6 7 6 7z" />
+                    </svg>
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">Wildfire Hazard</h4>
+                      </div>
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">USFS Wildfire Risk to Communities</span>
+                        </p>
+                      )}
                     </div>
-                    {showSourceInfo && (
-                      <p className="text-[11px] text-muted-foreground/80 truncate">
-                        Source: <span className="font-medium text-foreground">USFS Wildfire Risk to Communities</span>
-                      </p>
-                    )}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, wildfire: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
                   </div>
-                </div>
+                )}
 
                 {/* Aquifers Layer */}
                 {layersInWidget.aquifers && (
@@ -5157,6 +5187,67 @@ export default function ClimateStudioView() {
                             <div className="flex items-center gap-2">
                               <div className="w-5 h-1 rounded" style={{ backgroundColor: '#3b82f6' }}></div>
                               <span className="text-[11px] text-foreground/70">Full capacity / Operational</span>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Wildfire Hazard */}
+                  {layersInWidget.wildfire && showWildfireLayer && (
+                    <div className="feature-card">
+                      <div
+                        className="flex items-center justify-between cursor-pointer mb-2.5"
+                        onClick={() => {
+                          const newCollapsed = new Set(collapsedFeatures)
+                          if (newCollapsed.has('wildfireHazard')) {
+                            newCollapsed.delete('wildfireHazard')
+                          } else {
+                            newCollapsed.add('wildfireHazard')
+                          }
+                          setCollapsedFeatures(newCollapsed)
+                        }}
+                      >
+                        <h4 className="text-[13px] font-semibold">Wildfire Hazard</h4>
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('wildfireHazard') ? '-rotate-90' : ''}`}
+                        />
+                      </div>
+                      {!collapsedFeatures.has('wildfireHazard') && (
+                        <>
+                          {/* Transparency Control */}
+                          <div className="space-y-2 mb-4">
+                            <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
+                            <Slider
+                              min={0}
+                              max={1}
+                              step={0.05}
+                              value={[wildfireOpacity]}
+                              onValueChange={(value) => setWildfireOpacity(value[0])}
+                              className="mb-2"
+                            />
+                          </div>
+
+                          {/* Description */}
+                          <div className="mb-4 p-3 rounded-lg bg-orange-50/50 dark:bg-orange-900/10">
+                            <p className="text-xs text-muted-foreground">
+                              USFS Wildfire Risk to Communities (2024) — 30m Wildfire Hazard Potential. Present-day snapshot, CONUS only.
+                            </p>
+                          </div>
+
+                          {/* Hazard Legend */}
+                          <div className="space-y-1.5">
+                            <h4 className="text-xs font-semibold text-muted-foreground mb-2">Hazard Potential</h4>
+                            <div className="h-3 w-full rounded" style={{
+                              background: 'linear-gradient(to right, #1a9641 0%, #a6d96a 25%, #ffffbf 50%, #fdae61 75%, #d7191c 100%)'
+                            }} />
+                            <div className="flex justify-between text-[9px] text-muted-foreground">
+                              <span>Very low</span>
+                              <span>Low</span>
+                              <span>Moderate</span>
+                              <span>High</span>
+                              <span>Very high</span>
                             </div>
                           </div>
                         </>

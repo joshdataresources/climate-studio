@@ -153,7 +153,7 @@ export function buildCityReportHtml(
   .cap{font-size:12px;margin:2px 0 12px}
   .narr{font-size:13px;line-height:1.5;margin:0}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:0 26px}
-  .metric{padding:12px 0;border-bottom:1px solid var(--line)}
+  .metric{padding:12px 0;border-top:1px solid var(--line)}
   .metric .lab{font-size:12px;color:var(--muted)}
   .metric .num{font-size:22px;font-weight:700;margin-top:1px}
   .metric .num .unit{font-size:12px;font-weight:600;color:var(--faint);margin-left:2px}
@@ -163,12 +163,12 @@ export function buildCityReportHtml(
   .section{margin-top:22px}
   .section-h{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:7px}
   .note{font-size:11.5px;color:var(--faint);margin-top:8px;line-height:1.5}
-  .fema-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
-  .fitem{background:#fff;padding:12px 14px}
+  .fema-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 26px}
+  .fitem{padding:12px 0;border-top:1px solid var(--line)}
   .fitem .lab{font-size:11px;color:var(--muted);margin-bottom:3px}
   .fitem .fval{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
   .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
-  .chip{background:var(--bg);border:1px solid var(--line);border-radius:11px;padding:9px 15px}
+  .chip{background:var(--bg);border-radius:11px;padding:9px 15px}
   .chip .lab{font-size:11px;color:var(--muted)}
   .chip .val{font-size:14px;font-weight:600}
   .foot{margin-top:22px;padding-top:14px;border-top:1px solid var(--line);font-size:11px;color:var(--faint);line-height:1.55}
@@ -190,7 +190,7 @@ export function buildCityReportHtml(
 
   <div class="cols">
     <div class="left">
-      <div class="panel" style="background:${b.tint};border:1px solid ${b.tintB};color:${b.dark}">
+      <div class="panel" style="background:${b.tint};color:${b.dark}">
         <div class="panel-h" style="color:${b.dark}">${ICON_SHIELD} Resilience score</div>
         <div class="big" style="color:${b.dark}">${Math.round(r.composite)}<span class="unit">/100</span></div>
         <div class="cap" style="color:${b.dark};opacity:.85">higher = more resilient · blend of hazard exposure and adaptive capacity</div>

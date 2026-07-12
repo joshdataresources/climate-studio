@@ -133,27 +133,33 @@ export function MetroMapCard({ metroName, year }: MetroMapCardProps) {
     p.days_over_95F != null && base.days_over_95F != null ? p.days_over_95F - base.days_over_95F : null
   const heatDaysSeries = RESILIENCE_DECADES.map(d => wb.projections?.[String(d)]?.days_over_95F ?? 0)
 
+  // Display the city only — drop the ", NV" state suffix the data carries.
+  const cityName = String(r.name ?? '').split(',')[0].trim()
+
   return (
     <div
       className="pointer-events-auto relative rounded-xl border border-[var(--cs-border-default)] bg-[var(--cs-surface-overlay)] px-3 py-2 shadow-lg backdrop-blur"
-      style={{ width: open ? 300 : 232 }}
+      style={{ width: open ? 300 : 180 }}
     >
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
         className="unstyled-btn flex w-full items-start justify-between gap-2 border-0 bg-transparent p-0 text-left"
       >
-        <div className="min-w-0">
-          <p className="flex items-center gap-1 truncate text-[14px] font-medium text-[var(--cs-text-primary)]">
-            {r.name}
+        {/* min-w-0 lets the name truncate instead of shoving the score out */}
+        <div className="min-w-0 flex-1">
+          <p className="flex items-center gap-1 text-[14px] font-medium text-[var(--cs-text-primary)]">
+            <span className="truncate">{cityName}</span>
             {open ? <ChevronUp className="h-3.5 w-3.5 shrink-0 opacity-50" /> : <ChevronDown className="h-3.5 w-3.5 shrink-0 opacity-50" />}
           </p>
           <p className="truncate text-[11px] text-[var(--cs-text-tertiary)]">
             {rankInfo ? `rank ${rankInfo.rank} of ${rankInfo.total} · ` : ''}{r.year}
-            {r.county ? ` · ${r.county} County` : ''}
           </p>
         </div>
-        <span className="text-[22px] font-semibold leading-none tabular-nums" style={{ color: scoreColor(r.composite) }}>
+        <span
+          className="shrink-0 text-[22px] font-semibold leading-none tabular-nums"
+          style={{ color: scoreColor(r.composite) }}
+        >
           {Math.round(r.composite)}
         </span>
       </button>
@@ -234,6 +240,14 @@ export function MetroMapCard({ metroName, year }: MetroMapCardProps) {
           </button>
         </div>
       )}
+      {/* City position marker. Sits on the panel's bottom edge with translate-y-1/2,
+          so the panel overlaps its top half and the dot reads as the map anchor. */}
+      <div
+        aria-hidden
+        className="absolute bottom-0 left-1/2 h-3 w-3 -translate-x-1/2 translate-y-1/2 rounded-full shadow-md"
+        style={{ background: 'var(--cs-brand-primary)', border: '2px solid var(--cs-surface-elevated)' }}
+      />
+
       {showReport && (
         <CityReportModal metroKey={metroKey} year={year} onClose={() => setShowReport(false)} />
       )}
