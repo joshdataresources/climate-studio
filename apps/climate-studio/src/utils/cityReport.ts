@@ -135,8 +135,8 @@ export function buildCityReportHtml(
 <style>
   :root{--ink:#101728;--muted:#6b7280;--faint:#9aa1ac;--line:#e9eaed;--bg:#f4f5f7}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5}
-  .sheet{max-width:900px;margin:0 auto;background:#fff;padding:28px 34px}
+  body{margin:0;background:#fff;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;font-size:14px;line-height:1.5}
+  .sheet{max-width:940px;margin:0 auto;background:#fff;padding:28px 34px}
   .title{font-size:25px;font-weight:700;letter-spacing:-.01em;margin:0 0 5px}
   .subtitle{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:13px;margin-bottom:16px}
   .subtitle .item{display:flex;align-items:center;gap:6px}
