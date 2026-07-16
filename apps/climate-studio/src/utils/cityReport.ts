@@ -84,6 +84,103 @@ function trajectorySvg(metroKey: string, weights: ResilienceWeights, color: stri
     `${grid}<polyline fill="none" stroke="${color}" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round" points="${pts}"/>${dots}${xlab}</svg>`
 }
 
+/** Absolute origin, so tiles resolve both inside the app iframe and in the saved file. */
+const ORIGIN = typeof window !== 'undefined' ? window.location.origin : ''
+
+/** lon/lat -> world pixel at zoom z (Web Mercator, 256px tiles). */
+function project(lat: number, lon: number, z: number) {
+  const size = 256 * Math.pow(2, z)
+  const x = ((lon + 180) / 360) * size
+  const s = Math.sin((lat * Math.PI) / 180)
+  const y = (0.5 - Math.log((1 + s) / (1 - s)) / (4 * Math.PI)) * size
+  return { x, y, size }
+}
+
+/**
+ * A slippy map with no map library: stitch 256px raster tiles into a mosaic
+ * centred on the city, then composite hazard layers over it as further tile
+ * grids. Deliberately NOT an embedded MapLibre instance — the report has to stay
+ * a self-contained document that survives print-to-PDF, and a live canvas map
+ * would not render in print.
+ */
+function tileGrid(
+  urlFor: (z: number, x: number, y: number) => string,
+  lat: number,
+  lon: number,
+  z: number,
+  W: number,
+  H: number,
+  opacity: number
+): string {
+  const { x: px, y: py } = project(lat, lon, z)
+  const left = px - W / 2
+  const top = py - H / 2
+  const n = Math.pow(2, z)
+  let out = ''
+  for (let tx = Math.floor(left / 256); tx <= Math.floor((left + W) / 256); tx++) {
+    for (let ty = Math.floor(top / 256); ty <= Math.floor((top + H) / 256); ty++) {
+      if (ty < 0 || ty >= n) continue
+      const wx = ((tx % n) + n) % n
+      out +=
+        `<img class="tile" src="${urlFor(z, wx, ty)}" ` +
+        `style="left:${Math.round(tx * 256 - left)}px;top:${Math.round(ty * 256 - top)}px;opacity:${opacity}">`
+    }
+  }
+  return out
+}
+
+/**
+ * Local hazard view: the basemap around the city, overlaid with the layers this
+ * metro actually scores badly on. Temperature anomaly always shows, keyed to the
+ * report's projection year — it is the layer that moves with the date.
+ */
+function localMapHtml(r: MetroResilience, year: number): string {
+  const W = 872
+  const H = 360
+  const Z = 9 // ~metro scale — close enough to read local pattern, wide enough for context
+
+  const base = tileGrid(
+    (z, x, y) => `https://basemaps.cartocdn.com/light_all/${z}/${x}/${y}.png`,
+    r.lat, r.lon, Z, W, H, 1
+  )
+
+  const shown: string[] = []
+  let overlays = ''
+
+  overlays += tileGrid(
+    (z, x, y) => `${ORIGIN}/api/climate/temperature-projection/proxy-tile/${year}/rcp45/anomaly/${z}/${x}/${y}`,
+    r.lat, r.lon, Z, W, H, 0.55
+  )
+  shown.push(`temperature anomaly (${year})`)
+
+  if (r.fire != null && r.fire < 50) {
+    overlays += tileGrid(
+      (z, x, y) => `${ORIGIN}/api/tiles/wildfire-whp/${z}/${x}/${y}.png?v=3`,
+      r.lat, r.lon, Z, W, H, 0.45
+    )
+    shown.push('wildfire hazard')
+  }
+
+  const city = esc(String(r.name ?? '').split(',')[0].trim())
+
+  return `
+  <div class="section">
+    <div class="section-h">Local hazard view — ${city}, ${year}</div>
+    <div class="map">
+      ${base}
+      ${overlays}
+      <div class="mk" style="background:${BANDS.bad.color}"></div>
+    </div>
+    <div class="maplg">
+      <span class="mlab">Layers:</span> ${esc(shown.join(' · '))}
+      <span class="ramp"></span>
+      <span class="mlab">cooler</span><span class="mlab" style="margin-left:auto">hotter</span>
+    </div>
+    <p class="note">Basemap © CARTO / OpenStreetMap. Overlays are live tiles — they render when the app's
+    services are running, and are omitted from a saved copy opened offline.</p>
+  </div>`
+}
+
 function femaCells(metroKey: string): string {
   const rec = nri[metroKey]
   if (!rec) return '<div class="fitem"><div class="lab">FEMA record</div><div class="fval">not matched</div></div>'
@@ -163,6 +260,12 @@ export function buildCityReportHtml(
   .section{margin-top:22px}
   .section-h{font-size:13px;font-weight:600;color:var(--ink);margin-bottom:10px;display:flex;align-items:center;gap:7px}
   .note{font-size:11.5px;color:var(--faint);margin-top:8px;line-height:1.5}
+  .map{position:relative;width:872px;max-width:100%;height:360px;border-radius:12px;overflow:hidden;background:#e8eef3}
+  .tile{position:absolute;width:256px;height:256px;border:0;image-rendering:auto}
+  .mk{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.40)}
+  .maplg{display:flex;align-items:center;gap:8px;margin-top:9px;font-size:11px;color:var(--faint)}
+  .mlab{font-size:11px;color:var(--faint)}
+  .ramp{flex:0 0 130px;height:6px;border-radius:3px;margin-left:12px;background:linear-gradient(to right,#3b82f6,#06b6d4,#eab308,#f97316,#ef4444)}
   .fema-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0 26px}
   .fitem{padding:12px 0;border-top:1px solid var(--line)}
   .fitem .lab{font-size:11px;color:var(--muted);margin-bottom:3px}
@@ -209,6 +312,8 @@ export function buildCityReportHtml(
     ${trajectorySvg(metroKey, weights, b.color)}
     <div class="note">Composite resilience by decade under the current weighting. Heat and water carry the forward trend; fire, flood, and capacity are present-day FEMA values held flat.</div>
   </div>
+
+  ${localMapHtml(r, year)}
 
   <div class="section">
     <div class="section-h">FEMA National Risk Index — county context</div>
