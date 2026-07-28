@@ -8,6 +8,10 @@
     "apps/*"
   ],
   "scripts": {
+    "dev": "./scripts/dev.sh",
+    "dev:backend": "./scripts/dev.sh --backend",
+    "dev:frontend": "./scripts/dev.sh --frontend",
+    "check:ee": "python3 qgis-processing/diagnose_ee.py --live",
     "dev:studio": "npm run dev --workspace=climate-studio",
     "build:studio": "npm run build --workspace=climate-studio",
     "preview:studio": "npm run preview --workspace=climate-studio",

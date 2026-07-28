@@ -140,7 +140,8 @@
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 2000;
+  /* Toolbar rail — top of the chrome stack, above side panels and detail cards. */
+  z-index: var(--cs-z-toolbar);
   pointer-events: none;
   background: transparent;
   height: auto;
@@ -483,7 +484,7 @@
   top: 0;
   left: 0;
   right: 0;
-  z-index: 2500;
+  z-index: var(--cs-z-toolbar-mobile);
   height: auto;
   min-height: 72px;
   padding: var(--mobile-nav-gap) 16px;

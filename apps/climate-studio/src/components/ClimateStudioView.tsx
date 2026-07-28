@@ -26,6 +26,7 @@ import { useLayer } from '../contexts/LayerContext'
 import { shouldShowClimateWidget } from '../config/layerDefinitions'
 import { BACKEND_BASE_URL, resolveClimateTileUrl } from '../config/backend'
 import { destroyMap, isMapUsable, safeGetLayer, safeRemoveLayer, safeRemoveSource } from '../utils/mapboxHelpers'
+import { enforceLayerOrder, getBeforeId, installLayerOrderGuard } from '../config/layerOrder'
 import {
   DndContext,
   closestCenter,
@@ -1231,34 +1232,12 @@ export default function ClimateStudioView() {
         })
       }
 
-      // Find a good insertion point - try to place before labels but after water/land
-      // Common Mapbox layer IDs to try: 'waterway-label', 'place-labels', 'poi-label', 'road-label'
-      let beforeId: string | undefined = undefined
-      const labelLayerIds = ['waterway-label', 'place-labels', 'poi-label', 'road-label', 'water-label', 'settlement-label']
-      for (const layerId of labelLayerIds) {
-        if (map.getLayer(layerId)) {
-          beforeId = layerId
-          break
-        }
-      }
-
-      // If no label layer found, try to insert before any layer with 'label' in the name
-      if (!beforeId) {
-        const style = map.getStyle()
-        if (style && style.layers) {
-          const labelLayer = style.layers.find((layer: any) =>
-            layer.id && (layer.id.includes('label') || layer.id.includes('Label'))
-          )
-          if (labelLayer) {
-            beforeId = labelLayer.id
-          }
-        }
-      }
-
       // Using solid fill for aquifers - no pattern loading needed
 
-      // LAYER ORDER (bottom to top): Groundwater -> Rivers -> Metro Humidity -> Precipitation
-      // Rivers should be on top of aquifers so they're visible
+      // Stacking order is declared in config/layerOrder.ts (MAP_LAYER_ORDER) and enforced
+      // by enforceLayerOrder() at the end of this function. Each addLayer below passes
+      // getBeforeId() so it lands in roughly the right slot immediately, avoiding a flash
+      // of mis-stacked layers before the reorder pass runs.
 
       // First, add groundwater aquifers (BOTTOM LAYER)
       if (!map.getLayer('aquifer-fill')) {
@@ -1286,7 +1265,7 @@ export default function ClimateStudioView() {
               'rgba(0, 0, 0, 0.2)'  // Subtle outline for visibility
             ]
           }
-        }, beforeId)
+        }, getBeforeId(map, 'aquifer-fill'))
       }
 
       // Add outline layer for selected state
@@ -1313,7 +1292,7 @@ export default function ClimateStudioView() {
               0   // Not selected: no outline
             ]
           }
-        }, beforeId)
+        }, getBeforeId(map, 'aquifer-outline'))
       }
 
       // Add hover outline
@@ -1340,7 +1319,7 @@ export default function ClimateStudioView() {
               0
             ]
           }
-        }, beforeId)
+        }, getBeforeId(map, 'aquifer-hover'))
       }
 
       console.log('✅ All aquifer layers set up successfully (BOTTOM)')
@@ -1448,7 +1427,7 @@ export default function ClimateStudioView() {
             ],
             'line-opacity': 0.6
           }
-        }, beforeId)
+        }, getBeforeId(map, 'river-lines-casing'))
       }
 
       if (!map.getLayer('river-lines')) {
@@ -1482,7 +1461,7 @@ export default function ClimateStudioView() {
             ],
             'line-opacity': 0.85
           }
-        }, beforeId)
+        }, getBeforeId(map, 'river-lines'))
       }
 
       // Add canals/aqueducts source and layers (risk-based coloring)
@@ -1518,7 +1497,7 @@ export default function ClimateStudioView() {
             'line-width': 7,
             'line-opacity': 0.9
           }
-        }, beforeId)
+        }, getBeforeId(map, 'canal-lines-casing'))
       }
 
       if (!map.getLayer('canal-lines')) {
@@ -1545,7 +1524,7 @@ export default function ClimateStudioView() {
             'line-width': 4,
             'line-opacity': 1.0
           }
-        }, beforeId)
+        }, getBeforeId(map, 'canal-lines'))
       }
 
       // Removed OSM aqueducts layer (dashed lines) - using canals layer only
@@ -1579,7 +1558,7 @@ export default function ClimateStudioView() {
             'circle-stroke-color': '#ffffff',
             'circle-opacity': 0.9
           }
-        }, beforeId)
+        }, getBeforeId(map, 'dams-circles'))
       }
 
       // Dam icon layer — white dam icon centered on each circle
@@ -1596,7 +1575,7 @@ export default function ClimateStudioView() {
             'icon-size': 0.6,
             'icon-allow-overlap': true
           }
-        }, beforeId)
+        }, getBeforeId(map, 'dams-icons'))
       }
 
       if (!map.getLayer('dams-labels')) {
@@ -1618,7 +1597,7 @@ export default function ClimateStudioView() {
             'text-halo-width': 1.5
           },
           minzoom: 6
-        })
+        }, getBeforeId(map, 'dams-labels'))
       }
 
       // Dam click handler
@@ -1706,7 +1685,7 @@ export default function ClimateStudioView() {
             'circle-stroke-width': 2,
             'circle-stroke-color': '#ffffff'
           }
-        }, beforeId)
+        }, getBeforeId(map, 'river-city-markers'))
       }
 
       // Add city labels
@@ -1728,7 +1707,7 @@ export default function ClimateStudioView() {
             'text-halo-color': '#000000',
             'text-halo-width': 1
           }
-        })
+        }, getBeforeId(map, 'river-city-labels'))
       }
 
       // Add lakes source and layers
@@ -1754,7 +1733,7 @@ export default function ClimateStudioView() {
             'fill-color': '#3b82f6', // Blue
             'fill-opacity': 0.4
           }
-        }, beforeId)
+        }, getBeforeId(map, 'lake-fill'))
       }
 
       // Add lake outline layer (dark blue border) - hidden by default, only rivers are shown
@@ -1772,7 +1751,7 @@ export default function ClimateStudioView() {
             'line-width': 2,
             'line-opacity': 0.9
           }
-        }, beforeId)
+        }, getBeforeId(map, 'lake-outline'))
       }
 
       // Add metro humidity heat map (organic blob-like visualization)
@@ -1940,7 +1919,7 @@ export default function ClimateStudioView() {
               15, 0.3
             ]
           }
-        }, beforeId)
+        }, getBeforeId(map, 'metro-humidity-heatmap-layer'))
       }
 
       // Add metro city labels (point features for labels)
@@ -1985,14 +1964,16 @@ export default function ClimateStudioView() {
             'text-halo-color': theme === 'light' ? 'rgba(255, 255, 255, 0.8)' : '#000000',
             'text-halo-width': 2
           }
-        })
+        }, getBeforeId(map, 'metro-humidity-labels'))
       }
 
-      console.log('✅ All river layers set up successfully (MIDDLE - on top of aquifers)')
+      console.log('✅ All base map layers set up successfully')
 
-      // Precipitation & Drought layer will be added dynamically when data is available (TOP LAYER)
-      // See useEffect below that handles precipitation_drought layer
-      // It will be inserted after aquifers using 'aquifer-hover' as beforeId
+      // Precipitation & Drought and the other tile overlays are added dynamically by the
+      // useEffects below as their toggles flip and data arrives.
+
+      // Re-assert the declared stacking order now that the base layers exist.
+      enforceLayerOrder(map)
 
       setAquiferLayersVisibility(map, showAquifersLayerRef.current)
 
@@ -2059,6 +2040,11 @@ export default function ClimateStudioView() {
       console.error('Failed to create Mapbox map:', error)
       return
     }
+
+    // Keep the stack sorted no matter which code path adds a layer or when.
+    // Tile URLs resolve asynchronously long after load, so this has to hook the map
+    // itself rather than rely on React deps. See config/layerOrder.ts.
+    installLayerOrderGuard(map)
 
     map.addControl(new mapboxgl.NavigationControl(), 'top-right')
 
@@ -2833,7 +2819,7 @@ export default function ClimateStudioView() {
           paint: {
             'raster-opacity': 0.7
           }
-        })
+        }, getBeforeId(map, 'sea-level-rise-layer'))
         console.log('✅ Sea level rise layer added successfully')
       } else {
         // Update opacity if layer exists
@@ -2874,7 +2860,7 @@ export default function ClimateStudioView() {
         })
       }
       if (!map.getLayer(layerId)) {
-        map.addLayer({ id: layerId, type: 'raster', source: sourceId, paint: { 'raster-opacity': wildfireOpacity } })
+        map.addLayer({ id: layerId, type: 'raster', source: sourceId, paint: { 'raster-opacity': wildfireOpacity } }, getBeforeId(map, 'wildfire-whp-layer'))
       } else {
         map.setPaintProperty(layerId, 'raster-opacity', wildfireOpacity)
       }
@@ -2907,22 +2893,6 @@ export default function ClimateStudioView() {
 
       if (!map.getLayer('grace-layer')) {
         console.log('🎨 Adding GRACE raster layer...')
-        // Add GRACE as bottommost layer (below precipitation/aquifers/rivers but above metro markers)
-        // Target order from bottom to top: Metro → Rivers → Aquifers → Precipitation → GRACE → Labels
-        // Insert before precipitation layer to make GRACE the bottom-most data layer
-        let beforeId: string | undefined = 'precipitation-drought-fill'
-
-        // If precipitation doesn't exist, try other layers
-        if (!map.getLayer(beforeId)) {
-          const dataLayerIds = ['aquifer-fill', 'aquifer-borders', 'waterway', 'water']
-          for (const layerId of dataLayerIds) {
-            if (map.getLayer(layerId)) {
-              beforeId = layerId
-              break
-            }
-          }
-        }
-
         map.addLayer({
           id: 'grace-layer',
           type: 'raster',
@@ -2930,8 +2900,8 @@ export default function ClimateStudioView() {
           paint: {
             'raster-opacity': graceOpacity
           }
-        }, beforeId)
-        console.log(`✅ GRACE layer added with opacity ${graceOpacity} before ${beforeId || 'top'}`)
+        }, getBeforeId(map, 'grace-layer'))
+        console.log(`✅ GRACE layer added with opacity ${graceOpacity}`)
       } else {
         // Update opacity and make visible
         map.setPaintProperty('grace-layer', 'raster-opacity', graceOpacity)
@@ -3005,24 +2975,6 @@ export default function ClimateStudioView() {
 
       if (!map.getLayer('temperature-layer')) {
         console.log('🎨 Adding temperature projection raster layer...')
-        // Add temperature layer on top of other data layers but below labels
-        // Should be above aquifers/rivers but below factories/labels
-        let beforeId: string | undefined = 'factory-points'
-
-        // If factory layer doesn't exist, try labels
-        if (!map.getLayer(beforeId)) {
-          // No factory layer. Fall back to a label layer; if none exist (MapLibre/CARTO
-          // has none of these Mapbox-only ids), leave undefined — a missing beforeId throws.
-          beforeId = undefined
-          const labelLayerIds = ['waterway-label', 'place-labels', 'poi-label', 'road-label']
-          for (const layerId of labelLayerIds) {
-            if (map.getLayer(layerId)) {
-              beforeId = layerId
-              break
-            }
-          }
-        }
-
         map.addLayer({
           id: 'temperature-layer',
           type: 'raster',
@@ -3031,8 +2983,8 @@ export default function ClimateStudioView() {
             'raster-opacity': controls.projectionOpacity ?? 0.6,
             'raster-fade-duration': 300
           }
-        }, beforeId)
-        console.log(`✅ Temperature layer added with opacity ${controls.projectionOpacity} before ${beforeId || 'top'}`)
+        }, getBeforeId(map, 'temperature-layer'))
+        console.log(`✅ Temperature layer added with opacity ${controls.projectionOpacity}`)
       } else {
         // Update opacity and make visible
         map.setPaintProperty('temperature-layer', 'raster-opacity', controls.projectionOpacity ?? 0.6)
@@ -3290,11 +3242,6 @@ export default function ClimateStudioView() {
 
         // Add fresh layer
         console.log('🎨 Adding Wet Bulb danger zones layer...')
-        // Insert below labels but above base map
-        let beforeId: string | undefined = 'waterway-label'
-        if (!safeGetLayer(map, beforeId)) beforeId = undefined
-        if (!beforeId && safeGetLayer(map, 'river-lines-casing')) beforeId = 'river-lines-casing'
-
         const layerConfig = {
           id: layerId,
           type: 'fill' as const,
@@ -3306,8 +3253,8 @@ export default function ClimateStudioView() {
           }
         }
         console.log('🎨 Adding layer with config:', layerConfig)
-        map.addLayer(layerConfig, beforeId)
-        console.log(`✅ Wet Bulb layer added before: ${beforeId || 'top'}`)
+        map.addLayer(layerConfig, getBeforeId(map, layerId))
+        console.log('✅ Wet Bulb layer added')
       } // End of isWetBulbActive check
 
       // Toggle visibility based on active state
@@ -3500,7 +3447,7 @@ export default function ClimateStudioView() {
           'circle-stroke-color': '#ffffff',
           'circle-stroke-opacity': 0.9
         }
-      })
+      }, getBeforeId(map, 'factory-circles'))
 
       // Factory icon layer — white factory icon centered on each circle
       if (!map.hasImage('factory-icon')) {
@@ -3516,7 +3463,7 @@ export default function ClimateStudioView() {
             'icon-size': 0.6,
             'icon-allow-overlap': true
           }
-        })
+        }, getBeforeId(map, 'factory-icons'))
       } else {
         map.setLayoutProperty('factory-icons', 'icon-size', 0.6)
       }
@@ -3541,7 +3488,7 @@ export default function ClimateStudioView() {
             'text-halo-width': 1.5
           },
           minzoom: 5
-        })
+        }, getBeforeId(map, 'factory-labels'))
       }
 
       // Add click handler for factory details
@@ -3649,7 +3596,7 @@ export default function ClimateStudioView() {
           'circle-opacity': 0.2,
           'circle-blur': 0.7
         }
-      })
+      }, getBeforeId(map, 'datacenter-glow'))
     }
 
     // Layer 2: Dark circle background
@@ -3669,7 +3616,7 @@ export default function ClimateStudioView() {
           ],
           'circle-opacity': 0.95
         }
-      })
+      }, getBeforeId(map, 'datacenter-circle'))
     }
 
     // Layer 3: ⚡ icon on each circle
@@ -3687,7 +3634,7 @@ export default function ClimateStudioView() {
           'icon-allow-overlap': true,
           'icon-ignore-placement': true
         }
-      })
+      }, getBeforeId(map, 'datacenter-zap'))
     }
 
     // Layer 4: Labels
@@ -3710,7 +3657,7 @@ export default function ClimateStudioView() {
           'text-halo-width': 1.5
         },
         minzoom: 5
-      })
+      }, getBeforeId(map, 'datacenter-labels'))
     }
 
     // Click handler — open detail panel
@@ -3841,7 +3788,7 @@ export default function ClimateStudioView() {
         'circle-stroke-width': 2,
         'circle-stroke-color': '#ffffff'
       }
-    })
+    }, getBeforeId(map, 'metro-circles'))
 
     // Add labels layer
     map.addLayer({
@@ -3859,7 +3806,7 @@ export default function ClimateStudioView() {
         'text-halo-color': '#000000',
         'text-halo-width': 1
       }
-    })
+    }, getBeforeId(map, 'metro-labels'))
 
     console.log('✅ Metro Population Change layer added successfully')
 
@@ -3901,7 +3848,7 @@ export default function ClimateStudioView() {
         'hillshade-shadow-color': '#000000',
         'hillshade-illumination-direction': 315
       }
-    })
+    }, getBeforeId(map, 'hillshade'))
 
     console.log('✅ Topographic Relief layer added successfully')
 
@@ -3957,43 +3904,6 @@ export default function ClimateStudioView() {
       // Add layer if it doesn't exist
       if (!map.getLayer(layerId)) {
         console.log('🎨 Adding precipitation-drought layer (TOP)...')
-        // Insert after aquifers (TOP LAYER) - use aquifer-hover as reference
-        // This ensures: Rivers (bottom) -> Aquifers (middle) -> Precipitation (top)
-        const afterAquiferId = map.getLayer('aquifer-hover') ? 'aquifer-hover' :
-          map.getLayer('aquifer-outline') ? 'aquifer-outline' :
-            map.getLayer('aquifer-fill') ? 'aquifer-fill' : undefined
-
-        // Find insertion point - before labels but after aquifers
-        let beforeId: string | undefined = undefined
-        if (afterAquiferId) {
-          // Insert after the last aquifer layer
-          const style = map.getStyle()
-          if (style && style.layers) {
-            const aquiferIndex = style.layers.findIndex((l: any) => l.id === afterAquiferId)
-            if (aquiferIndex >= 0 && aquiferIndex < style.layers.length - 1) {
-              // Find next layer after aquifers
-              for (let i = aquiferIndex + 1; i < style.layers.length; i++) {
-                const nextLayer = style.layers[i]
-                if (nextLayer.id && !nextLayer.id.includes('aquifer')) {
-                  beforeId = nextLayer.id
-                  break
-                }
-              }
-            }
-          }
-        }
-
-        // Fallback to label layers if no better position found
-        if (!beforeId) {
-          const labelLayerIds = ['waterway-label', 'place-labels', 'poi-label', 'road-label', 'water-label', 'settlement-label']
-          for (const id of labelLayerIds) {
-            if (map.getLayer(id)) {
-              beforeId = id
-              break
-            }
-          }
-        }
-
         map.addLayer({
           id: layerId,
           type: 'raster',
@@ -4001,7 +3911,7 @@ export default function ClimateStudioView() {
           paint: {
             'raster-opacity': controls.droughtOpacity || 0.6
           }
-        }, beforeId)
+        }, getBeforeId(map, layerId))
       } else {
         // Update opacity if layer exists
         map.setPaintProperty(layerId, 'raster-opacity', controls.droughtOpacity || 0.6)
@@ -4016,6 +3926,19 @@ export default function ClimateStudioView() {
       }
     }
   }, [isPrecipitationDroughtActive, precipitationDroughtData, mapLoaded, controls.droughtOpacity, mapStyleEpoch])
+
+  // Backstop for the layer-order guard installed on the map itself.
+  //
+  // The guard (installLayerOrderGuard, see map init above) covers every add. This only
+  // catches the one case it can't: a layer being *removed* when a toggle goes off, which
+  // can leave the remaining stack fine but is cheap to re-verify. enforceLayerOrder()
+  // early-outs when nothing needs moving, so this costs a single style read.
+  useEffect(() => {
+    if (!mapLoaded) return
+    const map = mapRef.current
+    if (!isMapUsable(map)) return
+    enforceLayerOrder(map)
+  }, [mapLoaded, mapStyleEpoch])
 
   // Backstop: Monitor precipitation drought status and retry on prolonged loading/error
   useEffect(() => {
@@ -6911,7 +6834,7 @@ export default function ClimateStudioView() {
       {/* Groundwater Details Panel - Bottom Center */}
       {
         selectedAquifer && (
-          <div className="detail-popup-panel safari-modal-fix z-[4000] pointer-events-auto">
+          <div className="detail-popup-panel safari-modal-fix z-[1000] pointer-events-auto">
             <GroundwaterDetailsPanel
               selectedAquifer={selectedAquifer}
               projectionYear={projectionYear}
@@ -6924,7 +6847,7 @@ export default function ClimateStudioView() {
       {/* Factory Details Panel - Bottom Center */}
       {
         selectedFactory && (
-          <div className="detail-popup-panel safari-modal-fix z-[4000] pointer-events-auto">
+          <div className="detail-popup-panel safari-modal-fix z-[1000] pointer-events-auto">
             <FactoryDetailPanel
               factory={selectedFactory}
               onClose={() => setSelectedFactory(null)}
@@ -6936,7 +6859,7 @@ export default function ClimateStudioView() {
       {/* AI Data Center Details Panel - Bottom Center */}
       {
         selectedDataCenter && (
-          <div className="detail-popup-panel safari-modal-fix z-[4000] pointer-events-auto">
+          <div className="detail-popup-panel safari-modal-fix z-[1000] pointer-events-auto">
             <AIDataCenterDetailPanel
               datacenter={selectedDataCenter}
               onClose={() => setSelectedDataCenter(null)}
@@ -6948,7 +6871,7 @@ export default function ClimateStudioView() {
       {/* Dam Details Panel - Bottom Center */}
       {
         selectedDam && (
-          <div className="detail-popup-panel safari-modal-fix z-[4000] pointer-events-auto">
+          <div className="detail-popup-panel safari-modal-fix z-[1000] pointer-events-auto">
             <DamDetailsPanel
               selectedDam={selectedDam}
               onClose={() => setSelectedDam(null)}
