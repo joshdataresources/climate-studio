@@ -858,8 +858,8 @@ span[data-radix-slider-track] {
 
 /* Remove Mapbox default popup styles */
 .metro-humidity-popup {
-  /* Ensure popup stays below sidebar (z-index: 2000) on all devices */
-  z-index: 1500 !important;
+  /* Transient map hover card — sits below the detail panels and all chrome. */
+  z-index: var(--cs-z-map-popup) !important;
 }
 
 .metro-humidity-popup .mapboxgl-popup-content {
@@ -880,8 +880,7 @@ span[data-radix-slider-track] {
 @media (min-width: 768px) and (max-width: 1024px) {
   .metro-humidity-popup,
   .mapboxgl-popup {
-    z-index: 1500 !important;
-    max-z-index: 1500 !important;
+    z-index: var(--cs-z-map-popup) !important;
   }
 }
 
@@ -904,7 +903,8 @@ span[data-radix-slider-track] {
   margin-left: 0 !important;
   margin-right: 0 !important;
   box-sizing: border-box !important;
-  z-index: 1000 !important;
+  /* Below the toolbar and side panels, above the map and its popups. */
+  z-index: var(--cs-z-detail-panel) !important;
 }
 
 /* Higher specificity for safari-modal-fix combination */
@@ -924,6 +924,17 @@ div.detail-popup-panel.safari-modal-fix.z-\[1000\] {
   transform: translateX(-50%) !important;
   width: min(640px, calc(100vw - 40px)) !important;
   max-width: calc(100vw - 40px) !important;
+}
+
+/* Left layers panel and right features panel.
+ *
+ * These carry a Tailwind `z-[1000]` utility that other rules in this file key off as a
+ * selector hook, so the class stays — but the effective stacking comes from the token.
+ * Side panels must sit ABOVE the detail popup panels (--cs-z-detail-panel: 1000) so the
+ * layer controls stay reachable while a Dam/Factory/AI Center card is open. */
+.app-layout .safari-panel-height,
+.app-layout .safari-features-panel {
+  z-index: var(--cs-z-side-panel) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -1009,7 +1020,9 @@ div.detail-popup-panel.safari-modal-fix.z-\[1000\] {
       left: 0 !important;
       top: 0 !important;
       height: 100vh !important;
-      z-index: 40 !important;
+      /* Was 40, which dropped the iPad toolbar below the side panels and detail
+       * cards. Use the same token as every other breakpoint. */
+      z-index: var(--cs-z-toolbar) !important;
     }
   }
 }

@@ -110,3 +110,6 @@ wetbulb_decades.log
 
 LINKEDIN_TECH_INVENTORY.md
 .claude/
+
+# Dev launcher logs (scripts/dev.sh)
+.dev-logs/

@@ -200,6 +200,27 @@
   --cs-z-toast: 1600;
   --cs-z-max: 9999;
 
+  /* ─────────────────────────────────────────────────────────────────────────
+   * Map UI stacking scale (screen chrome, above the map canvas).
+   *
+   * Ordered bottom → top. This is the DOM-side counterpart to the map layer
+   * order in config/layerOrder.ts, and encodes the same intent: chrome first,
+   * then detail cards, then everything painted on the map itself.
+   *
+   *   toolbar / side panels      ← highest, always reachable
+   *   detail popup panels        ← Dam, Factory, AI Center bottom cards
+   *   map hover cards & popups   ← lowest, transient
+   * ───────────────────────────────────────────────────────────────────────── */
+  --cs-z-map-canvas: 1;
+  --cs-z-map-hover: 100;         /* transient hover cards drawn over the map */
+  --cs-z-map-popup: 900;         /* maplibre popups, e.g. metro humidity */
+  --cs-z-detail-panel: 1000;     /* Dam / Factory / AI Center / Groundwater cards */
+  --cs-z-side-panel: 1500;       /* left layers panel, right features panel */
+  --cs-z-toolbar: 2000;          /* .app-sidebar rail */
+  --cs-z-toolbar-mobile: 2500;   /* .mobile-header */
+  --cs-z-drawer: 3000;           /* tablet/mobile slide-over panels */
+  --cs-z-notification: 4000;     /* toasts, banners, blocking overlays */
+
   /* Layout: desktop panel columns (for detail popup centering) */
   --cs-left-panel-offset: 92px;
   --cs-left-panel-width: 352px;
