@@ -88,10 +88,24 @@ const ORDER_INDEX = new Map(MAP_LAYER_ORDER.map((id, i) => [id, i]))
 /**
  * Basemap layer id to insert custom layers *before*.
  *
- * The old code probed Mapbox Studio ids (`waterway-label`, `place-labels`, `poi-label`…).
- * The basemap is now CARTO positron/dark-matter, whose ids are underscore-cased
- * (`waterway_label`, `watername_ocean`, `place_hamlet`…), so every one of those probes
- * missed. We match on shape rather than on a hardcoded list, and cache per style.
+ * We want analysis layers to sit above the basemap's geometry — roads, boundaries,
+ * buildings — but below its place names, which stay legible on top. So the anchor is the
+ * bottom of the basemap's trailing label block.
+ *
+ * Taking the *first* symbol layer in the style does not work, and the reason is worth
+ * recording. CARTO positron interleaves one early symbol layer, `waterway_label`, at
+ * index 13 — beneath ~90 road, tunnel, bridge, building and country-boundary layers that
+ * come after it:
+ *
+ *     13  symbol  waterway_label      ← first symbol in the style
+ *     14  line    tunnel_service_case
+ *     …           road_*, bridge_*, building, boundary_country_*
+ *    105  symbol  watername_ocean     ← real start of the label block
+ *    106+ symbol  place_*, poi_*, roadname_*
+ *
+ * Anchoring on `waterway_label` buried every analysis layer under the entire street grid.
+ * Instead we walk backwards from the top of the style to find where the contiguous run of
+ * label layers begins, which lands on `watername_ocean` and is basemap-agnostic.
  */
 export function findBasemapLabelAnchor(map: MapLibreMap): string | undefined {
   let style: ReturnType<MapLibreMap['getStyle']>
@@ -103,16 +117,24 @@ export function findBasemapLabelAnchor(map: MapLibreMap): string | undefined {
   if (!style?.layers) return undefined
 
   const custom = ORDER_INDEX
-  const isSymbol = (l: { id: string; type: string }) =>
-    l.type === 'symbol' && !custom.has(l.id)
+  const basemap = style.layers.filter((l) => !custom.has(l.id))
+  if (!basemap.length) return undefined
 
-  // Prefer the first basemap symbol (label) layer — custom layers go beneath place names.
-  const firstSymbol = style.layers.find(isSymbol)
+  // Walk down from the top while we're still in symbol layers. Where that run starts is
+  // the bottom of the label block — everything below it is geometry we want to cover.
+  let i = basemap.length - 1
+  while (i >= 0 && basemap[i].type === 'symbol') i--
+  const labelBlockStart = i + 1
+
+  if (labelBlockStart < basemap.length) return basemap[labelBlockStart].id
+
+  // Style is all symbols (unusual) — fall back to the first one.
+  const firstSymbol = basemap.find((l) => l.type === 'symbol')
   if (firstSymbol) return firstSymbol.id
 
-  // Fall back to any basemap layer whose id looks label-ish, underscore or hyphen cased.
-  const labelish = style.layers.find(
-    (l) => !custom.has(l.id) && /label|place|poi|waterway|watername/i.test(l.id)
+  // No symbol layers at all: fall back to anything label-shaped, else append on top.
+  const labelish = basemap.find((l) =>
+    /label|place|poi|waterway|watername/i.test(l.id)
   )
   return labelish?.id
 }
@@ -155,19 +177,39 @@ export function enforceLayerOrder(map: MapLibreMap | null | undefined): void {
     return // style not loaded, or map destroyed
   }
 
-  // Early-out when the stack is already sorted. Keeps this safe to call from hot paths
+  const anchorId = findBasemapLabelAnchor(map)
+
+  // Early-out when the stack is already correct. Keeps this safe to call from hot paths
   // (every layer add, or a map `idle` handler) without churning the style.
+  //
+  // "Correct" means two things, and checking only the first is a trap: layers added with
+  // no beforeId land on top of the whole style — above the basemap's labels — yet arrive
+  // in an order that's already internally sorted, so a relative-order check alone passes
+  // them straight through. The anchor check is what catches that.
   const present = getCurrentLayerOrder(map)
   const sorted = [...present].sort(
     (a, b) => (ORDER_INDEX.get(a) ?? 0) - (ORDER_INDEX.get(b) ?? 0)
   )
-  if (present.length === sorted.length && present.every((id, i) => id === sorted[i])) {
-    return
+  const internallySorted =
+    present.length === sorted.length && present.every((id, i) => id === sorted[i])
+
+  let belowAnchor = true
+  if (anchorId) {
+    try {
+      const ids = (map.getStyle()?.layers ?? []).map((l) => l.id)
+      const anchorAt = ids.indexOf(anchorId)
+      const topCustomAt = present.length ? ids.indexOf(present[present.length - 1]) : -1
+      belowAnchor = anchorAt < 0 || topCustomAt < 0 || topCustomAt < anchorAt
+    } catch {
+      belowAnchor = false
+    }
   }
+
+  if (internallySorted && belowAnchor) return
 
   // Anchor the top of the custom stack beneath the basemap's labels, then stack
   // downward: each layer is moved to sit immediately below the one we placed last.
-  let anchor = findBasemapLabelAnchor(map)
+  let anchor = anchorId
 
   for (let i = MAP_LAYER_ORDER.length - 1; i >= 0; i--) {
     const layerId = MAP_LAYER_ORDER[i]
