@@ -86,6 +86,46 @@ export const MAP_LAYER_ORDER: readonly string[] = [
 const ORDER_INDEX = new Map(MAP_LAYER_ORDER.map((id, i) => [id, i]))
 
 /**
+ * Layers that belong ABOVE the basemap's own place names, not below them.
+ *
+ * The stack straddles the basemap labels rather than sitting entirely under them:
+ *
+ *     ┌─ measurement tools, our markers and their labels   ← above basemap labels
+ *     ├─ basemap place names (MESA, PHOENIX, watername_*)
+ *     ├─ rivers, aqueducts, aquifers, sea level, rasters   ← below basemap labels
+ *     ├─ basemap roads, boundaries, buildings
+ *     └─ topographic relief
+ *
+ * The split follows what each layer is for. Continuous washes — temperature, wildfire,
+ * sea level — read fine with place names on top, and burying the names under them makes
+ * the map hard to navigate. But a factory or data center marker IS the subject; a
+ * basemap city label sitting across it is just occlusion.
+ *
+ * Placing our symbol layers above the basemap's also settles label collisions in our
+ * favour: MapLibre resolves overlapping text by stack order, so where a marker label and
+ * a place name compete for the same pixels, the basemap's yields.
+ */
+const ABOVE_BASEMAP_LABELS = new Set<string>([
+  'datacenter-glow',
+  'datacenter-circle',
+  'datacenter-zap',
+  'factory-circles',
+  'factory-icons',
+  'dams-circles',
+  'dams-icons',
+  'metro-circles',
+  'river-city-markers',
+  'metro-humidity-labels',
+  'metro-labels',
+  'river-city-labels',
+  'datacenter-labels',
+  'factory-labels',
+  'dams-labels',
+  'measurement-polygon-layer',
+  'measurement-line-layer',
+])
+
+/**
  * Basemap layer id to insert custom layers *before*.
  *
  * We want analysis layers to sit above the basemap's geometry — roads, boundaries,
@@ -142,16 +182,22 @@ export function findBasemapLabelAnchor(map: MapLibreMap): string | undefined {
 /**
  * The id this layer should be inserted *before* to land in the right slot right away.
  *
- * Returns the nearest higher-ordered custom layer that is currently on the map, or the
- * basemap label anchor if this layer belongs on top of the custom stack. Undefined means
- * "append to the very top".
+ * Returns the nearest higher-ordered custom layer in the same band (above or below the
+ * basemap labels) that is currently on the map. Falls back to the basemap label anchor
+ * for a below-labels layer, or undefined — append to the very top — for an above-labels
+ * one.
  */
 export function getBeforeId(map: MapLibreMap, layerId: string): string | undefined {
   const index = ORDER_INDEX.get(layerId)
   if (index === undefined) return findBasemapLabelAnchor(map)
 
+  const above = ABOVE_BASEMAP_LABELS.has(layerId)
+
   for (let i = index + 1; i < MAP_LAYER_ORDER.length; i++) {
     const candidate = MAP_LAYER_ORDER[i]
+    // A below-labels layer must never anchor to an above-labels one — that would drag it
+    // across the basemap labels and undo the split.
+    if (!above && ABOVE_BASEMAP_LABELS.has(candidate)) break
     try {
       if (map.getLayer(candidate)) return candidate
     } catch {
@@ -159,7 +205,8 @@ export function getBeforeId(map: MapLibreMap, layerId: string): string | undefin
       return undefined
     }
   }
-  return findBasemapLabelAnchor(map)
+
+  return above ? undefined : findBasemapLabelAnchor(map)
 }
 
 /**
@@ -183,9 +230,9 @@ export function enforceLayerOrder(map: MapLibreMap | null | undefined): void {
   // (every layer add, or a map `idle` handler) without churning the style.
   //
   // "Correct" means two things, and checking only the first is a trap: layers added with
-  // no beforeId land on top of the whole style — above the basemap's labels — yet arrive
-  // in an order that's already internally sorted, so a relative-order check alone passes
-  // them straight through. The anchor check is what catches that.
+  // no beforeId land on top of the whole style, yet arrive in an order that's already
+  // internally sorted — so a relative-order check alone passes them straight through.
+  // The banding check is what catches that.
   const present = getCurrentLayerOrder(map)
   const sorted = [...present].sort(
     (a, b) => (ORDER_INDEX.get(a) ?? 0) - (ORDER_INDEX.get(b) ?? 0)
@@ -193,26 +240,41 @@ export function enforceLayerOrder(map: MapLibreMap | null | undefined): void {
   const internallySorted =
     present.length === sorted.length && present.every((id, i) => id === sorted[i])
 
-  let belowAnchor = true
+  // Every layer must also be on the correct side of the basemap label block.
+  let correctlyBanded = true
   if (anchorId) {
     try {
       const ids = (map.getStyle()?.layers ?? []).map((l) => l.id)
       const anchorAt = ids.indexOf(anchorId)
-      const topCustomAt = present.length ? ids.indexOf(present[present.length - 1]) : -1
-      belowAnchor = anchorAt < 0 || topCustomAt < 0 || topCustomAt < anchorAt
+      if (anchorAt >= 0) {
+        correctlyBanded = present.every((id) => {
+          const at = ids.indexOf(id)
+          if (at < 0) return true
+          return ABOVE_BASEMAP_LABELS.has(id) ? at > anchorAt : at < anchorAt
+        })
+      }
     } catch {
-      belowAnchor = false
+      correctlyBanded = false
     }
   }
 
-  if (internallySorted && belowAnchor) return
+  if (internallySorted && correctlyBanded) return
 
-  // Anchor the top of the custom stack beneath the basemap's labels, then stack
-  // downward: each layer is moved to sit immediately below the one we placed last.
-  let anchor = anchorId
+  // Walk MAP_LAYER_ORDER from the top down, moving each present layer below the one we
+  // placed last. The anchor starts undefined — the very top of the style — so the
+  // above-labels band stacks over the basemap's place names. On crossing into the
+  // below-labels band we reset the anchor to the label block, dropping the rest beneath.
+  let anchor: string | undefined = undefined
+  let crossedIntoBelowBand = false
 
   for (let i = MAP_LAYER_ORDER.length - 1; i >= 0; i--) {
     const layerId = MAP_LAYER_ORDER[i]
+
+    if (!crossedIntoBelowBand && !ABOVE_BASEMAP_LABELS.has(layerId)) {
+      crossedIntoBelowBand = true
+      anchor = anchorId
+    }
+
     try {
       if (!map.getLayer(layerId)) continue
       map.moveLayer(layerId, anchor)
