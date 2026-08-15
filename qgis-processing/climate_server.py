@@ -1725,4 +1725,10 @@ def wet_bulb_temperature():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5001))
-    app.run(host='0.0.0.0', port=port, debug=True)
+    # use_reloader=False: the reloader re-imports this module in a child process on
+    # every boot, and each import re-authenticates ~9 Earth Engine services over the
+    # network. That doubles startup time and makes it network-dependent, which was
+    # blowing past scripts/dev.sh's readiness timeout. debug=True still gives the
+    # interactive debugger and error pages; you just won't get autoreload-on-save for
+    # backend code — re-run `npm run dev` to pick up backend changes.
+    app.run(host='0.0.0.0', port=port, debug=True, use_reloader=False)

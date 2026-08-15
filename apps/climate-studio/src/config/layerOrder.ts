@@ -50,7 +50,9 @@ export const MAP_LAYER_ORDER: readonly string[] = [
   'aquifer-hover',
 
   // ── Tier 4: hydrography — rivers, aqueducts, lakes ───────────────────────
-  // Casing first so the coloured line draws inside its own outline.
+  // Casing first so the coloured line draws inside its own outline. The lines
+  // themselves stay below the basemap's place names (they're background context,
+  // same as roads); their name labels do not — see river-labels/canal-labels below.
   'lake-fill',
   'lake-outline',
   'canal-lines-casing',
@@ -70,9 +72,20 @@ export const MAP_LAYER_ORDER: readonly string[] = [
   'metro-circles',
   'river-city-markers',
   // Labels last — always legible, never covered by a marker.
+  //
+  // river-labels/canal-labels ride along their (below-basemap-labels) lines with
+  // symbol-placement: 'line', but the label TEXT belongs up here with the other
+  // above-basemap-labels symbols. MapLibre resolves overlapping/nearby text by
+  // collision priority in stack order — left below the basemap's own dense place-name
+  // layer (watername_*, place_*), a river or canal name loses almost every collision
+  // against it and silently never renders. Promoting just the text layers here (while
+  // the line layers themselves stay in Tier 4) fixes that without changing how the
+  // lines look under the basemap's roads/boundaries.
   'metro-humidity-labels',
   'metro-labels',
   'river-city-labels',
+  'canal-labels',
+  'river-labels',
   'datacenter-labels',
   'factory-labels',
   'dams-labels',
@@ -118,6 +131,8 @@ const ABOVE_BASEMAP_LABELS = new Set<string>([
   'metro-humidity-labels',
   'metro-labels',
   'river-city-labels',
+  'canal-labels',
+  'river-labels',
   'datacenter-labels',
   'factory-labels',
   'dams-labels',

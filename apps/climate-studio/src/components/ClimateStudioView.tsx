@@ -49,6 +49,13 @@ import { CSS } from '@dnd-kit/utilities'
 import aquifersData from '../data/aquifers.json'
 // Import river data - Natural Earth 10m rivers with flow projections by year/scenario
 import riversData from '../data/rivers-with-projections.json'
+// One point per named river (midpoint of its longest segment), generated from
+// rivers-with-projections.json. The Natural Earth river lines are pre-split into many
+// short segments per name (see each feature's 'dissolve' property) — MapLibre's
+// symbol-placement: 'line' text couldn't reliably find a placement window on those
+// fragments, so names silently never rendered. Point labels sidestep that entirely,
+// the same way river-city-labels/dams-labels/factory-labels already do successfully.
+import riverNamePoints from '../data/river-name-points.json'
 // Import lakes data with water level projections
 import lakesData from '../data/lakes.json'
 // Import factory data with environmental impact information
@@ -345,18 +352,6 @@ function getDepletionColor(properties: any, projectionYear: number = 2025): stri
   return color
 }
 
-// Get GRACE depletion color based on cm/year trend
-// Matches GRACE hexagon color scheme: red=depletion, green=stable/recharge
-function getGRACEDepletionColor(trendCmPerYear: number): string {
-  if (trendCmPerYear <= -3) return '#8b0000'   // Dark red - severe depletion
-  if (trendCmPerYear <= -2) return '#dc143c'   // Crimson - high depletion
-  if (trendCmPerYear <= -1) return '#ff6347'   // Tomato - moderate depletion
-  if (trendCmPerYear <= -0.5) return '#ffa500' // Orange - mild depletion
-  if (trendCmPerYear <= 0.5) return '#90ee90'  // Light green - stable
-  if (trendCmPerYear <= 1) return '#32cd32'    // Lime green - recharge
-  return '#228b22'                             // Forest green - strong recharge
-}
-
 // Get river flow depletion color based on percentage of 2025 baseline
 function getRiverDepletionColor(properties: any, projectionYear: number = 2025): string {
   const baseline = properties?.baseline_flow_cfs_2025 || properties?.flow_projections?.['2025']
@@ -629,7 +624,6 @@ type LayersInWidgetState = {
   seaLevel: boolean
   wildfire: boolean
   aquifers: boolean
-  groundwater: boolean
   precipitation: boolean
   wetBulb: boolean
   temperature: boolean
@@ -647,7 +641,6 @@ const ALL_LAYERS_IN_WIDGET: LayersInWidgetState = {
   seaLevel: true,
   wildfire: true,
   aquifers: true,
-  groundwater: true,
   precipitation: true,
   wetBulb: true,
   temperature: true,
@@ -665,7 +658,6 @@ const NO_LAYERS_IN_WIDGET: LayersInWidgetState = {
   seaLevel: false,
   wildfire: false,
   aquifers: false,
-  groundwater: false,
   precipitation: false,
   wetBulb: false,
   temperature: false,
@@ -794,7 +786,6 @@ export default function ClimateStudioView() {
   }, [showAquifersLayer])
   const [showDamsLayer, setShowDamsLayer] = useState(true) // Default ON - shows dam infrastructure
   const [showMetroHumidityLayer, setShowMetroHumidityLayer] = useState(true) // Default ON
-  const [showGroundwaterLayer, setShowGroundwaterLayer] = useState(false)
   const [showFactoriesLayer, setShowFactoriesLayer] = useState(true)
   const [showAIDataCentersLayer, setShowAIDataCentersLayer] = useState(true)
   const [selectedDataCenter, setSelectedDataCenter] = useState<SelectedDataCenter | null>(null)
@@ -896,10 +887,6 @@ export default function ClimateStudioView() {
     if (!layersInWidget.seaLevel && showSeaLevelRiseLayer) {
       setShowSeaLevelRiseLayer(false)
     }
-    // Groundwater
-    if (!layersInWidget.groundwater && showGroundwaterLayer) {
-      setShowGroundwaterLayer(false)
-    }
     // Aquifers
     if (!layersInWidget.aquifers && showAquifersLayer) {
       setShowAquifersLayer(false)
@@ -936,7 +923,6 @@ export default function ClimateStudioView() {
     layersInWidget.canals,
     layersInWidget.dams,
     layersInWidget.seaLevel,
-    layersInWidget.groundwater,
     layersInWidget.aquifers,
     layersInWidget.factories,
     layersInWidget.aiDataCenters,
@@ -945,32 +931,6 @@ export default function ClimateStudioView() {
     layersInWidget.wetBulb,
     layersInWidget.temperature
   ])
-
-  // GRACE tile layer state
-  const [graceTileUrl, setGraceTileUrl] = useState<string | null>(null)
-  const [showGRACELayer, setShowGRACELayer] = useState(true)
-  const [graceOpacity, setGraceOpacity] = useState(0.5) // Default 50% opacity
-
-  // Fetch GRACE tile URL on mount
-  useEffect(() => {
-    const fetchGRACETileUrl = async () => {
-      try {
-        const response = await fetch(`${BACKEND_BASE_URL}/api/climate/groundwater/tiles`)
-
-        if (response.ok) {
-          const data = await response.json()
-          if (data.tile_url) {
-            setGraceTileUrl(data.tile_url)
-            console.log('✅ GRACE tile URL fetched:', data.metadata)
-          }
-        }
-      } catch (err) {
-        console.warn('⚠️ Failed to fetch GRACE tile URL:', err)
-      }
-    }
-
-    fetchGRACETileUrl()
-  }, [])
 
   // Get temperature projection data from climate context
   const isTemperatureProjectionActive = isLayerActive('temperature_projection')
@@ -1394,6 +1354,16 @@ export default function ClimateStudioView() {
         })
       }
 
+      // Point source backing river-labels — see the riverNamePoints import comment
+      // for why river names use points instead of placing text along 'rivers'.
+      if (!map.getSource('river-name-points')) {
+        console.log('📦 Adding river-name-points source...')
+        map.addSource('river-name-points', {
+          type: 'geojson',
+          data: riverNamePoints as any
+        })
+      }
+
       // Add river line layer (blue with darker border for casing)
       // Use Natural Earth scalerank: 0-2=major, 3-4=medium, 5+=minor
       if (!map.getLayer('river-lines-casing')) {
@@ -1464,6 +1434,29 @@ export default function ClimateStudioView() {
         }, getBeforeId(map, 'river-lines'))
       }
 
+      if (!map.getLayer('river-labels')) {
+        console.log('🎨 Adding river-labels layer...')
+        map.addLayer({
+          id: 'river-labels',
+          type: 'symbol',
+          source: 'river-name-points',
+          layout: {
+            'text-field': ['get', 'name'],
+            'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+            'text-size': 12,
+            'text-letter-spacing': 0.1,
+            'text-offset': [0, -1],
+            'text-anchor': 'top'
+          },
+          paint: {
+            'text-color': '#1e3a8a',
+            'text-halo-color': '#ffffff',
+            'text-halo-width': 2
+          },
+          minzoom: 4
+        }, getBeforeId(map, 'river-labels'))
+      }
+
       // Add canals/aqueducts source and layers (risk-based coloring)
       if (!map.getSource('canals')) {
         console.log('📦 Adding canals source...')
@@ -1525,6 +1518,38 @@ export default function ClimateStudioView() {
             'line-opacity': 1.0
           }
         }, getBeforeId(map, 'canal-lines'))
+      }
+
+      if (!map.getLayer('canal-labels')) {
+        console.log('🎨 Adding canal-labels layer...')
+        map.addLayer({
+          id: 'canal-labels',
+          type: 'symbol',
+          source: 'canals',
+          layout: {
+            'symbol-placement': 'line',
+            'text-field': ['get', 'name'],
+            'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+            'text-size': 11,
+            'text-letter-spacing': 0.1,
+            'text-max-angle': 30,
+            'text-offset': [0, -1]
+          },
+          paint: {
+            'text-color': [
+              'match',
+              ['get', '_risk_level'],
+              'critical', '#7f1d1d',  // Dark red
+              'high', '#9a3412',      // Dark orange
+              'moderate', '#854d0e',  // Dark yellow
+              'low', '#166534',       // Dark green
+              '#0e7490'               // Default dark cyan
+            ],
+            'text-halo-color': '#ffffff',
+            'text-halo-width': 1.5
+          },
+          minzoom: 5
+        }, getBeforeId(map, 'canal-labels'))
       }
 
       // Removed OSM aqueducts layer (dashed lines) - using canals layer only
@@ -2546,7 +2571,7 @@ export default function ClimateStudioView() {
     const map = mapRef.current
     const visibility = showRiversLayer ? 'visible' : 'none'
 
-    const riverLayerIds = ['river-lines-casing', 'river-lines', 'river-city-markers', 'river-city-labels']
+    const riverLayerIds = ['river-lines-casing', 'river-lines', 'river-labels', 'river-city-markers', 'river-city-labels']
 
     riverLayerIds.forEach(layerId => {
       if (map.getLayer(layerId)) {
@@ -2625,7 +2650,7 @@ export default function ClimateStudioView() {
     const map = mapRef.current
     const visibility = showCanalsLayer ? 'visible' : 'none'
 
-    const canalLayerIds = ['canal-lines-casing', 'canal-lines']
+    const canalLayerIds = ['canal-lines-casing', 'canal-lines', 'canal-labels']
 
     canalLayerIds.forEach(layerId => {
       if (map.getLayer(layerId)) {
@@ -2873,65 +2898,6 @@ export default function ClimateStudioView() {
       }
     }
   }, [showWildfireLayer, wildfireOpacity, mapLoaded])
-
-  // Manage GRACE groundwater tile layer
-  useEffect(() => {
-    if (!mapRef.current || !mapLoaded || !graceTileUrl) return
-
-    const map = mapRef.current
-
-    // Add GRACE raster source and layer if enabled (requires both groundwater layer AND GRACE toggle)
-    if (showGRACELayer && showGroundwaterLayer) {
-      if (!map.getSource('grace-tiles')) {
-        console.log('🌍 Adding GRACE tile source...')
-        map.addSource('grace-tiles', {
-          type: 'raster',
-          tiles: [graceTileUrl],
-          tileSize: 256
-        })
-      }
-
-      if (!map.getLayer('grace-layer')) {
-        console.log('🎨 Adding GRACE raster layer...')
-        map.addLayer({
-          id: 'grace-layer',
-          type: 'raster',
-          source: 'grace-tiles',
-          paint: {
-            'raster-opacity': graceOpacity
-          }
-        }, getBeforeId(map, 'grace-layer'))
-        console.log(`✅ GRACE layer added with opacity ${graceOpacity}`)
-      } else {
-        // Update opacity and make visible
-        map.setPaintProperty('grace-layer', 'raster-opacity', graceOpacity)
-        map.setLayoutProperty('grace-layer', 'visibility', 'visible')
-      }
-    } else {
-      // Hide the layer if it exists
-      if (map.getLayer('grace-layer')) {
-        map.setLayoutProperty('grace-layer', 'visibility', 'none')
-      }
-    }
-
-    return () => {
-      // Cleanup on unmount
-      // Check if map still exists and hasn't been removed
-      if (!map || map._removed) return
-
-      try {
-        if (map.getLayer('grace-layer')) {
-          map.removeLayer('grace-layer')
-        }
-        if (map.getSource('grace-tiles')) {
-          map.removeSource('grace-tiles')
-        }
-      } catch (error) {
-        // Map may have been removed during cleanup
-        console.log('Map already removed during GRACE layer cleanup')
-      }
-    }
-  }, [showGRACELayer, showGroundwaterLayer, graceTileUrl, mapLoaded, graceOpacity])
 
   // Add/remove temperature projection layer based on climate context toggle
   useEffect(() => {
@@ -4344,15 +4310,6 @@ export default function ClimateStudioView() {
                       <input
                         type="checkbox"
                         className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.groundwater}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, groundwater: !layersInWidget.groundwater })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">Historic Groundwater Baseline</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
                         checked={layersInWidget.precipitation}
                         onChange={() => setLayersInWidget({ ...layersInWidget, precipitation: !layersInWidget.precipitation })}
                       />
@@ -4627,32 +4584,6 @@ export default function ClimateStudioView() {
                       onClick={(e) => {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, aquifers: false })
-                      }}
-                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
-                    >
-                      <X className="h-5 w-5 text-muted-foreground" />
-                    </button>
-                  </div>
-                )}
-
-                {/* Groundwater Layer */}
-                {layersInWidget.groundwater && (
-                  <div className={`layer-card cursor-pointer ${showGroundwaterLayer ? 'active' : ''}`} onClick={() => setShowGroundwaterLayer(!showGroundwaterLayer)}>
-                    <TrendingUp className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                    <div className="flex-1 min-w-0 flex flex-col gap-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <h4 className="text-sm font-semibold">Historic Groundwater Baseline</h4>
-                      </div>
-                      {showSourceInfo && (
-                        <p className="text-[11px] text-muted-foreground/80 truncate">
-                          Source: <span className="font-medium text-foreground">NASA GRACE</span>
-                        </p>
-                      )}
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setLayersInWidget({ ...layersInWidget, groundwater: false })
                       }}
                       className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >
@@ -5236,71 +5167,6 @@ export default function ClimateStudioView() {
                     </div>
                   )}
 
-                  {/* Historic Groundwater Baseline */}
-                  {layersInWidget.groundwater && showGRACELayer && (
-                    <div className="feature-card">
-                      <div
-                        className="flex items-center justify-between cursor-pointer mb-2.5"
-                        onClick={() => {
-                          const newCollapsed = new Set(collapsedFeatures)
-                          if (newCollapsed.has('graceGroundwater')) {
-                            newCollapsed.delete('graceGroundwater')
-                          } else {
-                            newCollapsed.add('graceGroundwater')
-                          }
-                          setCollapsedFeatures(newCollapsed)
-                        }}
-                      >
-                        <h4 className="text-[13px] font-semibold">Historic Groundwater Baseline</h4>
-                        <ChevronDown
-                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('graceGroundwater') ? '-rotate-90' : ''}`}
-                        />
-                      </div>
-                      {!collapsedFeatures.has('graceGroundwater') && (
-                        <>
-                          {/* Transparency Control */}
-                          <div className="space-y-2 mb-4">
-                            <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
-                            <Slider
-                              min={0}
-                              max={1}
-                              step={0.05}
-                              value={[graceOpacity]}
-                              onValueChange={(value) => setGraceOpacity(value[0])}
-                              className="mb-2"
-                            />
-                          </div>
-
-                          {/* Description */}
-                          <div className="mb-4 p-3 rounded-lg bg-blue-50/50 dark:bg-blue-900/10">
-                            <p className="text-xs text-muted-foreground">
-                              NASA GRACE satellite measurements showing groundwater storage changes (2002-2024)
-                            </p>
-                          </div>
-
-                          {/* Depletion Status Legend */}
-                          <div className="space-y-1.5">
-                            <h4 className="text-xs font-semibold text-muted-foreground mb-2">Groundwater Trend</h4>
-                            <div className="h-3 w-full rounded" style={{
-                              background: 'linear-gradient(to right, #b2182b 0%, #ef8a62 20%, #fddbc7 40%, #f7f7f7 50%, #d1e5f0 60%, #67a9cf 80%, #2166ac 100%)'
-                            }} />
-                            <div className="flex justify-between text-[9px] text-muted-foreground">
-                              <span>-20cm</span>
-                              <span>Depletion</span>
-                              <span>0</span>
-                              <span>Recharge</span>
-                              <span>+20cm</span>
-                            </div>
-                          </div>
-
-                          <div className="mt-3 text-[10px] text-muted-foreground italic">
-                            Change vs. 2004-2009 baseline
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-
                   {/* Future Temperature Anomaly */}
                   {layersInWidget.temperature && isTemperatureProjectionActive && (
                     <div className="feature-card">
@@ -5794,8 +5660,6 @@ export default function ClimateStudioView() {
                           'rivers',
                           'canals',
                           'aquifers',
-                          'groundwater',
-                          'graceGroundwater',
                           'temperature',
                           'precipitation',
                           'wetBulb',
@@ -6017,15 +5881,6 @@ export default function ClimateStudioView() {
                             <input
                               type="checkbox"
                               className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                              checked={layersInWidget.groundwater}
-                              onChange={() => setLayersInWidget({ ...layersInWidget, groundwater: !layersInWidget.groundwater })}
-                            />
-                            <span className="text-xs font-semibold text-foreground">Groundwater</span>
-                          </label>
-                          <label className="flex items-start gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
                               checked={layersInWidget.aquifers}
                               onChange={() => setLayersInWidget({ ...layersInWidget, aquifers: !layersInWidget.aquifers })}
                             />
@@ -6125,13 +5980,6 @@ export default function ClimateStudioView() {
                           <Waves className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
                           <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Sea Level Rise</span></div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, seaLevel: false }); }}><X className="h-4 w-4" /></button>
-                        </div>
-                      )}
-                      {layersInWidget.groundwater && (
-                        <div className={`layer-card cursor-pointer ${showGroundwaterLayer ? 'active' : ''}`} onClick={() => setShowGroundwaterLayer(!showGroundwaterLayer)}>
-                          <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Groundwater</span></div>
-                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, groundwater: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.aquifers && (
@@ -6579,42 +6427,6 @@ export default function ClimateStudioView() {
                       </div>
                     )}
 
-                    {/* Historic Groundwater Baseline Controls */}
-                    {showGroundwaterLayer && (
-                      <div className="feature-card">
-                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('graceGroundwater') ? n.delete('graceGroundwater') : n.add('graceGroundwater'); setCollapsedFeatures(n) }}>
-                          <h4 className="text-[13px] font-semibold">Historic Groundwater Baseline</h4>
-                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('graceGroundwater') ? '-rotate-90' : ''}`} />
-                        </div>
-                        {!collapsedFeatures.has('graceGroundwater') && (
-                          <div className="space-y-3">
-                            {/* Transparency Control */}
-                            <div className="space-y-2">
-                              <div className="text-[11px] font-medium text-foreground/70 mb-1">Transparency</div>
-                              <Slider
-                                min={0}
-                                max={1}
-                                step={0.05}
-                                value={[graceOpacity]}
-                                onValueChange={(value) => setGraceOpacity(value[0])}
-                                className="w-full"
-                              />
-                              <div className="text-[11px] text-muted-foreground">
-                                {Math.round((1 - graceOpacity) * 100)}% transparent
-                              </div>
-                            </div>
-                            {/* Data Source */}
-                            <div className="mt-3 p-2 bg-background/50 rounded">
-                              <div className="text-[11px] font-semibold mb-1">Data Source</div>
-                              <div className="text-[10px] text-muted-foreground">
-                                NASA GRACE satellite measurements showing groundwater depletion from 2002-2022
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
                     {/* Precipitation & Drought Controls */}
                     {isPrecipitationDroughtActive && (
                       <div className="feature-card">
@@ -6810,7 +6622,7 @@ export default function ClimateStudioView() {
                       onClick={() => {
                         if (collapsedFeatures.size === 0) {
                           // Collapse all
-                          const allFeatures = new Set(['metroWeather', 'factories', 'rivers', 'canals', 'temperature', 'precipitation', 'wetbulb', 'aquifers', 'graceGroundwater', 'sealevel', 'metroPopulation'])
+                          const allFeatures = new Set(['metroWeather', 'factories', 'rivers', 'canals', 'temperature', 'precipitation', 'wetbulb', 'aquifers', 'sealevel', 'metroPopulation'])
                           setCollapsedFeatures(allFeatures)
                         } else {
                           // Expand all
