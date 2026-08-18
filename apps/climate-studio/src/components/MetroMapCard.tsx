@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { ChevronDown, ChevronUp, FileText } from 'lucide-react'
+import { ChevronDown, ChevronUp, FileText, X } from 'lucide-react'
 import { CityReportModal } from './CityReportModal'
 import {
   metroResilience,
@@ -107,9 +107,15 @@ function resolveMetroKey(name: string): string | null {
 export interface MetroMapCardProps {
   metroName: string
   year: number
+  /** Only set when this card was opened by clicking its map dot while the full
+   *  Metro Weather layer is off — there's no other way to dismiss a lone card in
+   *  that case, so it gets a close button next to the score. When the layer is on,
+   *  every city's card is already showing and the layer toggle is the dismiss
+   *  action, so this stays undefined and no close button renders. */
+  onClose?: () => void
 }
 
-export function MetroMapCard({ metroName, year }: MetroMapCardProps) {
+export function MetroMapCard({ metroName, year, onClose }: MetroMapCardProps) {
   const [open, setOpen] = useState(false)
   const [showReport, setShowReport] = useState(false)
   const [expanded, setExpanded] = useState<string | null>(null) // all dimensions collapsed by default
@@ -141,10 +147,12 @@ export function MetroMapCard({ metroName, year }: MetroMapCardProps) {
       className="pointer-events-auto relative rounded-xl border border-[var(--cs-border-default)] bg-[var(--cs-surface-overlay)] px-3 py-2 shadow-lg backdrop-blur"
       style={{ width: open ? 300 : 180 }}
     >
-      <button
-        type="button"
+      <div
+        role="button"
+        tabIndex={0}
         onClick={() => setOpen(o => !o)}
-        className="unstyled-btn flex w-full items-start justify-between gap-2 border-0 bg-transparent p-0 text-left"
+        onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') setOpen(o => !o) }}
+        className="flex w-full cursor-pointer items-start justify-between gap-2"
       >
         {/* min-w-0 lets the name truncate instead of shoving the score out */}
         <div className="min-w-0 flex-1">
@@ -156,13 +164,33 @@ export function MetroMapCard({ metroName, year }: MetroMapCardProps) {
             {rankInfo ? `rank ${rankInfo.rank} of ${rankInfo.total} · ` : ''}{r.year}
           </p>
         </div>
-        <span
-          className="shrink-0 text-[22px] font-semibold leading-none tabular-nums"
-          style={{ color: scoreColor(r.composite) }}
-        >
-          {Math.round(r.composite)}
-        </span>
-      </button>
+        <div className="flex shrink-0 items-center gap-1">
+          <span
+            className="text-[22px] font-semibold leading-none tabular-nums"
+            style={{ color: scoreColor(r.composite) }}
+          >
+            {Math.round(r.composite)}
+          </span>
+          {onClose && (
+            <button
+              type="button"
+              onClick={e => { e.stopPropagation(); onClose() }}
+              aria-label={`Close ${cityName} card`}
+              className="unstyled-btn flex shrink-0 items-center justify-center rounded-full"
+              style={{
+                width: 22,
+                height: 22,
+                background: 'var(--cs-surface-elevated)',
+                border: '1px solid var(--cs-border-default)',
+                boxShadow: 'var(--cs-shadow-md)',
+                color: 'var(--cs-text-tertiary)'
+              }}
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
 
       {open && (
         <div className="mt-2 text-[var(--cs-text-primary)]">
@@ -240,13 +268,10 @@ export function MetroMapCard({ metroName, year }: MetroMapCardProps) {
           </button>
         </div>
       )}
-      {/* City position marker. Sits on the panel's bottom edge with translate-y-1/2,
-          so the panel overlaps its top half and the dot reads as the map anchor. */}
-      <div
-        aria-hidden
-        className="absolute bottom-0 left-1/2 h-3 w-3 -translate-x-1/2 translate-y-1/2 rounded-full shadow-md"
-        style={{ background: 'var(--cs-brand-primary)', border: '2px solid var(--cs-surface-elevated)' }}
-      />
+      {/* No card-drawn position marker here anymore — the always-on
+          metro-weather-dots map layer (ClimateStudioView.tsx) now marks this
+          exact point whether the card is open or not. Having both stacked a
+          second dot directly under this one. */}
 
       {showReport && (
         <CityReportModal metroKey={metroKey} year={year} onClose={() => setShowReport(false)} />

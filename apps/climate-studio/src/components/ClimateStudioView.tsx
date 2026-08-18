@@ -1,5 +1,5 @@
 // Water Access View - Groundwater, Rivers, Lakes, Metro Humidity
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, type MutableRefObject } from 'react'
 import { Link } from 'react-router-dom'
 import mapboxgl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -1441,8 +1441,10 @@ export default function ClimateStudioView() {
           type: 'symbol',
           source: 'river-name-points',
           layout: {
-            'text-field': ['get', 'name'],
-            'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
+            // 'R. ' prefix + an italic font so river names read distinctly from
+            // city/place labels at a glance, without changing color or size.
+            'text-field': ['concat', 'R. ', ['get', 'name']],
+            'text-font': ['Open Sans Italic', 'Arial Unicode MS Regular'],
             'text-size': 12,
             'text-letter-spacing': 0.1,
             'text-offset': [0, -1],
@@ -1979,7 +1981,10 @@ export default function ClimateStudioView() {
             'text-field': ['get', 'city'],
             'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold'],
             'text-size': 12,
-            'text-anchor': 'center',
+            // Anchored below the point (not 'center') so the label doesn't sit directly
+            // on top of the always-on metro-city-dots marker at the same coordinate.
+            'text-anchor': 'top',
+            'text-offset': [0, 0.7],
             'text-allow-overlap': false,
             'text-ignore-placement': false,
             visibility: showMetroHumidityLayer ? 'visible' : 'none'
@@ -1991,6 +1996,13 @@ export default function ClimateStudioView() {
           }
         }, getBeforeId(map, 'metro-humidity-labels'))
       }
+
+      // Metro dots used to live here as a map canvas layer, but a canvas layer can
+      // never render above the MetroMapCard DOM overlay no matter its z-index — the
+      // whole map is one canvas, always beneath the DOM overlay div. They're now a
+      // single DOM-rendered dot per metro, always on regardless of showMetroHumidityLayer,
+      // rendered in its own overlay block after the Metro Weather cards (search
+      // "metro-city-dots" further down) so it can sit visually in front of the cards.
 
       console.log('✅ All base map layers set up successfully')
 
@@ -3340,6 +3352,11 @@ export default function ClimateStudioView() {
         console.log('Map already removed during move/zoom listener cleanup')
       }
     }
+    // Gated on showMetroHumidityLayer again: this forceUpdate re-renders the whole
+    // (very large) ClimateStudioView component on every pan/zoom frame. The always-on
+    // metro city dots track the map independently now, in their own small
+    // MetroCityDots component below — so this listener only needs to run while the
+    // Metro Weather cards themselves are actually on screen.
   }, [mapLoaded, showMetroHumidityLayer])
 
   // Factories Layer - Map Visualization
@@ -6912,12 +6929,16 @@ export default function ClimateStudioView() {
                     position: 'absolute',
                     left: `${point.x}px`,
                     top: `${point.y}px`,
-                    // Bottom-anchored above the metro point: the caret points at the
-                    // location and expanding the card grows it upward, keeping the
-                    // bottom edge fixed.
-                    transform: 'translate(-50%, calc(-100% - 10px))',
+                    // Bottom-anchored above the metro point: the card's rounded bottom edge
+                    // sits right at the metro-city-dots dot below it (rendered separately,
+                    // unconditionally, in its own always-on-top overlay — see the block
+                    // after this one), so the card overlaps the dot's top half and its
+                    // bottom half peeks out on top, in front of the card.
+                    transform: 'translate(-50%, calc(-100% + 2px))',
                     pointerEvents: 'auto',
-                    zIndex: isActive ? 1000 : 100 // Higher z-index when active
+                    // Kept under --cs-z-detail-panel (1000, tokens.css) so an open card
+                    // never covers a Dam/Factory/AI-Center panel or the side panels above it.
+                    zIndex: isActive ? 850 : 100
                   }}
                 >
                   {/* Unified metro card (collapsed by default; dimensions expand like Heat).
@@ -6933,6 +6954,147 @@ export default function ClimateStudioView() {
         )
       }
 
+      {/* Always-on metro city dots, independent of showMetroHumidityLayer — see the
+          MetroCityDots component defined after this one for why it's split out. */}
+      {mapLoaded && (
+        <MetroCityDots
+          mapRef={mapRef}
+          theme={theme}
+          projectionYear={projectionYear}
+          showMetroHumidityLayer={showMetroHumidityLayer}
+        />
+      )}
+
     </div >
+  )
+}
+
+/**
+ * Renders the always-on metro location dots as their own tiny component, with its
+ * own map move/zoom listener and its own local state.
+ *
+ * These dots need to track the map continuously, on every pan/zoom frame, all the
+ * time — including for users who never touch the Metro Weather layer. If that
+ * listener lived in ClimateStudioView itself (as it briefly did), every pan/zoom
+ * frame would re-render the ENTIRE ~7,000-line parent component just to move some
+ * dots, which is a real perf regression, not a wash. Isolating it here means
+ * panning the map only ever re-renders this small subtree — the parent's own
+ * re-render stays gated to when the Metro Weather cards are actually visible,
+ * same as before dots existed.
+ *
+ * When showMetroHumidityLayer is off, a dot becomes clickable: it opens that one
+ * city's MetroMapCard right here (with a close button, since there's no layer
+ * toggle to dismiss a lone card by). When the layer is on, every city's card is
+ * already showing via the full list in ClimateStudioView, so dots go back to
+ * decorative-only and any open single card clears itself (effect below) rather
+ * than sitting there duplicating one of the full-list cards.
+ */
+function MetroCityDots({
+  mapRef,
+  theme,
+  projectionYear,
+  showMetroHumidityLayer
+}: {
+  mapRef: MutableRefObject<mapboxgl.Map | null>
+  theme: string
+  projectionYear: number
+  showMetroHumidityLayer: boolean
+}) {
+  const [, forceDotsUpdate] = useState(0)
+  const [selectedCity, setSelectedCity] = useState<string | null>(null)
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map) return
+
+    const handleMove = () => forceDotsUpdate(prev => prev + 1)
+    map.on('move', handleMove)
+    map.on('zoom', handleMove)
+
+    return () => {
+      if (!map || map._removed) return
+      try {
+        map.off('move', handleMove)
+        map.off('zoom', handleMove)
+      } catch {
+        // map already torn down
+      }
+    }
+  }, [mapRef])
+
+  // The full Metro Weather layer already shows every city's card — clear any
+  // dot-opened single card so it doesn't sit there as a duplicate.
+  useEffect(() => {
+    if (showMetroHumidityLayer) setSelectedCity(null)
+  }, [showMetroHumidityLayer])
+
+  const map = mapRef.current
+  if (!map) return null
+
+  const selectedFeature = selectedCity
+    ? (metroHumidityData as any).features.find((f: any) => f.properties.city === selectedCity)
+    : null
+
+  return (
+    <div style={{ pointerEvents: 'none' }}>
+      {(metroHumidityData as any).features.map((feature: any, index: number) => {
+        const { city, lat, lng } = feature.properties
+        const point = map.project([lng, lat])
+        return (
+          <div
+            key={`metro-city-dot-${index}`}
+            aria-hidden={showMetroHumidityLayer}
+            aria-label={showMetroHumidityLayer ? undefined : `Show resilience card for ${city}`}
+            role={showMetroHumidityLayer ? undefined : 'button'}
+            onClick={showMetroHumidityLayer ? undefined : () => setSelectedCity(city)}
+            style={{
+              position: 'absolute',
+              left: `${point.x}px`,
+              top: `${point.y}px`,
+              transform: 'translate(-50%, -50%)',
+              width: 10,
+              height: 10,
+              borderRadius: '50%',
+              background: '#437efc', // var(--cs-brand-primary)
+              border: `2px solid ${theme === 'light' ? '#ffffff' : '#000000'}`,
+              boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+              // Stays under --cs-z-map-popup (900, tokens.css) — the ceiling documented
+              // for map-anchored popups/dots — so it never covers the side panels
+              // (--cs-z-side-panel: 1500) or bottom-center detail panels (--cs-z-detail-panel: 1000).
+              // Kept just above the card's active z-index (850) so the dot still pokes
+              // through in front of the bubble, per the earlier styling pass.
+              zIndex: 860,
+              // Decorative (and inert) while the full layer is on — every city
+              // already has a card. Clickable once it's off, so a dot is the
+              // only way left to pull up a single city's card.
+              pointerEvents: showMetroHumidityLayer ? 'none' : 'auto',
+              cursor: showMetroHumidityLayer ? undefined : 'pointer'
+            }}
+          />
+        )
+      })}
+
+      {!showMetroHumidityLayer && selectedFeature && (() => {
+        const { city, lat, lng } = selectedFeature.properties
+        const point = map.project([lng, lat])
+        return (
+          <div
+            style={{
+              position: 'absolute',
+              left: `${point.x}px`,
+              top: `${point.y}px`,
+              // Same overlap-the-dot positioning as the full card list.
+              transform: 'translate(-50%, calc(-100% + 2px))',
+              pointerEvents: 'auto',
+              // Matches the full card list's active z-index (850, tokens.css scale) —
+              // safely under the side panels and bottom-center detail panels.
+              zIndex: 850
+            }}
+          >
+            <MetroMapCard metroName={city} year={projectionYear} onClose={() => setSelectedCity(null)} />
+          </div>
+        )
+      })()}
+    </div>
   )
 }
