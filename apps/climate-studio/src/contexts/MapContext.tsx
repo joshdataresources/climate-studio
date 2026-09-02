@@ -59,6 +59,8 @@ const DEFAULT_VIEWPORT: ViewportState = {
   zoom: 5.5,
 }
 
+const SAVED_VIEWS_STORAGE_KEY = 'climate-saved-views'
+
 const DEFAULT_SAVED_VIEW: SavedView = {
   id: 'south-west',
   name: 'South West',
@@ -120,7 +122,25 @@ export function MapProvider({ children }: MapProviderProps) {
   const [searchResults, setSearchResults] = useState<GeoSearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [savedViews, setSavedViewsInternal] = useState<SavedView[]>(() => {
-    // Always start fresh with the South West view as default
+    // Saves have always been written to localStorage; they just were never read
+    // back, so views did not survive a reload. Hydrate them here.
+    //
+    // An absent key means first run, and seeds the South West default. A key that
+    // is present and parses is honoured as-is — including an empty list — so a user
+    // who deletes every view does not have the default resurrect on next load.
+    try {
+      const stored = localStorage.getItem(SAVED_VIEWS_STORAGE_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (Array.isArray(parsed)) {
+          return parsed
+            .map(normalizeSavedView)
+            .filter((view): view is SavedView => view !== null)
+        }
+      }
+    } catch (e) {
+      console.warn('Could not restore saved views, starting from the default:', e)
+    }
     return [DEFAULT_SAVED_VIEW]
   })
   
@@ -133,7 +153,7 @@ export function MapProvider({ children }: MapProviderProps) {
   const setSavedViews = useCallback((views: SavedView[]) => {
     setSavedViewsInternal(views)
     try {
-      localStorage.setItem('climate-saved-views', JSON.stringify(views))
+      localStorage.setItem(SAVED_VIEWS_STORAGE_KEY, JSON.stringify(views))
     } catch (e) {
       console.error('Failed to save views:', e)
     }
@@ -261,7 +281,12 @@ export function MapProvider({ children }: MapProviderProps) {
     setSavedViews(updated)
   }, [savedViews, setSavedViews])
 
-  // Load first saved view on mount
+  // Open on the first saved view. On a fresh install that is still the South West
+  // default; once the user has saved and reordered their own views, the top one wins.
+  //
+  // Position only, deliberately: ClimateContext already restores the user's last
+  // active layers from its own storage, and forcing this view's layers on every load
+  // would fight that. Layers and forecast date are applied when a view is clicked.
   React.useEffect(() => {
     if (savedViews.length > 0) {
       setViewportInternal(savedViews[0].viewport)
