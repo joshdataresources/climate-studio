@@ -5,6 +5,8 @@ import { Button } from "../ui/button"
 import { Input } from "../ui/input"
 import { useMap } from "../../contexts/MapContext"
 import { useTheme } from "../../contexts/ThemeContext"
+import { useClimate } from "@climate-studio/core"
+import type { ClimateControlsState } from "@climate-studio/core"
 import { Loader2, MapPin, Search, Save, Bookmark, GripVertical, MoreHorizontal, Trash2, Pencil } from "lucide-react"
 import {
   DropdownMenu,
@@ -40,7 +42,7 @@ interface SavedView {
   name: string
   viewport: ViewportState
   activeLayerIds: string[]
-  controls: any
+  controls: Partial<ClimateControlsState>
 }
 
 interface GeoSearchResult {
@@ -180,8 +182,10 @@ function SortableViewItem({
 export interface SearchAndViewsPanelProps {
   viewType: 'climate' | 'waterAccess' | 'factories'
   searchPlaceholder?: string
+  // Optional overrides for what a saved view captures. Left undefined (the normal
+  // case) the map context snapshots the live layers and climate controls itself.
   activeLayerIds?: string[]
-  controls?: any
+  controls?: Partial<ClimateControlsState>
   // Optional custom search handler for views with special search logic (like factories)
   onCustomSearch?: (term: string) => void
   customSearchResults?: Array<{
@@ -198,14 +202,15 @@ export interface SearchAndViewsPanelProps {
 export function SearchAndViewsPanel({
   viewType,
   searchPlaceholder = "Search for a city, state, or country",
-  activeLayerIds = [],
-  controls = {},
+  activeLayerIds,
+  controls,
   onCustomSearch,
   customSearchResults,
   onCustomResultClick,
   searchExtra,
 }: SearchAndViewsPanelProps) {
   const { theme } = useTheme()
+  const { activeLayerIds: liveLayerIds, controls: liveControls } = useClimate()
   const {
     viewport,
     searchTerm,
@@ -259,10 +264,29 @@ export function SearchAndViewsPanel({
   }, [])
 
   const hasViewChanged = useCallback((view: SavedView) => {
-    return viewport.center.lat !== view.viewport.center.lat ||
+    const movedMap =
+      viewport.center.lat !== view.viewport.center.lat ||
       viewport.center.lng !== view.viewport.center.lng ||
       viewport.zoom !== view.viewport.zoom
-  }, [viewport])
+    if (movedMap) return true
+
+    // A view now also pins its layers and forecast date, so the "unsaved changes"
+    // marker has to account for those. Fields the view never recorded (older saves)
+    // are skipped, otherwise every legacy view would read as permanently changed.
+    if (view.activeLayerIds?.length) {
+      const saved = [...view.activeLayerIds].sort().join('|')
+      const live = [...liveLayerIds].sort().join('|')
+      if (saved !== live) return true
+    }
+
+    const savedControls = view.controls ?? {}
+    if (savedControls.projectionYear !== undefined &&
+        savedControls.projectionYear !== liveControls.projectionYear) return true
+    if (savedControls.scenario !== undefined &&
+        savedControls.scenario !== liveControls.scenario) return true
+
+    return false
+  }, [viewport, liveLayerIds, liveControls])
 
   const editSavedView = useCallback((viewId: string) => {
     const view = savedViews.find(v => v.id === viewId)

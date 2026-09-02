@@ -1,5 +1,6 @@
 // Contexts
 export { ClimateProvider, useClimate } from './contexts/ClimateContext';
+export type { ClimateControlsState } from './contexts/ClimateContext';
 
 // Config
 export { climateLayers, getClimateLayer } from './config/climateLayers';

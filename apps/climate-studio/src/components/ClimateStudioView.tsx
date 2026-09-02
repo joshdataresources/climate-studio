@@ -3989,7 +3989,7 @@ export default function ClimateStudioView() {
 
   const handleSaveCurrentView = useCallback(() => {
     if (!newViewName.trim()) return
-    saveCurrentView(newViewName, [], {})
+    saveCurrentView(newViewName)
     setNewViewName('')
     setShowSaveDialog(false)
   }, [newViewName, saveCurrentView])
@@ -4215,8 +4215,6 @@ export default function ClimateStudioView() {
             <SearchAndViewsPanel
               viewType="waterAccess"
               searchPlaceholder="Search for a city, state, or country"
-              activeLayerIds={[]}
-              controls={controls}
             />
           </div>
 
@@ -5719,8 +5717,6 @@ export default function ClimateStudioView() {
                 <SearchAndViewsPanel
                   viewType="waterAccess"
                   searchPlaceholder="Search for a city, state, or country"
-                  activeLayerIds={[]}
-                  controls={controls}
                   searchExtra={
                     <button
                       className="flex-shrink-0 p-1 hover:bg-black/5 rounded transition-colors border-none bg-transparent cursor-pointer"

@@ -3,7 +3,7 @@ import { ClimateLayerId, climateLayers } from '../config/climateLayers';
 
 type DisplayStyle = 'depth' | 'confidence';
 
-interface ClimateControlsState {
+export interface ClimateControlsState {
   scenario: string;
   projectionYear: number;
   seaLevelFeet: number;
@@ -66,6 +66,23 @@ interface ClimateContextValue {
   setWetBulbOpacity: (value: number) => void;
   activeLayerIds: ClimateLayerId[];
   setActiveLayerIds: (layerIds: ClimateLayerId[]) => void;
+  /**
+   * Restore an exact layer selection and/or control snapshot in one shot — used when
+   * loading a saved view.
+   *
+   * Differs from setActiveLayerIds in two ways that matter for restore:
+   *  - it bypasses the accidental-clear safeguard, so a view saved with no layers
+   *    restores as no layers instead of silently falling back to the defaults;
+   *  - it reconciles localStorage and the restore watchdog in the same tick, so the
+   *    watchdog effect does not immediately revert the layers you just applied.
+   *
+   * `controls` is applied as a partial: unknown keys are ignored (tolerating snapshots
+   * written by older builds) and omitted keys keep their current value.
+   */
+  applyViewState: (state: {
+    activeLayerIds?: ClimateLayerId[];
+    controls?: Partial<ClimateControlsState>;
+  }) => void;
   toggleLayer: (layerId: ClimateLayerId) => void;
   isLayerActive: (layerId: ClimateLayerId) => boolean;
   layerErrors: LayerError[];
@@ -318,6 +335,78 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
     });
   }, [clearLayerErrors, setActiveLayerIds]);
 
+  // Setters keyed by control name, so a saved snapshot can be replayed generically.
+  // useState setters are referentially stable, so this map never needs to change.
+  const controlSetters = useMemo(
+    () => ({
+      scenario: setScenario,
+      projectionYear: setProjectionYear,
+      seaLevelFeet: setSeaLevelFeet,
+      analysisDate: setAnalysisDate,
+      displayStyle: setDisplayStyle,
+      resolution: setResolution,
+      projectionOpacity: setProjectionOpacity,
+      seaLevelOpacity: setSeaLevelOpacity,
+      urbanHeatOpacity: setUrbanHeatOpacity,
+      urbanHeatSeason: setUrbanHeatSeason,
+      urbanHeatColorScheme: setUrbanHeatColorScheme,
+      urbanExpansionOpacity: setUrbanExpansionOpacity,
+      reliefStyle: setReliefStyle,
+      reliefOpacity: setReliefOpacity,
+      temperatureMode: setTemperatureMode,
+      droughtOpacity: setDroughtOpacity,
+      droughtMetric: setDroughtMetric,
+      megaregionOpacity: setMegaregionOpacity,
+      megaregionDataMode: setMegaregionDataMode,
+      megaregionShowPopulation: setMegaregionShowPopulation,
+      megaregionShowTemperature: setMegaregionShowTemperature,
+      megaregionAnimating: setMegaregionAnimating,
+      useRealData: setUseRealData,
+      wetBulbOpacity: setWetBulbOpacity
+    }) as Record<keyof ClimateControlsState, (value: never) => void>,
+    []
+  );
+
+  const applyViewState = useCallback(
+    (state: {
+      activeLayerIds?: ClimateLayerId[];
+      controls?: Partial<ClimateControlsState>;
+    }) => {
+      if (state.controls) {
+        for (const [key, value] of Object.entries(state.controls)) {
+          if (value === undefined) continue;
+          // A snapshot captured mid-animation would otherwise restart the megaregion
+          // loop, which ticks projectionYear every second and would immediately walk
+          // the restored year forward. Restore always lands paused.
+          if (key === 'megaregionAnimating') continue;
+          const setter = controlSetters[key as keyof ClimateControlsState];
+          if (setter) setter(value as never);
+        }
+        setMegaregionAnimating(false);
+      }
+
+      if (state.activeLayerIds) {
+        const restored = state.activeLayerIds.filter(
+          (id): id is ClimateLayerId => typeof id === 'string'
+        );
+
+        // Write storage and the watchdog marker before the state update so the
+        // restore-from-localStorage effect sees a consistent world and stands down.
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(restored));
+        } catch (error) {
+          console.warn('WARN Failed to persist restored layers:', error);
+        }
+        lastRestoredRef.current = JSON.stringify([...restored].sort());
+
+        // Bypasses the setActiveLayerIds safeguard on purpose: this is an explicit
+        // user restore, not an accidental reset.
+        setActiveLayerIdsState(restored);
+      }
+    },
+    [controlSetters]
+  );
+
   const controls: ClimateControlsState = useMemo(
     () => ({
       scenario,
@@ -382,6 +471,7 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
       setWetBulbOpacity,
       activeLayerIds,
       setActiveLayerIds,
+      applyViewState,
       toggleLayer,
       isLayerActive,
       layerErrors,
@@ -392,6 +482,7 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
     [
       controls,
       activeLayerIds,
+      applyViewState,
       toggleLayer,
       isLayerActive,
       layerErrors,

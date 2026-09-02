@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useRef, ReactNode } from 'react'
+import { useClimate } from '@climate-studio/core'
+import type { ClimateControlsState, ClimateLayerId } from '@climate-studio/core'
 
 interface ViewportState {
   center: { lat: number; lng: number }
@@ -12,12 +14,44 @@ interface GeoSearchResult {
   boundingbox?: [string, string, string, string]
 }
 
+/**
+ * A saved view is a full snapshot of what the user was looking at, not just where.
+ * `controls` carries the climate control state — including the forecast year
+ * (`projectionYear`) and emissions `scenario` — so loading a view puts the map back
+ * on the same layers, at the same forecast date, as when it was saved.
+ */
 interface SavedView {
   id: string
   name: string
   viewport: ViewportState
   activeLayerIds: string[]
-  controls: any
+  controls: Partial<ClimateControlsState>
+}
+
+/**
+ * Views saved by older builds may predate `activeLayerIds`/`controls`, or may have
+ * stored junk in them. Normalise on read so a stale entry can never crash a restore.
+ */
+const normalizeSavedView = (view: any): SavedView | null => {
+  if (!view || typeof view !== 'object') return null
+  const center = view.viewport?.center
+  if (typeof center?.lat !== 'number' || typeof center?.lng !== 'number') return null
+
+  return {
+    id: typeof view.id === 'string' ? view.id : `view-${Date.now()}`,
+    name: typeof view.name === 'string' ? view.name : 'Untitled view',
+    viewport: {
+      center: { lat: center.lat, lng: center.lng },
+      zoom: typeof view.viewport?.zoom === 'number' ? view.viewport.zoom : DEFAULT_VIEWPORT.zoom,
+    },
+    activeLayerIds: Array.isArray(view.activeLayerIds)
+      ? view.activeLayerIds.filter((id: unknown) => typeof id === 'string')
+      : [],
+    controls:
+      view.controls && typeof view.controls === 'object' && !Array.isArray(view.controls)
+        ? view.controls
+        : {},
+  }
 }
 
 const DEFAULT_VIEWPORT: ViewportState = {
@@ -54,7 +88,16 @@ export interface MapContextValue {
   savedViews: SavedView[]
   setSavedViews: (views: SavedView[]) => void
   loadSavedView: (view: SavedView) => void
-  saveCurrentView: (name: string, activeLayerIds: string[], controls: any) => void
+  /**
+   * Snapshot the current map. `activeLayerIds` and `controls` default to the live
+   * climate state — callers only pass them to deliberately override what is captured
+   * (e.g. the factories view, which has no climate layers of its own).
+   */
+  saveCurrentView: (
+    name: string,
+    activeLayerIds?: string[],
+    controls?: Partial<ClimateControlsState>
+  ) => void
   deleteSavedView: (viewId: string) => void
   updateSavedViewName: (viewId: string, name: string) => void
 }
@@ -66,6 +109,12 @@ interface MapProviderProps {
 }
 
 export function MapProvider({ children }: MapProviderProps) {
+  // MapProvider is always mounted inside ClimateProvider (see App.tsx), so the live
+  // layer selection and climate controls are readable here. Sourcing them from the
+  // context rather than from caller props is deliberate: every call site used to pass
+  // an empty array, so saved views captured no layers at all.
+  const { activeLayerIds: liveLayerIds, controls: liveControls, applyViewState } = useClimate()
+
   const [viewport, setViewportInternal] = useState<ViewportState>(DEFAULT_VIEWPORT)
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState<GeoSearchResult[]>([])
@@ -160,23 +209,45 @@ export function MapProvider({ children }: MapProviderProps) {
   }, [setViewport])
 
   const loadSavedView = useCallback((view: SavedView) => {
-    setViewport(view.viewport)
-  }, [setViewport])
+    const restored = normalizeSavedView(view)
+    if (!restored) {
+      console.warn('Ignored a saved view with no usable viewport:', view)
+      return
+    }
 
-  const saveCurrentView = useCallback((name: string, activeLayerIds: string[], controls: any) => {
+    setViewport(restored.viewport)
+
+    // Only hand back layers/controls the view actually recorded. Views saved before
+    // this existed carry neither, and should keep behaving as position-only bookmarks
+    // rather than wiping the user's current layers on load.
+    applyViewState({
+      activeLayerIds: restored.activeLayerIds.length
+        ? (restored.activeLayerIds as ClimateLayerId[])
+        : undefined,
+      controls: Object.keys(restored.controls).length ? restored.controls : undefined,
+    })
+  }, [setViewport, applyViewState])
+
+  const saveCurrentView = useCallback((
+    name: string,
+    activeLayerIds?: string[],
+    controls?: Partial<ClimateControlsState>
+  ) => {
     if (!name.trim()) return
 
     const newView: SavedView = {
       id: `view-${Date.now()}`,
       name: name.trim(),
       viewport: viewport,
-      activeLayerIds,
-      controls
+      activeLayerIds: activeLayerIds ?? [...liveLayerIds],
+      // Copy the snapshot: `liveControls` is a memoised object that is replaced on
+      // every control change, and we must not hold a reference that keeps mutating.
+      controls: { ...(controls ?? liveControls) }
     }
 
     const updatedViews = [...savedViews, newView]
     setSavedViews(updatedViews)
-  }, [viewport, savedViews, setSavedViews])
+  }, [viewport, savedViews, setSavedViews, liveLayerIds, liveControls])
 
   const deleteSavedView = useCallback((viewId: string) => {
     const updated = savedViews.filter(v => v.id !== viewId)
