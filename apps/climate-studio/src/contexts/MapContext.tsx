@@ -69,6 +69,31 @@ const DEFAULT_SAVED_VIEW: SavedView = {
   controls: {}
 }
 
+/**
+ * Saves have always been written to localStorage; they just were never read back,
+ * so views did not survive a reload. This is that missing read.
+ *
+ * An absent key means first run, and seeds the South West default. A key that is
+ * present and parses is honoured as-is — including an empty list — so a user who
+ * deletes every view does not have the default resurrect on the next load.
+ */
+const loadStoredViews = (): SavedView[] => {
+  try {
+    const stored = localStorage.getItem(SAVED_VIEWS_STORAGE_KEY)
+    if (stored) {
+      const parsed = JSON.parse(stored)
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map(normalizeSavedView)
+          .filter((view): view is SavedView => view !== null)
+      }
+    }
+  } catch (e) {
+    console.warn('Could not restore saved views, starting from the default:', e)
+  }
+  return [DEFAULT_SAVED_VIEW]
+}
+
 export interface MapContextValue {
   // Viewport state - shared across views
   viewport: ViewportState
@@ -117,32 +142,19 @@ export function MapProvider({ children }: MapProviderProps) {
   // an empty array, so saved views captured no layers at all.
   const { activeLayerIds: liveLayerIds, controls: liveControls, applyViewState } = useClimate()
 
-  const [viewport, setViewportInternal] = useState<ViewportState>(DEFAULT_VIEWPORT)
+  // savedViews is declared before viewport on purpose: the opening viewport is
+  // derived from the first saved view, and it has to be right on the very first
+  // render. The map is created from `viewport` by a child effect, and child effects
+  // run before this provider's own, so seeding the viewport from an effect left the
+  // map built at DEFAULT_VIEWPORT and the first moveend wrote that default straight
+  // back over the restored position.
+  const [savedViews, setSavedViewsInternal] = useState<SavedView[]>(loadStoredViews)
+  const [viewport, setViewportInternal] = useState<ViewportState>(
+    () => savedViews[0]?.viewport ?? DEFAULT_VIEWPORT
+  )
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState<GeoSearchResult[]>([])
   const [isSearching, setIsSearching] = useState(false)
-  const [savedViews, setSavedViewsInternal] = useState<SavedView[]>(() => {
-    // Saves have always been written to localStorage; they just were never read
-    // back, so views did not survive a reload. Hydrate them here.
-    //
-    // An absent key means first run, and seeds the South West default. A key that
-    // is present and parses is honoured as-is — including an empty list — so a user
-    // who deletes every view does not have the default resurrect on next load.
-    try {
-      const stored = localStorage.getItem(SAVED_VIEWS_STORAGE_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        if (Array.isArray(parsed)) {
-          return parsed
-            .map(normalizeSavedView)
-            .filter((view): view is SavedView => view !== null)
-        }
-      }
-    } catch (e) {
-      console.warn('Could not restore saved views, starting from the default:', e)
-    }
-    return [DEFAULT_SAVED_VIEW]
-  })
   
   const searchControllerRef = useRef<AbortController | null>(null)
 
@@ -280,18 +292,6 @@ export function MapProvider({ children }: MapProviderProps) {
     )
     setSavedViews(updated)
   }, [savedViews, setSavedViews])
-
-  // Open on the first saved view. On a fresh install that is still the South West
-  // default; once the user has saved and reordered their own views, the top one wins.
-  //
-  // Position only, deliberately: ClimateContext already restores the user's last
-  // active layers from its own storage, and forcing this view's layers on every load
-  // would fight that. Layers and forecast date are applied when a view is clicked.
-  React.useEffect(() => {
-    if (savedViews.length > 0) {
-      setViewportInternal(savedViews[0].viewport)
-    }
-  }, []) // Only run once
 
   const value: MapContextValue = {
     viewport,

@@ -2143,6 +2143,20 @@ export default function ClimateStudioView() {
           zoom: map.getZoom()
         })
 
+        const currentZoom = map.getZoom()
+
+        // Keep the shared viewport in sync with the camera.
+        //
+        // This must run whatever layers are active. It used to sit below the
+        // aquifer guard, so the context viewport only tracked the map while the
+        // Aquifers layer happened to be on — with it off the viewport stayed pinned
+        // at DEFAULT_VIEWPORT, every saved view recorded the default position, and
+        // loading any view zoomed the map back out to 5.5.
+        setViewport({
+          center: { lat: map.getCenter().lat, lng: map.getCenter().lng },
+          zoom: currentZoom
+        })
+
         if (!showAquifersLayerRef.current) return
 
         fetchAquiferData({
@@ -2150,14 +2164,6 @@ export default function ClimateStudioView() {
           south: sw.lat - padding,
           east: ne.lng + padding,
           west: sw.lng - padding
-        })
-
-        const currentZoom = map.getZoom()
-
-        // Update shared viewport state
-        setViewport({
-          center: { lat: map.getCenter().lat, lng: map.getCenter().lng },
-          zoom: currentZoom
         })
 
         // Show microclimate banner when zooming in past level 10
