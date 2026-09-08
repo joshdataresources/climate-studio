@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useRef, ReactNode } from 'react'
 import { useClimate } from '@climate-studio/core'
 import type { ClimateControlsState, ClimateLayerId } from '@climate-studio/core'
+import { readSharedView } from '../utils/shareableView'
 
 interface ViewportState {
   center: { lat: number; lng: number }
@@ -148,9 +149,13 @@ export function MapProvider({ children }: MapProviderProps) {
   // run before this provider's own, so seeding the viewport from an effect left the
   // map built at DEFAULT_VIEWPORT and the first moveend wrote that default straight
   // back over the restored position.
+  // A ?lat=&lng=&z=&layers=&year= link is how a view travels between browsers, so it
+  // outranks the local saved list. Read once per mount, before anything renders.
+  const [sharedView] = useState(readSharedView)
+
   const [savedViews, setSavedViewsInternal] = useState<SavedView[]>(loadStoredViews)
   const [viewport, setViewportInternal] = useState<ViewportState>(
-    () => savedViews[0]?.viewport ?? DEFAULT_VIEWPORT
+    () => sharedView?.viewport ?? savedViews[0]?.viewport ?? DEFAULT_VIEWPORT
   )
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState<GeoSearchResult[]>([])
@@ -292,6 +297,18 @@ export function MapProvider({ children }: MapProviderProps) {
     )
     setSavedViews(updated)
   }, [savedViews, setSavedViews])
+
+  // The viewport from a share link is applied synchronously above (the map is built
+  // from it). Layers and controls have to go through ClimateContext, so they land
+  // here on mount. Position-only links leave the current layers untouched.
+  React.useEffect(() => {
+    if (!sharedView) return
+    if (!sharedView.activeLayerIds && !sharedView.controls) return
+    applyViewState({
+      activeLayerIds: sharedView.activeLayerIds as ClimateLayerId[] | undefined,
+      controls: sharedView.controls,
+    })
+  }, []) // once, from the URL the page was opened with
 
   const value: MapContextValue = {
     viewport,

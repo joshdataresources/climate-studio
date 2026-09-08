@@ -6,8 +6,9 @@ import { Input } from "../ui/input"
 import { useMap } from "../../contexts/MapContext"
 import { useTheme } from "../../contexts/ThemeContext"
 import { useClimate } from "@climate-studio/core"
+import { buildShareUrl, copyToClipboard } from "../../utils/shareableView"
 import type { ClimateControlsState } from "@climate-studio/core"
-import { Loader2, MapPin, Search, Save, Bookmark, GripVertical, MoreHorizontal, Trash2, Pencil } from "lucide-react"
+import { Loader2, MapPin, Search, Save, Bookmark, GripVertical, MoreHorizontal, Trash2, Pencil, Link2, Check } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,6 +57,8 @@ interface SortableViewItemProps {
   view: SavedView
   hasViewChanged: (view: SavedView) => boolean
   loadSavedView: (view: SavedView) => void
+  shareSavedView: (view: SavedView) => void
+  sharedViewId: string | null
   updateSavedView: (id: string) => void
   deleteSavedView: (id: string) => void
   editSavedView: (id: string) => void
@@ -70,6 +73,8 @@ function SortableViewItem({
   view,
   hasViewChanged,
   loadSavedView,
+  shareSavedView,
+  sharedViewId,
   updateSavedView,
   deleteSavedView,
   editSavedView,
@@ -166,6 +171,19 @@ function SortableViewItem({
             <Pencil className="h-4 w-4 mr-2" />
             Edit Name
           </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => shareSavedView(view)}>
+            {sharedViewId === view.id ? (
+              <>
+                <Check className="h-4 w-4 mr-2 text-green-500" />
+                Link copied
+              </>
+            ) : (
+              <>
+                <Link2 className="h-4 w-4 mr-2" />
+                Copy link
+              </>
+            )}
+          </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => deleteSavedView(view.id)}
             className="text-destructive focus:text-destructive"
@@ -231,6 +249,7 @@ export function SearchAndViewsPanel({
   const [newViewName, setNewViewName] = useState("")
   const [editingViewId, setEditingViewId] = useState<string | null>(null)
   const [editingViewName, setEditingViewName] = useState("")
+  const [sharedViewId, setSharedViewId] = useState<string | null>(null)
 
   const handleSearchSubmit = useCallback(
     (event: React.FormEvent<HTMLFormElement>) => {
@@ -254,6 +273,18 @@ export function SearchAndViewsPanel({
     setNewViewName("")
     setShowSaveDialog(false)
   }, [newViewName, activeLayerIds, controls, saveCurrentViewToContext])
+
+  // localStorage cannot cross a browser profile, so a view travels as a link that
+  // carries its position, layers and forecast year in the query string.
+  const shareSavedView = useCallback(async (view: SavedView) => {
+    const ok = await copyToClipboard(buildShareUrl(view))
+    if (!ok) {
+      window.prompt('Copy this link to share the view:', buildShareUrl(view))
+      return
+    }
+    setSharedViewId(view.id)
+    setTimeout(() => setSharedViewId(current => (current === view.id ? null : current)), 2000)
+  }, [])
 
   const deleteSavedView = useCallback((viewId: string) => {
     deleteSavedViewFromContext(viewId)
@@ -437,6 +468,8 @@ export function SearchAndViewsPanel({
                       view={view}
                       hasViewChanged={hasViewChanged}
                       loadSavedView={loadSavedView}
+                      shareSavedView={shareSavedView}
+                      sharedViewId={sharedViewId}
                       updateSavedView={updateSavedView}
                       deleteSavedView={deleteSavedView}
                       editSavedView={editSavedView}
