@@ -83,11 +83,17 @@ const CLIMATE_LAYER_IDS = new Set<string>(climateLayers.map(layer => layer.id))
 const climateIdsOnly = (ids: string[]): ClimateLayerId[] =>
   ids.filter(id => CLIMATE_LAYER_IDS.has(id)) as ClimateLayerId[]
 
+/**
+ * The bookmark a first run starts with. Deliberately records no layers and no
+ * controls: it is a place, not a captured session. A restore is authoritative and
+ * switches off every layer a view did not record, so seeding it with a token layer
+ * list would mean clicking it wiped whatever the user had turned on.
+ */
 const DEFAULT_SAVED_VIEW: SavedView = {
   id: 'south-west',
   name: 'South West',
   viewport: DEFAULT_VIEWPORT,
-  activeLayerIds: ['topographic_relief'],
+  activeLayerIds: [],
   controls: {}
 }
 
