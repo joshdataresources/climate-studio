@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark" class="dark">
+<html lang="en" data-theme="light" class="light">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -7,13 +7,13 @@
     <title>Sustainable Urban Studio</title>
     <script>
       (function () {
-        var VERSION = '2';
+        var VERSION = '3';
         var versionKey = 'cs-theme-version';
         var themeKey = 'cs-theme';
-        var theme = 'dark';
+        var theme = 'light';
         try {
           if (localStorage.getItem(versionKey) !== VERSION) {
-            localStorage.setItem(themeKey, 'dark');
+            localStorage.setItem(themeKey, 'light');
             localStorage.setItem(versionKey, VERSION);
           } else {
             var stored = localStorage.getItem(themeKey);

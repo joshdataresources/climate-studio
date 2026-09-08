@@ -3,22 +3,22 @@ export type Theme = 'dark' | 'light'
 export const THEME_STORAGE_KEY = 'cs-theme'
 export const THEME_VERSION_KEY = 'cs-theme-version'
 /** Bump when changing the default theme so existing users pick up the new default once. */
-export const CURRENT_THEME_VERSION = '2'
+export const CURRENT_THEME_VERSION = '3'
 
-/** Resolve theme on first load; migrates prior light default to dark once per version bump. */
+/** Resolve theme on first load; migrates the prior default once per version bump. */
 export function resolveInitialTheme(): Theme {
-  if (typeof window === 'undefined') return 'dark'
+  if (typeof window === 'undefined') return 'light'
 
   const version = localStorage.getItem(THEME_VERSION_KEY)
   if (version !== CURRENT_THEME_VERSION) {
-    localStorage.setItem(THEME_STORAGE_KEY, 'dark')
+    localStorage.setItem(THEME_STORAGE_KEY, 'light')
     localStorage.setItem(THEME_VERSION_KEY, CURRENT_THEME_VERSION)
-    return 'dark'
+    return 'light'
   }
 
   const stored = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null
   if (stored === 'dark' || stored === 'light') return stored
-  return 'dark'
+  return 'light'
 }
 
 export function applyThemeToDocument(theme: Theme) {
