@@ -8,7 +8,7 @@ import { useTheme } from "../../contexts/ThemeContext"
 import { useClimate } from "@climate-studio/core"
 import { buildShareUrl, copyToClipboard } from "../../utils/shareableView"
 import type { ClimateControlsState } from "@climate-studio/core"
-import { Loader2, MapPin, Search, Save, Bookmark, GripVertical, MoreHorizontal, Trash2, Pencil, Link2, Check } from "lucide-react"
+import { Loader2, MapPin, Search, Save, Bookmark, GripVertical, MoreHorizontal, Trash2, Pencil, Link2, Check, RefreshCw } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -94,6 +94,8 @@ function SortableViewItem({
   } = useSortable({ id: view.id })
 
   const isEditing = editingViewId === view.id
+  // Drives both the unsaved-changes dot and whether "Update to current view" is live.
+  const changed = hasViewChanged(view)
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -153,6 +155,12 @@ function SortableViewItem({
         <div className="flex-1 min-w-0 flex flex-col gap-1">
           <div className="flex items-center justify-between gap-2">
             <h4 className="text-[13px] font-semibold text-[var(--cs-text-primary)]">{view.name}</h4>
+            {changed && (
+              <span
+                className="h-1.5 w-1.5 rounded-full bg-[#5a7cec] flex-shrink-0"
+                title="The map no longer matches this view — use Update to current view"
+              />
+            )}
           </div>
         </div>
       </button>
@@ -167,6 +175,13 @@ function SortableViewItem({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={() => updateSavedView(view.id)}
+            disabled={!changed}
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            {changed ? "Update to current view" : "Up to date"}
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => editSavedView(view.id)}>
             <Pencil className="h-4 w-4 mr-2" />
             Edit Name
@@ -228,7 +243,7 @@ export function SearchAndViewsPanel({
   searchExtra,
 }: SearchAndViewsPanelProps) {
   const { theme } = useTheme()
-  const { activeLayerIds: liveLayerIds, controls: liveControls } = useClimate()
+  const { controls: liveControls } = useClimate()
   const {
     viewport,
     searchTerm,
@@ -241,8 +256,10 @@ export function SearchAndViewsPanel({
     setSavedViews,
     loadSavedView: loadSavedViewFromContext,
     saveCurrentView: saveCurrentViewToContext,
+    updateSavedView: updateSavedViewInContext,
     deleteSavedView: deleteSavedViewFromContext,
     updateSavedViewName,
+    captureLayerIds,
   } = useMap()
 
   const [showSaveDialog, setShowSaveDialog] = useState(false)
@@ -290,11 +307,29 @@ export function SearchAndViewsPanel({
     deleteSavedViewFromContext(viewId)
   }, [deleteSavedViewFromContext])
 
+  // Re-captures position, layers and forecast date onto an existing view. The same
+  // optional overrides the save path takes apply here, so the factories panel keeps
+  // updating its views as position-only.
   const updateSavedView = useCallback((viewId: string) => {
-    // For now just update the saved view name since viewport is handled by context
-  }, [])
+    updateSavedViewInContext(viewId, activeLayerIds, controls)
+  }, [updateSavedViewInContext, activeLayerIds, controls])
 
   const hasViewChanged = useCallback((view: SavedView) => {
+    // A view that recorded neither layers nor controls predates them being captured,
+    // and restores position-only. It counts as out of date even when the map is
+    // sitting exactly where it was saved: offering the update is the only way the
+    // user can upgrade it short of deleting it and saving again.
+    //
+    // Gated on this panel actually having climate state to capture. The factories
+    // panel overrides both to empty, so its views are position-only by design and
+    // an update would be a no-op — they must not sit permanently flagged.
+    const recordsNothing =
+      !view.activeLayerIds?.length && !Object.keys(view.controls ?? {}).length
+    const capturesClimateState =
+      (activeLayerIds ?? captureLayerIds()).length > 0 ||
+      Object.keys(controls ?? liveControls).length > 0
+    if (recordsNothing && capturesClimateState) return true
+
     const movedMap =
       viewport.center.lat !== view.viewport.center.lat ||
       viewport.center.lng !== view.viewport.center.lng ||
@@ -305,8 +340,11 @@ export function SearchAndViewsPanel({
     // marker has to account for those. Fields the view never recorded (older saves)
     // are skipped, otherwise every legacy view would read as permanently changed.
     if (view.activeLayerIds?.length) {
+      // Against captureLayerIds(), not just ClimateContext's — a view records the
+      // mounted view's own toggles too, so comparing to the climate layers alone
+      // would report every view as permanently changed.
       const saved = [...view.activeLayerIds].sort().join('|')
-      const live = [...liveLayerIds].sort().join('|')
+      const live = [...(activeLayerIds ?? captureLayerIds())].sort().join('|')
       if (saved !== live) return true
     }
 
@@ -317,7 +355,7 @@ export function SearchAndViewsPanel({
         savedControls.scenario !== liveControls.scenario) return true
 
     return false
-  }, [viewport, liveLayerIds, liveControls])
+  }, [viewport, captureLayerIds, liveControls, activeLayerIds, controls])
 
   const editSavedView = useCallback((viewId: string) => {
     const view = savedViews.find(v => v.id === viewId)

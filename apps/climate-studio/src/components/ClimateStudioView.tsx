@@ -765,6 +765,7 @@ export default function ClimateStudioView() {
     saveCurrentView,
     deleteSavedView: deleteSavedViewFromContext,
     updateSavedViewName,
+    registerViewLayerAdapter,
   } = useMap()
 
   // Determine map style based on theme
@@ -798,6 +799,61 @@ export default function ClimateStudioView() {
   const [showMetroDataStatistics, setShowMetroDataStatistics] = useState(false)
   const [showTopographicRelief, setShowTopographicRelief] = useState(true) // Default ON at 20% opacity
   const [activeBubbleIndex, setActiveBubbleIndex] = useState<number | null>(null) // Track which bubble is active
+
+  // ── saved views: this view's own layer toggles ───────────────────────────────
+  // Most layers here are local component state rather than ClimateContext layers,
+  // so saving a view used to record only the three ClimateContext knows about
+  // (precipitation_drought, wet_bulb, temperature_projection) and restoring one
+  // left everything else exactly as it was. These refs expose the toggles to
+  // MapContext so they travel with a view, and with its share link.
+  //
+  // Where a layer already has an id in the climate config, that id is reused so a
+  // link means the same thing in every view.
+  const viewLayerStateRef = useRef<Record<string, boolean>>({})
+  const viewLayerSettersRef = useRef<Record<string, (on: boolean) => void>>({})
+
+  viewLayerStateRef.current = {
+    sea_level_rise: showSeaLevelRiseLayer,
+    river_flow_status: showRiversLayer,
+    topographic_relief: showTopographicRelief,
+    canals_aqueducts: showCanalsLayer,
+    major_dams: showDamsLayer,
+    aquifers: showAquifersLayer,
+    metro_weather: showMetroHumidityLayer,
+    factories: showFactoriesLayer,
+    ai_data_centers: showAIDataCentersLayer,
+    wildfire_hazard: showWildfireLayer,
+  }
+  viewLayerSettersRef.current = {
+    sea_level_rise: setShowSeaLevelRiseLayer,
+    river_flow_status: setShowRiversLayer,
+    topographic_relief: setShowTopographicRelief,
+    canals_aqueducts: setShowCanalsLayer,
+    major_dams: setShowDamsLayer,
+    aquifers: setShowAquifersLayer,
+    metro_weather: setShowMetroHumidityLayer,
+    factories: setShowFactoriesLayer,
+    ai_data_centers: setShowAIDataCentersLayer,
+    wildfire_hazard: setShowWildfireLayer,
+  }
+
+  useEffect(() => {
+    registerViewLayerAdapter({
+      getLayerIds: () =>
+        Object.entries(viewLayerStateRef.current)
+          .filter(([, on]) => on)
+          .map(([id]) => id),
+      // A restore is authoritative: ids the view recorded go on, everything this
+      // view owns and the view did not record goes off.
+      applyLayerIds: (ids: string[]) => {
+        const wanted = new Set(ids)
+        for (const [id, setLayer] of Object.entries(viewLayerSettersRef.current)) {
+          setLayer(wanted.has(id))
+        }
+      },
+    })
+    return () => registerViewLayerAdapter(null)
+  }, [registerViewLayerAdapter])
 
   // Climate Suite panel controls
   const [showManageLayersDropdown, setShowManageLayersDropdown] = useState(false)

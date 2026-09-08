@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback, useRef, ReactNode } from 'react'
-import { useClimate } from '@climate-studio/core'
+import { useClimate, climateLayers } from '@climate-studio/core'
 import type { ClimateControlsState, ClimateLayerId } from '@climate-studio/core'
 import { readSharedView } from '../utils/shareableView'
 
@@ -61,6 +61,27 @@ const DEFAULT_VIEWPORT: ViewportState = {
 }
 
 const SAVED_VIEWS_STORAGE_KEY = 'climate-saved-views'
+
+/**
+ * Not every layer lives in ClimateContext. ClimateStudioView owns most of its own
+ * toggles as local component state (Sea Level Rise, Aquifers, Rivers, Canals, Dams,
+ * Metro Weather, Factories, AI Data Centers, Wildfire), and a saved view could
+ * neither capture nor restore those — it only ever saw the three that ClimateContext
+ * knows about. A view registers this adapter so its own toggles join the snapshot.
+ *
+ * Ids share one flat namespace with the climate layers, so the stored shape and the
+ * ?layers= share link stay exactly as they were.
+ */
+export interface ViewLayerAdapter {
+  getLayerIds: () => string[]
+  applyLayerIds: (ids: string[]) => void
+}
+
+const CLIMATE_LAYER_IDS = new Set<string>(climateLayers.map(layer => layer.id))
+
+/** Ids ClimateContext owns; the rest belong to whichever view registered an adapter. */
+const climateIdsOnly = (ids: string[]): ClimateLayerId[] =>
+  ids.filter(id => CLIMATE_LAYER_IDS.has(id)) as ClimateLayerId[]
 
 const DEFAULT_SAVED_VIEW: SavedView = {
   id: 'south-west',
@@ -126,8 +147,30 @@ export interface MapContextValue {
     activeLayerIds?: string[],
     controls?: Partial<ClimateControlsState>
   ) => void
+  /**
+   * Re-snapshot an existing view in place, keeping its id, name and list position.
+   * Without this, a view saved before layers and controls were captured could never
+   * pick them up — the only way to refresh one was to delete it and save it again.
+   * Overrides follow the same rule as saveCurrentView: omitted means "use live state".
+   */
+  updateSavedView: (
+    viewId: string,
+    activeLayerIds?: string[],
+    controls?: Partial<ClimateControlsState>
+  ) => void
   deleteSavedView: (viewId: string) => void
   updateSavedViewName: (viewId: string, name: string) => void
+  /**
+   * Let the mounted view contribute its own layer toggles to saves and restores.
+   * Pass null on unmount. Only one view is mounted at a time, so the last
+   * registration wins.
+   */
+  registerViewLayerAdapter: (adapter: ViewLayerAdapter | null) => void
+  /**
+   * Everything currently on, across both owners. This is what a save records, so
+   * it is also what an "is this view still current?" check has to compare against.
+   */
+  captureLayerIds: () => string[]
 }
 
 export const MapContext = createContext<MapContextValue | undefined>(undefined)
@@ -162,6 +205,19 @@ export function MapProvider({ children }: MapProviderProps) {
   const [isSearching, setIsSearching] = useState(false)
   
   const searchControllerRef = useRef<AbortController | null>(null)
+
+  // Set by whichever view is mounted. Child effects run before this provider's own,
+  // so a view has always registered by the time the share-link effect below fires.
+  const viewLayerAdapterRef = useRef<ViewLayerAdapter | null>(null)
+  const registerViewLayerAdapter = useCallback((adapter: ViewLayerAdapter | null) => {
+    viewLayerAdapterRef.current = adapter
+  }, [])
+
+  /** Everything on right now: ClimateContext's layers plus the mounted view's own. */
+  const captureLayerIds = useCallback(
+    () => [...new Set([...liveLayerIds, ...(viewLayerAdapterRef.current?.getLayerIds() ?? [])])],
+    [liveLayerIds]
+  )
 
   const setViewport = useCallback((newViewport: ViewportState) => {
     setViewportInternal(newViewport)
@@ -257,12 +313,19 @@ export function MapProvider({ children }: MapProviderProps) {
     // Only hand back layers/controls the view actually recorded. Views saved before
     // this existed carry neither, and should keep behaving as position-only bookmarks
     // rather than wiping the user's current layers on load.
+    const recordedLayers = restored.activeLayerIds.length ? restored.activeLayerIds : null
+
     applyViewState({
-      activeLayerIds: restored.activeLayerIds.length
-        ? (restored.activeLayerIds as ClimateLayerId[])
-        : undefined,
+      // Climate ids go to ClimateContext; view-owned ids would be meaningless there.
+      // An empty result is still applied when the view recorded *something*, so a
+      // view with only view-owned layers correctly clears the climate ones.
+      activeLayerIds: recordedLayers ? climateIdsOnly(recordedLayers) : undefined,
       controls: Object.keys(restored.controls).length ? restored.controls : undefined,
     })
+
+    // The mounted view switches its own toggles to match — on for ids the view
+    // recorded, off for the rest. Skipped entirely for a position-only view.
+    if (recordedLayers) viewLayerAdapterRef.current?.applyLayerIds(recordedLayers)
   }, [setViewport, applyViewState])
 
   const saveCurrentView = useCallback((
@@ -276,7 +339,7 @@ export function MapProvider({ children }: MapProviderProps) {
       id: `view-${Date.now()}`,
       name: name.trim(),
       viewport: viewport,
-      activeLayerIds: activeLayerIds ?? [...liveLayerIds],
+      activeLayerIds: activeLayerIds ?? captureLayerIds(),
       // Copy the snapshot: `liveControls` is a memoised object that is replaced on
       // every control change, and we must not hold a reference that keeps mutating.
       controls: { ...(controls ?? liveControls) }
@@ -284,7 +347,27 @@ export function MapProvider({ children }: MapProviderProps) {
 
     const updatedViews = [...savedViews, newView]
     setSavedViews(updatedViews)
-  }, [viewport, savedViews, setSavedViews, liveLayerIds, liveControls])
+  }, [viewport, savedViews, setSavedViews, captureLayerIds, liveControls])
+
+  const updateSavedView = useCallback((
+    viewId: string,
+    activeLayerIds?: string[],
+    controls?: Partial<ClimateControlsState>
+  ) => {
+    const updated = savedViews.map(v =>
+      v.id === viewId
+        ? {
+            ...v,
+            viewport: viewport,
+            activeLayerIds: activeLayerIds ?? captureLayerIds(),
+            // Copied for the same reason as in saveCurrentView: liveControls is a
+            // memoised object that is replaced on every control change.
+            controls: { ...(controls ?? liveControls) }
+          }
+        : v
+    )
+    setSavedViews(updated)
+  }, [savedViews, setSavedViews, viewport, captureLayerIds, liveControls])
 
   const deleteSavedView = useCallback((viewId: string) => {
     const updated = savedViews.filter(v => v.id !== viewId)
@@ -305,9 +388,14 @@ export function MapProvider({ children }: MapProviderProps) {
     if (!sharedView) return
     if (!sharedView.activeLayerIds && !sharedView.controls) return
     applyViewState({
-      activeLayerIds: sharedView.activeLayerIds as ClimateLayerId[] | undefined,
+      activeLayerIds: sharedView.activeLayerIds
+        ? climateIdsOnly(sharedView.activeLayerIds)
+        : undefined,
       controls: sharedView.controls,
     })
+    if (sharedView.activeLayerIds) {
+      viewLayerAdapterRef.current?.applyLayerIds(sharedView.activeLayerIds)
+    }
   }, []) // once, from the URL the page was opened with
 
   const value: MapContextValue = {
@@ -325,8 +413,11 @@ export function MapProvider({ children }: MapProviderProps) {
     setSavedViews,
     loadSavedView,
     saveCurrentView,
+    updateSavedView,
     deleteSavedView,
     updateSavedViewName,
+    registerViewLayerAdapter,
+    captureLayerIds,
   }
 
   return (
