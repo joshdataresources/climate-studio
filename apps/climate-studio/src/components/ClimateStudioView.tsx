@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState, useCallback, type MutableRefObject } from 'react'
 import { Link } from 'react-router-dom'
 import mapboxgl from 'maplibre-gl'
+import { registerSeaLevelTileProtocol, SLR_PROTOCOL } from '../utils/seaLevelTiles'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMap } from '../contexts/MapContext'
 import { useTheme } from '../contexts/ThemeContext'
@@ -2832,8 +2833,11 @@ export default function ClimateStudioView() {
     const layerId = 'sea-level-rise-layer'
 
     if (showSeaLevelRiseLayer) {
-      // Construct tile URL using the working NOAA tile endpoint
-      const tileUrl = `${BACKEND_BASE_URL}/api/tiles/noaa-slr/${seaLevelRiseFeet}/{z}/{x}/{y}.png`
+      // NOAA's PNGs carry their own depth ramp (dark = deep, pale = shallow), which no
+      // paint property can restyle. Route the tiles through the slr:// protocol, which
+      // rewrites their pixels so open water reads light and water taking land reads dark.
+      registerSeaLevelTileProtocol()
+      const tileUrl = `${SLR_PROTOCOL}://${BACKEND_BASE_URL}/api/tiles/noaa-slr/${seaLevelRiseFeet}/{z}/{x}/{y}.png`
 
       console.log(`🌊 Adding sea level rise layer: ${seaLevelRiseFeet}ft`)
 
