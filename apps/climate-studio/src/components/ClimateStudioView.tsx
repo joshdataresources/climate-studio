@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, useCallback, type MutableRefObject } from 
 import { Link } from 'react-router-dom'
 import mapboxgl from 'maplibre-gl'
 import { registerSeaLevelTileProtocol, SLR_PROTOCOL } from '../utils/seaLevelTiles'
+import { seaLevelFeetForYear } from '../utils/seaLevelProjection'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMap } from '../contexts/MapContext'
 import { useTheme } from '../contexts/ThemeContext'
@@ -792,7 +793,6 @@ export default function ClimateStudioView() {
   const [showAIDataCentersLayer, setShowAIDataCentersLayer] = useState(true)
   const [selectedDataCenter, setSelectedDataCenter] = useState<SelectedDataCenter | null>(null)
   const [showSeaLevelRiseLayer, setShowSeaLevelRiseLayer] = useState(false)
-  const [seaLevelRiseFeet, setSeaLevelRiseFeet] = useState(3)
   const [showWildfireLayer, setShowWildfireLayer] = useState(false)
   const [wildfireOpacity, setWildfireOpacity] = useState(0.2)
   const [showHumidityWetBulb, setShowHumidityWetBulb] = useState(true)
@@ -879,6 +879,11 @@ export default function ClimateStudioView() {
 
   // Climate context for precipitation & drought layer
   const { toggleLayer, isLayerActive, controls, setDroughtMetric, setDroughtOpacity, setWetBulbOpacity, setProjectionOpacity, setTemperatureMode } = useClimate()
+
+  // Derived from the forecast year, not stored. This used to be useState(3) whose
+  // setter was never called, so the map drew 3ft no matter what year was selected
+  // while the projections panel reported the year's real figure.
+  const seaLevelRiseFeet = seaLevelFeetForYear(controls.projectionYear)
 
   // Use projectionYear from climate context (slider) instead of local state
   // This ensures Metro Weather popovers update when the user moves the year slider

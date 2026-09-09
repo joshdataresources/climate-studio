@@ -1954,6 +1954,48 @@ app.get('/api/climate/topographic-relief/tiles', async (req, res) => {
   }
 });
 
+/**
+ * GET /api/climate/wet-bulb-temperature
+ * Proxy to the Python climate service.
+ *
+ * The frontend reaches every backend route through this server, so a route only
+ * Flask implements is a 404 for the app. Query params are forwarded verbatim
+ * rather than allow-listed, since the climate service owns their validation.
+ */
+app.get('/api/climate/wet-bulb-temperature', async (req, res) => {
+  try {
+    const params = new URLSearchParams(req.query);
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/wet-bulb-temperature?${params.toString()}`;
+
+    console.log(`\u{1F4E1} Fetching from: ${climateServiceUrl}`);
+    const response = await axios.get(climateServiceUrl, { timeout: 60000 });
+
+    console.log('\u2705 Received wet bulb temperature from climate service');
+    res.json(response.data);
+  } catch (error) {
+    console.error('\u274C Wet bulb temperature error:', error.message);
+    const status = error.response?.status ?? 500;
+    res.status(status).json({ success: false, error: error.message });
+  }
+});
+
+/**
+ * GET /api/climate/status
+ * Proxy to the Python climate service. Backs the Earth Engine status indicator,
+ * which asks whichever backend the layers use whether EE authenticated.
+ */
+app.get('/api/climate/status', async (req, res) => {
+  try {
+    const climateServiceUrl = `${CLIMATE_SERVICE_URL}/api/climate/status`;
+    const response = await axios.get(climateServiceUrl, { timeout: 30000 });
+    res.json(response.data);
+  } catch (error) {
+    console.error('\u274C Climate status error:', error.message);
+    const status = error.response?.status ?? 500;
+    res.status(status).json({ success: false, error: error.message });
+  }
+});
+
 // ============================================
 // USGS Aquifer Endpoints
 // ============================================

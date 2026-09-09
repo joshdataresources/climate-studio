@@ -246,6 +246,15 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
           );
           console.log(`✅ Fetch complete for ${layerId}, status:`, response.status);
         } catch (fetchError) {
+          // An abort is this hook's own cleanup — a superseded request when the
+          // viewport, year or scenario changed, or the layer being switched off. It
+          // is not a failure, and logging it as one made every healthy cold load
+          // show a handful of red errors for layers that went on to load fine.
+          if (fetchError instanceof Error && fetchError.name === 'AbortError') {
+            console.log(`⏹️ Fetch for ${layerId} superseded, ignoring`);
+            throw fetchError;
+          }
+
           console.error(`❌ Fetch failed for ${layerId} after retries:`, fetchError);
           console.error(`❌ Fetch error type:`, fetchError instanceof Error ? fetchError.name : typeof fetchError);
           console.error(`❌ Fetch error message:`, fetchError instanceof Error ? fetchError.message : fetchError);

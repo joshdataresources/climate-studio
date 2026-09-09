@@ -4,6 +4,7 @@ import React from "react"
 import { useClimate } from "@climate-studio/core"
 import { Slider } from "./ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
+import { seaLevelFeetForYear } from '../utils/seaLevelProjection'
 
 const scenarioOptions = [
   { value: "rcp26", label: "RCP 2.6 (Low)" },
@@ -31,9 +32,9 @@ export function ClimateProjectionsWidget({ className = "" }: ClimateProjectionsW
 
     const tempAnomaly = tempAnomalies[scenario as keyof typeof tempAnomalies] || tempAnomalies.rcp45
 
-    // Sea level rise estimation
-    const yearsSince2025 = year - 2025
-    const seaLevelFeet = Math.round(1 + ((yearsSince2025) / (2100 - 2025)) * 9)
+    // Sea level rise estimation — shared with the map layer so the number shown here
+    // and the inundation actually drawn are always the same projection.
+    const seaLevelFeet = seaLevelFeetForYear(year)
 
     // Global average baseline temperature (approximate)
     const baselineTemp = 15.0 // °C (global average)
