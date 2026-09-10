@@ -40,6 +40,20 @@ const logEnvWarnings = () => {
 };
 
 // Middleware
+/**
+ * A genuinely transparent 1x1 PNG (RGBA 0,0,0,0), returned when an upstream tile
+ * service fails so the layer simply draws nothing.
+ *
+ * Every tile route used to inline a literal that decoded to RGBA 0,255,0,127 —
+ * half-opaque green — while being called `transparent`. Whenever an upstream was
+ * down, and USFS wildfire had been 403ing since it migrated to IIPP, that painted
+ * green across the whole extent of the layer.
+ */
+const TRANSPARENT_TILE_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII=',
+  'base64'
+);
+
 app.use(helmet());
 app.use(compression());
 app.use(cors());
@@ -1342,7 +1356,7 @@ app.get('/api/tiles/noaa-slr/:feet/:z/:x/:y.png', async (req, res) => {
   } catch (error) {
     console.error('❌ NOAA tile error:', error.message);
     // Return transparent 1x1 PNG on error
-    const transparent = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+    const transparent = TRANSPARENT_TILE_PNG;
     res.set('Content-Type', 'image/png');
     res.send(transparent);
   }
@@ -1366,8 +1380,10 @@ app.get('/api/tiles/wildfire-whp/:z/:x/:y.png', async (req, res) => {
     const minY = HALF - ((y + 1) / n) * 2 * HALF;
     const bbox = `${minX},${minY},${maxX},${maxY}`;
 
+    // USFS migrated this service to IIPP; the old apps.fs.usda.gov host now answers
+    // every request with 403 "The service being requested has been migrated to IIPP".
     const whpUrl =
-      'https://apps.fs.usda.gov/fsgisx01/rest/services/RDW_Wildfire/RMRS_WRC_WildfireHazardPotential/ImageServer/exportImage' +
+      'https://imagery.geoplatform.gov/iipp/rest/services/Fire_Aviation/USFS_EDW_RMRS_WRC_WildfireHazardPotential/ImageServer/exportImage' +
       `?bbox=${bbox}&bboxSR=3857&imageSR=3857&size=256,256&format=png32&transparent=true&f=image`;
 
     const response = await axios.get(whpUrl, {
@@ -1385,7 +1401,10 @@ app.get('/api/tiles/wildfire-whp/:z/:x/:y.png', async (req, res) => {
   } catch (error) {
     // Log loudly — this is how we find out whether USFS is refusing us, timing out, or 4xx-ing.
     console.error('🔥❌ Wildfire WHP tile error:', error.response?.status || '', error.message);
-    const transparent = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+    // A genuinely transparent 1x1 (RGBA 0,0,0,0). The previous literal decoded to
+    // RGBA 0,255,0,127 — opaque green — so while the upstream service was 403ing,
+    // every failed tile painted half-opaque green across the entire map.
+    const transparent = TRANSPARENT_TILE_PNG;
     res.set('Content-Type', 'image/png');
     res.send(transparent);
   }
@@ -1613,7 +1632,7 @@ app.get('/api/climate/temperature-projection/proxy-tile/:year/:scenario/:mode/do
     res.send(response.data);
   } catch (error) {
     console.error('❌ Downscaled temperature proxy tile error:', error.message);
-    const transparent = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+    const transparent = TRANSPARENT_TILE_PNG;
     res.set('Content-Type', 'image/png');
     res.send(transparent);
   }
@@ -1635,7 +1654,7 @@ app.get('/api/climate/temperature-projection/proxy-tile/:year/:scenario/:mode/:z
     res.send(response.data);
   } catch (error) {
     console.error('❌ Temperature proxy tile error:', error.message);
-    const transparent = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+    const transparent = TRANSPARENT_TILE_PNG;
     res.set('Content-Type', 'image/png');
     res.send(transparent);
   }

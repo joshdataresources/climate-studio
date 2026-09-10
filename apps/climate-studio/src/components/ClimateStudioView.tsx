@@ -6624,25 +6624,31 @@ export default function ClimateStudioView() {
                                 Based on {controls.scenario.toUpperCase()} scenario for year {controls.projectionYear}
                               </div>
                             </div>
-                            {/* Sea Level Legend */}
+                            {/* Sea Level Legend — mirrors what the tiles actually draw.
+                                The old version listed metre bands in four blues that
+                                the layer has never rendered, and said nothing about
+                                the green, which is the part people ask about. */}
                             <div className="space-y-2">
-                              <div className="text-xs font-semibold mb-1">Inundation Levels</div>
-                              <div className="space-y-1">
+                              <div className="text-xs font-semibold mb-1">What you are seeing</div>
+                              <div className="space-y-1.5">
                                 <div className="flex items-center gap-2 text-[11px]">
-                                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#deebf7' }}></div>
-                                  <span>0-1 meter</span>
+                                  <div
+                                    className="w-8 h-3 rounded-sm flex-shrink-0"
+                                    style={{ background: 'linear-gradient(to right, rgb(7,42,102), rgba(183,224,245,0))' }}
+                                  ></div>
+                                  <span>Water covering land, fading out to open sea</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-[11px]">
-                                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#9ecae1' }}></div>
-                                  <span>1-2 meters</span>
+                                  <div
+                                    className="w-8 h-3 rounded-sm flex-shrink-0"
+                                    style={{ backgroundColor: 'rgba(150,190,120,0.45)' }}
+                                  ></div>
+                                  <span>Low-lying land</span>
                                 </div>
-                                <div className="flex items-center gap-2 text-[11px]">
-                                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#4292c6' }}></div>
-                                  <span>2-3 meters</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-[11px]">
-                                  <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: '#08519c' }}></div>
-                                  <span>&gt;3 meters</span>
+                                <div className="text-[11px] text-muted-foreground leading-snug">
+                                  Low-lying land sits below the projected water line but is not
+                                  connected to the sea, so this scenario does not flood it. NOAA
+                                  publishes it as a separate class from inundation depth.
                                 </div>
                               </div>
                             </div>
