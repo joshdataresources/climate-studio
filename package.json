@@ -23,7 +23,8 @@
     "preview:hempstead": "npm run preview --workspace=hempstead-resilience",
     "dev:shared": "npm run dev --workspace=@climate/shared",
     "build:shared": "npm run build --workspace=@climate/shared",
-    "install:all": "npm install"
+    "install:all": "npm install",
+    "test:e2e": "node tests/saved-views.test.mjs && node tests/update-view.test.mjs && node tests/sea-level-colour.test.mjs"
   },
   "devDependencies": {},
   "engines": {
