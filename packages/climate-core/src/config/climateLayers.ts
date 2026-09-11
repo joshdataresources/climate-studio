@@ -74,7 +74,12 @@ export interface ClimateLayerDefinition {
   };
   defaultActive?: boolean;
   controls: ClimateControl[];
-  fetch: {
+  /**
+   * How to load this layer's data, when it has any. Optional: a layer can render
+   * entirely from bundled data (wet_bulb does), and declaring a route it does not
+   * read means the app fetches it anyway — and retries it on failure — for nothing.
+   */
+  fetch?: {
     method: 'GET' | 'POST';
     route: string;
     /**
@@ -400,33 +405,15 @@ export const climateLayers: ClimateLayerDefinition[] = [
     },
     defaultActive: false,
     controls: ['projectionYear', 'scenario', 'wetBulbOpacity'],
-    fetch: {
-      method: 'GET',
-      route: '/api/climate/wet-bulb-temperature',
-      query: ({ bounds, projectionYear, scenario }) => {
-        const { north, south, east, west } = bounds ?? {
-          north: 41,
-          south: 40,
-          east: -73,
-          west: -74
-        };
-        // Map RCP scenarios to SSP format expected by the endpoint
-        const rcpToSsp: Record<string, string> = {
-          rcp26: 'ssp126',
-          rcp45: 'ssp245',
-          rcp85: 'ssp585'
-        };
-        return {
-          north,
-          south,
-          east,
-          west,
-          year: projectionYear,
-          scenario: rcpToSsp[scenario] ?? 'ssp245',
-          resolution: 4
-        };
-      }
-    },
+    // No fetch: this layer draws from the bundled metro projections in
+    // src/data/expanded_wet_bulb_projections.json, not from the API.
+    //
+    // It used to declare /api/climate/wet-bulb-temperature, so activating it fired an
+    // Earth Engine hexagon query across the whole viewport. At continental extent that
+    // exceeds Earth Engine's 5,000-element limit and 500s every time, and the failure
+    // path retried every 30 seconds for as long as the layer stayed active. The
+    // response was never read — ClimateStudioView assigns layerStates.wet_bulb?.data
+    // and nothing consumes it. Pure waste, on a loop.
     style: {
       color: '#ff4d00',
       opacity: 0.6,

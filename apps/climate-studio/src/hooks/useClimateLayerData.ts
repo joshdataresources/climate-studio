@@ -20,9 +20,14 @@ const getBoundsKey = (bounds: LatLngBoundsLiteral | null) => {
 };
 
 export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
+/** How many times a failing layer retries on its own before it stops. */
+const MAX_AUTO_RETRIES = 3;
+
   const { controls, activeLayerIds, addLayerError, clearLayerErrors } = useClimate();
   const [layerStates, setLayerStates] = useState<LayerStateMap>({});
   const cacheRef = useRef<Map<string, LayerFetchState>>(new Map());
+  /** Consecutive automatic retries per cache key, reset by a successful fetch. */
+  const retryCountsRef = useRef<Map<string, number>>(new Map());
   const abortControllers = useRef<Map<ClimateLayerId, AbortController>>(new Map());
 
   // Clear tile layer cache on mount to ensure fresh tile URLs
@@ -110,7 +115,8 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       console.log(`✅ Layer config found for: ${layerId}`, layer);
 
       // Skip fetch if route is empty (layer uses local data only, like megaregion)
-      if (!layer.fetch.route || layer.fetch.route === '') {
+      // A layer with no fetch renders from bundled data and has nothing to load.
+      if (!layer.fetch?.route) {
         console.log(`⏭️ Skipping fetch for ${layerId} - uses local data`);
         setLayerState(layerId, {
           status: 'success',
@@ -245,6 +251,7 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
             }
           );
           console.log(`✅ Fetch complete for ${layerId}, status:`, response.status);
+          retryCountsRef.current.delete(cacheKey);
         } catch (fetchError) {
           // An abort is this hook's own cleanup — a superseded request when the
           // viewport, year or scenario changed, or the layer being switched off. It
@@ -368,13 +375,25 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
             }
           });
           
-          // Schedule automatic retry in 30 seconds
-          setTimeout(() => {
-            if (activeLayerIds.includes(layerId)) {
-              console.log(`🔄 Automatic retry for ${layerId} after error`);
-              fetchLayer(layerId, true);
-            }
-          }, 30000);
+          // Schedule automatic retry, up to a ceiling.
+          //
+          // This used to retry every 30 seconds for as long as the layer stayed
+          // active, with no limit — so a layer whose request could never succeed
+          // (a bad route, or a query the upstream always rejects) hammered the
+          // backend indefinitely, once per open tab. Give up after a few attempts
+          // and leave the cached data in place.
+          const attempts = (retryCountsRef.current.get(cacheKey) ?? 0) + 1;
+          retryCountsRef.current.set(cacheKey, attempts);
+          if (attempts <= MAX_AUTO_RETRIES) {
+            setTimeout(() => {
+              if (activeLayerIds.includes(layerId)) {
+                console.log(`🔄 Automatic retry ${attempts}/${MAX_AUTO_RETRIES} for ${layerId} after error`);
+                fetchLayer(layerId, true);
+              }
+            }, 30000);
+          } else {
+            console.warn(`⏸️ ${layerId} failed ${attempts - 1} automatic retries, giving up until something changes`);
+          }
           
           return;
         }
@@ -587,7 +606,7 @@ export const useClimateLayerData = (bounds: LatLngBoundsLiteral | null) => {
       
       // Reset circuit breaker for this layer to allow retry
       const layer = getClimateLayer(layerId);
-      if (layer?.fetch.route) {
+      if (layer?.fetch?.route) {
         const url = `${getBackendBaseUrl()}${layer.fetch.route}`;
         climateLayerReliability.resetCircuitBreaker(layerId, url);
       }
