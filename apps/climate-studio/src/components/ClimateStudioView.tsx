@@ -1108,118 +1108,30 @@ export default function ClimateStudioView() {
     }
   }, [controls.projectionYear])
 
-  // Fetch aquifer data for visible map bounds
-  const fetchAquiferData = useCallback(async (bounds?: { north: number; south: number; east: number; west: number }) => {
+  /**
+   * Load aquifer boundaries from the bundled dataset.
+   *
+   * This used to call /api/usgs/aquifers, with the bundled file only as a fallback
+   * when that failed. The endpoint lived on the Express backend, which was never
+   * deployed — so in production the call always failed and the fallback always ran.
+   * The bundled data is also the better of the two: 72 features carrying recharge
+   * rate, consumption factor and projections, against 67 bare geometries from the
+   * API. Bounds are ignored because the whole national set is 90 KB.
+   */
+  const fetchAquiferData = useCallback(async (_bounds?: { north: number; south: number; east: number; west: number }) => {
     setError(null)
-
-    let url = `${BACKEND_BASE_URL}/api/usgs/aquifers`
-    const params = new URLSearchParams()
-
-    if (bounds) {
-      params.append('north', bounds.north.toString())
-      params.append('south', bounds.south.toString())
-      params.append('east', bounds.east.toString())
-      params.append('west', bounds.west.toString())
-    } else {
-      // Default to US-wide bounds if none provided
-      params.append('north', '50')
-      params.append('south', '24')
-      params.append('east', '-66')
-      params.append('west', '-125')
-    }
-
-    url += `?${params.toString()}`
-
     try {
-      // Add timeout to prevent infinite loading
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
-
-      try {
-        const response = await fetch(url, {
-          signal: controller.signal
-        })
-
-        clearTimeout(timeoutId)
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch aquifer data: ${response.statusText}`)
-        }
-
-        const result = await response.json()
-
-        if (result.success && result.data) {
-          const aquifers = result.data
-
-          if (!aquifers || !aquifers.features) {
-            return
-          }
-
-          // Enhance with projection data and colors
-          const enhancedAquifers = enhanceAquiferData(aquifers)
-
-          setAquiferData(prevData => {
-            if (!prevData) {
-              setAquiferCount(enhancedAquifers.features.length)
-              return enhancedAquifers
-            }
-
-            // Merge with existing data
-            const existingMap = new Map()
-            prevData.features.forEach((f: any) => {
-              const key = f.id || JSON.stringify(f.geometry?.coordinates?.[0]?.[0])
-              if (key) existingMap.set(key, f)
-            })
-
-            enhancedAquifers.features.forEach((f: any) => {
-              const key = f.id || JSON.stringify(f.geometry?.coordinates?.[0]?.[0])
-              if (key && !existingMap.has(key)) {
-                existingMap.set(key, f)
-              }
-            })
-
-            const merged = {
-              type: 'FeatureCollection' as const,
-              features: Array.from(existingMap.values())
-            }
-
-            setAquiferCount(merged.features.length)
-            return merged
-          })
-        }
-      } catch (fetchErr) {
-        clearTimeout(timeoutId)
-        throw fetchErr
+      const localAquifers = aquifersData as unknown as GeoJSON.FeatureCollection
+      if (!localAquifers?.features?.length) {
+        setError('Aquifer data is unavailable.')
+        return
       }
+      const enhanced = enhanceAquiferData(localAquifers)
+      setAquiferData(enhanced)
+      setAquiferCount(enhanced.features.length)
     } catch (err) {
-      console.error('Error fetching aquifer data:', err)
-      console.log('📂 Falling back to local aquifer data...')
-
-      // Fallback to local static aquifer data when API fails
-      try {
-        const localAquifers = aquifersData as GeoJSON.FeatureCollection
-        if (localAquifers && localAquifers.features && localAquifers.features.length > 0) {
-          const enhancedAquifers = enhanceAquiferData(localAquifers)
-          setAquiferData(enhancedAquifers)
-          setAquiferCount(enhancedAquifers.features.length)
-          console.log('✅ Loaded', enhancedAquifers.features.length, 'aquifers from local data')
-          setError(null) // Clear error since we have fallback data
-        } else {
-          // Only show error if fallback also fails
-          if (err instanceof Error && err.name === 'AbortError') {
-            setError('Request timed out. Using limited local data.')
-          } else {
-            setError('Failed to load aquifer data from API. Using local data.')
-          }
-        }
-      } catch (fallbackErr) {
-        console.error('Fallback to local aquifer data also failed:', fallbackErr)
-        if (err instanceof Error && err.name === 'AbortError') {
-          setError('Request timed out. The backend may not be running. Please check that the backend server is started.')
-        } else {
-          setError(err instanceof Error ? err.message : 'Failed to load aquifer data. Please check that the backend server is running.')
-        }
-      }
+      console.error('Could not load aquifer data:', err)
+      setError('Failed to load aquifer data.')
     }
   }, [enhanceAquiferData])
 

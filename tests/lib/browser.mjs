@@ -55,4 +55,4 @@ export function createReporter(title) {
 }
 
 export const BASE_URL = process.env.CLIMATE_STUDIO_URL || 'http://localhost:8080'
-export const BACKEND_URL = process.env.CLIMATE_BACKEND_URL || 'http://localhost:3001'
+export const BACKEND_URL = process.env.CLIMATE_BACKEND_URL || 'http://localhost:5001'

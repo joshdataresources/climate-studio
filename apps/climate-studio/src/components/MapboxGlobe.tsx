@@ -11,7 +11,7 @@ import { MegaregionLayer } from "./MegaregionLayer"
 
 // Resolve relative tile URLs (e.g. "/api/climate/...") to absolute backend URLs for production
 const BACKEND_BASE_URL =
-  import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001';
+  import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:5001';
 
 const resolveAbsoluteTileUrl = (tileUrl: string): string =>
   tileUrl.startsWith('/') ? `${BACKEND_BASE_URL}${tileUrl}` : tileUrl;
@@ -322,7 +322,7 @@ export function MapboxGlobe({
             <Source
               id="sea-level-rise"
               type="raster"
-              tiles={[`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'}/api/tiles/noaa-slr/${feet}/{z}/{x}/{y}.png`]}
+              tiles={[`${import.meta.env.VITE_BACKEND_URL || 'http://localhost:5001'}/api/tiles/noaa-slr/${feet}/{z}/{x}/{y}.png`]}
               tileSize={256}
             >
               <Layer

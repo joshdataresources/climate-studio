@@ -9,11 +9,8 @@
 #
 # Handles the four things that keep going wrong by hand:
 #   · the stale Vite dep cache (chart.js ENOENT → white screen)
-#   · leftover processes holding 8080 / 5001 / 3001
+#   · leftover processes holding 8080 / 5001
 #   · the Flask backend never being started, so every EE layer renders blank
-#   · the Node backend never being started, so aquifers, sea level rise,
-#     wildfire tiles, and live streamflow silently fail (the frontend's .env
-#     points VITE_NODE_BACKEND_URL at :3001, but nothing used to listen there)
 #
 set -uo pipefail
 
@@ -22,9 +19,7 @@ cd "$REPO_ROOT"
 
 FRONTEND_PORT=8080
 BACKEND_PORT=5001
-NODE_BACKEND_PORT=3001
 BACKEND_DIR="$REPO_ROOT/qgis-processing"
-NODE_BACKEND_DIR="$REPO_ROOT/backend"
 STUDIO_DIR="$REPO_ROOT/apps/climate-studio"
 
 GREEN=$'\033[32m'; RED=$'\033[31m'; YELLOW=$'\033[33m'
@@ -68,7 +63,6 @@ say "Freeing ports"
 [ "$RUN_FRONTEND" = 1 ] && free_port "$FRONTEND_PORT" "vite"
 if [ "$RUN_BACKEND" = 1 ]; then
   free_port "$BACKEND_PORT" "flask"
-  free_port "$NODE_BACKEND_PORT" "node"
 fi
 ok "ports clear"
 
@@ -89,20 +83,13 @@ if [ "$RUN_FRONTEND" = 1 ] && [ ! -x "$REPO_ROOT/node_modules/.bin/vite" ] \
   npm install || die "npm install failed"
 fi
 
-if [ "$RUN_BACKEND" = 1 ] && [ ! -d "$NODE_BACKEND_DIR/node_modules" ]; then
-  warn "backend/node_modules missing — running npm install in backend/"
-  ( cd "$NODE_BACKEND_DIR" && npm install ) || die "backend npm install failed"
-fi
-
 # ── shutdown ─────────────────────────────────────────────────────────────────
 BACKEND_PID=""
-NODE_BACKEND_PID=""
 FRONTEND_PID=""
 shutdown() {
   printf '\n'
   say "Shutting down"
   [ -n "$BACKEND_PID" ] && kill "$BACKEND_PID" 2>/dev/null || true
-  [ -n "$NODE_BACKEND_PID" ] && kill "$NODE_BACKEND_PID" 2>/dev/null || true
   [ -n "$FRONTEND_PID" ] && kill "$FRONTEND_PID" 2>/dev/null || true
   wait 2>/dev/null || true
   ok "stopped"
@@ -165,43 +152,6 @@ if services and not all(services.values()):
     warn "log: $BACKEND_LOG"
     tail -n 15 "$BACKEND_LOG" 2>/dev/null | sed 's/^/      /'
     BACKEND_PID=""
-  fi
-fi
-
-# ── node backend ─────────────────────────────────────────────────────────────
-# Aquifers, sea level rise tiles, wildfire tiles, and live streamflow all go
-# through BACKEND_BASE_URL, which the frontend's .env points at :3001. Without
-# this running, those calls hit a closed port and the layers stay empty.
-if [ "$RUN_BACKEND" = 1 ]; then
-  say "Starting Node server (Express, port $NODE_BACKEND_PORT)"
-
-  if [ ! -f "$NODE_BACKEND_DIR/.env" ]; then
-    warn "backend/.env missing — some Node-backed layers may be blank"
-  fi
-
-  mkdir -p "$REPO_ROOT/.dev-logs"
-  NODE_BACKEND_LOG="$REPO_ROOT/.dev-logs/node-server.log"
-  ( cd "$NODE_BACKEND_DIR" && PORT="$NODE_BACKEND_PORT" node server.js ) > "$NODE_BACKEND_LOG" 2>&1 &
-  NODE_BACKEND_PID=$!
-
-  printf '  waiting for node backend'
-  NODE_BACKEND_UP=0
-  for _ in $(seq 1 30); do
-    if curl -fsS -o /dev/null --max-time 1 "http://localhost:$NODE_BACKEND_PORT/health" 2>/dev/null; then
-      NODE_BACKEND_UP=1; break
-    fi
-    if ! kill -0 "$NODE_BACKEND_PID" 2>/dev/null; then break; fi
-    printf '.'; sleep 1
-  done
-  printf '\n'
-
-  if [ "$NODE_BACKEND_UP" = 1 ]; then
-    ok "node backend ready — http://localhost:$NODE_BACKEND_PORT"
-  else
-    warn "node backend did not come up — aquifers, sea level rise, wildfire tiles, and streamflow will be blank"
-    warn "log: $NODE_BACKEND_LOG"
-    tail -n 15 "$NODE_BACKEND_LOG" 2>/dev/null | sed 's/^/      /'
-    NODE_BACKEND_PID=""
   fi
 fi
 

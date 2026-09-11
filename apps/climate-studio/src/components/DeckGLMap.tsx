@@ -24,7 +24,7 @@ import 'maplibre-gl/dist/maplibre-gl.css'
 
 // Resolve relative tile URLs (e.g. "/api/climate/...") to absolute backend URLs for production
 const BACKEND_BASE_URL =
-  import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:3001';
+  import.meta.env.VITE_NODE_BACKEND_URL?.replace(/\/$/, '') || 'http://localhost:5001';
 
 const resolveAbsoluteTileUrl = (tileUrl: string): string =>
   tileUrl.startsWith('/') ? `${BACKEND_BASE_URL}${tileUrl}` : tileUrl;

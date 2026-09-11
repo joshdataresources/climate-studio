@@ -54,7 +54,7 @@ export class ClimateLayerReliabilityService {
   private healthCheckInterval: NodeJS.Timeout | null = null;
   private backendBaseUrl: string;
 
-  constructor(backendBaseUrl: string = 'http://localhost:3001') {
+  constructor(backendBaseUrl: string = 'http://localhost:5001') {
     this.backendBaseUrl = backendBaseUrl;
     this.startHealthMonitoring();
   }
