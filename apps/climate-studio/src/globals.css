@@ -1291,3 +1291,19 @@ div.detail-popup-panel.safari-modal-fix.z-\[1000\].pointer-events-auto {
   max-width: var(--cs-detail-panel-tablet-max-width) !important;
 }
 
+
+/* ── Metro city dots ──────────────────────────────────────────────────────────
+   The dot is the only way to open a city's resilience card when the full Metro
+   Weather layer is off, so it has to read as a target rather than a decoration.
+   It was 10px with no hover state, which looked like a map decoration. */
+.metro-city-dot {
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.metro-city-dot--interactive:hover {
+  transform: translate(-50%, -50%) scale(1.35);
+  box-shadow: 0 0 0 4px rgba(67, 126, 252, 0.28), 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+.metro-city-dot--interactive:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(67, 126, 252, 0.55), 0 2px 6px rgba(0, 0, 0, 0.35);
+}

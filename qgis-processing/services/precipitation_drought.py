@@ -46,12 +46,20 @@ class PrecipitationDroughtService:
             logger.error(f"Failed to initialize Earth Engine: {e}")
             logger.warning("Precipitation/drought service will not be available")
 
-    # Dry to wet. Deliberately long, with saturated ends, so a percentile stretch
-    # has somewhere to put the extremes instead of washing everything into the
-    # middle of the ramp.
+    # Dry to wet, brown through to teal-green (ColorBrewer BrBG).
+    #
+    # Deliberately not the red-to-blue ramp this used to be. Red-blue is what the
+    # Temperature Anomaly layer uses, so the two layers were hard to tell apart at a
+    # glance, and its wet end sat right on top of the basemap's water colour — wet
+    # ground and open sea rendered nearly the same. Brown-to-teal is the conventional
+    # choice for moisture and collides with neither.
+    #
+    # Long, with saturated ends, so a percentile stretch has somewhere to put the
+    # extremes instead of washing everything into the middle.
     PALETTE = [
-        '#7f2704', '#a63603', '#d94801', '#f16913', '#fd8d3c', '#fdbe85',
-        '#fee8c8', '#f7f7f7', '#d1e5f0', '#92c5de', '#4393c3', '#2166ac', '#053061',
+        '#543005', '#8c510a', '#bf812d', '#dfc27d', '#f6e8c3',
+        '#f5f5f5',
+        '#c7eae5', '#80cdc1', '#35978f', '#01665e', '#003c30',
     ]
 
     def get_tile_url(self, bounds, scenario='rcp45', year=2050, metric='precipitation'):

@@ -5335,7 +5335,7 @@ export default function ClimateStudioView() {
                               0-10 mm/day caption would be wrong nearly always. */}
                           <div className="space-y-1">
                             <div className="h-3 w-full rounded-full" style={{
-                              background: 'linear-gradient(to right, #7f2704, #a63603, #d94801, #f16913, #fd8d3c, #fdbe85, #fee8c8, #f7f7f7, #d1e5f0, #92c5de, #4393c3, #2166ac, #053061)'
+                              background: 'linear-gradient(to right, #543005, #8c510a, #bf812d, #dfc27d, #f6e8c3, #f5f5f5, #c7eae5, #80cdc1, #35978f, #01665e, #003c30)'
                             }} />
                             {(() => {
                               const range = layerStates.precipitation_drought?.data?.metadata?.visRange as
@@ -6975,18 +6975,26 @@ function MetroCityDots({
             aria-hidden={showMetroHumidityLayer}
             aria-label={showMetroHumidityLayer ? undefined : `Show resilience card for ${city}`}
             role={showMetroHumidityLayer ? undefined : 'button'}
+            tabIndex={showMetroHumidityLayer ? undefined : 0}
             onClick={showMetroHumidityLayer ? undefined : () => setSelectedCity(city)}
+            onKeyDown={showMetroHumidityLayer ? undefined : (e) => {
+              if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelectedCity(city) }
+            }}
+            className={`metro-city-dot${showMetroHumidityLayer ? '' : ' metro-city-dot--interactive'}`}
             style={{
               position: 'absolute',
               left: `${point.x}px`,
               top: `${point.y}px`,
               transform: 'translate(-50%, -50%)',
-              width: 10,
-              height: 10,
+              // 16px rather than 10: when the Metro Weather layer is off this dot is
+              // the only affordance for opening a city's card, and at 10px with no
+              // hover state it read as a map decoration rather than a control.
+              width: 16,
+              height: 16,
               borderRadius: '50%',
               background: '#437efc', // var(--cs-brand-primary)
-              border: `2px solid ${theme === 'light' ? '#ffffff' : '#000000'}`,
-              boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+              border: `2.5px solid ${theme === 'light' ? '#ffffff' : '#0b0b0f'}`,
+              boxShadow: '0 1px 4px rgba(0,0,0,0.35)',
               // Stays under --cs-z-map-popup (900, tokens.css) — the ceiling documented
               // for map-anchored popups/dots — so it never covers the side panels
               // (--cs-z-side-panel: 1500) or bottom-center detail panels (--cs-z-detail-panel: 1000).
