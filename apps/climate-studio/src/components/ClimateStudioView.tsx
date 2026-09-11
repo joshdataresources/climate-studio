@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 import mapboxgl from 'maplibre-gl'
 import { registerSeaLevelTileProtocol, SLR_PROTOCOL, noaaSeaLevelTileUrl } from '../utils/seaLevelTiles'
 import { registerWildfireTileProtocol, wildfireTileUrl } from '../utils/wildfireTiles'
-import { seaLevelFeetForYear } from '../utils/seaLevelProjection'
+import { noaaInundationFeet } from '../config/climateProjections'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMap } from '../contexts/MapContext'
 import { useTheme } from '../contexts/ThemeContext'
@@ -881,10 +881,11 @@ export default function ClimateStudioView() {
   // Climate context for precipitation & drought layer
   const { toggleLayer, isLayerActive, controls, setDroughtMetric, setDroughtOpacity, setWetBulbOpacity, setProjectionOpacity, setTemperatureMode } = useClimate()
 
-  // Derived from the forecast year, not stored. This used to be useState(3) whose
-  // setter was never called, so the map drew 3ft no matter what year was selected
-  // while the projections panel reported the year's real figure.
-  const seaLevelRiseFeet = seaLevelFeetForYear(controls.projectionYear)
+  // Derived from the forecast year and scenario, not stored. This used to be
+  // useState(3) whose setter was never called, so the map drew 3ft no matter what
+  // was selected. Shares one projection with the Climate Projections panel, so the
+  // figure shown and the inundation drawn cannot disagree.
+  const seaLevelRiseFeet = noaaInundationFeet(controls.projectionYear, controls.scenario)
 
   // Use projectionYear from climate context (slider) instead of local state
   // This ensures Metro Weather popovers update when the user moves the year slider

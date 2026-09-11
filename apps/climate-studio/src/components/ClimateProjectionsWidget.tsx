@@ -4,7 +4,7 @@ import React from "react"
 import { useClimate } from "@climate-studio/core"
 import { Slider } from "./ui/slider"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
-import { seaLevelFeetForYear } from '../utils/seaLevelProjection'
+import { seaLevelRiseFeet, temperatureAnomalyC, PROJECTION_SOURCES } from '../config/climateProjections'
 
 const scenarioOptions = [
   { value: "rcp26", label: "RCP 2.6 (Low)" },
@@ -23,47 +23,30 @@ export function ClimateProjectionsWidget({ className = "" }: ClimateProjectionsW
   const getProjectedValues = (scenario: string, year: number) => {
     const yearProgress = (year - 2025) / (2100 - 2025) // 0 to 1
 
-    // Temperature anomaly projections (°C above baseline)
-    const tempAnomalies = {
-      rcp26: 1.0 + yearProgress * 1.0,   // 1-2°C by 2100
-      rcp45: 1.5 + yearProgress * 1.7,   // 1.5-3.2°C by 2100
-      rcp85: 2.0 + yearProgress * 2.8    // 2-4.8°C by 2100
-    }
+    // IPCC AR6 best estimates, above the 1850-1900 baseline.
+    const tempAnomaly = temperatureAnomalyC(year, scenario)
 
-    const tempAnomaly = tempAnomalies[scenario as keyof typeof tempAnomalies] || tempAnomalies.rcp45
-
-    // Sea level rise estimation — shared with the map layer so the number shown here
-    // and the inundation actually drawn are always the same projection.
-    const seaLevelFeet = seaLevelFeetForYear(year)
+    // NOAA 2022 GMSL scenarios, shared with the map layer so the number shown here
+    // and the inundation actually drawn are the same projection.
+    const seaLevelFeet = seaLevelRiseFeet(year, scenario)
 
     // Global average baseline temperature (approximate)
     const baselineTemp = 15.0 // °C (global average)
     const actualTemp = baselineTemp + tempAnomaly
 
-    // Precipitation projections (mm/year)
-    const precipBase = 800
-    const precipChange = scenario === 'rcp85' ? 100 : scenario === 'rcp45' ? 50 : 20
-    const precipitation = precipBase + yearProgress * precipChange
-
-    // Drought Index (0-5 scale, higher = more drought)
-    // Increases with temperature, decreases slightly with precipitation in some scenarios
-    const droughtBase = 1.0
-    const droughtIncrease = scenario === 'rcp85' ? 1.5 : scenario === 'rcp45' ? 1.0 : 0.5
-    const droughtIndex = droughtBase + yearProgress * droughtIncrease
-
-    // Soil Moisture (percentage, decreases with warming and drought)
-    // Base soil moisture around 60%, decreases as drought increases
-    const soilMoistureBase = 60
-    const soilMoistureDecrease = scenario === 'rcp85' ? 12 : scenario === 'rcp45' ? 8 : 4
-    const soilMoisture = Math.max(30, soilMoistureBase - yearProgress * soilMoistureDecrease)
+    // Precipitation, drought index and soil moisture used to be shown here as
+    // single global figures built from invented constants — 800 mm baseline, a
+    // drought index starting at 1.0, soil moisture at 60% — scaled linearly by year.
+    // None of them had a source, and none of those quantities is meaningful as one
+    // number for the whole world: they vary by location, which is exactly what the
+    // Precipitation & Drought map layer shows. They are not displayed rather than
+    // displayed as fiction. Re-add them by reading the precipitation-drought service
+    // for the current viewport, the way the map layer does.
 
     return {
       tempAnomaly,
       actualTemp,
       seaLevelFeet,
-      precipitation,
-      droughtIndex,
-      soilMoisture,
     }
   }
 
@@ -136,25 +119,11 @@ export function ClimateProjectionsWidget({ className = "" }: ClimateProjectionsW
               {projected.actualTemp.toFixed(1)}°C
             </span>
           </div>
-          <div className="climate-metrics-secondary flex flex-col space-y-1">
-            <span className="text-muted-foreground">Precipitation</span>
-            <span className="font-semibold text-blue-400">
-              {projected.precipitation.toFixed(0)}mm
-            </span>
-          </div>
-          <div className="climate-metrics-secondary flex flex-col space-y-1">
-            <span className="text-muted-foreground">Drought Index</span>
-            <span className="font-semibold text-yellow-400">
-              {projected.droughtIndex.toFixed(1)}
-            </span>
-          </div>
-          <div className="climate-metrics-secondary flex flex-col space-y-1">
-            <span className="text-muted-foreground">Soil Moisture</span>
-            <span className="font-semibold text-green-400">
-              {projected.soilMoisture.toFixed(0)}%
-            </span>
-          </div>
         </div>
+        <p className="mt-2 text-[10px] leading-snug text-muted-foreground">
+          Sea level: {PROJECTION_SOURCES.seaLevel}. Temperature: {PROJECTION_SOURCES.temperature}.
+          Central estimates.
+        </p>
       </div>
     </div>
   )
