@@ -1119,9 +1119,15 @@ export function DeckGLMap({
         wet_bulb_events: number
         days_over_95F: number
         days_over_100F: number
-        estimated_at_risk_population: number
-        casualty_rate_percent: number
-        extent_radius_km: number
+        estimated_at_risk_population?: number
+        casualty_rate_percent?: number
+        extent_radius_km?: number
+        // Real, from NASA NEX-GDDP-CMIP6 via the Stull (2011) formula. Declared
+        // late because the fabricated display fields above were typed and these
+        // were not, which is how the map ended up inventing a temperature it
+        // already had.
+        summer_wet_bulb_F: number
+        peak_wet_bulb_F: number
       }>
     }>
 
@@ -1132,19 +1138,31 @@ export function DeckGLMap({
         // Interpolate projection data for the selected year
         const projection = interpolateWetBulbProjection(projections, year)
 
-        // Calculate wet bulb temperature from summer temp estimate and humidity
-        // Use days_over_95F as a proxy for summer temperature intensity
-        const estimatedSummerTempF = 90 + (projection.days_over_95F / 20)
-        const wetBulbTempC = calculateWetBulbC(
-          (estimatedSummerTempF - 32) * 5 / 9,
-          projection.avg_summer_humidity
-        )
+        // The dataset stores a real wet-bulb temperature per city per decade,
+        // computed from NASA NEX-GDDP-CMIP6 daily tas and hurs with the Stull (2011)
+        // formula. Use it.
+        //
+        // This used to reverse-engineer a dry-bulb temperature from the number of
+        // days over 95°F (`90 + days_over_95F / 20`) and push that through a wet-bulb
+        // calculation. It was documented as a known issue and it was badly wrong:
+        // for Houston it produced 94.8°F where the stored summer wet-bulb is 81.0°F.
+        const wetBulbTempC = (projection.summer_wet_bulb_F - 32) * 5 / 9
 
         // Get color based on wet bulb danger level
         const colorRGBA = getWetBulbColorRGBA(wetBulbTempC, 180)
 
-        // Use extent_radius_km from projections
-        const radiusKm = projection.extent_radius_km
+        // Sized from the real fields — how many dangerous days, scaled by how many
+        // people are there. extent_radius_km is one of the three fabricated
+        // display-only fields the dataset's generator deliberately never filled in.
+        const eventRadiusKm =
+          projection.wet_bulb_events <= 3 ? 25 :
+          projection.wet_bulb_events <= 10 ? 35 :
+          projection.wet_bulb_events <= 25 ? 50 :
+          projection.wet_bulb_events <= 50 ? 70 :
+          projection.wet_bulb_events <= 75 ? 95 : 120
+        const radiusKm = Math.round(
+          eventRadiusKm * Math.min(1.3, 0.8 + (metro_population_2024 / 10000000))
+        )
 
         return {
           type: 'Feature' as const,
@@ -1162,8 +1180,9 @@ export function DeckGLMap({
             peak_humidity: projection.peak_humidity,
             days_over_95F: projection.days_over_95F,
             days_over_100F: projection.days_over_100F,
-            at_risk_population: projection.estimated_at_risk_population,
-            casualty_rate_percent: projection.casualty_rate_percent,
+            // estimated_at_risk_population and casualty_rate_percent are not
+            // carried through: the dataset's generator documents them as fabricated
+            // display-only values it never computed.
             extent_radius_km: radiusKm,
             metro_population: metro_population_2024,
             fillColor: colorRGBA,

@@ -318,9 +318,11 @@ export function interpolateWetBulbProjection(
     wet_bulb_events: number
     days_over_95F: number
     days_over_100F: number
-    estimated_at_risk_population: number
-    casualty_rate_percent: number
-    extent_radius_km: number
+    estimated_at_risk_population?: number
+    casualty_rate_percent?: number
+    extent_radius_km?: number
+    summer_wet_bulb_F: number
+    peak_wet_bulb_F: number
   }>,
   targetYear: number
 ): {
@@ -329,9 +331,11 @@ export function interpolateWetBulbProjection(
   wet_bulb_events: number
   days_over_95F: number
   days_over_100F: number
-  estimated_at_risk_population: number
-  casualty_rate_percent: number
-  extent_radius_km: number
+  estimated_at_risk_population?: number
+  casualty_rate_percent?: number
+  extent_radius_km?: number
+  summer_wet_bulb_F: number
+  peak_wet_bulb_F: number
 } {
   const years = Object.keys(projections).map(Number).sort((a, b) => a - b)
 
@@ -363,8 +367,22 @@ export function interpolateWetBulbProjection(
     wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
     days_over_95F: Math.round(lower.days_over_95F + (upper.days_over_95F - lower.days_over_95F) * ratio),
     days_over_100F: Math.round(lower.days_over_100F + (upper.days_over_100F - lower.days_over_100F) * ratio),
-    estimated_at_risk_population: Math.round(lower.estimated_at_risk_population + (upper.estimated_at_risk_population - lower.estimated_at_risk_population) * ratio),
-    casualty_rate_percent: Math.round((lower.casualty_rate_percent + (upper.casualty_rate_percent - lower.casualty_rate_percent) * ratio) * 10) / 10,
-    extent_radius_km: Math.round(lower.extent_radius_km + (upper.extent_radius_km - lower.extent_radius_km) * ratio)
+    // The real wet bulb temperatures, interpolated like everything else. These
+    // were absent from this function entirely, which is why callers that wanted a
+    // temperature reverse-engineered one from days_over_95F instead.
+    summer_wet_bulb_F: Math.round((lower.summer_wet_bulb_F + (upper.summer_wet_bulb_F - lower.summer_wet_bulb_F) * ratio) * 10) / 10,
+    peak_wet_bulb_F: Math.round((lower.peak_wet_bulb_F + (upper.peak_wet_bulb_F - lower.peak_wet_bulb_F) * ratio) * 10) / 10,
+    // Carried through only where the dataset actually has them: the generator
+    // documents these three as fabricated display fields it never computed, and
+    // they are missing for some cities entirely.
+    ...(lower.estimated_at_risk_population != null && upper.estimated_at_risk_population != null
+      ? { estimated_at_risk_population: Math.round(lower.estimated_at_risk_population + (upper.estimated_at_risk_population - lower.estimated_at_risk_population) * ratio) }
+      : {}),
+    ...(lower.casualty_rate_percent != null && upper.casualty_rate_percent != null
+      ? { casualty_rate_percent: Math.round((lower.casualty_rate_percent + (upper.casualty_rate_percent - lower.casualty_rate_percent) * ratio) * 10) / 10 }
+      : {}),
+    ...(lower.extent_radius_km != null && upper.extent_radius_km != null
+      ? { extent_radius_km: Math.round(lower.extent_radius_km + (upper.extent_radius_km - lower.extent_radius_km) * ratio) }
+      : {}),
   }
 }

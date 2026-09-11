@@ -51,9 +51,11 @@ interface WetBulbData {
       wet_bulb_events: number
       days_over_95F: number
       days_over_100F: number
-      estimated_at_risk_population: number
-      casualty_rate_percent: number
-      extent_radius_km: number
+      estimated_at_risk_population?: number
+      casualty_rate_percent?: number
+      extent_radius_km?: number
+      summer_wet_bulb_F: number
+      peak_wet_bulb_F: number
     }
   }
 }
@@ -342,10 +344,17 @@ export function MetroUnifiedPopup({ metroName, visible, onClose }: MetroUnifiedP
                     </div>
                   </div>
 
+                  {/* "Est. Pop. in Zone" used to sit here, reading
+                      estimated_at_risk_population. That is one of three fields the
+                      dataset's own generator documents as fabricated and deliberately
+                      never computed, and MetroMapCard already omits it for unverified
+                      provenance. Peak wet bulb is measured, so show that instead. */}
                   <div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400">Est. Pop. in Zone</div>
-                    <div className="text-sm font-bold text-gray-900 dark:text-white">
-                      {(wetBulbStats.current.estimated_at_risk_population || 0).toLocaleString()}
+                    <div className="text-xs text-gray-500 dark:text-gray-400">Peak wet bulb</div>
+                    <div className="text-lg font-bold text-orange-600 dark:text-orange-400">
+                      {wetBulbStats.current.peak_wet_bulb_F != null
+                        ? `${Math.round(wetBulbStats.current.peak_wet_bulb_F)}°F`
+                        : '—'}
                     </div>
                   </div>
                 </div>
