@@ -2,7 +2,8 @@
 import { useEffect, useRef, useState, useCallback, type MutableRefObject } from 'react'
 import { Link } from 'react-router-dom'
 import mapboxgl from 'maplibre-gl'
-import { registerSeaLevelTileProtocol, SLR_PROTOCOL } from '../utils/seaLevelTiles'
+import { registerSeaLevelTileProtocol, SLR_PROTOCOL, noaaSeaLevelTileUrl } from '../utils/seaLevelTiles'
+import { registerWildfireTileProtocol, wildfireTileUrl } from '../utils/wildfireTiles'
 import { seaLevelFeetForYear } from '../utils/seaLevelProjection'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMap } from '../contexts/MapContext'
@@ -2898,7 +2899,7 @@ export default function ClimateStudioView() {
       // paint property can restyle. Route the tiles through the slr:// protocol, which
       // rewrites their pixels so open water reads light and water taking land reads dark.
       registerSeaLevelTileProtocol()
-      const tileUrl = `${SLR_PROTOCOL}://${BACKEND_BASE_URL}/api/tiles/noaa-slr/${seaLevelRiseFeet}/{z}/{x}/{y}.png`
+      const tileUrl = `${SLR_PROTOCOL}://${noaaSeaLevelTileUrl(seaLevelRiseFeet)}`
 
       console.log(`🌊 Adding sea level rise layer: ${seaLevelRiseFeet}ft`)
 
@@ -2958,7 +2959,8 @@ export default function ClimateStudioView() {
     if (showWildfireLayer) {
       // Served through our backend as same-origin PNG tiles. The USFS ArcGIS host isn't
       // reliably CORS-enabled, so fetching it straight from the browser fails silently.
-      const tileUrl = `${BACKEND_BASE_URL}/api/tiles/wildfire-whp/{z}/{x}/{y}.png?v=3`
+      registerWildfireTileProtocol()
+      const tileUrl = wildfireTileUrl()
       if (!map.getSource(sourceId)) {
         map.addSource(sourceId, {
           type: 'raster',

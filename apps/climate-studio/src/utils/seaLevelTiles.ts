@@ -173,8 +173,22 @@ async function canvasToPngBytes(canvas: OffscreenCanvas | HTMLCanvasElement): Pr
 
 let registered = false
 
-/** z/x/y out of a proxied NOAA tile URL, so the neighbouring tiles can be named. */
-const TILE_URL = /\/noaa-slr\/(\d+)\/(\d+)\/(\d+)\/(\d+)\.png/
+/**
+ * NOAA's own tile path, so the neighbouring tiles can be named: the ArcGIS cache is
+ * addressed /tile/{z}/{row}/{col}, i.e. y before x.
+ */
+const TILE_URL = /\/MapServer\/tile\/(\d+)\/(\d+)\/(\d+)(?:$|\?)/
+
+/**
+ * NOAA serves these tiles with permissive CORS, so the browser fetches them straight
+ * from coast.noaa.gov. They used to be relayed through our own backend, which meant
+ * every tile was downloaded twice — once by the server from NOAA, once by the browser
+ * from the server — and the server half was billed as egress. The proxy existed for
+ * a CORS problem that does not exist.
+ */
+export function noaaSeaLevelTileUrl(feet: number): string {
+  return `https://coast.noaa.gov/arcgis/rest/services/dc_slr/slr_${feet}ft/MapServer/tile/{z}/{y}/{x}`
+}
 
 /**
  * Tiles already fetched, keyed by URL. The fade needs each tile's eight neighbours,
@@ -237,7 +251,7 @@ async function buildMosaic(
   ctx.drawImage(centre, w, h)
   if (!match) return { canvas, ctx } // unrecognised URL: centre only, no neighbours
 
-  const [, feet, z, x, y] = match
+  const [, z, y, x] = match
   const span = 2 ** Number(z)
   const neighbours: Array<Promise<void>> = []
 
@@ -247,7 +261,7 @@ async function buildMosaic(
       const ny = Number(y) + dy
       if (ny < 0 || ny >= span) continue          // no tiles past the poles
       const nx = (Number(x) + dx + span) % span   // longitude wraps
-      const neighbourUrl = url.replace(TILE_URL, `/noaa-slr/${feet}/${z}/${nx}/${ny}.png`)
+      const neighbourUrl = url.replace(TILE_URL, `/MapServer/tile/${z}/${ny}/${nx}`)
       neighbours.push(
         fetchTileBitmap(neighbourUrl, signal).then(bmp => {
           if (!bmp) return
