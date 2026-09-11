@@ -9,6 +9,7 @@ import {
   femaFloodTileUrl,
   FEMA_FLOOD_MIN_ZOOM,
 } from '../utils/femaFloodTiles'
+import { countyFloodRiskFor } from '../utils/femaFloodRisk'
 import { noaaInundationFeet } from '../config/climateProjections'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMap } from '../contexts/MapContext'
@@ -797,7 +798,7 @@ export default function ClimateStudioView() {
     showAquifersLayerRef.current = showAquifersLayer
   }, [showAquifersLayer])
   const [showDamsLayer, setShowDamsLayer] = useState(true) // Default ON - shows dam infrastructure
-  const [showMetroHumidityLayer, setShowMetroHumidityLayer] = useState(true) // Default ON
+  const [showMetroHumidityLayer, setShowMetroHumidityLayer] = useState(false)
   const [showFactoriesLayer, setShowFactoriesLayer] = useState(true)
   const [showAIDataCentersLayer, setShowAIDataCentersLayer] = useState(true)
   const [selectedDataCenter, setSelectedDataCenter] = useState<SelectedDataCenter | null>(null)
@@ -926,16 +927,10 @@ export default function ClimateStudioView() {
     selectedFeatureIdRef.current = selectedFeatureId
   }, [selectedFeatureId])
 
-  // Initialize default climate layers on mount (run only once)
-  useEffect(() => {
-    if (!isLayerActive('wet_bulb')) {
-      toggleLayer('wet_bulb')
-    }
-    if (!isLayerActive('temperature_projection')) {
-      toggleLayer('temperature_projection')
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // Wet Bulb and Future Temperature Anomaly used to be force-enabled here on every
+  // mount, overriding their own defaultActive: false in the layer config and
+  // covering the map before the user chose anything. They now start off, like every
+  // other layer, and the config is the single source of truth for what is on.
 
   // Auto-disable layers when removed from widget
   useEffect(() => {
@@ -2935,6 +2930,76 @@ export default function ClimateStudioView() {
     }
   }, [showFemaFloodLayer, femaFloodOpacity, mapLoaded])
 
+  // County flood risk, for the zooms where NFHL will not draw.
+  //
+  // NFHL has no pre-rendered national service and refuses to render above its own
+  // scale threshold, so a wide flood view has to come from FEMA's National Risk
+  // Index instead. It is a different measurement at a different resolution —
+  // expected-annual-loss percentiles per county, not mapped flood extents — so the
+  // layer card says which of the two is on screen rather than letting county risk
+  // read as floodplain.
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return
+    const map = mapRef.current
+    const sourceId = 'fema-flood-risk'
+    const fillId = 'fema-flood-risk-fill'
+    const lineId = 'fema-flood-risk-line'
+
+    const teardown = () => {
+      try {
+        if (map.getLayer(lineId)) map.removeLayer(lineId)
+        if (map.getLayer(fillId)) map.removeLayer(fillId)
+        if (map.getSource(sourceId)) map.removeSource(sourceId)
+      } catch {
+        // map already gone
+      }
+    }
+
+    if (!showFemaFloodLayer || viewport.zoom >= FEMA_FLOOD_MIN_ZOOM) {
+      teardown()
+      return
+    }
+    if (!isMapUsable(map)) return
+
+    const bounds = map.getBounds()
+    const data = countyFloodRiskFor({
+      north: bounds.getNorth(),
+      south: bounds.getSouth(),
+      east: bounds.getEast(),
+      west: bounds.getWest(),
+    })
+
+    const existing = map.getSource(sourceId) as maplibregl.GeoJSONSource | undefined
+    if (existing) {
+      existing.setData(data)
+      return
+    }
+
+    const anchor = getBeforeId(map, 'fema-flood-layer')
+    map.addSource(sourceId, { type: 'geojson', data })
+    map.addLayer(
+      {
+        id: fillId,
+        type: 'fill',
+        source: sourceId,
+        paint: {
+          'fill-color': ['coalesce', ['get', 'floodColor'], 'rgba(0,0,0,0)'],
+          'fill-opacity': femaFloodOpacity * 0.85,
+        },
+      },
+      anchor
+    )
+    map.addLayer(
+      {
+        id: lineId,
+        type: 'line',
+        source: sourceId,
+        paint: { 'line-color': 'rgba(74,20,134,0.35)', 'line-width': 0.5 },
+      },
+      anchor
+    )
+  }, [showFemaFloodLayer, femaFloodOpacity, mapLoaded, viewport.zoom, viewport.center.lat, viewport.center.lng])
+
   // Add/remove temperature projection layer based on climate context toggle
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return
@@ -4611,9 +4676,11 @@ export default function ClimateStudioView() {
                       <div className="flex items-center justify-between gap-2">
                         <h4 className="text-sm font-semibold">FEMA Flood Zones</h4>
                       </div>
-                      {showFemaFloodLayer && viewport.zoom < FEMA_FLOOD_MIN_ZOOM && (
-                        <p className="text-[11px] text-amber-600 dark:text-amber-400">
-                          Zoom in to see flood zones — FEMA maps these at street level
+                      {showFemaFloodLayer && (
+                        <p className="text-[11px] text-muted-foreground">
+                          {viewport.zoom < FEMA_FLOOD_MIN_ZOOM
+                            ? 'Showing county flood risk. Zoom in for mapped flood zones.'
+                            : 'Showing mapped flood zones (FEMA NFHL).'}
                         </p>
                       )}
                       {showSourceInfo && (

@@ -22,10 +22,15 @@ const browser = await launchBrowser()
   await page.locator('.layer-card').filter({ hasText: 'FEMA Flood Zones' }).first().click()
   await page.waitForTimeout(6000)
 
-  report.ok('no tiles requested below the usable zoom', fema.length === 0, `${fema.length} requests`)
+  report.ok('no NFHL tiles requested below the usable zoom', fema.length === 0, `${fema.length} requests`)
   const hint = await page.locator('.layer-card').filter({ hasText: 'FEMA Flood Zones' })
-    .filter({ hasText: /Zoom in/i }).count()
-  report.ok('the card explains why nothing is drawn', hint === 1)
+    .filter({ hasText: /county flood risk/i }).count()
+  report.ok('the card says which of the two resolutions is showing', hint === 1)
+
+  // The wide view comes from bundled NRI data, so it must appear without a request.
+  const nri = await page.evaluate(() => performance.getEntriesByType('resource')
+    .filter(e => e.name.includes('National_Risk_Index')).length)
+  report.ok('county risk needs no network request', nri === 0, `${nri} requests`)
   await page.close()
 }
 
@@ -52,6 +57,9 @@ const browser = await launchBrowser()
     viaBackend.slice(0, 2).join(' | '))
   report.ok('FEMA returned no errors', bad.length === 0, bad.slice(0, 3).join(','))
   report.ok('no uncaught page errors', errs.length === 0, errs.slice(0, 2).join(' | '))
+  const zoneText = await page.locator('.layer-card').filter({ hasText: 'FEMA Flood Zones' })
+    .filter({ hasText: /mapped flood zones/i }).count()
+  report.ok('the card switches to mapped flood zones at street level', zoneText === 1)
 
   const attributed = await page.locator('text=FEMA National Flood Hazard Layer').count()
   report.ok('the source is attributed on the map', attributed > 0)
