@@ -46,15 +46,30 @@ class PrecipitationDroughtService:
             logger.error(f"Failed to initialize Earth Engine: {e}")
             logger.warning("Precipitation/drought service will not be available")
 
-    def get_tile_url(self, bounds, scenario='rcp45', year=2050, metric='drought_index'):
+    # Dry to wet. Deliberately long, with saturated ends, so a percentile stretch
+    # has somewhere to put the extremes instead of washing everything into the
+    # middle of the ramp.
+    PALETTE = [
+        '#7f2704', '#a63603', '#d94801', '#f16913', '#fd8d3c', '#fdbe85',
+        '#fee8c8', '#f7f7f7', '#d1e5f0', '#92c5de', '#4393c3', '#2166ac', '#053061',
+    ]
+
+    def get_tile_url(self, bounds, scenario='rcp45', year=2050, metric='precipitation'):
         """
-        Get Earth Engine tile URL for smooth precipitation/drought heatmap visualization
+        Earth Engine tile URL for the precipitation heatmap.
+
+        One measurement, one layer. This used to offer 'precipitation',
+        'drought_index' and 'soil_moisture' as if they were three datasets; all
+        three were the same CMIP6 precipitation image rescaled — drought index was
+        `6 - precip * 0.6` and soil moisture was `precip * 10`. Soil moisture is
+        gone entirely (it was never measured) and drought is what the dry end of
+        this ramp shows, rather than a separate toggle.
 
         Args:
             bounds: Dict with 'north', 'south', 'east', 'west' keys
             scenario: Climate scenario (rcp26, rcp45, rcp85)
             year: Projection year (2020-2100)
-            metric: 'precipitation', 'drought_index', or 'soil_moisture'
+            metric: accepted for backwards compatibility; ignored
 
         Returns:
             Dict with 'tile_url' and 'metadata'
@@ -86,42 +101,54 @@ class PrecipitationDroughtService:
                 scale=5000  # ~5km (CMIP6 native is ~25km)
             )
 
-            # Define visualization based on metric
-            if metric == 'precipitation':
-                vis_params = {
-                    'min': 0,
-                    'max': 10,
-                    'palette': [
-                        '#F5ED53', '#F5F3CE', '#6B9AF3', '#2357D2'
-                    ]
-                }
-            elif metric == 'drought_index':
-                # Invert scale: low precip = drought (red), high precip = no drought (blue)
-                vis_params = {
-                    'min': 0,
-                    'max': 10,
-                    'palette': [
-                        '#dc2626', '#f59e0b', '#fef08a', '#ffffff', '#90caf9', '#42a5f5', '#1e88e5'
-                    ]
-                }
-            else:  # soil_moisture
-                vis_params = {
-                    'min': 0,
-                    'max': 10,
-                    'palette': [
-                        '#8b4513', '#daa520', '#f0e68c', '#adff2f', '#7cfc00', '#32cd32'
-                    ]
-                }
-
-            # Get map ID and tile URL
-            map_id = precip_resampled.getMapId(vis_params)
-            tile_url = map_id['tile_fetcher'].url_format
-
-            # Calculate regional statistics for the viewport
+            # Stretch the palette across what the data in this viewport actually
+            # does, rather than a fixed 0-10 mm/day.
+            #
+            # CMIP6 daily precipitation over the US mostly sits between 1 and 5
+            # mm/day, so a 0-10 range squeezed nearly every pixel into the first
+            # third of the ramp — which is why the map read as one pale yellow and
+            # one pale blue with no visible variation. Stretching to the 2nd and
+            # 98th percentiles of the visible region puts the real spread across
+            # the whole palette and lets the extremes reach the saturated ends.
             region = ee.Geometry.Rectangle([
                 bounds['west'], bounds['south'],
                 bounds['east'], bounds['north']
             ])
+
+            vis_min, vis_max = 0.0, 10.0
+            try:
+                spread = precip_resampled.reduceRegion(
+                    reducer=ee.Reducer.percentile([2, 98]),
+                    geometry=region,
+                    scale=10000,
+                    maxPixels=1e9,
+                    bestEffort=True
+                ).getInfo()
+                low = spread.get('precipitation_p2')
+                high = spread.get('precipitation_p98')
+                if low is not None and high is not None:
+                    low, high = float(low), float(high)
+                    if high - low > 0.2:
+                        vis_min, vis_max = low, high
+                    else:
+                        # A small or uniform viewport — a city block, say — has almost
+                        # no spread to stretch. Falling back to a fixed 0-10 mm/day
+                        # here would put every pixel in the first tenth of the ramp
+                        # and render flat, which is the problem this is meant to fix.
+                        # Open a narrow window around the local mean instead, so what
+                        # variation exists is still visible.
+                        centre = (low + high) / 2
+                        half = max(0.25, centre * 0.35)
+                        vis_min, vis_max = max(0.0, centre - half), centre + half
+                    logger.info(f"Vis range: {vis_min:.2f}-{vis_max:.2f} mm/day (p2={low:.2f}, p98={high:.2f})")
+            except Exception as stretch_error:
+                logger.warning(f"Percentile stretch failed, using fixed range: {stretch_error}")
+
+            vis_params = {'min': vis_min, 'max': vis_max, 'palette': self.PALETTE}
+
+            # Get map ID and tile URL
+            map_id = precip_resampled.getMapId(vis_params)
+            tile_url = map_id['tile_fetcher'].url_format
 
             # Get mean precipitation for the region
             stats = precip_resampled.reduceRegion(
@@ -133,21 +160,14 @@ class PrecipitationDroughtService:
 
             mean_precip = stats.get('precipitation', None)
 
-            # Calculate drought index (inverse of precipitation, normalized 0-6)
-            # Higher drought index = more drought (less precipitation)
+            # Drought index is a restatement of the same number — kept because the
+            # UI still labels the dry end — but soil moisture is gone. It was
+            # `precip * 10`, presented as a percentage, and was never measured.
             drought_index = None
-            soil_moisture = None
             if mean_precip is not None:
-                # Normalize: 0 mm/day = 6 (severe drought), 10+ mm/day = 0 (no drought)
                 drought_index = max(0, min(6, 6 - (mean_precip * 0.6)))
 
-                # Calculate soil moisture as a proxy from precipitation
-                # Normalized 0-100% where higher precipitation = higher soil moisture
-                # 0 mm/day = 0%, 10+ mm/day = 100%
-                soil_moisture = min(100, max(0, mean_precip * 10))
-
-            logger.info(f"Generated tile URL for precipitation/drought: {metric}")
-            logger.info(f"Regional stats: avg_precip={mean_precip}, drought_index={drought_index}, soil_moisture={soil_moisture}")
+            logger.info(f"Regional stats: avg_precip={mean_precip}, drought_index={drought_index}")
 
             return {
                 'tile_url': tile_url,
@@ -160,7 +180,7 @@ class PrecipitationDroughtService:
                     'dataType': 'tiles',
                     'averagePrecipitation': round(mean_precip, 2) if mean_precip is not None else None,
                     'droughtIndex': round(drought_index, 2) if drought_index is not None else None,
-                    'soilMoisture': round(soil_moisture, 2) if soil_moisture is not None else None
+                    'visRange': [round(vis_min, 2), round(vis_max, 2)]
                 }
             }
 
@@ -231,7 +251,7 @@ class PrecipitationDroughtService:
             bounds: Dict with 'north', 'south', 'east', 'west' keys
             scenario: Climate scenario (rcp26, rcp45, rcp85)
             year: Projection year (2020-2100)
-            metric: 'precipitation', 'drought_index', or 'soil_moisture'
+            metric: 'precipitation' or 'drought_index' (two views of one measurement)
             resolution: H3 hexagon resolution (4-10)
 
         Returns:
@@ -391,17 +411,10 @@ class PrecipitationDroughtService:
             # Scale: 0 (wet) to 10 (extreme drought)
             drought_index = max(0, min(10, 10 - (precip_mm * 1.0)))
 
-            # Soil moisture proxy: direct relationship with precipitation
-            # Scale: 0% (dry) to 100% (saturated)
-            soil_moisture = min(100, max(0, precip_mm * 10))
-
-            # Select value based on metric
-            if metric == 'precipitation':
-                value = precip_mm
-            elif metric == 'drought_index':
-                value = drought_index
-            else:  # soil_moisture
-                value = soil_moisture
+            # Soil moisture used to be computed here as `precip_mm * 10` and
+            # reported as a saturation percentage. It was never measured — it is
+            # precipitation with a different unit on it — so it is gone.
+            value = drought_index if metric == 'drought_index' else precip_mm
 
             hexagon_data.append({
                 'hex_id': hex_id,
@@ -410,8 +423,7 @@ class PrecipitationDroughtService:
                 'boundary': boundary,
                 'value': round(value, 2),
                 'precipitation': round(precip_mm, 2),
-                'droughtIndex': round(drought_index, 2),
-                'soilMoisture': round(soil_moisture, 1)
+                'droughtIndex': round(drought_index, 2)
             })
 
         if missing_count > 0:

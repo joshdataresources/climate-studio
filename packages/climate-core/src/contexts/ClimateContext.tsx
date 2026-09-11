@@ -20,7 +20,7 @@ export interface ClimateControlsState {
   reliefOpacity: number;
   temperatureMode: 'anomaly' | 'actual';
   droughtOpacity: number;
-  droughtMetric: 'precipitation' | 'drought_index' | 'soil_moisture';
+  droughtMetric: 'precipitation' | 'drought_index';
   megaregionOpacity: number;
   megaregionDataMode: 'population' | 'temperature' | 'both';
   megaregionShowPopulation: boolean;
@@ -56,7 +56,7 @@ interface ClimateContextValue {
   setReliefOpacity: (value: number) => void;
   setTemperatureMode: (mode: 'anomaly' | 'actual') => void;
   setDroughtOpacity: (value: number) => void;
-  setDroughtMetric: (metric: 'precipitation' | 'drought_index' | 'soil_moisture') => void;
+  setDroughtMetric: (metric: 'precipitation' | 'drought_index') => void;
   setMegaregionOpacity: (value: number) => void;
   setMegaregionDataMode: (mode: 'population' | 'temperature' | 'both') => void;
   setMegaregionShowPopulation: (value: boolean) => void;
@@ -145,7 +145,7 @@ export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children })
   const [reliefOpacity, setReliefOpacity] = useState<number>(0.3);
   const [temperatureMode, setTemperatureMode] = useState<'anomaly' | 'actual'>('anomaly');
   const [droughtOpacity, setDroughtOpacity] = useState<number>(0.3);
-  const [droughtMetric, setDroughtMetric] = useState<'precipitation' | 'drought_index' | 'soil_moisture'>('precipitation');
+  const [droughtMetric, setDroughtMetric] = useState<'precipitation' | 'drought_index'>('precipitation');
   const [megaregionOpacity, setMegaregionOpacity] = useState<number>(0.5);
   const [megaregionDataMode, setMegaregionDataMode] = useState<'population' | 'temperature' | 'both'>('population');
   const [megaregionShowPopulation, setMegaregionShowPopulation] = useState<boolean>(true);

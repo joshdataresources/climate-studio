@@ -257,7 +257,6 @@ export function MapboxGlobe({
   const actualTempData = layerStates.temperature_projection?.data?.metadata?.averageTemperature;
   const precipitationData = layerStates.precipitation_drought?.data?.metadata?.averagePrecipitation;
   const droughtIndexData = layerStates.precipitation_drought?.data?.metadata?.droughtIndex;
-  const soilMoistureData = layerStates.precipitation_drought?.data?.metadata?.soilMoisture;
 
   return (
     <div className={`h-full w-full relative ${className ?? ""}`}>

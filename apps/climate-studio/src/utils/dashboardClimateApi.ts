@@ -12,7 +12,6 @@ export interface DashboardEarthEngineSnapshot {
 export interface DashboardPrecipitationSnapshot {
   precipitationMm: number | null
   droughtIndex: number | null
-  soilMoisture: number | null
   isRealData: boolean
 }
 
@@ -191,12 +190,10 @@ export async function fetchDashboardPrecipitationSnapshot(
 
   const precipitationMm = props?.precipitation ?? props?.value ?? null
   const droughtIndex = props?.droughtIndex ?? null
-  const soilMoisture = props?.soilMoisture ?? null
 
   return {
     precipitationMm,
     droughtIndex,
-    soilMoisture,
     isRealData: precipitationMm != null,
   }
 }
@@ -241,17 +238,15 @@ export function buildPrecipitationChartsFromTrajectories(
       year: number
       precipitationMm: number | null
       droughtIndex: number | null
-      soilMoisture: number | null
     }>
   }>
 ): {
   precipitation: PrecipitationChartBundle
   drought: PrecipitationChartBundle
-  soilMoisture: PrecipitationChartBundle
 } {
   const empty: PrecipitationChartBundle = { data: [], series: [] }
   if (!trajectories.length) {
-    return { precipitation: empty, drought: empty, soilMoisture: empty }
+    return { precipitation: empty, drought: empty }
   }
 
   const years = [...PROJECTION_YEARS]
@@ -262,7 +257,7 @@ export function buildPrecipitationChartsFromTrajectories(
     color: metroChartColor(index),
   }))
 
-  function build(valueKey: 'precipitationMm' | 'droughtIndex' | 'soilMoisture'): PrecipitationChartBundle {
+  function build(valueKey: 'precipitationMm' | 'droughtIndex'): PrecipitationChartBundle {
     const data = years.map(year => {
       const row: { year: number; [key: string]: number | string } = { year }
       for (const t of trajectories) {
@@ -279,7 +274,6 @@ export function buildPrecipitationChartsFromTrajectories(
   return {
     precipitation: build('precipitationMm'),
     drought: build('droughtIndex'),
-    soilMoisture: build('soilMoisture'),
   }
 }
 

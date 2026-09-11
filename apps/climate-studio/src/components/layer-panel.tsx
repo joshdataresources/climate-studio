@@ -125,9 +125,11 @@ const renderControl = (
         return {
           tempAnomaly,
           actualTemp,
-          precipitation: 800 + yearProgress * (scenario === 'rcp85' ? 100 : scenario === 'rcp45' ? 50 : 20), // mm/year
-          droughtIndex: 1.0 + yearProgress * (scenario === 'rcp85' ? 0.5 : scenario === 'rcp45' ? 0.3 : 0.1),
-          soilMoisture: 60 - yearProgress * (scenario === 'rcp85' ? 15 : scenario === 'rcp45' ? 10 : 5) // %
+          // Precipitation, drought index and soil moisture used to be invented
+          // here too — 800 mm baseline, drought starting at 1.0, soil moisture at
+          // 60%, all scaled linearly by year — and used as a fallback whenever the
+          // layer had not loaded. Nothing fabricated is shown now: the real figures
+          // come from the layer, and where it has not loaded the panel says so.
         };
       };
 
@@ -143,15 +145,15 @@ const renderControl = (
       const actualTempData = tempLayerState?.data?.metadata?.averageTemperature
         ?? tempLayerState?.metadata?.averageTemperature
         ?? projected.actualTemp;
+      // Real, measured over the current viewport by the precipitation layer, or
+      // nothing at all. Soil moisture is gone: the service computed it as
+      // precipitation multiplied by ten and called it a saturation percentage.
       const precipitationData = droughtLayerState?.data?.metadata?.averagePrecipitation
         ?? droughtLayerState?.metadata?.averagePrecipitation
-        ?? projected.precipitation;
+        ?? null;
       const droughtIndexData = droughtLayerState?.data?.metadata?.droughtIndex
         ?? droughtLayerState?.metadata?.droughtIndex
-        ?? projected.droughtIndex;
-      const soilMoistureData = droughtLayerState?.data?.metadata?.soilMoisture
-        ?? droughtLayerState?.metadata?.soilMoisture
-        ?? projected.soilMoisture;
+        ?? null;
 
       return (
         <div key="projectionYear" className="space-y-2">
@@ -194,19 +196,13 @@ const renderControl = (
             <div className="flex flex-col space-y-1">
               <span className="text-muted-foreground">Precipitation</span>
               <span className="font-semibold text-blue-400">
-                {precipitationData.toFixed(0)}mm
+                {precipitationData != null ? `${precipitationData.toFixed(1)} mm/day` : '—'}
               </span>
             </div>
             <div className="flex flex-col space-y-1">
               <span className="text-muted-foreground">Drought Index</span>
               <span className="font-semibold text-yellow-400">
-                {droughtIndexData.toFixed(1)}
-              </span>
-            </div>
-            <div className="flex flex-col space-y-1">
-              <span className="text-muted-foreground">Soil Moisture</span>
-              <span className="font-semibold text-green-400">
-                {soilMoistureData.toFixed(0)}%
+                {droughtIndexData != null ? droughtIndexData.toFixed(1) : '—'}
               </span>
             </div>
           </div>
@@ -419,14 +415,13 @@ const renderControl = (
       return (
         <div key="droughtMetric" className="space-y-2">
           <label className="text-xs font-semibold text-muted-foreground">Metric Type</label>
-          <Select value={values.droughtMetric} onValueChange={value => setters.setDroughtMetric(value as 'precipitation' | 'drought_index' | 'soil_moisture')}>
+          <Select value={values.droughtMetric} onValueChange={value => setters.setDroughtMetric(value as 'precipitation' | 'drought_index')}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Choose metric" />
             </SelectTrigger>
             <SelectContent className="z-[9999]">
               <SelectItem value="precipitation">Precipitation</SelectItem>
               <SelectItem value="drought_index">Drought Index</SelectItem>
-              <SelectItem value="soil_moisture">Soil Moisture</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -828,7 +823,7 @@ export function LayerControlsPanel({ layerStates = {} }: LayerControlsPanelProps
                         </div>
                       </>
                     )}
-                    {climate.controls.droughtMetric === 'soil_moisture' && (
+                    {false && (
                       <>
                         <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#8b4513] via-[#daa520] via-[#f0e68c] via-[#adff2f] via-[#7cfc00] to-[#32cd32]" />
                         <div className="flex justify-between text-[10px] text-muted-foreground">

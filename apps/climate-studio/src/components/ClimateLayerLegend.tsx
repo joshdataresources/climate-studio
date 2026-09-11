@@ -14,14 +14,10 @@ const LEGEND_CONFIGS: Record<string, LegendItem> = {
     range: '0 - 10 mm/day'
   },
   drought_index: {
-    label: 'Drought Index',
-    gradient: 'linear-gradient(to right, #8b4513, #d2691e, #f4a460, #ffffff, #90ee90, #32cd32, #228b22)',
-    range: '-2 (dry) to +2 (wet)'
-  },
-  soil_moisture: {
-    label: 'Soil Moisture',
-    gradient: 'linear-gradient(to right, #8b4513, #daa520, #f0e68c, #adff2f, #7cfc00, #32cd32)',
-    range: '0 - 10 mm'
+    label: 'Precipitation',
+    // Matches PALETTE in qgis-processing/services/precipitation_drought.py.
+    gradient: 'linear-gradient(to right, #7f2704, #a63603, #d94801, #f16913, #fd8d3c, #fdbe85, #fee8c8, #f7f7f7, #d1e5f0, #92c5de, #4393c3, #2166ac, #053061)',
+    range: 'dry to wet, stretched to the visible area'
   },
   megaregion_growth: {
     label: 'Population Growth Rate',

@@ -85,8 +85,7 @@ export function GISAnalysisApp() {
         case "droughtMetric": {
           const metricLabels = {
             precipitation: "Precipitation",
-            drought_index: "Drought Index",
-            soil_moisture: "Soil Moisture"
+            drought_index: "Drought Index"
           }
           return {
             label: "Drought Metric",

@@ -55,7 +55,7 @@ export interface ClimateFetchContext {
   reliefOpacity: number;
   temperatureMode: 'anomaly' | 'actual';
   droughtOpacity: number;
-  droughtMetric: 'precipitation' | 'drought_index' | 'soil_moisture';
+  droughtMetric: 'precipitation' | 'drought_index';
   megaregionOpacity: number;
   megaregionAnimating: boolean;
   groundwaterOpacity: number;

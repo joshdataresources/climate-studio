@@ -5304,23 +5304,13 @@ export default function ClimateStudioView() {
                             </div>
                           )}
 
-                          {/* Metric Type Selector */}
-                          <div className="space-y-2 mb-4">
-                            <label className="text-xs font-semibold text-muted-foreground">Metric Type</label>
-                            <Select
-                              value={controls.droughtMetric}
-                              onValueChange={(value) => setDroughtMetric(value as 'precipitation' | 'drought_index' | 'soil_moisture')}
-                            >
-                              <SelectTrigger className="w-full">
-                                <SelectValue placeholder="Choose metric" />
-                              </SelectTrigger>
-                              <SelectContent className="z-[9999]">
-                                <SelectItem value="precipitation">Precipitation</SelectItem>
-                                <SelectItem value="drought_index">Drought Index</SelectItem>
-                                <SelectItem value="soil_moisture">Soil Moisture</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          </div>
+                          {/* The Metric Type selector is gone. Precipitation,
+                              drought index and soil moisture were the same CMIP6
+                              precipitation image rescaled — drought index was
+                              6 - precip*0.6, soil moisture precip*10 — so choosing
+                              between them only changed the palette, not the data.
+                              One layer now, with a dry-to-wet ramp stretched to the
+                              viewport so the extremes are visible. */}
 
                           {/* Opacity Slider */}
                           <div className="space-y-2 mb-4">
@@ -5337,52 +5327,31 @@ export default function ClimateStudioView() {
                             />
                           </div>
 
-                          {/* Legend based on selected metric */}
+                          {/* One legend, matching PALETTE in
+                              qgis-processing/services/precipitation_drought.py, and
+                              labelled with the range the tiles were actually
+                              rendered at — the service stretches the palette to the
+                              2nd-98th percentile of the visible area, so a fixed
+                              0-10 mm/day caption would be wrong nearly always. */}
                           <div className="space-y-1">
-                            {controls.droughtMetric === 'precipitation' && (
-                              <>
-                                <div className="h-3 w-full rounded-full" style={{
-                                  background: 'linear-gradient(90deg, #F5ED53 0%, #F5F3CE 50%, #6B9AF3 75%, #2357D2 100%)'
-                                }} />
+                            <div className="h-3 w-full rounded-full" style={{
+                              background: 'linear-gradient(to right, #7f2704, #a63603, #d94801, #f16913, #fd8d3c, #fdbe85, #fee8c8, #f7f7f7, #d1e5f0, #92c5de, #4393c3, #2166ac, #053061)'
+                            }} />
+                            {(() => {
+                              const range = layerStates.precipitation_drought?.data?.metadata?.visRange as
+                                | [number, number]
+                                | undefined
+                              return (
                                 <div className="flex justify-between text-[10px] text-muted-foreground">
-                                  <span>0</span>
-                                  <span>2</span>
-                                  <span>4</span>
-                                  <span>6</span>
-                                  <span>8</span>
-                                  <span>10 mm/day</span>
+                                  <span>{range ? `${range[0].toFixed(1)} mm/day` : 'drier'}</span>
+                                  <span>{range ? `${range[1].toFixed(1)} mm/day` : 'wetter'}</span>
                                 </div>
-                              </>
-                            )}
-                            {controls.droughtMetric === 'drought_index' && (
-                              <>
-                                <div className="h-3 w-full rounded-full" style={{
-                                  background: 'linear-gradient(to right, #dc2626 0%, #f59e0b 16.67%, #fef08a 33.33%, #ffffff 50%, #90caf9 66.67%, #42a5f5 83.33%, #1e88e5 100%)'
-                                }} />
-                                <div className="flex justify-between text-[10px] text-muted-foreground">
-                                  <span>0</span>
-                                  <span>1</span>
-                                  <span>2</span>
-                                  <span>3</span>
-                                  <span>4</span>
-                                  <span>5</span>
-                                  <span>6+</span>
-                                </div>
-                              </>
-                            )}
-                            {controls.droughtMetric === 'soil_moisture' && (
-                              <>
-                                <div className="h-3 w-full rounded-full bg-gradient-to-r from-[#8b4513] via-[#daa520] via-[#f0e68c] via-[#adff2f] via-[#7cfc00] to-[#32cd32]" />
-                                <div className="flex justify-between text-[10px] text-muted-foreground">
-                                  <span>0</span>
-                                  <span>2</span>
-                                  <span>4</span>
-                                  <span>6</span>
-                                  <span>8</span>
-                                  <span>10 mm</span>
-                                </div>
-                              </>
-                            )}
+                              )
+                            })()}
+                            <p className="text-[10px] leading-snug text-muted-foreground">
+                              Scaled to the visible area, so the range changes as you pan.
+                              Dry end is the drought signal.
+                            </p>
                           </div>
                         </div>
                       )}
@@ -6446,17 +6415,6 @@ export default function ClimateStudioView() {
                                     className="h-4 w-4"
                                   />
                                   <span className="text-sm text-foreground">Drought Index</span>
-                                </label>
-                                <label className="flex items-center gap-2 cursor-pointer">
-                                  <input
-                                    type="radio"
-                                    name="droughtMetricTablet"
-                                    value="soil_moisture"
-                                    checked={controls.droughtMetric === 'soil_moisture'}
-                                    onChange={() => setDroughtMetric('soil_moisture')}
-                                    className="h-4 w-4"
-                                  />
-                                  <span className="text-sm text-foreground">Soil Moisture</span>
                                 </label>
                               </div>
                             </div>
