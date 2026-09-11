@@ -18,28 +18,34 @@ anyone being able to tell by looking.
 | Temperature anomaly figures | IPCC AR6 WG1, Table SPM.1 best estimates. Same file. |
 | Map raster layers | Served live: NOAA Sea Level Rise Viewer, USFS Wildfire Hazard Potential, and Earth Engine imagery. Fetched by the browser direct from source. |
 
-## Not real, and not displayed
+## Not real — removed
 
-`expanded_wet_bulb_projections.json` carries three fields its own generator
+`expanded_wet_bulb_projections.json` used to carry three fields its own generator
 documents as fabricated and deliberately never computed:
 
     estimated_at_risk_population
     casualty_rate_percent
     extent_radius_km
 
-They are absent entirely for some cities. Nothing renders them. They are typed
-optional so it stays obvious they may not be there.
+They are gone — deleted from the dataset (720 values across 52 cities), from every
+type declaration, and from the interpolator. Not hidden behind a flag or left in the
+JSON for later: removed, so they cannot quietly come back into a view.
 
-Two places had been using them, both now fixed:
+Four places had been using them:
 
-- `DeckGLMap` sized its wet-bulb circles from `extent_radius_km`, and computed a
-  wet-bulb temperature by reverse-engineering a dry-bulb one from the count of
-  days over 95°F (`90 + days_over_95F / 20`). For Houston that produced 94.8°F
-  where the dataset's own stored summer wet bulb is 81.0°F. It now reads the
-  stored value and sizes circles from event counts and metro population.
-- `MetroUnifiedPopup` displayed "Est. Pop. in Zone" from
-  `estimated_at_risk_population`. It now shows peak wet bulb, which is measured.
-  `MetroMapCard` had already omitted these fields for unverified provenance.
+- `DeckGLMap` sized wet-bulb circles from `extent_radius_km`, and computed a
+  wet-bulb temperature by reverse-engineering a dry-bulb one from the count of days
+  over 95°F (`90 + days_over_95F / 20`). For Houston that produced 94.8°F where the
+  dataset's own stored summer wet bulb is 81.0°F. It now reads the stored value and
+  sizes circles from event counts and metro population.
+- `MetroUnifiedPopup` displayed "Est. Pop. in Zone". It now shows peak wet bulb,
+  which is measured.
+- `metroOutlook.humidityScore` added up to 30 points to a displayed heat-humidity
+  risk level based on the fabricated population. It now scores from the change in
+  dangerous heat-humidity days alone. This one was indirect — a made-up number
+  shifting a risk level rather than being printed — and was the easiest to miss.
+- `MetroMapCard` and `prototype/MetroPanel` had already omitted them for unverified
+  provenance.
 
 The Climate Projections panel used to show precipitation, drought index and soil
 moisture built from invented constants. They are not displayed; none had a source

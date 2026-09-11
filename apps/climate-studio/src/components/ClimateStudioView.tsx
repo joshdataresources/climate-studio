@@ -522,7 +522,7 @@ function SortableViewItem({
     setNodeRef,
     transform,
     transition,
-    isDragging,
+    isDragging
   } = useSortable({ id: view.id })
 
   const isEditing = editingViewId === view.id
@@ -530,7 +530,7 @@ function SortableViewItem({
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: isDragging ? 0.5 : 1
   }
 
   if (isEditing) {
@@ -647,7 +647,7 @@ const ALL_LAYERS_IN_WIDGET: LayersInWidgetState = {
   precipitation: true,
   wetBulb: true,
   temperature: true,
-  topographic: true,
+  topographic: true
 }
 
 const NO_LAYERS_IN_WIDGET: LayersInWidgetState = {
@@ -664,7 +664,7 @@ const NO_LAYERS_IN_WIDGET: LayersInWidgetState = {
   precipitation: false,
   wetBulb: false,
   temperature: false,
-  topographic: false,
+  topographic: false
 }
 
 export default function ClimateStudioView() {
@@ -767,7 +767,7 @@ export default function ClimateStudioView() {
     saveCurrentView,
     deleteSavedView: deleteSavedViewFromContext,
     updateSavedViewName,
-    registerViewLayerAdapter,
+    registerViewLayerAdapter
   } = useMap()
 
   // Determine map style based on theme
@@ -823,7 +823,7 @@ export default function ClimateStudioView() {
     metro_weather: showMetroHumidityLayer,
     factories: showFactoriesLayer,
     ai_data_centers: showAIDataCentersLayer,
-    wildfire_hazard: showWildfireLayer,
+    wildfire_hazard: showWildfireLayer
   }
   viewLayerSettersRef.current = {
     sea_level_rise: setShowSeaLevelRiseLayer,
@@ -835,7 +835,7 @@ export default function ClimateStudioView() {
     metro_weather: setShowMetroHumidityLayer,
     factories: setShowFactoriesLayer,
     ai_data_centers: setShowAIDataCentersLayer,
-    wildfire_hazard: setShowWildfireLayer,
+    wildfire_hazard: setShowWildfireLayer
   }
 
   useEffect(() => {
@@ -851,7 +851,7 @@ export default function ClimateStudioView() {
         for (const [id, setLayer] of Object.entries(viewLayerSettersRef.current)) {
           setLayer(wanted.has(id))
         }
-      },
+      }
     })
     return () => registerViewLayerAdapter(null)
   }, [registerViewLayerAdapter])
@@ -875,7 +875,7 @@ export default function ClimateStudioView() {
 
   // Which layers are IN the widget (visible in the list) - separate from whether they're active
   const [layersInWidget, setLayersInWidget] = useState<LayersInWidgetState>({
-    ...ALL_LAYERS_IN_WIDGET,
+    ...ALL_LAYERS_IN_WIDGET
   })
 
   // Climate context for precipitation & drought layer
@@ -1183,7 +1183,7 @@ export default function ClimateStudioView() {
           type: 'fill',
           source: 'aquifers',
           layout: {
-            visibility: showAquifersLayerRef.current ? 'visible' : 'none',
+            visibility: showAquifersLayerRef.current ? 'visible' : 'none'
           },
           paint: {
             // Use solid fill color based on fillColor property
@@ -1212,7 +1212,7 @@ export default function ClimateStudioView() {
           type: 'line',
           source: 'aquifers',
           layout: {
-            visibility: showAquifersLayerRef.current ? 'visible' : 'none',
+            visibility: showAquifersLayerRef.current ? 'visible' : 'none'
           },
           paint: {
             'line-color': [
@@ -1239,7 +1239,7 @@ export default function ClimateStudioView() {
           type: 'line',
           source: 'aquifers',
           layout: {
-            visibility: showAquifersLayerRef.current ? 'visible' : 'none',
+            visibility: showAquifersLayerRef.current ? 'visible' : 'none'
           },
           paint: {
             'line-color': [
@@ -1797,10 +1797,7 @@ export default function ClimateStudioView() {
                 peak_humidity: Math.round(lower.peak_humidity + (upper.peak_humidity - lower.peak_humidity) * ratio),
                 wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
                 days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
-                days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
-                estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
-                casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
-                extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
+                days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio)
               }
             }
 
@@ -1816,8 +1813,7 @@ export default function ClimateStudioView() {
                 intensity,
                 color,
                 wet_bulb_events: humidityData.wet_bulb_events,
-                days_over_95F: humidityData.days_over_95F,
-                extent_radius_km: humidityData.extent_radius_km
+                days_over_95F: humidityData.days_over_95F
               })
             }
 
@@ -1831,9 +1827,6 @@ export default function ClimateStudioView() {
                 wet_bulb_events: humidityData.wet_bulb_events,
                 days_over_95F: humidityData.days_over_95F,
                 days_over_100F: humidityData.days_over_100F,
-                at_risk_population: humidityData.estimated_at_risk_population,
-                casualty_rate_percent: humidityData.casualty_rate_percent,
-                extent_radius_km: humidityData.extent_radius_km,
                 color: color,
                 intensity: intensity  // Used for heatmap weight
               },
@@ -2047,7 +2040,7 @@ export default function ClimateStudioView() {
           [-133, 19],  // SW — just west of CA, just south of FL/TX
           [-60, 53]    // NE — just east of ME, just north of the border
         ],
-        minZoom: 3,
+        minZoom: 3
       })
     } catch (error) {
       console.error('Failed to create Mapbox map:', error)
@@ -2208,10 +2201,7 @@ export default function ClimateStudioView() {
         peak_humidity: Math.round(lower.peak_humidity + (upper.peak_humidity - lower.peak_humidity) * ratio),
         wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
         days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
-        days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
-        estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
-        casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
-        extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
+        days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio)
       }
     }
 
@@ -2779,7 +2769,7 @@ export default function ClimateStudioView() {
       north: ne.lat + padding,
       south: sw.lat - padding,
       east: ne.lng + padding,
-      west: sw.lng - padding,
+      west: sw.lng - padding
     })
   }, [showAquifersLayer, mapLoaded, fetchAquiferData])
 
@@ -2879,7 +2869,7 @@ export default function ClimateStudioView() {
           type: 'raster',
           tiles: [tileUrl],
           tileSize: 256,
-          attribution: 'USFS Wildfire Risk to Communities (RMRS / Pyrologix, LANDFIRE)',
+          attribution: 'USFS Wildfire Risk to Communities (RMRS / Pyrologix, LANDFIRE)'
         })
       }
       if (!map.getLayer(layerId)) {
@@ -3072,10 +3062,7 @@ export default function ClimateStudioView() {
             peak_humidity: Math.round((lower.peak_humidity || 0) + ((upper.peak_humidity || 0) - (lower.peak_humidity || 0)) * ratio),
             wet_bulb_events: Math.round((lower.wet_bulb_events || 0) + ((upper.wet_bulb_events || 0) - (lower.wet_bulb_events || 0)) * ratio),
             days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
-            days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
-            estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
-            casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
-            extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
+            days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio)
           }
         }
 
@@ -3154,7 +3141,6 @@ export default function ClimateStudioView() {
                 avg_summer_humidity: projection.avg_summer_humidity,
                 days_over_95F: projection.days_over_95F,
                 days_over_100F: projection.days_over_100F,
-                at_risk_population: projection.estimated_at_risk_population,
                 radius_km: radiusKm,
                 metro_population: metro_population_2024,
                 baseline_humidity,
@@ -4008,7 +3994,7 @@ export default function ClimateStudioView() {
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
+      coordinateGetter: sortableKeyboardCoordinates
     })
   )
 
@@ -6857,10 +6843,7 @@ export default function ClimateStudioView() {
                   peak_humidity: Math.round(lower.peak_humidity + (upper.peak_humidity - lower.peak_humidity) * ratio),
                   wet_bulb_events: Math.round(lower.wet_bulb_events + (upper.wet_bulb_events - lower.wet_bulb_events) * ratio),
                   days_over_95F: Math.round((lower.days_over_95F || 0) + ((upper.days_over_95F || 0) - (lower.days_over_95F || 0)) * ratio),
-                  days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio),
-                  estimated_at_risk_population: Math.round((lower.estimated_at_risk_population || 0) + ((upper.estimated_at_risk_population || 0) - (lower.estimated_at_risk_population || 0)) * ratio),
-                  casualty_rate_percent: Math.round(((lower.casualty_rate_percent || 0) + ((upper.casualty_rate_percent || 0) - (lower.casualty_rate_percent || 0)) * ratio) * 10) / 10,
-                  extent_radius_km: Math.round((lower.extent_radius_km || 0) + ((upper.extent_radius_km || 0) - (lower.extent_radius_km || 0)) * ratio)
+                  days_over_100F: Math.round((lower.days_over_100F || 0) + ((upper.days_over_100F || 0) - (lower.days_over_100F || 0)) * ratio)
                 }
               }
 

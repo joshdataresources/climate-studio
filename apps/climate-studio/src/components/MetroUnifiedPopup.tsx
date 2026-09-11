@@ -51,9 +51,6 @@ interface WetBulbData {
       wet_bulb_events: number
       days_over_95F: number
       days_over_100F: number
-      estimated_at_risk_population?: number
-      casualty_rate_percent?: number
-      extent_radius_km?: number
       summer_wet_bulb_F: number
       peak_wet_bulb_F: number
     }

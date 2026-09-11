@@ -116,13 +116,16 @@ function riverScore(flowPct: number, waterRisk: 'high' | 'medium' | 'low'): numb
   return Math.min(100, decline * 0.85 + riskBonus)
 }
 
-function humidityScore(wetBulbEvents: number, baselineEvents: number, atRiskPop?: number): number {
+/**
+ * Scored from the change in dangerous heat-humidity days, which is measured.
+ *
+ * This used to add up to 30 further points from estimated_at_risk_population — one
+ * of three fields the wet-bulb dataset's own generator documents as fabricated and
+ * never computed. A made-up number was shifting a risk level shown to users.
+ */
+function humidityScore(wetBulbEvents: number, baselineEvents: number): number {
   const eventDelta = Math.max(0, wetBulbEvents - baselineEvents)
-  let score = eventDelta * 4
-  if (atRiskPop != null && atRiskPop > 0) {
-    score += Math.min(30, Math.log10(atRiskPop + 1) * 8)
-  }
-  return Math.min(100, score)
+  return Math.min(100, eventDelta * 4)
 }
 
 function coastalScore(seaLevelFeet: number): number {
@@ -242,15 +245,13 @@ export function getMetroOutlook(input: MetroOutlookInput): MetroOutlook | null {
       present: scoreToLevel(
         humidityScore(
           presentWb.current.wet_bulb_events as number,
-          presentWb.baseline.wet_bulb_events as number,
-          presentWb.current.estimated_at_risk_population as number | undefined
+          presentWb.baseline.wet_bulb_events as number
         )
       ),
       future: scoreToLevel(
         humidityScore(
           futureWb.current.wet_bulb_events as number,
-          futureWb.baseline.wet_bulb_events as number,
-          futureWb.current.estimated_at_risk_population as number | undefined
+          futureWb.baseline.wet_bulb_events as number
         )
       ),
       presentDetail: `${presentWb.current.wet_bulb_events} dangerous heat-humidity events`,

@@ -1119,9 +1119,6 @@ export function DeckGLMap({
         wet_bulb_events: number
         days_over_95F: number
         days_over_100F: number
-        estimated_at_risk_population?: number
-        casualty_rate_percent?: number
-        extent_radius_km?: number
         // Real, from NASA NEX-GDDP-CMIP6 via the Stull (2011) formula. Declared
         // late because the fabricated display fields above were typed and these
         // were not, which is how the map ended up inventing a temperature it
