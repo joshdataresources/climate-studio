@@ -4,6 +4,11 @@ import { Link } from 'react-router-dom'
 import mapboxgl from 'maplibre-gl'
 import { registerSeaLevelTileProtocol, SLR_PROTOCOL, noaaSeaLevelTileUrl } from '../utils/seaLevelTiles'
 import { registerWildfireTileProtocol, wildfireTileUrl } from '../utils/wildfireTiles'
+import {
+  registerFemaFloodTileProtocol,
+  femaFloodTileUrl,
+  FEMA_FLOOD_MIN_ZOOM,
+} from '../utils/femaFloodTiles'
 import { noaaInundationFeet } from '../config/climateProjections'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMap } from '../contexts/MapContext'
@@ -626,6 +631,7 @@ type LayersInWidgetState = {
   canals: boolean
   seaLevel: boolean
   wildfire: boolean
+  femaFlood: boolean
   aquifers: boolean
   precipitation: boolean
   wetBulb: boolean
@@ -643,6 +649,7 @@ const ALL_LAYERS_IN_WIDGET: LayersInWidgetState = {
   canals: true,
   seaLevel: true,
   wildfire: true,
+  femaFlood: true,
   aquifers: true,
   precipitation: true,
   wetBulb: true,
@@ -660,6 +667,7 @@ const NO_LAYERS_IN_WIDGET: LayersInWidgetState = {
   canals: false,
   seaLevel: false,
   wildfire: false,
+  femaFlood: false,
   aquifers: false,
   precipitation: false,
   wetBulb: false,
@@ -795,6 +803,8 @@ export default function ClimateStudioView() {
   const [selectedDataCenter, setSelectedDataCenter] = useState<SelectedDataCenter | null>(null)
   const [showSeaLevelRiseLayer, setShowSeaLevelRiseLayer] = useState(false)
   const [showWildfireLayer, setShowWildfireLayer] = useState(false)
+  const [showFemaFloodLayer, setShowFemaFloodLayer] = useState(false)
+  const [femaFloodOpacity, setFemaFloodOpacity] = useState(0.65)
   const [wildfireOpacity, setWildfireOpacity] = useState(0.2)
   const [showHumidityWetBulb, setShowHumidityWetBulb] = useState(true)
   const [showMetroDataStatistics, setShowMetroDataStatistics] = useState(false)
@@ -823,7 +833,8 @@ export default function ClimateStudioView() {
     metro_weather: showMetroHumidityLayer,
     factories: showFactoriesLayer,
     ai_data_centers: showAIDataCentersLayer,
-    wildfire_hazard: showWildfireLayer
+    wildfire_hazard: showWildfireLayer,
+    fema_flood: showFemaFloodLayer,
   }
   viewLayerSettersRef.current = {
     sea_level_rise: setShowSeaLevelRiseLayer,
@@ -835,7 +846,8 @@ export default function ClimateStudioView() {
     metro_weather: setShowMetroHumidityLayer,
     factories: setShowFactoriesLayer,
     ai_data_centers: setShowAIDataCentersLayer,
-    wildfire_hazard: setShowWildfireLayer
+    wildfire_hazard: setShowWildfireLayer,
+    fema_flood: setShowFemaFloodLayer,
   }
 
   useEffect(() => {
@@ -2860,8 +2872,6 @@ export default function ClimateStudioView() {
     const layerId = 'wildfire-whp-layer'
 
     if (showWildfireLayer) {
-      // Served through our backend as same-origin PNG tiles. The USFS ArcGIS host isn't
-      // reliably CORS-enabled, so fetching it straight from the browser fails silently.
       registerWildfireTileProtocol()
       const tileUrl = wildfireTileUrl()
       if (!map.getSource(sourceId)) {
@@ -2886,6 +2896,44 @@ export default function ClimateStudioView() {
       }
     }
   }, [showWildfireLayer, wildfireOpacity, mapLoaded])
+
+  // Manage the FEMA flood hazard layer (NFHL MapServer, fetched direct from FEMA)
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return
+    const map = mapRef.current
+    const sourceId = 'fema-flood-tiles'
+    const layerId = 'fema-flood-layer'
+
+    if (showFemaFloodLayer) {
+      registerFemaFloodTileProtocol()
+      if (!map.getSource(sourceId)) {
+        map.addSource(sourceId, {
+          type: 'raster',
+          tiles: [femaFloodTileUrl()],
+          tileSize: 256,
+          // NFHL will not draw above its own scale threshold, so requesting tiles it
+          // can only return blank is wasted work. See FEMA_FLOOD_MIN_ZOOM.
+          minzoom: FEMA_FLOOD_MIN_ZOOM,
+          attribution: 'FEMA National Flood Hazard Layer'
+        })
+      }
+      if (!map.getLayer(layerId)) {
+        map.addLayer(
+          { id: layerId, type: 'raster', source: sourceId, paint: { 'raster-opacity': femaFloodOpacity } },
+          getBeforeId(map, 'fema-flood-layer')
+        )
+      } else {
+        map.setPaintProperty(layerId, 'raster-opacity', femaFloodOpacity)
+      }
+    } else {
+      try {
+        if (map.getLayer(layerId)) map.removeLayer(layerId)
+        if (map.getSource(sourceId)) map.removeSource(sourceId)
+      } catch (error) {
+        console.log('Map already removed during FEMA flood layer cleanup')
+      }
+    }
+  }, [showFemaFloodLayer, femaFloodOpacity, mapLoaded])
 
   // Add/remove temperature projection layer based on climate context toggle
   useEffect(() => {
@@ -4545,6 +4593,39 @@ export default function ClimateStudioView() {
                       onClick={(e) => {
                         e.stopPropagation()
                         setLayersInWidget({ ...layersInWidget, wildfire: false })
+                      }}
+                      className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
+                    >
+                      <X className="h-5 w-5 text-muted-foreground" />
+                    </button>
+                  </div>
+                )}
+
+                {/* FEMA Flood Zones Layer */}
+                {layersInWidget.femaFlood && (
+                  <div className={`layer-card cursor-pointer ${showFemaFloodLayer ? 'active' : ''}`} onClick={() => setShowFemaFloodLayer(!showFemaFloodLayer)}>
+                    <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M4 15c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1v2c-1.5 0-1.5 1-3 1s-1.5-1-3-1-1.5 1-3 1-1.5-1-3-1-1.5 1-3 1v-2zm0-5c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1v2c-1.5 0-1.5 1-3 1s-1.5-1-3-1-1.5 1-3 1-1.5-1-3-1-1.5 1-3 1v-2z" />
+                    </svg>
+                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="text-sm font-semibold">FEMA Flood Zones</h4>
+                      </div>
+                      {showFemaFloodLayer && viewport.zoom < FEMA_FLOOD_MIN_ZOOM && (
+                        <p className="text-[11px] text-amber-600 dark:text-amber-400">
+                          Zoom in to see flood zones — FEMA maps these at street level
+                        </p>
+                      )}
+                      {showSourceInfo && (
+                        <p className="text-[11px] text-muted-foreground/80 truncate">
+                          Source: <span className="font-medium text-foreground">FEMA National Flood Hazard Layer</span>
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setLayersInWidget({ ...layersInWidget, femaFlood: false })
                       }}
                       className="h-5 w-5 flex-shrink-0 flex items-center justify-center bg-transparent border-none hover:bg-transparent"
                     >

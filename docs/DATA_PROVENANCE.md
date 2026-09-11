@@ -16,6 +16,7 @@ anyone being able to tell by looking.
 | `metro-water-access.json` | Utility-documented supply mixes, researched and cited, ~2024-25. |
 | Sea level rise figures | NOAA Technical Report NOS 01 (2022), GMSL scenarios. See `src/config/climateProjections.ts`. |
 | Temperature anomaly figures | IPCC AR6 WG1, Table SPM.1 best estimates. Same file. |
+| FEMA flood zones | FEMA National Flood Hazard Layer, layer 28 "Flood Hazard Zones", fetched direct from `hazards.fema.gov`. Rendered with FEMA's own symbology and labels (Zone AE, Zone X, levee-reduced-risk). Only drawn at zoom 14 and deeper — the service carries minScale 36,111 and returns a transparent image above it. |
 | Map raster layers | Served live: NOAA Sea Level Rise Viewer, USFS Wildfire Hazard Potential, and Earth Engine imagery. Fetched by the browser direct from source. |
 
 ## Not real — removed
