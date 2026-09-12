@@ -2071,6 +2071,77 @@ export default function ClimateStudioView() {
     </div>
   ) : null
 
+  /**
+   * Sea Level Rise legend.
+   *
+   * Shared for the same reason the flood legend is: the Features panel is rendered
+   * twice, once per breakpoint, and this card only existed in one of them — so at
+   * desktop width the layer drew a gradient nobody had a key for.
+   *
+   * The swatches mirror what the tiles are actually recoloured to in
+   * utils/seaLevelTiles.ts. NOAA's own palette runs the other way, dark for deep,
+   * and the layer inverts it, so a legend taken from NOAA would be backwards.
+   */
+  const seaLevelLegendCard = showSeaLevelRiseLayer ? (
+    <div className="feature-card">
+      <div
+        className="flex items-center justify-between cursor-pointer mb-2.5"
+        onClick={() => {
+          const n = new Set(collapsedFeatures)
+          n.has('sealevel') ? n.delete('sealevel') : n.add('sealevel')
+          setCollapsedFeatures(n)
+        }}
+      >
+        <h4 className="text-[13px] font-semibold">Sea Level Rise</h4>
+        <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('sealevel') ? '-rotate-90' : ''}`} />
+      </div>
+      {!collapsedFeatures.has('sealevel') && (
+        <div className="space-y-3">
+          <div className="space-y-2">
+            <div className="text-xs font-semibold mb-1">Projection Settings</div>
+            <div className="text-[11px] text-muted-foreground">
+              {controls.scenario.toUpperCase()} in {controls.projectionYear} — about{' '}
+              {seaLevelRiseFeet} ft of inundation
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="text-xs font-semibold mb-1">What you are seeing</div>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 text-[11px]">
+                <div
+                  className="w-8 h-3 rounded-sm flex-shrink-0 border border-black/10"
+                  style={{ background: 'linear-gradient(to right, rgb(7,42,102), rgba(183,224,245,0))' }}
+                />
+                <span>Water covering land, fading out to open sea</span>
+              </div>
+              <div className="flex items-center gap-2 text-[11px]">
+                <div
+                  className="w-8 h-3 rounded-sm flex-shrink-0 border border-black/10"
+                  style={{ backgroundColor: 'rgba(150,190,120,0.45)' }}
+                />
+                <span>Low-lying land</span>
+              </div>
+            </div>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Darkest where the sea takes land, thinning to nothing offshore — open
+              water carries no information the basemap does not already show.
+            </p>
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Low-lying land sits below the projected water line but is not connected
+              to the sea, so this scenario does not flood it. NOAA publishes it as a
+              separate class from inundation depth.
+            </p>
+          </div>
+
+          <p className="text-[10px] text-muted-foreground leading-snug">
+            NOAA Sea Level Rise Viewer. Depth is relative to mean higher high water.
+          </p>
+        </div>
+      )}
+    </div>
+  ) : null
+
   // Initialize map
   useEffect(() => {
     isMountedRef.current = true
@@ -5223,6 +5294,8 @@ export default function ClimateStudioView() {
                     </div>
                   )}
 
+                  {seaLevelLegendCard}
+
                   {femaFloodLegendCard}
 
                   {/* Wildfire Hazard */}
@@ -6231,6 +6304,8 @@ export default function ClimateStudioView() {
                     )}
 
 
+                    {seaLevelLegendCard}
+
                     {femaFloodLegendCard}
 
                     {/* Factory Filters */}
@@ -6653,55 +6728,6 @@ export default function ClimateStudioView() {
                                 onValueChange={(value) => setWetBulbOpacity(value[0])}
                                 className="w-full"
                               />
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Sea Level Rise Controls */}
-                    {showSeaLevelRiseLayer && (
-                      <div className="feature-card">
-                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('sealevel') ? n.delete('sealevel') : n.add('sealevel'); setCollapsedFeatures(n) }}>
-                          <h4 className="text-[13px] font-semibold">Sea Level Rise</h4>
-                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('sealevel') ? '-rotate-90' : ''}`} />
-                        </div>
-                        {!collapsedFeatures.has('sealevel') && (
-                          <div className="space-y-3">
-                            {/* Sea Level Settings */}
-                            <div className="space-y-2">
-                              <div className="text-xs font-semibold mb-1">Projection Settings</div>
-                              <div className="text-[11px] text-muted-foreground">
-                                Based on {controls.scenario.toUpperCase()} scenario for year {controls.projectionYear}
-                              </div>
-                            </div>
-                            {/* Sea Level Legend — mirrors what the tiles actually draw.
-                                The old version listed metre bands in four blues that
-                                the layer has never rendered, and said nothing about
-                                the green, which is the part people ask about. */}
-                            <div className="space-y-2">
-                              <div className="text-xs font-semibold mb-1">What you are seeing</div>
-                              <div className="space-y-1.5">
-                                <div className="flex items-center gap-2 text-[11px]">
-                                  <div
-                                    className="w-8 h-3 rounded-sm flex-shrink-0"
-                                    style={{ background: 'linear-gradient(to right, rgb(7,42,102), rgba(183,224,245,0))' }}
-                                  ></div>
-                                  <span>Water covering land, fading out to open sea</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-[11px]">
-                                  <div
-                                    className="w-8 h-3 rounded-sm flex-shrink-0"
-                                    style={{ backgroundColor: 'rgba(150,190,120,0.45)' }}
-                                  ></div>
-                                  <span>Low-lying land</span>
-                                </div>
-                                <div className="text-[11px] text-muted-foreground leading-snug">
-                                  Low-lying land sits below the projected water line but is not
-                                  connected to the sea, so this scenario does not flood it. NOAA
-                                  publishes it as a separate class from inundation depth.
-                                </div>
-                              </div>
                             </div>
                           </div>
                         )}
