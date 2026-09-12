@@ -630,7 +630,9 @@ const FEMA_FLOOD_LEGEND: ReadonlyArray<{
 }> = [
   { color: 'rgb(0,228,255)', label: '1% annual chance flood', detail: 'The regulatory floodplain — Zones A, AE, VE' },
   { color: 'rgb(0,228,255)', label: 'Regulatory floodway', detail: 'The channel that must stay clear', hatch: true },
-  { color: 'rgb(255,134,0)', label: '0.2% annual chance flood', detail: 'Zone X, shaded' },
+  // Recoloured from FEMA's orange — see REPLACEMENT_HUE in utils/femaFloodTiles.ts.
+  // The swatch has to track the rotation or the legend stops matching the map.
+  { color: 'rgb(170,0,255)', label: '0.2% annual chance flood', detail: 'Zone X, shaded' },
   { color: 'rgb(109,109,109)', label: 'Reduced risk due to levee', detail: 'Protected, not risk-free', hatch: true },
   { color: 'rgb(242,228,121)', label: 'Undetermined hazard', detail: 'Zone D — not studied' },
 ]

@@ -1,4 +1,5 @@
 import maplibregl from 'maplibre-gl'
+import { toCanvas, canvasToPngBytes } from './tileCanvas'
 
 /**
  * Recolours the NOAA sea level rise tiles as they arrive.
@@ -153,22 +154,6 @@ export function recolorSeaLevelPixels(
     const fade = 1 - Math.min(dist[p], FADE_PIXELS) / FADE_PIXELS
     pixels[i + 3] = alpha * fade
   }
-}
-
-const toCanvas = (width: number, height: number) =>
-  typeof OffscreenCanvas !== 'undefined'
-    ? new OffscreenCanvas(width, height)
-    : Object.assign(document.createElement('canvas'), { width, height })
-
-async function canvasToPngBytes(canvas: OffscreenCanvas | HTMLCanvasElement): Promise<ArrayBuffer> {
-  if ('convertToBlob' in canvas) {
-    return (await canvas.convertToBlob({ type: 'image/png' })).arrayBuffer()
-  }
-  const blob: Blob | null = await new Promise(resolve =>
-    (canvas as HTMLCanvasElement).toBlob(resolve, 'image/png')
-  )
-  if (!blob) throw new Error('Could not encode recoloured sea level tile')
-  return blob.arrayBuffer()
 }
 
 let registered = false

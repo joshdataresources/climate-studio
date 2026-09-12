@@ -71,5 +71,54 @@ const browser = await launchBrowser()
   await page.close()
 }
 
+// ── the 0.2% zone must not arrive orange ───────────────────────────────────────
+{
+  const page = await browser.newPage()
+  await page.goto(`${BASE_URL}/`, { waitUntil: 'domcontentloaded' })
+  const r = await page.evaluate(async () => {
+    const mod = await import('/src/utils/femaFloodTiles.ts')
+    const HALF = 20037508.342789244
+    const bbox = (z, x, y) => { const n = 2 ** z
+      return [(x/n)*2*HALF-HALF, HALF-((y+1)/n)*2*HALF, ((x+1)/n)*2*HALF-HALF, HALF-(y/n)*2*HALF].join(',') }
+    const q = new URLSearchParams({ bbox: bbox(13, 2046, 3381), bboxSR: '3857', imageSR: '3857',
+      size: '256,256', format: 'png32', transparent: 'true', layers: 'show:28', dpi: '48', f: 'image' })
+    const res = await fetch(`https://hazards.fema.gov/arcgis/rest/services/public/NFHL/MapServer/export?${q}`)
+    const bmp = await createImageBitmap(await res.blob())
+    const c = new OffscreenCanvas(256, 256); const ctx = c.getContext('2d'); ctx.drawImage(bmp, 0, 0)
+    const img = ctx.getImageData(0, 0, 256, 256)
+    const before = new Uint8ClampedArray(img.data)
+    mod.recolorFloodZonePixels(img.data)
+
+    const hue = (r, g, b) => {
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn
+      if (!d) return -1
+      let h = mx === r ? 60 * (((g - b) / d) % 6) : mx === g ? 60 * ((b - r) / d + 2) : 60 * ((r - g) / d + 4)
+      return h < 0 ? h + 360 : h
+    }
+    let orangeBefore = 0, orangeAfter = 0, cyanBefore = 0, cyanAfter = 0
+    for (let i = 0; i < before.length; i += 4) {
+      if (before[i + 3] === 0) continue
+      const hb = hue(before[i], before[i+1], before[i+2])
+      const ha = hue(img.data[i], img.data[i+1], img.data[i+2])
+      if (hb >= 15 && hb <= 45) orangeBefore++
+      if (ha >= 15 && ha <= 45) orangeAfter++
+      if (before[i] === 0 && before[i+1] === 229 && before[i+2] === 255) cyanBefore++
+      if (img.data[i] === 0 && img.data[i+1] === 229 && img.data[i+2] === 255) cyanAfter++
+    }
+    return { orangeBefore, orangeAfter, cyanBefore, cyanAfter }
+  })
+  report.ok(`the 0.2% zone arrives orange from FEMA (${r.orangeBefore} px)`, r.orangeBefore > 1000)
+  // Not zero: a handful of near-grey pixels on anti-aliased edges carry a trace of
+  // warm hue. Catching those too would mean dropping the saturation guard far enough
+  // to recolour the levee hatching, which is legitimately grey. A fringe under a
+  // tenth of a percent is invisible; losing the hatching would not be.
+  const fringe = (100 * r.orangeAfter) / r.orangeBefore
+  report.ok(`orange is gone bar an anti-aliasing fringe (${fringe.toFixed(3)}%)`,
+    fringe < 0.1, `${r.orangeAfter} px left of ${r.orangeBefore}`)
+  report.ok(`the 1% zone's cyan is untouched (${r.cyanBefore} px)`,
+    r.cyanAfter === r.cyanBefore && r.cyanBefore > 1000)
+  await page.close()
+}
+
 await browser.close()
 process.exit(report.finish() ? 0 : 1)

@@ -1,4 +1,5 @@
 import maplibregl from 'maplibre-gl'
+import { toCanvas, canvasToPngBytes, hueAndSaturation, withHue } from './tileCanvas'
 
 /**
  * FEMA National Flood Hazard Layer, fetched straight from FEMA.
@@ -38,6 +39,42 @@ const FLOOD_HAZARD_ZONES_LAYER = 28
  * to see, it is that FEMA takes half a minute per tile to draw them.
  */
 export const FEMA_FLOOD_MIN_ZOOM = 12
+
+/**
+ * FEMA draws the 0.2% annual chance zone in orange, which is very close to the
+ * orange the USFS wildfire layer uses for high hazard — rgb(255,134,0) against
+ * rgb(255,170,0). Two unrelated hazards reading as the same colour is worse than
+ * either being slightly off-spec, so the orange is rotated to purple on arrival.
+ *
+ * Purple rather than green: green collides with the wildfire layer's low-hazard end
+ * and with the basemap's parks.
+ *
+ * Done by hue rotation rather than swapping a flat colour. FEMA renders that zone
+ * with hatching and anti-aliased edges, so it reaches the tile as a family of
+ * darker and paler oranges — a single-colour swap would leave most of it behind.
+ * Lightness and saturation are preserved, so the hatch pattern survives intact.
+ */
+const ORANGE_HUE_RANGE: [number, number] = [15, 45]
+// Low, deliberately. The guard exists to leave greys alone — the levee hatching is
+// grey and has a saturation near zero — and these tiles carry nothing but FEMA's own
+// symbology, so there is no basemap colour to protect. A stricter threshold left an
+// orange fringe on every anti-aliased edge.
+const MIN_SATURATION = 0.06
+const REPLACEMENT_HUE = 280 // violet
+
+/** Rewrite one tile's pixels in place. Exported so it can be tested without a map. */
+export function recolorFloodZonePixels(pixels: Uint8ClampedArray): void {
+  for (let i = 0; i < pixels.length; i += 4) {
+    if (pixels[i + 3] === 0) continue
+    const { hue, sat } = hueAndSaturation(pixels[i], pixels[i + 1], pixels[i + 2])
+    if (sat < MIN_SATURATION) continue
+    if (hue < ORANGE_HUE_RANGE[0] || hue > ORANGE_HUE_RANGE[1]) continue
+    const [r, g, b] = withHue(pixels[i], pixels[i + 1], pixels[i + 2], REPLACEMENT_HUE)
+    pixels[i] = r
+    pixels[i + 1] = g
+    pixels[i + 2] = b
+  }
+}
 
 /** The cheapest dpi that still renders at a given zoom. */
 function dpiForZoom(zoom: number): number {
@@ -95,7 +132,28 @@ export function registerFemaFloodTileProtocol(): void {
       const response = await fetch(`${MAP_SERVER}?${query}`, { signal: abortController.signal })
       // Draw nothing rather than failing loudly if FEMA moves or rate-limits us.
       if (!response.ok) return { data: new ArrayBuffer(0) }
-      return { data: await response.arrayBuffer() }
+
+      const blob = await response.blob()
+      if (blob.size === 0) return { data: new ArrayBuffer(0) }
+
+      const bitmap = await createImageBitmap(blob)
+      try {
+        const canvas = toCanvas(bitmap.width, bitmap.height)
+        const ctx = canvas.getContext('2d') as
+          | OffscreenCanvasRenderingContext2D
+          | CanvasRenderingContext2D
+          | null
+        // Without a context the original tile is still correct, just orange.
+        if (!ctx) return { data: await blob.arrayBuffer() }
+
+        ctx.drawImage(bitmap, 0, 0)
+        const image = ctx.getImageData(0, 0, bitmap.width, bitmap.height)
+        recolorFloodZonePixels(image.data)
+        ctx.putImageData(image, 0, 0)
+        return { data: await canvasToPngBytes(canvas) }
+      } finally {
+        bitmap.close()
+      }
     } catch {
       return { data: new ArrayBuffer(0) }
     }
