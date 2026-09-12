@@ -621,6 +621,20 @@ function SortableViewItem({
   )
 }
 
+/** FEMA's own flood-zone symbology, read off the service's /legend endpoint. */
+const FEMA_FLOOD_LEGEND: ReadonlyArray<{
+  color: string
+  label: string
+  detail: string
+  hatch?: boolean
+}> = [
+  { color: 'rgb(0,228,255)', label: '1% annual chance flood', detail: 'The regulatory floodplain — Zones A, AE, VE' },
+  { color: 'rgb(0,228,255)', label: 'Regulatory floodway', detail: 'The channel that must stay clear', hatch: true },
+  { color: 'rgb(255,134,0)', label: '0.2% annual chance flood', detail: 'Zone X, shaded' },
+  { color: 'rgb(109,109,109)', label: 'Reduced risk due to levee', detail: 'Protected, not risk-free', hatch: true },
+  { color: 'rgb(242,228,121)', label: 'Undetermined hazard', detail: 'Zone D — not studied' },
+]
+
 type LayersInWidgetState = {
   metroWeather: boolean
   metroPopulation: boolean
@@ -1998,6 +2012,63 @@ export default function ClimateStudioView() {
       return false
     }
   }, [showMetroHumidityLayer, showMetroDataStatistics, projectionYear, theme])
+
+  /**
+   * FEMA's flood zone legend.
+   *
+   * The tiles arrive with FEMA's own symbology baked in, so these swatches are read
+   * off the service's /legend endpoint rather than chosen here — they have to match
+   * what FEMA draws or the card is lying about the map.
+   *
+   * Shared because the Features panel is rendered twice, once per breakpoint, and a
+   * legend duplicated by hand is a legend that drifts.
+   */
+  const femaFloodLegendCard = layersInWidget.femaFlood && showFemaFloodLayer ? (
+    <div className="feature-card">
+      <div
+        className="flex items-center justify-between cursor-pointer mb-2.5"
+        onClick={() => {
+          const n = new Set(collapsedFeatures)
+          n.has('femaFlood') ? n.delete('femaFlood') : n.add('femaFlood')
+          setCollapsedFeatures(n)
+        }}
+      >
+        <h4 className="text-[13px] font-semibold">FEMA Flood Zones</h4>
+        <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('femaFlood') ? '-rotate-90' : ''}`} />
+      </div>
+      {!collapsedFeatures.has('femaFlood') && (
+        <div className="space-y-3">
+          {viewport.zoom < FEMA_FLOOD_MIN_ZOOM ? (
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Zoom to {FEMA_FLOOD_MIN_ZOOM} to draw the zones. FEMA publishes them at
+              street level and will not render them wider.
+            </p>
+          ) : (
+            <div className="space-y-1.5">
+              {FEMA_FLOOD_LEGEND.map(row => (
+                <div key={row.label} className="flex items-start gap-2 text-[11px]">
+                  <div
+                    className="w-4 h-3 rounded-sm flex-shrink-0 mt-0.5 border border-black/10"
+                    style={row.hatch
+                      ? { backgroundImage: `repeating-linear-gradient(45deg, ${row.color} 0 2px, transparent 2px 4px)` }
+                      : { backgroundColor: row.color }}
+                  />
+                  <div className="min-w-0">
+                    <div className="text-foreground">{row.label}</div>
+                    <div className="text-muted-foreground">{row.detail}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+          <p className="text-[10px] text-muted-foreground leading-snug">
+            FEMA National Flood Hazard Layer. A 1% annual chance is the "100-year"
+            flood — roughly a one in four chance over a 30-year mortgage.
+          </p>
+        </div>
+      )}
+    </div>
+  ) : null
 
   // Initialize map
   useEffect(() => {
@@ -4605,13 +4676,32 @@ export default function ClimateStudioView() {
                       <div className="flex items-center justify-between gap-2">
                         <h4 className="text-sm font-semibold">FEMA Flood Zones</h4>
                       </div>
-                      {showFemaFloodLayer && (
+                      {showFemaFloodLayer && (viewport.zoom >= FEMA_FLOOD_MIN_ZOOM ? (
                         <p className="text-[11px] text-muted-foreground">
-                          {viewport.zoom < FEMA_FLOOD_MIN_ZOOM
-                            ? 'Zoom in to see flood zones — FEMA draws these at street level.'
-                            : 'Mapped flood zones (FEMA NFHL).'}
+                          Mapped flood zones (FEMA NFHL).
                         </p>
-                      )}
+                      ) : (
+                        /* A progress readout rather than a flat "zoom in".
+                           The layer is on and drawing nothing, which reads as broken
+                           unless you can see how much further you have to go — and
+                           see it move while you zoom. */
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
+                            <span>Zoom {viewport.zoom.toFixed(1)} of {FEMA_FLOOD_MIN_ZOOM} needed</span>
+                            <span>{Math.max(0, Math.ceil((FEMA_FLOOD_MIN_ZOOM - viewport.zoom) * 10) / 10)} to go</span>
+                          </div>
+                          <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-[#437efc] transition-[width] duration-200"
+                              style={{
+                                // From the world view up to the threshold, so the bar
+                                // actually moves over the range people zoom through.
+                                width: `${Math.min(100, Math.max(0, ((viewport.zoom - 3) / (FEMA_FLOOD_MIN_ZOOM - 3)) * 100))}%`
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ))}
                       {showSourceInfo && (
                         <p className="text-[11px] text-muted-foreground/80 truncate">
                           Source: <span className="font-medium text-foreground">FEMA National Flood Hazard Layer</span>
@@ -5111,6 +5201,8 @@ export default function ClimateStudioView() {
                       )}
                     </div>
                   )}
+
+                  {femaFloodLegendCard}
 
                   {/* Wildfire Hazard */}
                   {layersInWidget.wildfire && showWildfireLayer && (
@@ -6118,6 +6210,8 @@ export default function ClimateStudioView() {
                     )}
 
 
+                    {femaFloodLegendCard}
+
                     {/* Factory Filters */}
                     {layersInWidget.factories && showFactoriesLayer && (
                       <div className="feature-card">
@@ -7085,6 +7179,42 @@ function MetroCityDots({
               cursor: showMetroHumidityLayer ? undefined : 'pointer'
             }}
           />
+        )
+      })}
+
+      {/* City names, shown only when the cards are off.
+          With the Metro Weather layer on, every dot already has a card above it
+          carrying the name; a label underneath would just be the same word twice.
+          With it off, the dot is an unlabelled blue circle you are expected to
+          click — so it needs to say which city it is. */}
+      {!showMetroHumidityLayer && (metroHumidityData as any).features.map((feature: any, index: number) => {
+        const { city, lat, lng } = feature.properties
+        const point = map.project([lng, lat])
+        return (
+          <div
+            key={`metro-city-label-${index}`}
+            aria-hidden
+            style={{
+              position: 'absolute',
+              left: `${point.x}px`,
+              top: `${point.y + 12}px`,
+              transform: 'translate(-50%, 0)',
+              pointerEvents: 'none',
+              whiteSpace: 'nowrap',
+              fontSize: 11,
+              fontWeight: 600,
+              lineHeight: 1.2,
+              color: theme === 'light' ? '#1f2937' : '#f3f4f6',
+              // A halo rather than a plate: the label has to stay readable over
+              // whatever raster layer happens to be underneath it.
+              textShadow: theme === 'light'
+                ? '0 0 3px #fff, 0 0 3px #fff, 0 0 3px #fff'
+                : '0 0 3px #0b0b0f, 0 0 3px #0b0b0f, 0 0 3px #0b0b0f',
+              zIndex: 859
+            }}
+          >
+            {city}
+          </div>
         )
       })}
 

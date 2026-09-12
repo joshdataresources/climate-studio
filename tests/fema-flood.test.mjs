@@ -24,8 +24,12 @@ const browser = await launchBrowser()
 
   report.ok('no NFHL tiles requested below the usable zoom', fema.length === 0, `${fema.length} requests`)
   const hint = await page.locator('.layer-card').filter({ hasText: 'FEMA Flood Zones' })
-    .filter({ hasText: /Zoom in/i }).count()
-  report.ok('the card explains why nothing is drawn', hint === 1)
+    .filter({ hasText: /of 12 needed/i }).count()
+  report.ok('the card names the zoom the layer needs', hint === 1)
+  // A bare "zoom in" reads as broken; the card shows how much further to go.
+  const progress = await page.locator('.layer-card').filter({ hasText: 'FEMA Flood Zones' })
+    .filter({ hasText: /to go/ }).count()
+  report.ok('the toggle shows how far from the usable zoom you are', progress === 1)
   await page.close()
 }
 
@@ -58,6 +62,12 @@ const browser = await launchBrowser()
 
   const attributed = await page.locator('text=FEMA National Flood Hazard Layer').count()
   report.ok('the source is attributed on the map', attributed > 0)
+
+  // The tiles carry FEMA's baked symbology, so the legend has to explain it.
+  const legend = await page.locator('.feature-card').filter({ hasText: '1% annual chance flood' }).count()
+  report.ok('a legend card explains what the colours mean', legend === 1)
+  const floodway = await page.locator('.feature-card').filter({ hasText: /Regulatory floodway/i }).count()
+  report.ok('the legend covers the hatched classes too', floodway === 1)
   await page.close()
 }
 
