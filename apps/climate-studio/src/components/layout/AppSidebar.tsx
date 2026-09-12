@@ -248,6 +248,13 @@ export function AppSidebar() {
           {/* Zoom Controls - only show if map context is available */}
           {mapContext && (
             <div className="flex flex-col gap-[4px] items-center relative shrink-0">
+              {/* Separates the zoom controls from the navigation above them: they act
+                  on the map rather than moving you between views. */}
+              <div
+                className="w-[28px] h-px shrink-0 mb-[4px]"
+                style={{ backgroundColor: isDark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.10)' }}
+              />
+
               {/* Zoom In */}
               <button
                 onClick={handleZoomIn}
@@ -269,6 +276,23 @@ export function AppSidebar() {
                   />
                 </div>
               </button>
+
+              {/* Current zoom, between the two buttons that change it.
+                  Layers with a scale threshold — FEMA's flood zones will not draw
+                  below zoom 12 — are much easier to reason about when the number is
+                  on screen rather than inferred. */}
+              <div
+                className="text-[11px] font-semibold tabular-nums leading-none select-none"
+                style={{
+                  color: isDesignSystemPage
+                    ? (isDark ? '#9CA3AF' : '#A3A9B3')
+                    : (isDark ? '#D1D5DB' : '#697487'),
+                  opacity: isDesignSystemPage ? 0.5 : 1
+                }}
+                title="Current zoom level"
+              >
+                {mapContext.viewport.zoom.toFixed(1)}
+              </div>
 
               {/* Zoom Out */}
               <button

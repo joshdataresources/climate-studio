@@ -2040,12 +2040,12 @@ export default function ClimateStudioView() {
       </div>
       {!collapsedFeatures.has('femaFlood') && (
         <div className="space-y-3">
-          {viewport.zoom < FEMA_FLOOD_MIN_ZOOM ? (
-            <p className="text-[11px] text-muted-foreground leading-snug">
-              Zoom to {FEMA_FLOOD_MIN_ZOOM} to draw the zones. FEMA publishes them at
-              street level and will not render them wider.
-            </p>
-          ) : (
+          {/* The legend shows at every zoom. It used to be replaced below zoom 12 by a
+              note explaining why nothing was drawn, but the layer toggle already says
+              that — and says it better, with a progress bar and a button. Swapping the
+              legend out just meant the one piece of reference material disappeared
+              exactly when someone was reading the card to find out what they would
+              see. */}
             <div className="space-y-1.5">
               {FEMA_FLOOD_LEGEND.map(row => (
                 <div key={row.label} className="flex items-start gap-2 text-[11px]">
@@ -2062,7 +2062,6 @@ export default function ClimateStudioView() {
                 </div>
               ))}
             </div>
-          )}
           <p className="text-[10px] text-muted-foreground leading-snug">
             FEMA National Flood Hazard Layer. A 1% annual chance is the "100-year"
             flood — roughly a one in four chance over a 30-year mortgage.
@@ -4688,11 +4687,31 @@ export default function ClimateStudioView() {
                            unless you can see how much further you have to go — and
                            see it move while you zoom. */
                         <div className="space-y-1">
-                          <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                            <span>Zoom {viewport.zoom.toFixed(1)} of {FEMA_FLOOD_MIN_ZOOM} needed</span>
-                            <span>{Math.max(0, Math.ceil((FEMA_FLOOD_MIN_ZOOM - viewport.zoom) * 10) / 10)} to go</span>
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="text-[11px] text-muted-foreground">
+                              Zoom {viewport.zoom.toFixed(1)} of {FEMA_FLOOD_MIN_ZOOM} needed
+                            </span>
+                            {/* Telling someone how far they have to go is less use than
+                                taking them there. */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setViewport({ ...viewport, zoom: FEMA_FLOOD_MIN_ZOOM })
+                              }}
+                              // unstyled-btn opts out of the global button rule in
+                              // globals.css, which otherwise repaints any button whose
+                              // class is not on its allow-list — an arbitrary
+                              // bg-[#hex] is not, so this rendered white on white.
+                              className="unstyled-btn flex-shrink-0 rounded-[6px] px-2 py-0.5 text-[11px] font-medium border-none cursor-pointer transition-opacity hover:opacity-90"
+                              style={{ backgroundColor: '#437efc', color: '#ffffff' }}
+                            >
+                              Zoom In
+                            </button>
                           </div>
-                          <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+                          <div
+                            className="h-1 w-full rounded-full overflow-hidden"
+                            style={{ backgroundColor: 'rgba(67,126,252,0.25)' }}
+                          >
                             <div
                               className="h-full rounded-full bg-[#437efc] transition-[width] duration-200"
                               style={{

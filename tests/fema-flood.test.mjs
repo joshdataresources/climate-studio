@@ -26,10 +26,21 @@ const browser = await launchBrowser()
   const hint = await page.locator('.layer-card').filter({ hasText: 'FEMA Flood Zones' })
     .filter({ hasText: /of 12 needed/i }).count()
   report.ok('the card names the zoom the layer needs', hint === 1)
-  // A bare "zoom in" reads as broken; the card shows how much further to go.
-  const progress = await page.locator('.layer-card').filter({ hasText: 'FEMA Flood Zones' })
-    .filter({ hasText: /to go/ }).count()
-  report.ok('the toggle shows how far from the usable zoom you are', progress === 1)
+  // A bare "zoom in" reads as broken; the card shows the gap and offers to close it.
+  const floodCard = page.locator('.layer-card').filter({ hasText: 'FEMA Flood Zones' }).first()
+  const zoomBtn = floodCard.getByRole('button', { name: 'Zoom In' })
+  report.ok('the toggle offers a button to reach the usable zoom', await zoomBtn.count() === 1)
+
+  await zoomBtn.click()
+  await page.waitForTimeout(2500)
+  const arrived = await floodCard.filter({ hasText: /Mapped flood zones/i }).count()
+  report.ok('pressing it takes you to a zoom where the layer draws', arrived === 1)
+
+  // The legend is reference material; it should not vanish at the zoom where
+  // someone is reading the card to find out what they are about to see.
+  const legendWide = await page.locator('.feature-card')
+    .filter({ hasText: '1% annual chance flood' }).count()
+  report.ok('the legend is present regardless of zoom', legendWide === 1)
   await page.close()
 }
 
