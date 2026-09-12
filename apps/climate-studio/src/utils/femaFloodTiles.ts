@@ -17,18 +17,34 @@ const MAP_SERVER =
 const FLOOD_HAZARD_ZONES_LAYER = 28
 
 /**
- * NFHL will not draw below its own scale threshold.
+ * NFHL will not draw above its own scale threshold — but the threshold is computed,
+ * not fixed, so it can be pushed.
  *
- * Layer 28 carries minScale 36,111, which in Web Mercator is about zoom 14 — so
- * FEMA returns a fully transparent image for anything zoomed further out, however
- * much flood zone is actually there. This is parcel-level data and that is a
- * property of the source, not something we can override.
+ * Layer 28 carries minScale 36,111, about zoom 14 at the default 96 dpi, and FEMA
+ * returns a fully transparent image for anything wider. ArcGIS derives the scale it
+ * compares against that threshold from the extent, the image size and the requested
+ * dpi — so asking for a lower dpi lowers the computed scale and brings a wider tile
+ * under the limit. The geometry returned is the same; only FEMA's idea of how
+ * zoomed-in we are changes.
  *
- * The source is declared with this minzoom so maplibre does not request tiles it
- * cannot use, and the UI says to zoom in rather than showing an empty layer that
- * looks broken.
+ * Measured cost of doing that, on New Orleans tiles:
+ *
+ *   z15, z14   dpi 96   1.1 - 1.7s
+ *   z13        dpi 48   1.8s
+ *   z12        dpi 24   3.9s
+ *   z11        dpi 12   25s      <- where it stops being worth it
+ *
+ * So the layer runs from zoom 12 up. Below that it is not that the zones are hard
+ * to see, it is that FEMA takes half a minute per tile to draw them.
  */
-export const FEMA_FLOOD_MIN_ZOOM = 14
+export const FEMA_FLOOD_MIN_ZOOM = 12
+
+/** The cheapest dpi that still renders at a given zoom. */
+function dpiForZoom(zoom: number): number {
+  if (zoom >= 14) return 96
+  if (zoom >= 13) return 48
+  return 24
+}
 
 /** Half the Web Mercator world, in metres. */
 const HALF = 20037508.342789244
@@ -59,8 +75,8 @@ export function registerFemaFloodTileProtocol(): void {
     if (!match) return { data: new ArrayBuffer(0) }
 
     const [, z, x, y] = match
-    // Belt and braces: the source's minzoom should prevent this, but a request
-    // below the threshold would only ever come back blank.
+    // Belt and braces: the source's minzoom should prevent this, but below the
+    // threshold FEMA takes tens of seconds per tile.
     if (Number(z) < FEMA_FLOOD_MIN_ZOOM) return { data: new ArrayBuffer(0) }
 
     const query = new URLSearchParams({
@@ -71,6 +87,7 @@ export function registerFemaFloodTileProtocol(): void {
       format: 'png32',
       transparent: 'true',
       layers: `show:${FLOOD_HAZARD_ZONES_LAYER}`,
+      dpi: String(dpiForZoom(Number(z))),
       f: 'image',
     })
 

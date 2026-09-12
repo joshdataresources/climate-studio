@@ -9,7 +9,6 @@ import {
   femaFloodTileUrl,
   FEMA_FLOOD_MIN_ZOOM,
 } from '../utils/femaFloodTiles'
-import { countyFloodRiskFor } from '../utils/femaFloodRisk'
 import { noaaInundationFeet } from '../config/climateProjections'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useMap } from '../contexts/MapContext'
@@ -2930,76 +2929,6 @@ export default function ClimateStudioView() {
     }
   }, [showFemaFloodLayer, femaFloodOpacity, mapLoaded])
 
-  // County flood risk, for the zooms where NFHL will not draw.
-  //
-  // NFHL has no pre-rendered national service and refuses to render above its own
-  // scale threshold, so a wide flood view has to come from FEMA's National Risk
-  // Index instead. It is a different measurement at a different resolution —
-  // expected-annual-loss percentiles per county, not mapped flood extents — so the
-  // layer card says which of the two is on screen rather than letting county risk
-  // read as floodplain.
-  useEffect(() => {
-    if (!mapRef.current || !mapLoaded) return
-    const map = mapRef.current
-    const sourceId = 'fema-flood-risk'
-    const fillId = 'fema-flood-risk-fill'
-    const lineId = 'fema-flood-risk-line'
-
-    const teardown = () => {
-      try {
-        if (map.getLayer(lineId)) map.removeLayer(lineId)
-        if (map.getLayer(fillId)) map.removeLayer(fillId)
-        if (map.getSource(sourceId)) map.removeSource(sourceId)
-      } catch {
-        // map already gone
-      }
-    }
-
-    if (!showFemaFloodLayer || viewport.zoom >= FEMA_FLOOD_MIN_ZOOM) {
-      teardown()
-      return
-    }
-    if (!isMapUsable(map)) return
-
-    const bounds = map.getBounds()
-    const data = countyFloodRiskFor({
-      north: bounds.getNorth(),
-      south: bounds.getSouth(),
-      east: bounds.getEast(),
-      west: bounds.getWest(),
-    })
-
-    const existing = map.getSource(sourceId) as maplibregl.GeoJSONSource | undefined
-    if (existing) {
-      existing.setData(data)
-      return
-    }
-
-    const anchor = getBeforeId(map, 'fema-flood-layer')
-    map.addSource(sourceId, { type: 'geojson', data })
-    map.addLayer(
-      {
-        id: fillId,
-        type: 'fill',
-        source: sourceId,
-        paint: {
-          'fill-color': ['coalesce', ['get', 'floodColor'], 'rgba(0,0,0,0)'],
-          'fill-opacity': femaFloodOpacity * 0.85,
-        },
-      },
-      anchor
-    )
-    map.addLayer(
-      {
-        id: lineId,
-        type: 'line',
-        source: sourceId,
-        paint: { 'line-color': 'rgba(74,20,134,0.35)', 'line-width': 0.5 },
-      },
-      anchor
-    )
-  }, [showFemaFloodLayer, femaFloodOpacity, mapLoaded, viewport.zoom, viewport.center.lat, viewport.center.lng])
-
   // Add/remove temperature projection layer based on climate context toggle
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return
@@ -4679,8 +4608,8 @@ export default function ClimateStudioView() {
                       {showFemaFloodLayer && (
                         <p className="text-[11px] text-muted-foreground">
                           {viewport.zoom < FEMA_FLOOD_MIN_ZOOM
-                            ? 'Showing county flood risk. Zoom in for mapped flood zones.'
-                            : 'Showing mapped flood zones (FEMA NFHL).'}
+                            ? 'Zoom in to see flood zones — FEMA draws these at street level.'
+                            : 'Mapped flood zones (FEMA NFHL).'}
                         </p>
                       )}
                       {showSourceInfo && (
