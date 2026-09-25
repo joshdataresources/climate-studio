@@ -16,7 +16,7 @@ const LEGEND_CONFIGS: Record<string, LegendItem> = {
   drought_index: {
     label: 'Precipitation',
     // Matches PALETTE in qgis-processing/services/precipitation_drought.py.
-    gradient: 'linear-gradient(to right, #543005, #8c510a, #bf812d, #dfc27d, #f6e8c3, #f5f5f5, #c7eae5, #80cdc1, #35978f, #01665e, #003c30)',
+    gradient: 'linear-gradient(to right, #d94801, #f16913, #fd8d3c, #fdae6b, #fdd0a2, #f7f7f7, #c6dbef, #9ecae1, #6baed6, #2171b5, #08519c)',
     range: 'dry to wet, stretched to the visible area'
   },
   megaregion_growth: {
