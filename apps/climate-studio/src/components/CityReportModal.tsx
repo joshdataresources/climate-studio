@@ -1,14 +1,22 @@
-import React, { useEffect, useMemo, useRef } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 import { buildCityReportHtml } from '../utils/cityReport'
-import { DEFAULT_WEIGHTS, type ResilienceWeights } from '../utils/resilienceScore'
+import {
+  DEFAULT_WEIGHTS,
+  RESILIENCE_SCENARIO,
+  RESILIENCE_SCENARIOS,
+  type ResilienceScenario,
+  type ResilienceWeights,
+} from '../utils/resilienceScore'
 
 interface CityReportModalProps {
   /** Metro key as used by the resilience engine (matches wet-bulb data keys). */
   metroKey: string
   year: number
   weights?: ResilienceWeights
+  /** Initial emissions scenario. The modal's dropdown can change it. */
+  scenario?: ResilienceScenario
   onClose: () => void
 }
 
@@ -21,8 +29,19 @@ interface CityReportModalProps {
  * styles produce a clean page. Rendered via a portal to <body> so it escapes
  * any transformed / backdrop-filtered ancestor (e.g. the map card).
  */
-export function CityReportModal({ metroKey, year, weights = DEFAULT_WEIGHTS, onClose }: CityReportModalProps) {
-  const html = useMemo(() => buildCityReportHtml(metroKey, year, weights), [metroKey, year, weights])
+export function CityReportModal({
+  metroKey,
+  year,
+  weights = DEFAULT_WEIGHTS,
+  scenario: initialScenario = RESILIENCE_SCENARIO,
+  onClose,
+}: CityReportModalProps) {
+  const [scenario, setScenario] = useState<ResilienceScenario>(initialScenario)
+  useEffect(() => setScenario(initialScenario), [initialScenario])
+  const html = useMemo(
+    () => buildCityReportHtml(metroKey, year, weights, scenario),
+    [metroKey, year, weights, scenario],
+  )
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
@@ -65,6 +84,24 @@ export function CityReportModal({ metroKey, year, weights = DEFAULT_WEIGHTS, onC
             Resilience report
           </h3>
           <div className="flex items-center gap-2">
+            <label className="flex items-center gap-2 text-xs" style={{ color: 'var(--cs-text-secondary)' }}>
+              <span className="hidden sm:inline">Scenario</span>
+              <select
+                value={scenario}
+                onChange={e => setScenario(e.target.value as ResilienceScenario)}
+                aria-label="Emissions scenario"
+                className="rounded-md px-2 py-1.5 text-xs font-medium outline-none focus-visible:ring-2 focus-visible:ring-[var(--cs-brand-primary)]"
+                style={{
+                  background: 'var(--cs-surface-sunken)',
+                  color: 'var(--cs-text-primary)',
+                  border: '1px solid var(--cs-border-default)',
+                }}
+              >
+                {RESILIENCE_SCENARIOS.map(s => (
+                  <option key={s.id} value={s.id}>{s.label}</option>
+                ))}
+              </select>
+            </label>
             <button
               type="button"
               onClick={downloadPdf}
