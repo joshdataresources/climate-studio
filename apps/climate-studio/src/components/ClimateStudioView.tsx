@@ -783,6 +783,9 @@ export default function ClimateStudioView() {
   const { panelsCollapsed, isTablet } = useSidebar()
   const [tabletViewsOpen, setTabletViewsOpen] = useState(false)
   const [tabletClimateOpen, setTabletClimateOpen] = useState(true)
+  // Phone drawer accordions, same pattern as the tablet Views / Climate cards.
+  const [mobileClimateOpen, setMobileClimateOpen] = useState(true)
+  const [mobileLayersOpen, setMobileLayersOpen] = useState(true)
   const [tabletActiveTab, setTabletActiveTab] = useState<'layers' | 'features'>('layers')
 
   // Use layer context for climate widget
@@ -936,6 +939,25 @@ export default function ClimateStudioView() {
   const wetBulbLayer = climateLayers.find(l => l.id === 'wet_bulb')
   const isWetBulbActive = isLayerActive('wet_bulb')
   const temperatureProjectionLayer = climateLayers.find(l => l.id === 'temperature_projection')
+
+  /** Source line per layer for the tablet list's Sources toggle. Mirrors the
+   * "Source:" lines on the desktop layer cards. */
+  const layerSourceName: Partial<Record<keyof LayersInWidgetState, string | undefined>> = {
+    metroWeather: 'NOAA / NASA',
+    factories: 'CHIPS Act, DOE',
+    aiDataCenters: 'Public filings, DOE',
+    dams: 'USGS / USBR',
+    rivers: 'Natural Earth / USGS',
+    canals: 'USBR / MWD',
+    seaLevel: 'NOAA Sea Level Rise',
+    wildfire: 'USFS Wildfire Risk to Communities',
+    femaFlood: 'FEMA National Flood Hazard Layer',
+    aquifers: 'USGS',
+    precipitation: climateLayers.find(l => l.id === 'precipitation_drought')?.source.name,
+    wetBulb: climateLayers.find(l => l.id === 'wet_bulb')?.source.name,
+    temperature: climateLayers.find(l => l.id === 'temperature_projection')?.source.name,
+    topographic: 'USGS National Elevation Dataset',
+  }
   const [aquiferOpacity, setAquiferOpacity] = useState(0.25)
   const [riverOpacity, setRiverOpacity] = useState(1.0) // Default full opacity for rivers
   const [topoReliefIntensity, setTopoReliefIntensity] = useState(0.2) // Default 20% intensity
@@ -4331,15 +4353,39 @@ export default function ClimateStudioView() {
 
           {/* Mobile-only: Climate Projections shown when layers drawer is open */}
           <div className="mobile-climate-projections pointer-events-auto flex-shrink-0">
-            <ClimateProjectionsWidget />
+            {mobileClimateOpen ? (
+              <div className="relative">
+                <ClimateProjectionsWidget />
+                <button
+                  className="absolute top-3 right-3 p-1 rounded hover:bg-black/5 transition-colors border-none bg-transparent cursor-pointer"
+                  onClick={() => setMobileClimateOpen(false)}
+                  aria-label="Collapse Climate Projections"
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="widget-container">
+                <div
+                  className="flex items-center justify-between cursor-pointer"
+                  onClick={() => setMobileClimateOpen(true)}
+                >
+                  <h3 className="text-sm font-semibold">Climate Projections</h3>
+                  <ChevronDown className="h-4 w-4 -rotate-90 transition-transform" />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Water Access Layers Panel */}
-          <div className="widget-container flex flex-col flex-1 min-h-0 pointer-events-auto">
-            {/* Header with Manage Layers dropdown */}
+          <div className={`widget-container flex flex-col flex-1 min-h-0 pointer-events-auto${mobileLayersOpen ? '' : ' mobile-collapsed'}`}>
+            {/* Header with Manage Layers dropdown. On phones the header also
+                collapses the panel; the chevron and the collapse are phone-only
+                (see .mobile-only / .mobile-collapsed in globals.css). */}
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
               <h3 className="text-sm font-semibold">Layers</h3>
-              <div className="relative" ref={manageLayersDropdownRef}>
+              <div className="flex items-center gap-2">
+              <div className="relative mobile-collapsed-hide" ref={manageLayersDropdownRef}>
                 <button
                   onClick={() => setShowManageLayersDropdown(!showManageLayersDropdown)}
                   className="flex items-center gap-1 text-[#5a7cec] hover:text-[#4a6cd6] transition-colors bg-transparent border-none"
@@ -4364,6 +4410,14 @@ export default function ClimateStudioView() {
                     ))}
                   </div>
                 )}
+              </div>
+              <button
+                className="mobile-only p-1 rounded hover:bg-black/5 transition-colors border-none bg-transparent cursor-pointer"
+                onClick={() => setMobileLayersOpen(o => !o)}
+                aria-label={mobileLayersOpen ? 'Collapse Layers' : 'Expand Layers'}
+              >
+                <ChevronDown className={`h-4 w-4 transition-transform ${mobileLayersOpen ? '' : '-rotate-90'}`} />
+              </button>
               </div>
             </div>
 
@@ -5783,98 +5837,98 @@ export default function ClimateStudioView() {
                       {layersInWidget.metroWeather && (
                         <div className={`layer-card cursor-pointer ${showMetroHumidityLayer ? 'active' : ''}`} onClick={() => setShowMetroHumidityLayer(!showMetroHumidityLayer)}>
                           <MapPin className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Metro Weather</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Metro Weather</span>{showSourceInfo && layerSourceName.metroWeather && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.metroWeather}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, metroWeather: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.factories && (
                         <div className={`layer-card cursor-pointer ${showFactoriesLayer ? 'active' : ''}`} onClick={() => setShowFactoriesLayer(!showFactoriesLayer)}>
                           <Factory className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Factories</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Factories</span>{showSourceInfo && layerSourceName.factories && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.factories}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, factories: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.aiDataCenters && (
                         <div className={`layer-card cursor-pointer ${showAIDataCentersLayer ? 'active' : ''}`} onClick={() => setShowAIDataCentersLayer(!showAIDataCentersLayer)}>
                           <Zap className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">AI Data Centers</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">AI Data Centers</span>{showSourceInfo && layerSourceName.aiDataCenters && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.aiDataCenters}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, aiDataCenters: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.dams && (
                         <div className={`layer-card cursor-pointer ${showDamsLayer ? 'active' : ''}`} onClick={() => setShowDamsLayer(!showDamsLayer)}>
                           <Building2 className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Major Dams</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Major Dams</span>{showSourceInfo && layerSourceName.dams && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.dams}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, dams: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.rivers && (
                         <div className={`layer-card cursor-pointer ${showRiversLayer ? 'active' : ''}`} onClick={() => setShowRiversLayer(!showRiversLayer)}>
                           <Waves className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">River Flow Status</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">River Flow Status</span>{showSourceInfo && layerSourceName.rivers && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.rivers}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, rivers: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.canals && (
                         <div className={`layer-card cursor-pointer ${showCanalsLayer ? 'active' : ''}`} onClick={() => setShowCanalsLayer(!showCanalsLayer)}>
                           <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Canals & Aqueducts</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Canals & Aqueducts</span>{showSourceInfo && layerSourceName.canals && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.canals}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, canals: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.seaLevel && (
                         <div className={`layer-card cursor-pointer ${showSeaLevelRiseLayer ? 'active' : ''}`} onClick={() => setShowSeaLevelRiseLayer(!showSeaLevelRiseLayer)}>
                           <Waves className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Sea Level Rise</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Sea Level Rise</span>{showSourceInfo && layerSourceName.seaLevel && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.seaLevel}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, seaLevel: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.wildfire && (
                         <div className={`layer-card cursor-pointer ${showWildfireLayer ? 'active' : ''}`} onClick={() => setShowWildfireLayer(!showWildfireLayer)}>
                           <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24"><path d="M12 23c4.4 0 8-3.1 8-7 0-2.6-1.6-5-3-6.5.2 1.4-.6 2.5-1.7 2.5C14.7 12 15 8 12 5c-.3 3-2 4.5-3.5 6C7 12.5 6 14 6 16c0 3.9 3.6 7 6 7z" /></svg>
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Wildfire Hazard</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Wildfire Hazard</span>{showSourceInfo && layerSourceName.wildfire && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.wildfire}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, wildfire: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.femaFlood && (
                         <div className={`layer-card cursor-pointer ${showFemaFloodLayer ? 'active' : ''}`} onClick={() => setShowFemaFloodLayer(!showFemaFloodLayer)}>
                           <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24"><path d="M4 15c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1v2c-1.5 0-1.5 1-3 1s-1.5-1-3-1-1.5 1-3 1-1.5-1-3-1-1.5 1-3 1v-2zm0-5c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1v2c-1.5 0-1.5 1-3 1s-1.5-1-3-1-1.5 1-3 1-1.5-1-3-1-1.5 1-3 1v-2z" /></svg>
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">FEMA Flood Zones</span>{showFemaFloodLayer && viewport.zoom < FEMA_FLOOD_MIN_ZOOM && (<span className="text-[11px] text-muted-foreground block">Zoom {viewport.zoom.toFixed(1)} of {FEMA_FLOOD_MIN_ZOOM} needed</span>)}</div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">FEMA Flood Zones</span>{showSourceInfo && layerSourceName.femaFlood && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.femaFlood}</span>)}{showFemaFloodLayer && viewport.zoom < FEMA_FLOOD_MIN_ZOOM && (<span className="text-[11px] text-muted-foreground block">Zoom {viewport.zoom.toFixed(1)} of {FEMA_FLOOD_MIN_ZOOM} needed</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, femaFlood: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.aquifers && (
                         <div className={`layer-card cursor-pointer ${showAquifersLayer ? 'active' : ''}`} onClick={() => setShowAquifersLayer(!showAquifersLayer)}>
                           <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Aquifers</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Aquifers</span>{showSourceInfo && layerSourceName.aquifers && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.aquifers}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, aquifers: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.precipitation && (
                         <div className={`layer-card cursor-pointer ${isPrecipitationDroughtActive ? 'active' : ''}`} onClick={() => toggleLayer('precipitation_drought')}>
                           <CloudRain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Precipitation & Drought</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Precipitation & Drought</span>{showSourceInfo && layerSourceName.precipitation && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.precipitation}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, precipitation: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.wetBulb && (
                         <div className={`layer-card cursor-pointer ${isWetBulbActive ? 'active' : ''}`} onClick={() => toggleLayer('wet_bulb')}>
                           <CloudRain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Wet Bulb Temperature</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Wet Bulb Temperature</span>{showSourceInfo && layerSourceName.wetBulb && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.wetBulb}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, wetBulb: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.temperature && (
                         <div className={`layer-card cursor-pointer ${isTemperatureProjectionActive ? 'active' : ''}`} onClick={() => toggleLayer('temperature_projection')}>
                           <TrendingUp className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Future Temperature Anomaly</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Future Temperature Anomaly</span>{showSourceInfo && layerSourceName.temperature && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.temperature}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, temperature: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.topographic && (
                         <div className={`layer-card cursor-pointer ${showTopographicRelief ? 'active' : ''}`} onClick={() => setShowTopographicRelief(!showTopographicRelief)}>
                           <Mountain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Topographic Relief</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Topographic Relief</span>{showSourceInfo && layerSourceName.topographic && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.topographic}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, topographic: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
@@ -6395,10 +6449,10 @@ export default function ClimateStudioView() {
 
                   </div>
 
-                  {/* Collapse/Expand All Features Button */}
-                  <div className="px-4 py-3 border-t border-border/100">
+                  {/* Collapse/Expand All Features, styled like Remove All Layers */}
+                  <div className="flex items-center justify-between px-4 py-2 border-t border-border/100 flex-shrink-0">
                     <button
-                      className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                      className="unstyled-btn text-[11px] font-semibold text-[#5a7cec] hover:text-[#4a6cd6] bg-transparent border-none cursor-pointer"
                       onClick={() => {
                         if (collapsedFeatures.size === 0) {
                           // Collapse all

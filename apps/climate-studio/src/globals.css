@@ -1307,3 +1307,26 @@ div.detail-popup-panel.safari-modal-fix.z-\[1000\].pointer-events-auto {
   outline: none;
   box-shadow: 0 0 0 4px rgba(67, 126, 252, 0.55), 0 2px 6px rgba(0, 0, 0, 0.35);
 }
+
+/* ── Phone drawer accordions ───────────────────────────────────────────────────
+   The phone layers drawer reuses the desktop Layers panel. Its collapse chevron
+   and collapsed state only apply at phone width, so desktop is unaffected. */
+.mobile-only {
+  display: none !important;
+}
+@media (max-width: 768px) {
+  .mobile-only {
+    display: inline-flex !important;
+  }
+  .widget-container.mobile-collapsed {
+    flex: 0 0 auto !important;
+    min-height: 0 !important;
+  }
+  .widget-container.mobile-collapsed > :not(:first-child),
+  .widget-container.mobile-collapsed .mobile-collapsed-hide {
+    display: none !important;
+  }
+  .widget-container.mobile-collapsed > :first-child {
+    margin-bottom: 0 !important;
+  }
+}
