@@ -24,8 +24,10 @@ import { toCanvas, canvasToPngBytes } from './tileCanvas'
  * reads as a band instead of a narrow crossover between hot and cold.
  */
 export const PRECIPITATION_RAMP = [
-  '#d94801', '#f16913', '#fdae61', '#fee08b', '#ffffbf',
-  '#d9ef8b', '#a6d96a', '#66c2a5', '#3288bd', '#2166ac', '#08519c',
+  '#d94801', '#f16913', '#fdae61',
+  '#fee08b', '#fff0a0', '#ffffbf', // yellow: three stops, the widest band
+  '#d9ef8b', '#9bd46e',            // green: two stops
+  '#66c2a5', '#3288bd', '#2166ac', '#08519c',
 ]
 
 export const PRECIPITATION_GRADIENT_CSS = `linear-gradient(to right, ${PRECIPITATION_RAMP.join(', ')})`

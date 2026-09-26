@@ -60,8 +60,10 @@ class PrecipitationDroughtService:
     # apps/climate-studio/src/utils/precipitationTiles.ts, which recolours tiles
     # in the browser and lists every ramp this service has painted with.
     PALETTE = [
-        '#d94801', '#f16913', '#fdae61', '#fee08b', '#ffffbf',
-        '#d9ef8b', '#a6d96a', '#66c2a5', '#3288bd', '#2166ac', '#08519c',
+        '#d94801', '#f16913', '#fdae61',
+        '#fee08b', '#fff0a0', '#ffffbf',
+        '#d9ef8b', '#9bd46e',
+        '#66c2a5', '#3288bd', '#2166ac', '#08519c',
     ]
 
     def get_tile_url(self, bounds, scenario='rcp45', year=2050, metric='precipitation'):
