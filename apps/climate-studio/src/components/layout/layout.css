@@ -520,12 +520,14 @@
   justify-content: center;
   flex-shrink: 0;
   border-radius: 10px;
-  background: white;
+  /* Solid brand tile with a white mark, so it reads as the logo rather than
+     one of the header buttons beside it. */
+  background: #437efc;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
 [data-theme="dark"] .mobile-header-logo {
-  background: #1F2937;
+  background: #437efc;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25), 0 1px 4px rgba(0, 0, 0, 0.15);
 }
 
@@ -566,13 +568,22 @@
   padding-top: 0;
 }
 
-/* Active state for mobile header icons */
-.mobile-header-icon.active {
-  color: #5A7CEC;
+/* Active state for mobile header icons: the current view (Map / Charts) and
+   any open drawer (Views, Layers). Same treatment as the selected rail item on
+   larger screens: light blue fill with a blue outline. The outline is an inset
+   shadow because the base rule forces border: none. */
+.mobile-header-icon.active,
+.mobile-header-icon.active:hover {
+  color: #437efc;
+  background: rgba(67, 126, 252, 0.10) !important;
+  box-shadow: inset 0 0 0 1.5px #437efc, 0 4px 20px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.04) !important;
 }
 
-[data-theme="light"] .mobile-header-icon.active {
-  color: #437efc;
+[data-theme="dark"] .mobile-header-icon.active,
+[data-theme="dark"] .mobile-header-icon.active:hover {
+  color: #8fb0ff;
+  background: rgba(67, 126, 252, 0.22) !important;
+  box-shadow: inset 0 0 0 1.5px #5a8eff, 0 4px 20px rgba(0, 0, 0, 0.25), 0 1px 4px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

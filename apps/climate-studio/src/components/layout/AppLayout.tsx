@@ -50,7 +50,7 @@ export function AppLayout() {
           <div className="mobile-header-left">
             <div className="mobile-header-logo" aria-hidden>
               <svg width="28" height="28" viewBox="14 14 30 30" fill="none">
-                <path d={LOGO_PATH} fill="#5A7CEC" />
+                <path d={LOGO_PATH} fill="#ffffff" />
               </svg>
             </div>
 
