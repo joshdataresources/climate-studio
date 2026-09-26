@@ -105,6 +105,9 @@ const defaultActiveLayers = climateLayers
 
 const STORAGE_KEY = 'climate-active-layers';
 
+/** Layers switched on for a first-time visitor only (see getInitialActiveLayers). */
+const FIRST_RUN_LAYERS: ClimateLayerId[] = ['precipitation_drought'];
+
 const getInitialActiveLayers = (): ClimateLayerId[] => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -124,8 +127,14 @@ const getInitialActiveLayers = (): ClimateLayerId[] => {
   } catch (e) {
     console.warn('⚠️ Failed to load active layers from localStorage:', e);
   }
-  console.log('🎬 Using default active layers:', defaultActiveLayers);
-  return defaultActiveLayers.length > 0 ? defaultActiveLayers : [];
+  // First run (nothing stored): open on Precipitation & Drought as the one Earth
+  // Engine layer, rather than none or Temperature Anomaly. It is not marked
+  // defaultActive in the config because defaultActive layers are re-merged on
+  // every load, which would switch it back on after the user turned it off.
+  const firstRun = Array.from(new Set([...defaultActiveLayers, ...FIRST_RUN_LAYERS]))
+    .filter(id => id !== 'temperature_projection') as ClimateLayerId[];
+  console.log('🎬 First run, using default active layers:', firstRun);
+  return firstRun;
 };
 
 export const ClimateProvider: React.FC<React.PropsWithChildren> = ({ children }) => {

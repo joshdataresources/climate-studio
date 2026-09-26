@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import mapboxgl from 'maplibre-gl'
 import { registerSeaLevelTileProtocol, SLR_PROTOCOL, noaaSeaLevelTileUrl } from '../utils/seaLevelTiles'
 import { registerWildfireTileProtocol, wildfireTileUrl } from '../utils/wildfireTiles'
+import { registerPrecipitationTileProtocol, precipitationTileUrl, PRECIPITATION_GRADIENT_CSS } from '../utils/precipitationTiles'
 import {
   registerFemaFloodTileProtocol,
   femaFloodTileUrl,
@@ -639,7 +640,6 @@ const FEMA_FLOOD_LEGEND: ReadonlyArray<{
 
 type LayersInWidgetState = {
   metroWeather: boolean
-  metroPopulation: boolean
   factories: boolean
   aiDataCenters: boolean
   dams: boolean
@@ -657,7 +657,6 @@ type LayersInWidgetState = {
 
 const ALL_LAYERS_IN_WIDGET: LayersInWidgetState = {
   metroWeather: true,
-  metroPopulation: true,
   factories: true,
   aiDataCenters: true,
   dams: true,
@@ -675,7 +674,6 @@ const ALL_LAYERS_IN_WIDGET: LayersInWidgetState = {
 
 const NO_LAYERS_IN_WIDGET: LayersInWidgetState = {
   metroWeather: false,
-  metroPopulation: false,
   factories: false,
   aiDataCenters: false,
   dams: false,
@@ -695,7 +693,6 @@ const NO_LAYERS_IN_WIDGET: LayersInWidgetState = {
  * One order for every layer list: the desktop Layers panel, both Manage Layers
  * dropdowns, and the tablet/portrait panel (mobile reuses the desktop panel).
  * Change the order here, not in the JSX, so the four lists cannot drift.
- * Metro Population is left out: the desktop panel has no row for it.
  */
 const LAYER_WIDGET_ORDER: ReadonlyArray<{ key: keyof LayersInWidgetState; label: string }> = [
   { key: 'metroWeather', label: 'Metro Weather' },
@@ -762,13 +759,6 @@ export default function ClimateStudioView() {
       humid_temp: number
       days_over_100: number
     }
-  } | null>(null)
-  const [megaregionHoverInfo, setMegaregionHoverInfo] = useState<{
-    x: number
-    y: number
-    metroName?: string
-    metroPopulation?: number
-    metroYear?: number
   } | null>(null)
   const [mapLoaded, setMapLoaded] = useState(false)
   const [mapStyleEpoch, setMapStyleEpoch] = useState(0)
@@ -846,7 +836,6 @@ export default function ClimateStudioView() {
   const [femaFloodOpacity, setFemaFloodOpacity] = useState(0.65)
   const [wildfireOpacity, setWildfireOpacity] = useState(0.2)
   const [showHumidityWetBulb, setShowHumidityWetBulb] = useState(true)
-  const [showMetroDataStatistics, setShowMetroDataStatistics] = useState(false)
   const [showTopographicRelief, setShowTopographicRelief] = useState(true) // Default ON at 20% opacity
   const [activeBubbleIndex, setActiveBubbleIndex] = useState<number | null>(null) // Track which bubble is active
 
@@ -949,7 +938,6 @@ export default function ClimateStudioView() {
   const temperatureProjectionLayer = climateLayers.find(l => l.id === 'temperature_projection')
   const [aquiferOpacity, setAquiferOpacity] = useState(0.25)
   const [riverOpacity, setRiverOpacity] = useState(1.0) // Default full opacity for rivers
-  const [metroDataOpacity, setMetroDataOpacity] = useState(0.6)
   const [topoReliefIntensity, setTopoReliefIntensity] = useState(0.2) // Default 20% intensity
 
   // Get map bounds for layer data fetching
@@ -975,10 +963,6 @@ export default function ClimateStudioView() {
     // Metro Weather
     if (!layersInWidget.metroWeather && showMetroHumidityLayer) {
       setShowMetroHumidityLayer(false)
-    }
-    // Metro Population
-    if (!layersInWidget.metroPopulation && showMetroDataStatistics) {
-      setShowMetroDataStatistics(false)
     }
     // Rivers
     if (!layersInWidget.rivers && showRiversLayer) {
@@ -1027,7 +1011,6 @@ export default function ClimateStudioView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     layersInWidget.metroWeather,
-    layersInWidget.metroPopulation,
     layersInWidget.rivers,
     layersInWidget.canals,
     layersInWidget.dams,
@@ -2036,7 +2019,7 @@ export default function ClimateStudioView() {
       console.error('❌ Error setting up map layers:', error)
       return false
     }
-  }, [showMetroHumidityLayer, showMetroDataStatistics, projectionYear, theme])
+  }, [showMetroHumidityLayer, projectionYear, theme])
 
   /**
    * FEMA's flood zone legend.
@@ -2224,7 +2207,8 @@ export default function ClimateStudioView() {
     // itself rather than rely on React deps. See config/layerOrder.ts.
     installLayerOrderGuard(map)
 
-    map.addControl(new mapboxgl.NavigationControl(), 'top-right')
+    // No NavigationControl: zoom lives in the left rail, and a second set in the
+    // top-right corner was redundant.
 
     // Handle window resize to ensure map fills container
     const handleResize = () => {
@@ -3873,113 +3857,6 @@ export default function ClimateStudioView() {
     }
   }, [mapLoaded, showAIDataCentersLayer])
 
-  // Handle Metro Population Change layer rendering
-  useEffect(() => {
-    if (!mapRef.current || !mapLoaded || !showMetroDataStatistics) return
-
-    const map = mapRef.current
-    if (!isMapUsable(map)) return
-
-    // Remove existing layers/source if present
-    safeRemoveLayer(map, 'metro-circles')
-    safeRemoveLayer(map, 'metro-labels')
-    safeRemoveSource(map, 'metro-data')
-
-    const data = megaregionData as { metros: Array<{ name: string; lat: number; lon: number; climate_risk: string; populations: Record<string, number> }> }
-
-    if (!data || !data.metros || data.metros.length === 0) {
-      console.log('⚠️ No metro data available')
-      return
-    }
-
-    // Use 2025 population for current display
-    const currentYear = '2025'
-
-    // Create GeoJSON for metro regions
-    const geoJson = {
-      type: 'FeatureCollection' as const,
-      features: data.metros.map((metro) => {
-        const currentPop = metro.populations[currentYear] || 0
-        const futurePop = metro.populations['2035'] || 0
-        const growthRate = currentPop > 0 ? ((futurePop - currentPop) / currentPop) : 0
-
-        return {
-          type: 'Feature' as const,
-          geometry: {
-            type: 'Point' as const,
-            coordinates: [metro.lon, metro.lat]
-          },
-          properties: {
-            name: metro.name,
-            population: currentPop,
-            growth: growthRate,
-            climate_risk: metro.climate_risk
-          }
-        }
-      })
-    }
-
-    // Add source
-    map.addSource('metro-data', {
-      type: 'geojson',
-      data: geoJson
-    })
-
-    // Add circles layer
-    map.addLayer({
-      id: 'metro-circles',
-      type: 'circle',
-      source: 'metro-data',
-      paint: {
-        'circle-radius': [
-          'interpolate',
-          ['linear'],
-          ['get', 'population'],
-          1000000, 15,
-          5000000, 25,
-          10000000, 35,
-          20000000, 50
-        ],
-        'circle-color': [
-          'case',
-          ['>', ['get', 'growth'], 0.2], '#22c55e',  // High growth (green)
-          ['>', ['get', 'growth'], 0.1], '#3b82f6',  // Moderate growth (blue)
-          ['>', ['get', 'growth'], 0], '#fbbf24',    // Low growth (yellow)
-          '#ef4444'  // Declining (red)
-        ],
-        'circle-opacity': 0.6,
-        'circle-stroke-width': 2,
-        'circle-stroke-color': '#ffffff'
-      }
-    }, getBeforeId(map, 'metro-circles'))
-
-    // Add labels layer
-    map.addLayer({
-      id: 'metro-labels',
-      type: 'symbol',
-      source: 'metro-data',
-      layout: {
-        'text-field': ['get', 'name'],
-        'text-size': 11,
-        'text-offset': [0, 0],
-        'text-anchor': 'center'
-      },
-      paint: {
-        'text-color': '#ffffff',
-        'text-halo-color': '#000000',
-        'text-halo-width': 1
-      }
-    }, getBeforeId(map, 'metro-labels'))
-
-    console.log('✅ Metro Population Change layer added successfully')
-
-    return () => {
-      safeRemoveLayer(map, 'metro-circles')
-      safeRemoveLayer(map, 'metro-labels')
-      safeRemoveSource(map, 'metro-data')
-    }
-  }, [mapLoaded, showMetroDataStatistics])
-
   // Handle Topographic Relief layer rendering
   useEffect(() => {
     if (!mapRef.current || !mapLoaded || !showTopographicRelief) return
@@ -4046,7 +3923,10 @@ export default function ClimateStudioView() {
       }
 
       const rawPrecipTileUrl = precipitationDroughtData.tile_url
-      const tileUrl = resolveClimateTileUrl(rawPrecipTileUrl)
+      // Recoloured in the browser so the map always matches the legend's ramp,
+      // whichever ramp the climate service is running (utils/precipitationTiles.ts).
+      registerPrecipitationTileProtocol()
+      const tileUrl = precipitationTileUrl(resolveClimateTileUrl(rawPrecipTileUrl))
 
       // Add or update source
       if (!map.getSource(sourceId)) {
@@ -4089,6 +3969,41 @@ export default function ClimateStudioView() {
       }
     }
   }, [isPrecipitationDroughtActive, precipitationDroughtData, mapLoaded, controls.droughtOpacity, mapStyleEpoch])
+
+  // Earth Engine tiles still drawing, per layer.
+  //
+  // The layer's status flips from 'loading' as soon as the service hands back a
+  // tile URL, which is well before any tile is on screen: each tile is then
+  // rendered by Earth Engine on request. Watching the map's own source state keeps
+  // the "Warming up Earth Engine" toast up until the tiles in view have arrived.
+  const [eeTilesPending, setEeTilesPending] = useState({ temperature: false, precipitation: false })
+  useEffect(() => {
+    if (!mapLoaded) return
+    const map = mapRef.current
+    if (!map) return
+    const pending = (id: string) => {
+      try {
+        return !!map.getSource(id) && !map.isSourceLoaded(id)
+      } catch {
+        return false
+      }
+    }
+    const check = () => {
+      const next = { temperature: pending('temperature-tiles'), precipitation: pending('precipitation-drought') }
+      setEeTilesPending(prev =>
+        prev.temperature === next.temperature && prev.precipitation === next.precipitation ? prev : next
+      )
+    }
+    map.on('sourcedataloading', check)
+    map.on('sourcedata', check)
+    map.on('idle', check)
+    check()
+    return () => {
+      map.off('sourcedataloading', check)
+      map.off('sourcedata', check)
+      map.off('idle', check)
+    }
+  }, [mapLoaded, mapStyleEpoch])
 
   // Backstop for the layer-order guard installed on the map itself.
   //
@@ -4137,15 +4052,6 @@ export default function ClimateStudioView() {
       ])
     }
   }, [aquiferOpacity, mapLoaded])
-
-  // Update Metro Population Change opacity
-  useEffect(() => {
-    if (!mapRef.current || !mapLoaded) return
-    const map = mapRef.current
-    if (map.getLayer('metro-circles')) {
-      map.setPaintProperty('metro-circles', 'circle-opacity', metroDataOpacity)
-    }
-  }, [metroDataOpacity, mapLoaded])
 
   // Update Topographic Relief intensity
   useEffect(() => {
@@ -4268,10 +4174,11 @@ export default function ClimateStudioView() {
       {/* Climate layer loading banner */}
       {(() => {
         const loadingLayers: string[] = []
-        if (isTemperatureProjectionActive && layerStates.temperature_projection?.status === 'loading') {
+        // Stays up until the tiles are drawn, not just until the service replies.
+        if (isTemperatureProjectionActive && (layerStates.temperature_projection?.status === 'loading' || eeTilesPending.temperature)) {
           loadingLayers.push('Temperature Anomaly')
         }
-        if (isPrecipitationDroughtActive && layerStates.precipitation_drought?.status === 'loading') {
+        if (isPrecipitationDroughtActive && (layerStates.precipitation_drought?.status === 'loading' || eeTilesPending.precipitation)) {
           loadingLayers.push('Precipitation & Drought')
         }
         if (loadingLayers.length === 0) return null
@@ -4965,71 +4872,6 @@ export default function ClimateStudioView() {
                     </div>
                   )}
 
-                  {/* Metro Population Change */}
-                  {layersInWidget.metroPopulation && showMetroDataStatistics && (
-                    <div className="feature-card">
-                      <div
-                        className="flex items-center justify-between cursor-pointer mb-2.5"
-                        onClick={() => {
-                          const newCollapsed = new Set(collapsedFeatures)
-                          if (newCollapsed.has('metroPopulation')) {
-                            newCollapsed.delete('metroPopulation')
-                          } else {
-                            newCollapsed.add('metroPopulation')
-                          }
-                          setCollapsedFeatures(newCollapsed)
-                        }}
-                      >
-                        <h4 className="text-[13px] font-semibold">Metro Population Change</h4>
-                        <ChevronDown
-                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('metroPopulation') ? '-rotate-90' : ''}`}
-                        />
-                      </div>
-                      {!collapsedFeatures.has('metroPopulation') && (
-                        <>
-                          {/* Opacity Slider */}
-                          <div className="space-y-2 mb-4">
-                            <div className="flex items-center justify-between">
-                              <label className="text-xs text-muted-foreground">Layer Opacity</label>
-                              <span className="text-xs font-medium">{Math.round(metroDataOpacity * 100)}%</span>
-                            </div>
-                            <Slider
-                              value={[Math.round(metroDataOpacity * 100)]}
-                              min={10}
-                              max={100}
-                              step={5}
-                              onValueChange={(value) => {
-                                setMetroDataOpacity(value[0] / 100)
-                              }}
-                            />
-                          </div>
-
-                          {/* Legend */}
-                          <div className="space-y-1.5">
-                            <h4 className="text-xs font-semibold text-muted-foreground mb-2">Population Growth</h4>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
-                              <span className="text-xs text-foreground">High Growth (20%+)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#3b82f6' }}></div>
-                              <span className="text-xs text-foreground">Moderate Growth (10-20%)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#fbbf24' }}></div>
-                              <span className="text-xs text-foreground">Low Growth (0-10%)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ef4444' }}></div>
-                              <span className="text-xs text-foreground">Declining</span>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground mt-2">Circle size represents population</p>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-
                   {/* Factory Filters */}
                   {layersInWidget.factories && showFactoriesLayer && (
                     <div className="feature-card">
@@ -5507,15 +5349,15 @@ export default function ClimateStudioView() {
                             />
                           </div>
 
-                          {/* One legend, matching PALETTE in
-                              qgis-processing/services/precipitation_drought.py, and
+                          {/* One legend, in the ramp the tiles are recoloured to
+                              (utils/precipitationTiles.ts), and
                               labelled with the range the tiles were actually
                               rendered at — the service stretches the palette to the
                               2nd-98th percentile of the visible area, so a fixed
                               0-10 mm/day caption would be wrong nearly always. */}
                           <div className="space-y-1">
                             <div className="h-3 w-full rounded-full" style={{
-                              background: 'linear-gradient(to right, #d94801, #f16913, #fd8d3c, #fdae6b, #fdd0a2, #f7f7f7, #c6dbef, #9ecae1, #6baed6, #2171b5, #08519c)'
+                              background: PRECIPITATION_GRADIENT_CSS
                             }} />
                             {(() => {
                               const range = layerStates.precipitation_drought?.data?.metadata?.visRange as
@@ -5791,7 +5633,6 @@ export default function ClimateStudioView() {
                         // Collapse all
                         setCollapsedFeatures(new Set([
                           'metroWeather',
-                          'metroPopulation',
                           'factories',
                           'rivers',
                           'canals',
@@ -6552,52 +6393,6 @@ export default function ClimateStudioView() {
                       </div>
                     )}
 
-                    {/* Metro Population Controls */}
-                    {showMetroDataStatistics && (
-                      <div className="feature-card">
-                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('metroPopulation') ? n.delete('metroPopulation') : n.add('metroPopulation'); setCollapsedFeatures(n) }}>
-                          <h4 className="text-[13px] font-semibold">Metro Population Change</h4>
-                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('metroPopulation') ? '-rotate-90' : ''}`} />
-                        </div>
-                        {!collapsedFeatures.has('metroPopulation') && (
-                          <div className="space-y-3">
-                            {/* Opacity Slider */}
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between">
-                                <label className="text-xs text-muted-foreground">Layer Opacity</label>
-                                <span className="text-xs font-medium">{Math.round(metroDataOpacity * 100)}%</span>
-                              </div>
-                              <Slider
-                                value={[Math.round(metroDataOpacity * 100)]}
-                                min={10}
-                                max={100}
-                                step={5}
-                                onValueChange={(value) => setMetroDataOpacity(value[0] / 100)}
-                                className="w-full"
-                              />
-                            </div>
-                            {/* Legend */}
-                            <div className="space-y-2">
-                              <div className="text-xs font-semibold mb-1">Population Change</div>
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2 text-[11px]">
-                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#d73027' }}></div>
-                                  <span>Declining (&lt;0%)</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-[11px]">
-                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ffffbf' }}></div>
-                                  <span>Stable (0-10%)</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-[11px]">
-                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#1a9850' }}></div>
-                                  <span>Growing (&gt;10%)</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
 
                   {/* Collapse/Expand All Features Button */}
@@ -6607,7 +6402,7 @@ export default function ClimateStudioView() {
                       onClick={() => {
                         if (collapsedFeatures.size === 0) {
                           // Collapse all
-                          const allFeatures = new Set(['metroWeather', 'factories', 'rivers', 'canals', 'temperature', 'precipitation', 'wetbulb', 'aquifers', 'sealevel', 'metroPopulation'])
+                          const allFeatures = new Set(['metroWeather', 'factories', 'rivers', 'canals', 'temperature', 'precipitation', 'wetbulb', 'aquifers', 'sealevel'])
                           setCollapsedFeatures(allFeatures)
                         } else {
                           // Expand all
@@ -6762,35 +6557,6 @@ export default function ClimateStudioView() {
             )}
 
             {/* Temperature & Humidity section removed - fields don't exist in data */}
-          </div>
-        )
-      }
-
-      {/* Metro Population Change Tooltip (TEST - from Climate screen) */}
-      {
-        megaregionHoverInfo && megaregionHoverInfo.metroName && megaregionHoverInfo.metroPopulation && (
-          <div
-            className="absolute z-10 pointer-events-none bg-card/95 backdrop-blur-lg border border-border/60 rounded-lg shadow-lg px-2.5 py-1.5 text-xs"
-            style={{
-              left: megaregionHoverInfo.x + 10,
-              top: megaregionHoverInfo.y + 10
-            }}
-          >
-            {/* Megaregion metro info */}
-            <div>
-              <div className="font-semibold text-foreground mb-1">
-                {megaregionHoverInfo.metroName}
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-blue-500">🏙️</span>
-                <span className="font-medium">
-                  {megaregionHoverInfo.metroPopulation.toLocaleString()} people
-                </span>
-              </div>
-              <div className="text-[10px] opacity-70 mt-0.5">
-                {megaregionHoverInfo.metroYear} projection
-              </div>
-            </div>
           </div>
         )
       }
