@@ -16,11 +16,16 @@ import { toCanvas, canvasToPngBytes } from './tileCanvas'
  * unchanged.
  */
 
-/** Dry to wet: bright orange through white to blue. The legends read this. */
+/**
+ * Dry to wet: orange, yellow, green, blue. The legends read this.
+ *
+ * Passing through yellow and green rather than straight from orange to blue
+ * gives the middle of the range its own colours, so moderate precipitation
+ * reads as a band instead of a narrow crossover between hot and cold.
+ */
 export const PRECIPITATION_RAMP = [
-  '#d94801', '#f16913', '#fd8d3c', '#fdae6b', '#fdd0a2',
-  '#f7f7f7',
-  '#c6dbef', '#9ecae1', '#6baed6', '#2171b5', '#08519c',
+  '#d94801', '#f16913', '#fdae61', '#fee08b', '#ffffbf',
+  '#d9ef8b', '#a6d96a', '#66c2a5', '#3288bd', '#2166ac', '#08519c',
 ]
 
 export const PRECIPITATION_GRADIENT_CSS = `linear-gradient(to right, ${PRECIPITATION_RAMP.join(', ')})`

@@ -2031,6 +2031,30 @@ export default function ClimateStudioView() {
    * Shared because the Features panel is rendered twice, once per breakpoint, and a
    * legend duplicated by hand is a legend that drifts.
    */
+  /**
+   * Precipitation colour ramp and range, shared by the desktop and tablet Features
+   * cards so the two cannot drift. The ramp is the one the tiles are recoloured to
+   * (utils/precipitationTiles.ts). The range is what the tiles were actually
+   * rendered at: the service stretches the ramp to the 2nd-98th percentile of the
+   * visible area, so a fixed 0-10 mm/day caption would be wrong nearly always.
+   */
+  const precipitationVisRange = layerStates.precipitation_drought?.data?.metadata?.visRange as
+    | [number, number]
+    | undefined
+  const precipitationLegend = (
+    <div className="space-y-1">
+      <div className="h-3 w-full rounded-full" style={{ background: PRECIPITATION_GRADIENT_CSS }} />
+      <div className="flex justify-between text-[10px] text-muted-foreground">
+        <span>{precipitationVisRange ? `${precipitationVisRange[0].toFixed(1)} mm/day` : 'drier'}</span>
+        <span>{precipitationVisRange ? `${precipitationVisRange[1].toFixed(1)} mm/day` : 'wetter'}</span>
+      </div>
+      <p className="text-[10px] leading-snug text-muted-foreground">
+        Scaled to the visible area, so the range changes as you pan.
+        Dry end is the drought signal.
+      </p>
+    </div>
+  )
+
   const femaFloodLegendCard = layersInWidget.femaFlood && showFemaFloodLayer ? (
     <div className="feature-card">
       <div
@@ -5349,32 +5373,7 @@ export default function ClimateStudioView() {
                             />
                           </div>
 
-                          {/* One legend, in the ramp the tiles are recoloured to
-                              (utils/precipitationTiles.ts), and
-                              labelled with the range the tiles were actually
-                              rendered at — the service stretches the palette to the
-                              2nd-98th percentile of the visible area, so a fixed
-                              0-10 mm/day caption would be wrong nearly always. */}
-                          <div className="space-y-1">
-                            <div className="h-3 w-full rounded-full" style={{
-                              background: PRECIPITATION_GRADIENT_CSS
-                            }} />
-                            {(() => {
-                              const range = layerStates.precipitation_drought?.data?.metadata?.visRange as
-                                | [number, number]
-                                | undefined
-                              return (
-                                <div className="flex justify-between text-[10px] text-muted-foreground">
-                                  <span>{range ? `${range[0].toFixed(1)} mm/day` : 'drier'}</span>
-                                  <span>{range ? `${range[1].toFixed(1)} mm/day` : 'wetter'}</span>
-                                </div>
-                              )
-                            })()}
-                            <p className="text-[10px] leading-snug text-muted-foreground">
-                              Scaled to the visible area, so the range changes as you pan.
-                              Dry end is the drought signal.
-                            </p>
-                          </div>
+                          {precipitationLegend}
                         </div>
                       )}
                     </div>
@@ -6359,6 +6358,7 @@ export default function ClimateStudioView() {
                                 className="w-full"
                               />
                             </div>
+                            {precipitationLegend}
                           </div>
                         )}
                       </div>
