@@ -217,8 +217,10 @@ export function AppSidebar() {
           <div className="flex flex-col gap-[8px] items-center relative shrink-0">
             <div className="h-[59px] relative shrink-0 w-[57px]">
               <svg className="block size-full" fill="none" preserveAspectRatio="none" viewBox="0 0 57 59">
-                <rect fill={isDark ? '#1F2937' : 'white'} height="59" rx="8" width="57" />
-                <path d={SVG_PATHS.logo} fill="#5A7CEC" />
+                {/* Solid brand tile with a white mark, so the logo reads as a
+                    logo and not as another menu item in the rail. */}
+                <rect fill="#437efc" height="59" rx="8" width="57" />
+                <path d={SVG_PATHS.logo} fill="#ffffff" />
               </svg>
             </div>
             

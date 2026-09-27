@@ -1,5 +1,6 @@
 import { useClimate } from "@climate-studio/core"
 import { useSidebar } from "../contexts/SidebarContext"
+import { PRECIPITATION_GRADIENT_CSS } from '../utils/precipitationTiles'
 
 interface LegendItem {
   label: string
@@ -10,13 +11,15 @@ interface LegendItem {
 const LEGEND_CONFIGS: Record<string, LegendItem> = {
   precipitation: {
     label: 'Precipitation',
-    gradient: 'linear-gradient(90deg, #F5ED53 0%, #F5F3CE 50%, #6B9AF3 75%, #2357D2 100%)',
-    range: '0 - 10 mm/day'
+    // Same ramp as the tiles. Both metrics are drawn with it, and the service
+    // stretches it to the visible area rather than a fixed 0-10 mm/day.
+    gradient: PRECIPITATION_GRADIENT_CSS,
+    range: 'dry to wet, stretched to the visible area'
   },
   drought_index: {
     label: 'Precipitation',
-    // Matches PALETTE in qgis-processing/services/precipitation_drought.py.
-    gradient: 'linear-gradient(to right, #543005, #8c510a, #bf812d, #dfc27d, #f6e8c3, #f5f5f5, #c7eae5, #80cdc1, #35978f, #01665e, #003c30)',
+    // The map tiles are recoloured to this same ramp (utils/precipitationTiles.ts).
+    gradient: PRECIPITATION_GRADIENT_CSS,
     range: 'dry to wet, stretched to the visible area'
   },
   megaregion_growth: {

@@ -3,6 +3,7 @@ import { X, ChevronDown, ChevronUp } from 'lucide-react'
 import {
   metroResilience,
   metroTrajectory,
+  trajectoryDomain,
   RESILIENCE_DECADES,
 } from '../../utils/resilienceScore'
 import wetBulbData from '../../data/expanded_wet_bulb_projections.json'
@@ -27,11 +28,11 @@ const scoreColor = (s: number) => (s >= 66 ? '#1D9E75' : s >= 40 ? '#EF9F27' : '
 function Sparkline({ values, years, markYear, color }: { values: number[]; years: number[]; markYear?: number; color: string }) {
   const w = 280
   const h = 40
-  const lo = Math.min(...values)
-  const hi = Math.max(...values)
+  // Shared scale across all metros so sparklines are comparable between cities.
+  const [lo, hi] = trajectoryDomain()
   const span = hi - lo || 1
   const x = (i: number) => 4 + (i * (w - 8)) / (values.length - 1)
-  const y = (v: number) => h - 6 - ((v - lo) / span) * (h - 12)
+  const y = (v: number) => h - 6 - ((Math.max(lo, Math.min(hi, v)) - lo) / span) * (h - 12)
   const pts = values.map((v, i) => `${x(i)},${y(v)}`).join(' ')
   const mi = markYear != null ? years.indexOf(markYear) : -1
   return (

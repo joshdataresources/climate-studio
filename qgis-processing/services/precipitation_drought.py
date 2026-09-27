@@ -46,20 +46,24 @@ class PrecipitationDroughtService:
             logger.error(f"Failed to initialize Earth Engine: {e}")
             logger.warning("Precipitation/drought service will not be available")
 
-    # Dry to wet, brown through to teal-green (ColorBrewer BrBG).
+    # Dry to wet: orange, yellow, green, blue.
     #
-    # Deliberately not the red-to-blue ramp this used to be. Red-blue is what the
-    # Temperature Anomaly layer uses, so the two layers were hard to tell apart at a
-    # glance, and its wet end sat right on top of the basemap's water colour — wet
-    # ground and open sea rendered nearly the same. Brown-to-teal is the conventional
-    # choice for moisture and collides with neither.
+    # Earlier versions were red-to-blue (too close to the Temperature Anomaly
+    # layer) and then brown-to-teal (BrBG), which read as muddy and aqua. Going
+    # through yellow and green gives moderate precipitation its own colours
+    # instead of a sharp crossover between hot and cold.
     #
     # Long, with saturated ends, so a percentile stretch has somewhere to put the
     # extremes instead of washing everything into the middle.
+    #
+    # Keep in sync with PRECIPITATION_RAMP in
+    # apps/climate-studio/src/utils/precipitationTiles.ts, which recolours tiles
+    # in the browser and lists every ramp this service has painted with.
     PALETTE = [
-        '#543005', '#8c510a', '#bf812d', '#dfc27d', '#f6e8c3',
-        '#f5f5f5',
-        '#c7eae5', '#80cdc1', '#35978f', '#01665e', '#003c30',
+        '#d94801', '#f16913', '#fdae61',
+        '#fee08b', '#fff0a0', '#ffffbf',
+        '#d9ef8b', '#9bd46e',
+        '#66c2a5', '#3288bd', '#2166ac', '#08519c',
     ]
 
     def get_tile_url(self, bounds, scenario='rcp45', year=2050, metric='precipitation'):

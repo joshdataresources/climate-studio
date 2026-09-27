@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import mapboxgl from 'maplibre-gl'
 import { registerSeaLevelTileProtocol, SLR_PROTOCOL, noaaSeaLevelTileUrl } from '../utils/seaLevelTiles'
 import { registerWildfireTileProtocol, wildfireTileUrl } from '../utils/wildfireTiles'
+import { registerPrecipitationTileProtocol, precipitationTileUrl, PRECIPITATION_GRADIENT_CSS } from '../utils/precipitationTiles'
 import {
   registerFemaFloodTileProtocol,
   femaFloodTileUrl,
@@ -639,7 +640,6 @@ const FEMA_FLOOD_LEGEND: ReadonlyArray<{
 
 type LayersInWidgetState = {
   metroWeather: boolean
-  metroPopulation: boolean
   factories: boolean
   aiDataCenters: boolean
   dams: boolean
@@ -657,7 +657,6 @@ type LayersInWidgetState = {
 
 const ALL_LAYERS_IN_WIDGET: LayersInWidgetState = {
   metroWeather: true,
-  metroPopulation: true,
   factories: true,
   aiDataCenters: true,
   dams: true,
@@ -675,7 +674,6 @@ const ALL_LAYERS_IN_WIDGET: LayersInWidgetState = {
 
 const NO_LAYERS_IN_WIDGET: LayersInWidgetState = {
   metroWeather: false,
-  metroPopulation: false,
   factories: false,
   aiDataCenters: false,
   dams: false,
@@ -690,6 +688,28 @@ const NO_LAYERS_IN_WIDGET: LayersInWidgetState = {
   temperature: false,
   topographic: false
 }
+
+/**
+ * One order for every layer list: the desktop Layers panel, both Manage Layers
+ * dropdowns, and the tablet/portrait panel (mobile reuses the desktop panel).
+ * Change the order here, not in the JSX, so the four lists cannot drift.
+ */
+const LAYER_WIDGET_ORDER: ReadonlyArray<{ key: keyof LayersInWidgetState; label: string }> = [
+  { key: 'metroWeather', label: 'Metro Weather' },
+  { key: 'factories', label: 'Factories' },
+  { key: 'aiDataCenters', label: 'AI Data Centers' },
+  { key: 'dams', label: 'Major Dams' },
+  { key: 'rivers', label: 'River Flow Status' },
+  { key: 'canals', label: 'Canals & Aqueducts' },
+  { key: 'seaLevel', label: 'Sea Level Rise' },
+  { key: 'wildfire', label: 'Wildfire Hazard' },
+  { key: 'femaFlood', label: 'FEMA Flood Zones' },
+  { key: 'aquifers', label: 'Aquifers' },
+  { key: 'precipitation', label: 'Precipitation & Drought' },
+  { key: 'wetBulb', label: 'Wet Bulb Temperature' },
+  { key: 'temperature', label: 'Future Temperature Anomaly' },
+  { key: 'topographic', label: 'Topographic Relief' },
+]
 
 export default function ClimateStudioView() {
   const mapContainer = useRef<HTMLDivElement>(null)
@@ -740,13 +760,6 @@ export default function ClimateStudioView() {
       days_over_100: number
     }
   } | null>(null)
-  const [megaregionHoverInfo, setMegaregionHoverInfo] = useState<{
-    x: number
-    y: number
-    metroName?: string
-    metroPopulation?: number
-    metroYear?: number
-  } | null>(null)
   const [mapLoaded, setMapLoaded] = useState(false)
   const [mapStyleEpoch, setMapStyleEpoch] = useState(0)
   const [aquiferData, setAquiferData] = useState<GeoJSON.FeatureCollection | null>(null)
@@ -770,6 +783,9 @@ export default function ClimateStudioView() {
   const { panelsCollapsed, isTablet } = useSidebar()
   const [tabletViewsOpen, setTabletViewsOpen] = useState(false)
   const [tabletClimateOpen, setTabletClimateOpen] = useState(true)
+  // Phone drawer accordions, same pattern as the tablet Views / Climate cards.
+  const [mobileClimateOpen, setMobileClimateOpen] = useState(true)
+  const [mobileLayersOpen, setMobileLayersOpen] = useState(true)
   const [tabletActiveTab, setTabletActiveTab] = useState<'layers' | 'features'>('layers')
 
   // Use layer context for climate widget
@@ -823,7 +839,6 @@ export default function ClimateStudioView() {
   const [femaFloodOpacity, setFemaFloodOpacity] = useState(0.65)
   const [wildfireOpacity, setWildfireOpacity] = useState(0.2)
   const [showHumidityWetBulb, setShowHumidityWetBulb] = useState(true)
-  const [showMetroDataStatistics, setShowMetroDataStatistics] = useState(false)
   const [showTopographicRelief, setShowTopographicRelief] = useState(true) // Default ON at 20% opacity
   const [activeBubbleIndex, setActiveBubbleIndex] = useState<number | null>(null) // Track which bubble is active
 
@@ -924,9 +939,27 @@ export default function ClimateStudioView() {
   const wetBulbLayer = climateLayers.find(l => l.id === 'wet_bulb')
   const isWetBulbActive = isLayerActive('wet_bulb')
   const temperatureProjectionLayer = climateLayers.find(l => l.id === 'temperature_projection')
+
+  /** Source line per layer for the tablet list's Sources toggle. Mirrors the
+   * "Source:" lines on the desktop layer cards. */
+  const layerSourceName: Partial<Record<keyof LayersInWidgetState, string | undefined>> = {
+    metroWeather: 'NOAA / NASA',
+    factories: 'CHIPS Act, DOE',
+    aiDataCenters: 'Public filings, DOE',
+    dams: 'USGS / USBR',
+    rivers: 'Natural Earth / USGS',
+    canals: 'USBR / MWD',
+    seaLevel: 'NOAA Sea Level Rise',
+    wildfire: 'USFS Wildfire Risk to Communities',
+    femaFlood: 'FEMA National Flood Hazard Layer',
+    aquifers: 'USGS',
+    precipitation: climateLayers.find(l => l.id === 'precipitation_drought')?.source.name,
+    wetBulb: climateLayers.find(l => l.id === 'wet_bulb')?.source.name,
+    temperature: climateLayers.find(l => l.id === 'temperature_projection')?.source.name,
+    topographic: 'USGS National Elevation Dataset',
+  }
   const [aquiferOpacity, setAquiferOpacity] = useState(0.25)
   const [riverOpacity, setRiverOpacity] = useState(1.0) // Default full opacity for rivers
-  const [metroDataOpacity, setMetroDataOpacity] = useState(0.6)
   const [topoReliefIntensity, setTopoReliefIntensity] = useState(0.2) // Default 20% intensity
 
   // Get map bounds for layer data fetching
@@ -952,10 +985,6 @@ export default function ClimateStudioView() {
     // Metro Weather
     if (!layersInWidget.metroWeather && showMetroHumidityLayer) {
       setShowMetroHumidityLayer(false)
-    }
-    // Metro Population
-    if (!layersInWidget.metroPopulation && showMetroDataStatistics) {
-      setShowMetroDataStatistics(false)
     }
     // Rivers
     if (!layersInWidget.rivers && showRiversLayer) {
@@ -1004,7 +1033,6 @@ export default function ClimateStudioView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     layersInWidget.metroWeather,
-    layersInWidget.metroPopulation,
     layersInWidget.rivers,
     layersInWidget.canals,
     layersInWidget.dams,
@@ -2013,7 +2041,7 @@ export default function ClimateStudioView() {
       console.error('❌ Error setting up map layers:', error)
       return false
     }
-  }, [showMetroHumidityLayer, showMetroDataStatistics, projectionYear, theme])
+  }, [showMetroHumidityLayer, projectionYear, theme])
 
   /**
    * FEMA's flood zone legend.
@@ -2025,6 +2053,30 @@ export default function ClimateStudioView() {
    * Shared because the Features panel is rendered twice, once per breakpoint, and a
    * legend duplicated by hand is a legend that drifts.
    */
+  /**
+   * Precipitation colour ramp and range, shared by the desktop and tablet Features
+   * cards so the two cannot drift. The ramp is the one the tiles are recoloured to
+   * (utils/precipitationTiles.ts). The range is what the tiles were actually
+   * rendered at: the service stretches the ramp to the 2nd-98th percentile of the
+   * visible area, so a fixed 0-10 mm/day caption would be wrong nearly always.
+   */
+  const precipitationVisRange = layerStates.precipitation_drought?.data?.metadata?.visRange as
+    | [number, number]
+    | undefined
+  const precipitationLegend = (
+    <div className="space-y-1">
+      <div className="h-3 w-full rounded-full" style={{ background: PRECIPITATION_GRADIENT_CSS }} />
+      <div className="flex justify-between text-[10px] text-muted-foreground">
+        <span>{precipitationVisRange ? `${precipitationVisRange[0].toFixed(1)} mm/day` : 'drier'}</span>
+        <span>{precipitationVisRange ? `${precipitationVisRange[1].toFixed(1)} mm/day` : 'wetter'}</span>
+      </div>
+      <p className="text-[10px] leading-snug text-muted-foreground">
+        Scaled to the visible area, so the range changes as you pan.
+        Dry end is the drought signal.
+      </p>
+    </div>
+  )
+
   const femaFloodLegendCard = layersInWidget.femaFlood && showFemaFloodLayer ? (
     <div className="feature-card">
       <div
@@ -2201,7 +2253,8 @@ export default function ClimateStudioView() {
     // itself rather than rely on React deps. See config/layerOrder.ts.
     installLayerOrderGuard(map)
 
-    map.addControl(new mapboxgl.NavigationControl(), 'top-right')
+    // No NavigationControl: zoom lives in the left rail, and a second set in the
+    // top-right corner was redundant.
 
     // Handle window resize to ensure map fills container
     const handleResize = () => {
@@ -3850,113 +3903,6 @@ export default function ClimateStudioView() {
     }
   }, [mapLoaded, showAIDataCentersLayer])
 
-  // Handle Metro Population Change layer rendering
-  useEffect(() => {
-    if (!mapRef.current || !mapLoaded || !showMetroDataStatistics) return
-
-    const map = mapRef.current
-    if (!isMapUsable(map)) return
-
-    // Remove existing layers/source if present
-    safeRemoveLayer(map, 'metro-circles')
-    safeRemoveLayer(map, 'metro-labels')
-    safeRemoveSource(map, 'metro-data')
-
-    const data = megaregionData as { metros: Array<{ name: string; lat: number; lon: number; climate_risk: string; populations: Record<string, number> }> }
-
-    if (!data || !data.metros || data.metros.length === 0) {
-      console.log('⚠️ No metro data available')
-      return
-    }
-
-    // Use 2025 population for current display
-    const currentYear = '2025'
-
-    // Create GeoJSON for metro regions
-    const geoJson = {
-      type: 'FeatureCollection' as const,
-      features: data.metros.map((metro) => {
-        const currentPop = metro.populations[currentYear] || 0
-        const futurePop = metro.populations['2035'] || 0
-        const growthRate = currentPop > 0 ? ((futurePop - currentPop) / currentPop) : 0
-
-        return {
-          type: 'Feature' as const,
-          geometry: {
-            type: 'Point' as const,
-            coordinates: [metro.lon, metro.lat]
-          },
-          properties: {
-            name: metro.name,
-            population: currentPop,
-            growth: growthRate,
-            climate_risk: metro.climate_risk
-          }
-        }
-      })
-    }
-
-    // Add source
-    map.addSource('metro-data', {
-      type: 'geojson',
-      data: geoJson
-    })
-
-    // Add circles layer
-    map.addLayer({
-      id: 'metro-circles',
-      type: 'circle',
-      source: 'metro-data',
-      paint: {
-        'circle-radius': [
-          'interpolate',
-          ['linear'],
-          ['get', 'population'],
-          1000000, 15,
-          5000000, 25,
-          10000000, 35,
-          20000000, 50
-        ],
-        'circle-color': [
-          'case',
-          ['>', ['get', 'growth'], 0.2], '#22c55e',  // High growth (green)
-          ['>', ['get', 'growth'], 0.1], '#3b82f6',  // Moderate growth (blue)
-          ['>', ['get', 'growth'], 0], '#fbbf24',    // Low growth (yellow)
-          '#ef4444'  // Declining (red)
-        ],
-        'circle-opacity': 0.6,
-        'circle-stroke-width': 2,
-        'circle-stroke-color': '#ffffff'
-      }
-    }, getBeforeId(map, 'metro-circles'))
-
-    // Add labels layer
-    map.addLayer({
-      id: 'metro-labels',
-      type: 'symbol',
-      source: 'metro-data',
-      layout: {
-        'text-field': ['get', 'name'],
-        'text-size': 11,
-        'text-offset': [0, 0],
-        'text-anchor': 'center'
-      },
-      paint: {
-        'text-color': '#ffffff',
-        'text-halo-color': '#000000',
-        'text-halo-width': 1
-      }
-    }, getBeforeId(map, 'metro-labels'))
-
-    console.log('✅ Metro Population Change layer added successfully')
-
-    return () => {
-      safeRemoveLayer(map, 'metro-circles')
-      safeRemoveLayer(map, 'metro-labels')
-      safeRemoveSource(map, 'metro-data')
-    }
-  }, [mapLoaded, showMetroDataStatistics])
-
   // Handle Topographic Relief layer rendering
   useEffect(() => {
     if (!mapRef.current || !mapLoaded || !showTopographicRelief) return
@@ -4023,7 +3969,10 @@ export default function ClimateStudioView() {
       }
 
       const rawPrecipTileUrl = precipitationDroughtData.tile_url
-      const tileUrl = resolveClimateTileUrl(rawPrecipTileUrl)
+      // Recoloured in the browser so the map always matches the legend's ramp,
+      // whichever ramp the climate service is running (utils/precipitationTiles.ts).
+      registerPrecipitationTileProtocol()
+      const tileUrl = precipitationTileUrl(resolveClimateTileUrl(rawPrecipTileUrl))
 
       // Add or update source
       if (!map.getSource(sourceId)) {
@@ -4066,6 +4015,41 @@ export default function ClimateStudioView() {
       }
     }
   }, [isPrecipitationDroughtActive, precipitationDroughtData, mapLoaded, controls.droughtOpacity, mapStyleEpoch])
+
+  // Earth Engine tiles still drawing, per layer.
+  //
+  // The layer's status flips from 'loading' as soon as the service hands back a
+  // tile URL, which is well before any tile is on screen: each tile is then
+  // rendered by Earth Engine on request. Watching the map's own source state keeps
+  // the "Warming up Earth Engine" toast up until the tiles in view have arrived.
+  const [eeTilesPending, setEeTilesPending] = useState({ temperature: false, precipitation: false })
+  useEffect(() => {
+    if (!mapLoaded) return
+    const map = mapRef.current
+    if (!map) return
+    const pending = (id: string) => {
+      try {
+        return !!map.getSource(id) && !map.isSourceLoaded(id)
+      } catch {
+        return false
+      }
+    }
+    const check = () => {
+      const next = { temperature: pending('temperature-tiles'), precipitation: pending('precipitation-drought') }
+      setEeTilesPending(prev =>
+        prev.temperature === next.temperature && prev.precipitation === next.precipitation ? prev : next
+      )
+    }
+    map.on('sourcedataloading', check)
+    map.on('sourcedata', check)
+    map.on('idle', check)
+    check()
+    return () => {
+      map.off('sourcedataloading', check)
+      map.off('sourcedata', check)
+      map.off('idle', check)
+    }
+  }, [mapLoaded, mapStyleEpoch])
 
   // Backstop for the layer-order guard installed on the map itself.
   //
@@ -4114,15 +4098,6 @@ export default function ClimateStudioView() {
       ])
     }
   }, [aquiferOpacity, mapLoaded])
-
-  // Update Metro Population Change opacity
-  useEffect(() => {
-    if (!mapRef.current || !mapLoaded) return
-    const map = mapRef.current
-    if (map.getLayer('metro-circles')) {
-      map.setPaintProperty('metro-circles', 'circle-opacity', metroDataOpacity)
-    }
-  }, [metroDataOpacity, mapLoaded])
 
   // Update Topographic Relief intensity
   useEffect(() => {
@@ -4245,10 +4220,11 @@ export default function ClimateStudioView() {
       {/* Climate layer loading banner */}
       {(() => {
         const loadingLayers: string[] = []
-        if (isTemperatureProjectionActive && layerStates.temperature_projection?.status === 'loading') {
+        // Stays up until the tiles are drawn, not just until the service replies.
+        if (isTemperatureProjectionActive && (layerStates.temperature_projection?.status === 'loading' || eeTilesPending.temperature)) {
           loadingLayers.push('Temperature Anomaly')
         }
-        if (isPrecipitationDroughtActive && layerStates.precipitation_drought?.status === 'loading') {
+        if (isPrecipitationDroughtActive && (layerStates.precipitation_drought?.status === 'loading' || eeTilesPending.precipitation)) {
           loadingLayers.push('Precipitation & Drought')
         }
         if (loadingLayers.length === 0) return null
@@ -4377,15 +4353,39 @@ export default function ClimateStudioView() {
 
           {/* Mobile-only: Climate Projections shown when layers drawer is open */}
           <div className="mobile-climate-projections pointer-events-auto flex-shrink-0">
-            <ClimateProjectionsWidget />
+            {mobileClimateOpen ? (
+              <div className="relative">
+                <ClimateProjectionsWidget />
+                <button
+                  className="absolute top-3 right-3 p-1 rounded hover:bg-black/5 transition-colors border-none bg-transparent cursor-pointer"
+                  onClick={() => setMobileClimateOpen(false)}
+                  aria-label="Collapse Climate Projections"
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="widget-container">
+                <div
+                  className="flex items-center justify-between cursor-pointer"
+                  onClick={() => setMobileClimateOpen(true)}
+                >
+                  <h3 className="text-sm font-semibold">Climate Projections</h3>
+                  <ChevronDown className="h-4 w-4 -rotate-90 transition-transform" />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Water Access Layers Panel */}
-          <div className="widget-container flex flex-col flex-1 min-h-0 pointer-events-auto">
-            {/* Header with Manage Layers dropdown */}
+          <div className={`widget-container flex flex-col flex-1 min-h-0 pointer-events-auto${mobileLayersOpen ? '' : ' mobile-collapsed'}`}>
+            {/* Header with Manage Layers dropdown. On phones the header also
+                collapses the panel; the chevron and the collapse are phone-only
+                (see .mobile-only / .mobile-collapsed in globals.css). */}
             <div className="flex items-center justify-between mb-3 flex-shrink-0">
               <h3 className="text-sm font-semibold">Layers</h3>
-              <div className="relative" ref={manageLayersDropdownRef}>
+              <div className="flex items-center gap-2">
+              <div className="relative mobile-collapsed-hide" ref={manageLayersDropdownRef}>
                 <button
                   onClick={() => setShowManageLayersDropdown(!showManageLayersDropdown)}
                   className="flex items-center gap-1 text-[#5a7cec] hover:text-[#4a6cd6] transition-colors bg-transparent border-none"
@@ -4397,125 +4397,27 @@ export default function ClimateStudioView() {
                 {/* Manage Layers Dropdown */}
                 {showManageLayersDropdown && (
                   <div className="absolute top-full right-0 mt-1 w-56 rounded-lg bg-background border border-border shadow-lg z-50 p-3 space-y-3">
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.metroWeather}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, metroWeather: !layersInWidget.metroWeather })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">Metro Weather</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.factories}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, factories: !layersInWidget.factories })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">Factories</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.aiDataCenters}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, aiDataCenters: !layersInWidget.aiDataCenters })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">AI Data Centers</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.dams}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, dams: !layersInWidget.dams })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">Major Dams</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.rivers}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, rivers: !layersInWidget.rivers })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">River Flow Status</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.canals}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, canals: !layersInWidget.canals })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">Canals & Aqueducts</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.seaLevel}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, seaLevel: !layersInWidget.seaLevel })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">Sea Level Rise</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.wildfire}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, wildfire: !layersInWidget.wildfire })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">Wildfire Hazard</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.aquifers}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, aquifers: !layersInWidget.aquifers })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">Aquifers</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.precipitation}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, precipitation: !layersInWidget.precipitation })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">Precipitation & Droughts</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.wetBulb}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, wetBulb: !layersInWidget.wetBulb })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">Wet Bulb Temperature</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.temperature}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, temperature: !layersInWidget.temperature })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">Future Temperature Anomaly</span>
-                    </label>
-                    <label className="flex items-start gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                        checked={layersInWidget.topographic}
-                        onChange={() => setLayersInWidget({ ...layersInWidget, topographic: !layersInWidget.topographic })}
-                      />
-                      <span className="text-xs font-semibold text-foreground">Topographic Relief</span>
-                    </label>
+                    {LAYER_WIDGET_ORDER.map(({ key, label }) => (
+                      <label key={key} className="flex items-start gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                          checked={layersInWidget[key]}
+                          onChange={() => setLayersInWidget({ ...layersInWidget, [key]: !layersInWidget[key] })}
+                        />
+                        <span className="text-xs font-semibold text-foreground">{label}</span>
+                      </label>
+                    ))}
                   </div>
                 )}
+              </div>
+              <button
+                className="mobile-only p-1 rounded hover:bg-black/5 transition-colors border-none bg-transparent cursor-pointer"
+                onClick={() => setMobileLayersOpen(o => !o)}
+                aria-label={mobileLayersOpen ? 'Collapse Layers' : 'Expand Layers'}
+              >
+                <ChevronDown className={`h-4 w-4 transition-transform ${mobileLayersOpen ? '' : '-rotate-90'}`} />
+              </button>
               </div>
             </div>
 
@@ -5048,71 +4950,6 @@ export default function ClimateStudioView() {
                     </div>
                   )}
 
-                  {/* Metro Population Change */}
-                  {layersInWidget.metroPopulation && showMetroDataStatistics && (
-                    <div className="feature-card">
-                      <div
-                        className="flex items-center justify-between cursor-pointer mb-2.5"
-                        onClick={() => {
-                          const newCollapsed = new Set(collapsedFeatures)
-                          if (newCollapsed.has('metroPopulation')) {
-                            newCollapsed.delete('metroPopulation')
-                          } else {
-                            newCollapsed.add('metroPopulation')
-                          }
-                          setCollapsedFeatures(newCollapsed)
-                        }}
-                      >
-                        <h4 className="text-[13px] font-semibold">Metro Population Change</h4>
-                        <ChevronDown
-                          className={`h-4 w-4 transition-transform ${collapsedFeatures.has('metroPopulation') ? '-rotate-90' : ''}`}
-                        />
-                      </div>
-                      {!collapsedFeatures.has('metroPopulation') && (
-                        <>
-                          {/* Opacity Slider */}
-                          <div className="space-y-2 mb-4">
-                            <div className="flex items-center justify-between">
-                              <label className="text-xs text-muted-foreground">Layer Opacity</label>
-                              <span className="text-xs font-medium">{Math.round(metroDataOpacity * 100)}%</span>
-                            </div>
-                            <Slider
-                              value={[Math.round(metroDataOpacity * 100)]}
-                              min={10}
-                              max={100}
-                              step={5}
-                              onValueChange={(value) => {
-                                setMetroDataOpacity(value[0] / 100)
-                              }}
-                            />
-                          </div>
-
-                          {/* Legend */}
-                          <div className="space-y-1.5">
-                            <h4 className="text-xs font-semibold text-muted-foreground mb-2">Population Growth</h4>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#22c55e' }}></div>
-                              <span className="text-xs text-foreground">High Growth (20%+)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#3b82f6' }}></div>
-                              <span className="text-xs text-foreground">Moderate Growth (10-20%)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#fbbf24' }}></div>
-                              <span className="text-xs text-foreground">Low Growth (0-10%)</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ef4444' }}></div>
-                              <span className="text-xs text-foreground">Declining</span>
-                            </div>
-                            <p className="text-[11px] text-muted-foreground mt-2">Circle size represents population</p>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  )}
-
                   {/* Factory Filters */}
                   {layersInWidget.factories && showFactoriesLayer && (
                     <div className="feature-card">
@@ -5590,32 +5427,7 @@ export default function ClimateStudioView() {
                             />
                           </div>
 
-                          {/* One legend, matching PALETTE in
-                              qgis-processing/services/precipitation_drought.py, and
-                              labelled with the range the tiles were actually
-                              rendered at — the service stretches the palette to the
-                              2nd-98th percentile of the visible area, so a fixed
-                              0-10 mm/day caption would be wrong nearly always. */}
-                          <div className="space-y-1">
-                            <div className="h-3 w-full rounded-full" style={{
-                              background: 'linear-gradient(to right, #543005, #8c510a, #bf812d, #dfc27d, #f6e8c3, #f5f5f5, #c7eae5, #80cdc1, #35978f, #01665e, #003c30)'
-                            }} />
-                            {(() => {
-                              const range = layerStates.precipitation_drought?.data?.metadata?.visRange as
-                                | [number, number]
-                                | undefined
-                              return (
-                                <div className="flex justify-between text-[10px] text-muted-foreground">
-                                  <span>{range ? `${range[0].toFixed(1)} mm/day` : 'drier'}</span>
-                                  <span>{range ? `${range[1].toFixed(1)} mm/day` : 'wetter'}</span>
-                                </div>
-                              )
-                            })()}
-                            <p className="text-[10px] leading-snug text-muted-foreground">
-                              Scaled to the visible area, so the range changes as you pan.
-                              Dry end is the drought signal.
-                            </p>
-                          </div>
+                          {precipitationLegend}
                         </div>
                       )}
                     </div>
@@ -5874,7 +5686,6 @@ export default function ClimateStudioView() {
                         // Collapse all
                         setCollapsedFeatures(new Set([
                           'metroWeather',
-                          'metroPopulation',
                           'factories',
                           'rivers',
                           'canals',
@@ -6004,123 +5815,17 @@ export default function ClimateStudioView() {
                       {/* Manage Layers Dropdown */}
                       {showManageLayersDropdown && (
                         <div className="absolute top-full right-0 mt-1 w-56 rounded-lg bg-background border border-border shadow-lg z-50 p-3 space-y-3">
-                          <label className="flex items-start gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                              checked={layersInWidget.metroWeather}
-                              onChange={() => setLayersInWidget({ ...layersInWidget, metroWeather: !layersInWidget.metroWeather })}
-                            />
-                            <span className="text-xs font-semibold text-foreground">Metro Weather</span>
-                          </label>
-                          <label className="flex items-start gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                              checked={layersInWidget.factories}
-                              onChange={() => setLayersInWidget({ ...layersInWidget, factories: !layersInWidget.factories })}
-                            />
-                            <span className="text-xs font-semibold text-foreground">Factories</span>
-                          </label>
-                          <label className="flex items-start gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                              checked={layersInWidget.aiDataCenters}
-                              onChange={() => setLayersInWidget({ ...layersInWidget, aiDataCenters: !layersInWidget.aiDataCenters })}
-                            />
-                            <span className="text-xs font-semibold text-foreground">AI Data Centers</span>
-                          </label>
-                          <label className="flex items-start gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                              checked={layersInWidget.rivers}
-                              onChange={() => setLayersInWidget({ ...layersInWidget, rivers: !layersInWidget.rivers })}
-                            />
-                            <span className="text-xs font-semibold text-foreground">Rivers</span>
-                          </label>
-                          <label className="flex items-start gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                              checked={layersInWidget.canals}
-                              onChange={() => setLayersInWidget({ ...layersInWidget, canals: !layersInWidget.canals })}
-                            />
-                            <span className="text-xs font-semibold text-foreground">Canals</span>
-                          </label>
-                          <label className="flex items-start gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                              checked={layersInWidget.wetBulb}
-                              onChange={() => setLayersInWidget({ ...layersInWidget, wetBulb: !layersInWidget.wetBulb })}
-                            />
-                            <span className="text-xs font-semibold text-foreground">Wet Bulb Temperature</span>
-                          </label>
-                          <label className="flex items-start gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                              checked={layersInWidget.temperature}
-                              onChange={() => setLayersInWidget({ ...layersInWidget, temperature: !layersInWidget.temperature })}
-                            />
-                            <span className="text-xs font-semibold text-foreground">Temperature Anomaly</span>
-                          </label>
-                          <label className="flex items-start gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                              checked={layersInWidget.topographic}
-                              onChange={() => setLayersInWidget({ ...layersInWidget, topographic: !layersInWidget.topographic })}
-                            />
-                            <span className="text-xs font-semibold text-foreground">Topographic Relief</span>
-                          </label>
-                          <label className="flex items-start gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                              checked={layersInWidget.dams}
-                              onChange={() => setLayersInWidget({ ...layersInWidget, dams: !layersInWidget.dams })}
-                            />
-                            <span className="text-xs font-semibold text-foreground">Dams</span>
-                          </label>
-                          <label className="flex items-start gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                              checked={layersInWidget.seaLevel}
-                              onChange={() => setLayersInWidget({ ...layersInWidget, seaLevel: !layersInWidget.seaLevel })}
-                            />
-                            <span className="text-xs font-semibold text-foreground">Sea Level Rise</span>
-                          </label>
-                          <label className="flex items-start gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                              checked={layersInWidget.aquifers}
-                              onChange={() => setLayersInWidget({ ...layersInWidget, aquifers: !layersInWidget.aquifers })}
-                            />
-                            <span className="text-xs font-semibold text-foreground">Aquifers</span>
-                          </label>
-                          <label className="flex items-start gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                              checked={layersInWidget.precipitation}
-                              onChange={() => setLayersInWidget({ ...layersInWidget, precipitation: !layersInWidget.precipitation })}
-                            />
-                            <span className="text-xs font-semibold text-foreground">Precipitation & Drought</span>
-                          </label>
-                          <label className="flex items-start gap-2 cursor-pointer">
-                            <input
-                              type="checkbox"
-                              className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
-                              checked={layersInWidget.metroPopulation}
-                              onChange={() => setLayersInWidget({ ...layersInWidget, metroPopulation: !layersInWidget.metroPopulation })}
-                            />
-                            <span className="text-xs font-semibold text-foreground">Metro Population</span>
-                          </label>
+                          {LAYER_WIDGET_ORDER.map(({ key, label }) => (
+                            <label key={key} className="flex items-start gap-2 cursor-pointer">
+                              <input
+                                type="checkbox"
+                                className="mt-0.5 h-4 w-4 flex-shrink-0 accent-blue-500"
+                                checked={layersInWidget[key]}
+                                onChange={() => setLayersInWidget({ ...layersInWidget, [key]: !layersInWidget[key] })}
+                              />
+                              <span className="text-xs font-semibold text-foreground">{label}</span>
+                            </label>
+                          ))}
                         </div>
                       )}
                     </div>
@@ -6132,92 +5837,99 @@ export default function ClimateStudioView() {
                       {layersInWidget.metroWeather && (
                         <div className={`layer-card cursor-pointer ${showMetroHumidityLayer ? 'active' : ''}`} onClick={() => setShowMetroHumidityLayer(!showMetroHumidityLayer)}>
                           <MapPin className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Metro Weather</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Metro Weather</span>{showSourceInfo && layerSourceName.metroWeather && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.metroWeather}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, metroWeather: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.factories && (
                         <div className={`layer-card cursor-pointer ${showFactoriesLayer ? 'active' : ''}`} onClick={() => setShowFactoriesLayer(!showFactoriesLayer)}>
                           <Factory className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Factories</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Factories</span>{showSourceInfo && layerSourceName.factories && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.factories}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, factories: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.aiDataCenters && (
                         <div className={`layer-card cursor-pointer ${showAIDataCentersLayer ? 'active' : ''}`} onClick={() => setShowAIDataCentersLayer(!showAIDataCentersLayer)}>
                           <Zap className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">AI Data Centers</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">AI Data Centers</span>{showSourceInfo && layerSourceName.aiDataCenters && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.aiDataCenters}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, aiDataCenters: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.dams && (
+                        <div className={`layer-card cursor-pointer ${showDamsLayer ? 'active' : ''}`} onClick={() => setShowDamsLayer(!showDamsLayer)}>
+                          <Building2 className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Major Dams</span>{showSourceInfo && layerSourceName.dams && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.dams}</span>)}</div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, dams: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.rivers && (
                         <div className={`layer-card cursor-pointer ${showRiversLayer ? 'active' : ''}`} onClick={() => setShowRiversLayer(!showRiversLayer)}>
                           <Waves className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">River Flow Status</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">River Flow Status</span>{showSourceInfo && layerSourceName.rivers && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.rivers}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, rivers: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.canals && (
                         <div className={`layer-card cursor-pointer ${showCanalsLayer ? 'active' : ''}`} onClick={() => setShowCanalsLayer(!showCanalsLayer)}>
                           <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Canals & Aqueducts</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Canals & Aqueducts</span>{showSourceInfo && layerSourceName.canals && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.canals}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, canals: false }); }}><X className="h-4 w-4" /></button>
-                        </div>
-                      )}
-                      {layersInWidget.wetBulb && (
-                        <div className={`layer-card cursor-pointer ${isWetBulbActive ? 'active' : ''}`} onClick={() => toggleLayer('wet_bulb')}>
-                          <CloudRain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Wet Bulb Temperature</span></div>
-                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, wetBulb: false }); }}><X className="h-4 w-4" /></button>
-                        </div>
-                      )}
-                      {layersInWidget.temperature && (
-                        <div className={`layer-card cursor-pointer ${isTemperatureProjectionActive ? 'active' : ''}`} onClick={() => toggleLayer('temperature_projection')}>
-                          <TrendingUp className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Future Temperature Anomaly</span></div>
-                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, temperature: false }); }}><X className="h-4 w-4" /></button>
-                        </div>
-                      )}
-                      {layersInWidget.topographic && (
-                        <div className={`layer-card cursor-pointer ${showTopographicRelief ? 'active' : ''}`} onClick={() => setShowTopographicRelief(!showTopographicRelief)}>
-                          <Mountain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Topographic Relief</span></div>
-                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, topographic: false }); }}><X className="h-4 w-4" /></button>
-                        </div>
-                      )}
-                      {layersInWidget.dams && (
-                        <div className={`layer-card cursor-pointer ${showDamsLayer ? 'active' : ''}`} onClick={() => setShowDamsLayer(!showDamsLayer)}>
-                          <Building2 className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Dams</span></div>
-                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, dams: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.seaLevel && (
                         <div className={`layer-card cursor-pointer ${showSeaLevelRiseLayer ? 'active' : ''}`} onClick={() => setShowSeaLevelRiseLayer(!showSeaLevelRiseLayer)}>
                           <Waves className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Sea Level Rise</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Sea Level Rise</span>{showSourceInfo && layerSourceName.seaLevel && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.seaLevel}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, seaLevel: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.wildfire && (
+                        <div className={`layer-card cursor-pointer ${showWildfireLayer ? 'active' : ''}`} onClick={() => setShowWildfireLayer(!showWildfireLayer)}>
+                          <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24"><path d="M12 23c4.4 0 8-3.1 8-7 0-2.6-1.6-5-3-6.5.2 1.4-.6 2.5-1.7 2.5C14.7 12 15 8 12 5c-.3 3-2 4.5-3.5 6C7 12.5 6 14 6 16c0 3.9 3.6 7 6 7z" /></svg>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Wildfire Hazard</span>{showSourceInfo && layerSourceName.wildfire && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.wildfire}</span>)}</div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, wildfire: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.femaFlood && (
+                        <div className={`layer-card cursor-pointer ${showFemaFloodLayer ? 'active' : ''}`} onClick={() => setShowFemaFloodLayer(!showFemaFloodLayer)}>
+                          <svg className="h-5 w-5 flex-shrink-0 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24"><path d="M4 15c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1v2c-1.5 0-1.5 1-3 1s-1.5-1-3-1-1.5 1-3 1-1.5-1-3-1-1.5 1-3 1v-2zm0-5c1.5 0 1.5-1 3-1s1.5 1 3 1 1.5-1 3-1 1.5 1 3 1 1.5-1 3-1v2c-1.5 0-1.5 1-3 1s-1.5-1-3-1-1.5 1-3 1-1.5-1-3-1-1.5 1-3 1v-2z" /></svg>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">FEMA Flood Zones</span>{showSourceInfo && layerSourceName.femaFlood && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.femaFlood}</span>)}{showFemaFloodLayer && viewport.zoom < FEMA_FLOOD_MIN_ZOOM && (<span className="text-[11px] text-muted-foreground block">Zoom {viewport.zoom.toFixed(1)} of {FEMA_FLOOD_MIN_ZOOM} needed</span>)}</div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, femaFlood: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.aquifers && (
                         <div className={`layer-card cursor-pointer ${showAquifersLayer ? 'active' : ''}`} onClick={() => setShowAquifersLayer(!showAquifersLayer)}>
                           <Droplets className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Aquifers</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Aquifers</span>{showSourceInfo && layerSourceName.aquifers && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.aquifers}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, aquifers: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                       {layersInWidget.precipitation && (
                         <div className={`layer-card cursor-pointer ${isPrecipitationDroughtActive ? 'active' : ''}`} onClick={() => toggleLayer('precipitation_drought')}>
                           <CloudRain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Precipitation & Drought</span></div>
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Precipitation & Drought</span>{showSourceInfo && layerSourceName.precipitation && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.precipitation}</span>)}</div>
                           <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, precipitation: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
-                      {layersInWidget.metroPopulation && (
-                        <div className={`layer-card cursor-pointer ${showMetroDataStatistics ? 'active' : ''}`} onClick={() => setShowMetroDataStatistics(!showMetroDataStatistics)}>
-                          <Users className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
-                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Metro Population</span></div>
-                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, metroPopulation: false }); }}><X className="h-4 w-4" /></button>
+                      {layersInWidget.wetBulb && (
+                        <div className={`layer-card cursor-pointer ${isWetBulbActive ? 'active' : ''}`} onClick={() => toggleLayer('wet_bulb')}>
+                          <CloudRain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Wet Bulb Temperature</span>{showSourceInfo && layerSourceName.wetBulb && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.wetBulb}</span>)}</div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, wetBulb: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.temperature && (
+                        <div className={`layer-card cursor-pointer ${isTemperatureProjectionActive ? 'active' : ''}`} onClick={() => toggleLayer('temperature_projection')}>
+                          <TrendingUp className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Future Temperature Anomaly</span>{showSourceInfo && layerSourceName.temperature && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.temperature}</span>)}</div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, temperature: false }); }}><X className="h-4 w-4" /></button>
+                        </div>
+                      )}
+                      {layersInWidget.topographic && (
+                        <div className={`layer-card cursor-pointer ${showTopographicRelief ? 'active' : ''}`} onClick={() => setShowTopographicRelief(!showTopographicRelief)}>
+                          <Mountain className="h-5 w-5 flex-shrink-0 text-muted-foreground" />
+                          <div className="flex-1 min-w-0"><span className="text-xs font-semibold block">Topographic Relief</span>{showSourceInfo && layerSourceName.topographic && (<span className="text-[10px] text-muted-foreground block truncate">Source: {layerSourceName.topographic}</span>)}</div>
+                          <button className="flex-shrink-0 text-muted-foreground hover:text-foreground" onClick={(e) => { e.stopPropagation(); setLayersInWidget({ ...layersInWidget, topographic: false }); }}><X className="h-4 w-4" /></button>
                         </div>
                       )}
                     </div>
@@ -6700,6 +6412,7 @@ export default function ClimateStudioView() {
                                 className="w-full"
                               />
                             </div>
+                            {precipitationLegend}
                           </div>
                         )}
                       </div>
@@ -6734,62 +6447,16 @@ export default function ClimateStudioView() {
                       </div>
                     )}
 
-                    {/* Metro Population Controls */}
-                    {showMetroDataStatistics && (
-                      <div className="feature-card">
-                        <div className="flex items-center justify-between cursor-pointer mb-2.5" onClick={() => { const n = new Set(collapsedFeatures); n.has('metroPopulation') ? n.delete('metroPopulation') : n.add('metroPopulation'); setCollapsedFeatures(n) }}>
-                          <h4 className="text-[13px] font-semibold">Metro Population Change</h4>
-                          <ChevronDown className={`h-4 w-4 transition-transform ${collapsedFeatures.has('metroPopulation') ? '-rotate-90' : ''}`} />
-                        </div>
-                        {!collapsedFeatures.has('metroPopulation') && (
-                          <div className="space-y-3">
-                            {/* Opacity Slider */}
-                            <div className="space-y-2">
-                              <div className="flex items-center justify-between">
-                                <label className="text-xs text-muted-foreground">Layer Opacity</label>
-                                <span className="text-xs font-medium">{Math.round(metroDataOpacity * 100)}%</span>
-                              </div>
-                              <Slider
-                                value={[Math.round(metroDataOpacity * 100)]}
-                                min={10}
-                                max={100}
-                                step={5}
-                                onValueChange={(value) => setMetroDataOpacity(value[0] / 100)}
-                                className="w-full"
-                              />
-                            </div>
-                            {/* Legend */}
-                            <div className="space-y-2">
-                              <div className="text-xs font-semibold mb-1">Population Change</div>
-                              <div className="space-y-1">
-                                <div className="flex items-center gap-2 text-[11px]">
-                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#d73027' }}></div>
-                                  <span>Declining (&lt;0%)</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-[11px]">
-                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#ffffbf' }}></div>
-                                  <span>Stable (0-10%)</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-[11px]">
-                                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#1a9850' }}></div>
-                                  <span>Growing (&gt;10%)</span>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
                   </div>
 
-                  {/* Collapse/Expand All Features Button */}
-                  <div className="px-4 py-3 border-t border-border/100">
+                  {/* Collapse/Expand All Features, styled like Remove All Layers */}
+                  <div className="flex items-center justify-between px-4 py-2 border-t border-border/100 flex-shrink-0">
                     <button
-                      className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                      className="unstyled-btn text-[11px] font-semibold text-[#5a7cec] hover:text-[#4a6cd6] bg-transparent border-none cursor-pointer"
                       onClick={() => {
                         if (collapsedFeatures.size === 0) {
                           // Collapse all
-                          const allFeatures = new Set(['metroWeather', 'factories', 'rivers', 'canals', 'temperature', 'precipitation', 'wetbulb', 'aquifers', 'sealevel', 'metroPopulation'])
+                          const allFeatures = new Set(['metroWeather', 'factories', 'rivers', 'canals', 'temperature', 'precipitation', 'wetbulb', 'aquifers', 'sealevel'])
                           setCollapsedFeatures(allFeatures)
                         } else {
                           // Expand all
@@ -6944,35 +6611,6 @@ export default function ClimateStudioView() {
             )}
 
             {/* Temperature & Humidity section removed - fields don't exist in data */}
-          </div>
-        )
-      }
-
-      {/* Metro Population Change Tooltip (TEST - from Climate screen) */}
-      {
-        megaregionHoverInfo && megaregionHoverInfo.metroName && megaregionHoverInfo.metroPopulation && (
-          <div
-            className="absolute z-10 pointer-events-none bg-card/95 backdrop-blur-lg border border-border/60 rounded-lg shadow-lg px-2.5 py-1.5 text-xs"
-            style={{
-              left: megaregionHoverInfo.x + 10,
-              top: megaregionHoverInfo.y + 10
-            }}
-          >
-            {/* Megaregion metro info */}
-            <div>
-              <div className="font-semibold text-foreground mb-1">
-                {megaregionHoverInfo.metroName}
-              </div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-blue-500">🏙️</span>
-                <span className="font-medium">
-                  {megaregionHoverInfo.metroPopulation.toLocaleString()} people
-                </span>
-              </div>
-              <div className="text-[10px] opacity-70 mt-0.5">
-                {megaregionHoverInfo.metroYear} projection
-              </div>
-            </div>
           </div>
         )
       }

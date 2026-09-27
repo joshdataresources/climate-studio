@@ -6,7 +6,9 @@
  *
  *   heat     — from expanded_wet_bulb_projections.json (peak wet-bulb + extreme
  *              heat days), min-max normalized across all metros for the year.
- *              Forward-looking (per decade, ssp585, to 2095).
+ *              Forward-looking (per decade, to 2095). The wet-bulb file is
+ *              SSP5-8.5 only; SSP2-4.5 heat is pattern-scaled from it (see
+ *              scenarioHeatFactor).
  *   water    — ACCESS-WEIGHTED supply portfolio (metro-water-access.json,
  *              utility-documented mixes): Σ share × source-health, where
  *              rivers/reservoirs inherit projected flow retention
@@ -46,9 +48,22 @@ import connectingRiversData from '../data/metro-connecting-rivers.json'
 import nriData from '../data/fema_nri_metros.json'
 import aquiferData from '../data/metro-aquifers.json'
 import waterAccessData from '../data/metro-water-access.json'
+import metroTempData from '../data/metro_temperature_projections.json'
 
 export const RESILIENCE_DECADES = [2025, 2035, 2045, 2055, 2065, 2075, 2085, 2095]
-export const RESILIENCE_SCENARIO = 'ssp585'
+
+/** Emissions scenarios the index can be computed under. Only scenarios with a
+ * real heat source are offered: the wet-bulb file is SSP5-8.5, and the NEX-GDDP
+ * temperature file carries both SSP2-4.5 and SSP5-8.5 (used to scale heat). */
+export type ResilienceScenario = 'ssp245' | 'ssp585'
+export const RESILIENCE_SCENARIOS: ReadonlyArray<{ id: ResilienceScenario; label: string; short: string }> = [
+  { id: 'ssp245', label: 'SSP2-4.5 (intermediate emissions)', short: 'SSP2-4.5' },
+  { id: 'ssp585', label: 'SSP5-8.5 (very high emissions)', short: 'SSP5-8.5' },
+]
+/** Default scenario (unchanged behaviour for existing callers). */
+export const RESILIENCE_SCENARIO: ResilienceScenario = 'ssp585'
+export const scenarioLabel = (s: ResilienceScenario) =>
+  RESILIENCE_SCENARIOS.find(x => x.id === s)?.label ?? s
 
 /** Tunable weighting for the composite. Dimension weights are relative (they
  * are normalized over the dimensions actually available for a metro);
@@ -78,11 +93,16 @@ const connecting = ((connectingRiversData as any).features ?? []) as any[]
 const nri = ((nriData as any).metros ?? {}) as Record<string, any>
 const metroAquifers = ((aquiferData as any).metros ?? {}) as Record<string, any>
 const waterAccess = ((waterAccessData as any).metros ?? {}) as Record<string, any>
+const metroTemp = metroTempData as Record<string, any>
 
 export interface WaterResult {
   score: number
   source: string
   coverage: 'portfolio' | 'river' | 'fallback'
+  /** Share (0–1) of the supply whose health follows a projected river flow.
+   * The remainder (unmapped rivers/reservoirs, groundwater, Great Lakes,
+   * desal/recycled) is held at a present-day value, so it does not trend. */
+  projectedShare: number
 }
 
 export interface MetroResilience {
@@ -102,6 +122,9 @@ export interface MetroResilience {
   composite: number
   waterSource: string
   waterCoverage: 'portfolio' | 'river' | 'fallback'
+  /** See WaterResult.projectedShare. */
+  waterProjectedShare: number
+  scenario: ResilienceScenario
   /** 'nri' when FEMA county data backs fire/flood/capacity. */
   nriCoverage: 'nri' | 'none'
   county?: string
@@ -141,12 +164,54 @@ function heatRange() {
   return heatGlobalRange
 }
 
-export function heatScore(metroKey: string, year: number): number | null {
+/**
+ * Pattern-scaling factor for SSP2-4.5 heat, per decade: the ratio of warming
+ * since 2025 under SSP2-4.5 vs SSP5-8.5, taken as the all-metro mean of annual
+ * average temperature in metro_temperature_projections.json (NASA NEX-GDDP-CMIP6).
+ * An ensemble mean is used because single-metro deltas from 4 models are noisy.
+ * Result is roughly 1.0 in 2035 falling to ~0.5 by 2095, in line with IPCC AR6
+ * WG1 Table SPM.1 (SSP2-4.5 ≈ half of SSP5-8.5's additional late-century warming).
+ * Clamped to [0, 1]. SSP5-8.5 returns 1 (the wet-bulb data is SSP5-8.5).
+ */
+let heatFactorCache: Record<number, number> | null = null
+export function scenarioHeatFactor(scenario: ResilienceScenario, dec: number): number {
+  if (scenario === 'ssp585' || dec <= RESILIENCE_DECADES[0]) return 1
+  if (!heatFactorCache) {
+    heatFactorCache = {}
+    const base = String(RESILIENCE_DECADES[0])
+    for (const y of RESILIENCE_DECADES.slice(1)) {
+      let a = 0, b = 0
+      for (const m of Object.values(metroTemp)) {
+        const s245 = m?.projections?.ssp245, s585 = m?.projections?.ssp585
+        const a0 = s245?.[base]?.annual_avg, a1 = s245?.[String(y)]?.annual_avg
+        const b0 = s585?.[base]?.annual_avg, b1 = s585?.[String(y)]?.annual_avg
+        if ([a0, a1, b0, b1].some(v => v == null)) continue
+        a += a1 - a0
+        b += b1 - b0
+      }
+      heatFactorCache[y] = b > 0 ? Math.max(0, Math.min(1, a / b)) : 1
+    }
+  }
+  return heatFactorCache[dec] ?? 1
+}
+
+export function heatScore(metroKey: string, year: number, scenario: ResilienceScenario = RESILIENCE_SCENARIO): number | null {
   const dec = snapDecade(year)
-  const p = wetBulb[metroKey]?.projections?.[String(dec)]
+  const proj = wetBulb[metroKey]?.projections
+  const p = proj?.[String(dec)]
   if (!p || p.peak_wet_bulb_F == null || p.days_over_95F == null) return null
+  let wb = p.peak_wet_bulb_F as number
+  let days = p.days_over_95F as number
+  const k = scenarioHeatFactor(scenario, dec)
+  const p0 = proj?.[String(RESILIENCE_DECADES[0])]
+  if (k !== 1 && p0?.peak_wet_bulb_F != null && p0?.days_over_95F != null) {
+    // scale the change since 2025, keep the 2025 starting point
+    wb = p0.peak_wet_bulb_F + k * (wb - p0.peak_wet_bulb_F)
+    days = p0.days_over_95F + k * (days - p0.days_over_95F)
+  }
+  // Fixed SSP5-8.5 range, so scores stay comparable across scenarios.
   const { pmin, pmax, dmin, dmax } = heatRange()
-  const hazard = 0.5 * norm(p.peak_wet_bulb_F, pmin, pmax) + 0.5 * norm(p.days_over_95F, dmin, dmax)
+  const hazard = 0.5 * norm(wb, pmin, pmax) + 0.5 * norm(days, dmin, dmax)
   return round1(100 - hazard)
 }
 
@@ -226,14 +291,15 @@ function riverKeyFromName(name: string): string | null {
   return null
 }
 
-function flowPct(key: string, dec: number): number | null {
-  return riverFlow[key]?.scenarios?.[RESILIENCE_SCENARIO]?.flow_percentage?.[String(dec)] ?? null
+function flowPct(key: string, dec: number, scenario: ResilienceScenario): number | null {
+  return riverFlow[key]?.scenarios?.[scenario]?.flow_percentage?.[String(dec)] ?? null
 }
 
-function portfolioWaterScore(metroKey: string, dec: number): WaterResult | null {
+function portfolioWaterScore(metroKey: string, dec: number, scenario: ResilienceScenario): WaterResult | null {
   const acc = waterAccess[metroKey]
   if (!acc?.portfolio?.length) return null
   let score = 0
+  let projectedShare = 0
   for (const item of acc.portfolio) {
     const name = String(item.name ?? '')
     let h: number
@@ -245,8 +311,9 @@ function portfolioWaterScore(metroKey: string, dec: number): WaterResult | null 
       h = 90
     } else {
       const rk = riverKeyFromName(name)
-      const pct = rk ? flowPct(rk, dec) : null
+      const pct = rk ? flowPct(rk, dec, scenario) : null
       if (pct != null) {
+        projectedShare += item.share ?? 0
         // reservoirs buffer variability slightly; long conveyance adds risk
         h = pct + (item.type === 'reservoir' ? 4 : item.type === 'imported' ? -5 : 0)
       } else {
@@ -266,17 +333,23 @@ function portfolioWaterScore(metroKey: string, dec: number): WaterResult | null 
     score: round1(Math.max(0, Math.min(100, score))),
     source: `Supply: ${top}`,
     coverage: 'portfolio',
+    projectedShare: Math.min(1, projectedShare),
   }
 }
 
-export function waterScore(metroName: string, year: number, metroKey?: string): WaterResult {
+export function waterScore(
+  metroName: string,
+  year: number,
+  metroKey?: string,
+  scenario: ResilienceScenario = RESILIENCE_SCENARIO,
+): WaterResult {
   const dec = snapDecade(year)
 
   // Preferred path: utility-documented access portfolio (all 52 metros).
   // Groundwater stress and conveyance risk are embedded per-source here, so
   // the legacy aquifer/canal adjustments below only apply to the fallback.
   if (metroKey) {
-    const p = portfolioWaterScore(metroKey, dec)
+    const p = portfolioWaterScore(metroKey, dec, scenario)
     if (p) return p
   }
 
@@ -287,15 +360,17 @@ export function waterScore(metroName: string, year: number, metroKey?: string): 
   let health: number
   let source: string
   let coverage: 'river' | 'fallback'
+  let projectedShare = 0
 
   if (matched.length) {
     const totalDep = matched.reduce((s, l) => s + l.dep, 0) || 1
     health = matched.reduce((s, l) => {
-      const pct = riverFlow[l.fk as string]?.scenarios?.[RESILIENCE_SCENARIO]?.flow_percentage?.[String(dec)]
+      const pct = riverFlow[l.fk as string]?.scenarios?.[scenario]?.flow_percentage?.[String(dec)]
       return s + (pct ?? 60) * l.dep
     }, 0) / totalDep
     source = 'River: ' + Array.from(new Set(matched.map(l => l.fk))).join(', ')
     coverage = 'river'
+    projectedShare = 1
   } else if (connectingLink[ck]) {
     const c = connectingLink[ck]
     const years = Object.keys(c.flow).map(Number)
@@ -303,6 +378,7 @@ export function waterScore(metroName: string, year: number, metroKey?: string): 
     health = (c.flow[String(ny)] / c.base) * 100
     source = 'River: ' + c.river
     coverage = 'river'
+    projectedShare = 1
   } else if (GREAT_LAKES.has(ck)) {
     health = 90; source = 'Great Lakes supply'; coverage = 'fallback'
   } else if (links.length) {
@@ -312,7 +388,7 @@ export function waterScore(metroName: string, year: number, metroKey?: string): 
   }
 
   const adjusted = health + aquiferAdjust(metroKey) - (CANAL_PENALTY[ck] || 0)
-  return { score: round1(Math.max(0, Math.min(100, adjusted))), source, coverage }
+  return { score: round1(Math.max(0, Math.min(100, adjusted))), source, coverage, projectedShare }
 }
 
 // ---- fire / flood / capacity: FEMA NRI (present-day, held flat by decade) ----
@@ -382,12 +458,13 @@ export function metroResilience(
   metroKey: string,
   year: number,
   weights: ResilienceWeights = DEFAULT_WEIGHTS,
+  scenario: ResilienceScenario = RESILIENCE_SCENARIO,
 ): MetroResilience | null {
   const c = wetBulb[metroKey]
   if (!c) return null
-  const heat = heatScore(metroKey, year)
+  const heat = heatScore(metroKey, year, scenario)
   if (heat == null) return null
-  const water = waterScore(c.name || metroKey, year, metroKey)
+  const water = waterScore(c.name || metroKey, year, metroKey, scenario)
   const fire = fireScore(metroKey)
   const flood = floodScore(metroKey)
   const capacity = capacityScore(metroKey)
@@ -405,15 +482,21 @@ export function metroResilience(
     composite: compose(heat, water.score, fire, flood, capacity, weights),
     waterSource: water.source,
     waterCoverage: water.coverage,
+    waterProjectedShare: water.projectedShare,
+    scenario,
     nriCoverage: nri[metroKey] ? 'nri' : 'none',
     county: nri[metroKey]?.county,
   }
 }
 
-export function rankMetros(year: number, weights: ResilienceWeights = DEFAULT_WEIGHTS): MetroResilience[] {
+export function rankMetros(
+  year: number,
+  weights: ResilienceWeights = DEFAULT_WEIGHTS,
+  scenario: ResilienceScenario = RESILIENCE_SCENARIO,
+): MetroResilience[] {
   const rows: MetroResilience[] = []
   for (const key of Object.keys(wetBulb)) {
-    const r = metroResilience(key, year, weights)
+    const r = metroResilience(key, year, weights, scenario)
     if (r) rows.push(r)
   }
   return rows.sort((a, b) => b.composite - a.composite)
@@ -429,10 +512,14 @@ export interface TrajectoryPoint {
   composite: number
 }
 
-export function metroTrajectory(metroKey: string, weights: ResilienceWeights = DEFAULT_WEIGHTS): TrajectoryPoint[] {
+export function metroTrajectory(
+  metroKey: string,
+  weights: ResilienceWeights = DEFAULT_WEIGHTS,
+  scenario: ResilienceScenario = RESILIENCE_SCENARIO,
+): TrajectoryPoint[] {
   const out: TrajectoryPoint[] = []
   for (const y of RESILIENCE_DECADES) {
-    const r = metroResilience(metroKey, y, weights)
+    const r = metroResilience(metroKey, y, weights, scenario)
     if (r) out.push({ year: y, heat: r.heat, water: r.water, fire: r.fire, flood: r.flood, capacity: r.capacity, composite: r.composite })
   }
   return out
@@ -443,4 +530,57 @@ export function resilienceColorRGBA(score: number, alpha = 200): [number, number
   if (score >= 66) return [29, 158, 117, alpha]   // teal-green, resilient
   if (score >= 40) return [239, 159, 39, alpha]    // amber, moderate
   return [226, 75, 74, alpha]                      // red, exposed
+}
+
+// ---- shared chart scale + peer envelope ----
+
+const weightKey = (w: ResilienceWeights) => `${w.heat}|${w.water}|${w.fire}|${w.flood}|${w.capacityShare}`
+const domainCache = new Map<string, [number, number]>()
+
+/**
+ * One y-axis range for every metro's trajectory chart, so a city's line can be
+ * read against other cities instead of being auto-fit to its own values.
+ * Covers the composite and the heat + water average for every metro, decade
+ * and offered scenario, rounded out to the nearest 10.
+ */
+export function trajectoryDomain(weights: ResilienceWeights = DEFAULT_WEIGHTS): [number, number] {
+  const key = weightKey(weights)
+  const hit = domainCache.get(key)
+  if (hit) return hit
+  let lo = Infinity, hi = -Infinity
+  for (const s of RESILIENCE_SCENARIOS) {
+    for (const k of Object.keys(wetBulb)) {
+      for (const t of metroTrajectory(k, weights, s.id)) {
+        const exp = (t.heat + t.water) / 2
+        lo = Math.min(lo, t.composite, exp)
+        hi = Math.max(hi, t.composite, exp)
+      }
+    }
+  }
+  const out: [number, number] = Number.isFinite(lo)
+    ? [Math.max(0, Math.floor(lo / 10) * 10), Math.min(100, Math.ceil(hi / 10) * 10)]
+    : [0, 100]
+  domainCache.set(key, out)
+  return out
+}
+
+export interface EnvelopePoint { year: number; min: number; median: number; max: number; count: number }
+const envelopeCache = new Map<string, EnvelopePoint[]>()
+
+/** Composite spread across all metros per decade (min, median, max). */
+export function compositeEnvelope(
+  weights: ResilienceWeights = DEFAULT_WEIGHTS,
+  scenario: ResilienceScenario = RESILIENCE_SCENARIO,
+): EnvelopePoint[] {
+  const key = `${weightKey(weights)}|${scenario}`
+  const hit = envelopeCache.get(key)
+  if (hit) return hit
+  const out = RESILIENCE_DECADES.map(y => {
+    const vals = rankMetros(y, weights, scenario).map(r => r.composite).sort((a, b) => a - b)
+    const n = vals.length
+    const median = n === 0 ? 0 : n % 2 ? vals[(n - 1) / 2] : (vals[n / 2 - 1] + vals[n / 2]) / 2
+    return { year: y, min: vals[0] ?? 0, median: round1(median), max: vals[n - 1] ?? 0, count: n }
+  })
+  envelopeCache.set(key, out)
+  return out
 }
